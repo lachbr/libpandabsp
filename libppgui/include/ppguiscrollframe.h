@@ -2,11 +2,10 @@
 #define PP_GUI_SCROLL_BAR_H
 
 #include "config_ppgui.h"
+#include "pp_utils.h"
 
 #include <pgScrollFrame.h>
 #include <nodePath.h>
-
-#include <pp_utils.h>
 
 class EXPCL_PPGUI PPGuiScrollFrame : public PGScrollFrame
 {

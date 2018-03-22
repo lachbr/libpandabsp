@@ -21,8 +21,8 @@ public:
 
         DCFieldDefStart();
 
-        DCFieldDef( server_time, NULL, NULL );
-        DCFieldDef( request_server_time, request_server_time_field, NULL );
+        DCFieldDef( server_time, nullptr, nullptr );
+        DCFieldDef( request_server_time, request_server_time_field, nullptr );
 
         DCFieldDefEnd();
 

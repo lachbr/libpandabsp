@@ -35,7 +35,7 @@ public:
 
         virtual DistributedObjectBase *create_distributed_object( DistributedObjectBase *object, ZONEID_TYPE zone_id = 0,
                                                                   bool explicit_doid = false, DOID_TYPE do_id = 0,
-                                                                  DCClassPP *dclass = NULL );
+                                                                  DCClassPP *dclass = nullptr );
 
         //void FormatGenerate()
 

@@ -2,8 +2,7 @@
 
 TypeDef( MapInfo );
 
-MapInfo::
-MapInfo( const string &name ) :
+MapInfo::MapInfo( const string &name ) :
         PandaNode( name ),
         _map_title( "" ),
         _map_version( "" ),
@@ -11,52 +10,44 @@ MapInfo( const string &name ) :
 {
 }
 
-void MapInfo::
-set_map_version( const string &ver )
+void MapInfo::set_map_version( const string &ver )
 {
         _map_version = ver;
 }
 
-string MapInfo::
-get_map_version() const
+string MapInfo::get_map_version() const
 {
         return _map_version;
 }
 
-void MapInfo::
-set_map_title( const string &title )
+void MapInfo::set_map_title( const string &title )
 {
         _map_title = title;
 }
 
-string MapInfo::
-get_map_title() const
+string MapInfo::get_map_title() const
 {
         return _map_title;
 }
 
-void MapInfo::
-set_sky_name( const string &sky )
+void MapInfo::set_sky_name( const string &sky )
 {
         _sky_name = sky;
 }
 
-string MapInfo::
-get_sky_name() const
+string MapInfo::get_sky_name() const
 {
         return _sky_name;
 }
 
 ///////////////////////////// BAM STUFF ////////////////////////////////
 
-void MapInfo::
-register_with_read_factory()
+void MapInfo::register_with_read_factory()
 {
         BamReader::get_factory()->register_factory( get_class_type(), make_from_bam );
 }
 
-void MapInfo::
-write_datagram( BamWriter *manager, Datagram &dg )
+void MapInfo::write_datagram( BamWriter *manager, Datagram &dg )
 {
         PandaNode::write_datagram( manager, dg );
 
@@ -65,8 +56,7 @@ write_datagram( BamWriter *manager, Datagram &dg )
         dg.add_string( _sky_name );
 }
 
-TypedWritable *MapInfo::
-make_from_bam( const FactoryParams &params )
+TypedWritable *MapInfo::make_from_bam( const FactoryParams &params )
 {
         MapInfo *node = new MapInfo( "" );
         DatagramIterator scan;
@@ -78,8 +68,7 @@ make_from_bam( const FactoryParams &params )
         return node;
 }
 
-void MapInfo::
-fillin( DatagramIterator &scan, BamReader *manager )
+void MapInfo::fillin( DatagramIterator &scan, BamReader *manager )
 {
         PandaNode::fillin( scan, manager );
 

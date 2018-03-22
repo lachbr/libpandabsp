@@ -19,7 +19,7 @@ struct Token
         }
 };
 
-typedef EXPCL_VIF vector<Token> TokenVec;
+typedef vector<Token> TokenVec;
 
 extern EXPCL_VIF TokenVec tokenizer( string &input );
 

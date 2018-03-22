@@ -2,14 +2,12 @@
 
 #include <string>
 
-InputDef::
-InputDef( InputState *inp_state ) :
+InputDef::InputDef( InputState *inp_state ) :
         _input_state( inp_state )
 {
 }
 
-InputDef &InputDef::
-operator =( const InputDef &other )
+InputDef &InputDef::operator =( const InputDef &other )
 {
         _set = other._set;
         _forcing = other._forcing;
@@ -20,50 +18,43 @@ operator =( const InputDef &other )
         return *this;
 }
 
-bool InputDef::
-operator ==( const InputDef &other ) const
+bool InputDef::operator ==( const InputDef &other ) const
 {
         return _name.compare( other._name ) == 0;
 }
 
-void InputDef::
-accept()
+void InputDef::accept()
 {
         _input_state->_event_handler->add_hook( _on, event_on, this );
         _input_state->_event_handler->add_hook( _off, event_off, this );
 }
 
-void InputDef::
-ignore()
+void InputDef::ignore()
 {
         _input_state->_event_handler->remove_hooks( _on );
         _input_state->_event_handler->remove_hooks( _off );
 }
 
-void InputDef::
-event_on( const Event *e, void *data )
+void InputDef::event_on( const Event *e, void *data )
 {
-        PT( InputDef ) inp = ( InputDef * )data;
+        PT( InputDef ) inp = (InputDef *)data;
         inp->_input_state->set( inp->_name, true );
 }
 
-void InputDef::
-event_off( const Event *e, void *data )
+void InputDef::event_off( const Event *e, void *data )
 {
-        PT( InputDef ) inp = ( InputDef * )data;
+        PT( InputDef ) inp = (InputDef *)data;
         inp->_input_state->set( inp->_name, false );
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 
-InputState::
-InputState() :
+InputState::InputState() :
         _event_handler( EventHandler::get_global_event_handler() )
 {
 }
 
-ExistInfo InputState::
-input_exists( const string &name ) const
+ExistInfo InputState::input_exists( const string &name ) const
 {
         ExistInfo info;
         info.exists = false;
@@ -83,8 +74,7 @@ input_exists( const string &name ) const
         return info;
 }
 
-void InputState::
-force_input( const string &name )
+void InputState::force_input( const string &name )
 {
         ExistInfo info = input_exists( name );
         if ( info.exists )
@@ -98,8 +88,7 @@ force_input( const string &name )
         }
 }
 
-void InputState::
-unforce_input( const string &name )
+void InputState::unforce_input( const string &name )
 {
         ExistInfo info = input_exists( name );
         if ( info.exists )
@@ -113,8 +102,7 @@ unforce_input( const string &name )
         }
 }
 
-void InputState::
-set( const string &name, bool val )
+void InputState::set( const string &name, bool val )
 {
         ExistInfo info = input_exists( name );
         if ( info.exists )
@@ -128,8 +116,7 @@ set( const string &name, bool val )
         }
 }
 
-string InputState::
-define_input( const string &name, const string &event_on, const string &event_off )
+string InputState::define_input( const string &name, const string &event_on, const string &event_off )
 {
 
         ExistInfo info = input_exists( name );
@@ -158,8 +145,7 @@ define_input( const string &name, const string &event_on, const string &event_of
         return name;
 }
 
-void InputState::
-undefine_input( const string &name )
+void InputState::undefine_input( const string &name )
 {
         ExistInfo info = input_exists( name );
         if ( info.exists )
@@ -176,8 +162,7 @@ undefine_input( const string &name )
         }
 }
 
-bool InputState::
-is_set( const string &name ) const
+bool InputState::is_set( const string &name ) const
 {
         ExistInfo info = input_exists( name );
         if ( info.exists )

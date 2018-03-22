@@ -6,99 +6,83 @@
 
 TypeHandle Door::_type_handle;
 
-Door::
-Door( const string &name ) :
+Door::Door( const string &name ) :
         PandaNode( name )
 {
         _opened_start_t = 0.0;
 }
 
-void Door::
-set_wait( PN_stdfloat wait )
+void Door::set_wait( PN_stdfloat wait )
 {
         _wait = wait;
 }
 
-PN_stdfloat Door::
-get_wait() const
+PN_stdfloat Door::get_wait() const
 {
         return _wait;
 }
 
-void Door::
-set_move_dir( LPoint3f &movedir )
+void Door::set_move_dir( LPoint3f &movedir )
 {
         _move_dir = movedir;
 }
 
-LPoint3f Door::
-get_move_dir() const
+LPoint3f Door::get_move_dir() const
 {
         return _move_dir;
 }
 
-void Door::
-set_speed( PN_stdfloat speed )
+void Door::set_speed( PN_stdfloat speed )
 {
         _speed = speed;
 }
 
-PN_stdfloat Door::
-get_speed() const
+PN_stdfloat Door::get_speed() const
 {
         return _speed;
 }
 
-void Door::
-set_spawn_pos( SpawnPos spawnpos )
+void Door::set_spawn_pos( SpawnPos spawnpos )
 {
         _spawn_pos = spawnpos;
 }
 
-Door::SpawnPos Door::
-get_spawn_pos() const
+Door::SpawnPos Door::get_spawn_pos() const
 {
         return _spawn_pos;
 }
 
-void Door::
-set_locked_sentence( const string &locked_sentence )
+void Door::set_locked_sentence( const string &locked_sentence )
 {
         _locked_sentence = locked_sentence;
 }
 
-string Door::
-get_locked_sentence() const
+string Door::get_locked_sentence() const
 {
         return _locked_sentence;
 }
 
-void Door::
-set_unlocked_sentence( const string &unlocked_sentence )
+void Door::set_unlocked_sentence( const string &unlocked_sentence )
 {
         _unlocked_sentence = unlocked_sentence;
 }
 
-string Door::
-get_unlocked_sentence() const
+string Door::get_unlocked_sentence() const
 {
         return _unlocked_sentence;
 }
 
-void Door::
-set_door_np( NodePath &np )
+void Door::set_door_np( NodePath &np )
 {
         _door_np = np;
 }
 
-NodePath Door::
-get_door_np() const
+NodePath Door::get_door_np() const
 {
         return _door_np;
 }
 
-void Door::
-tick()
+void Door::tick()
 {
         if ( _state == DS_closed )
         {
@@ -136,27 +120,24 @@ tick()
         }
 }
 
-AsyncTask::DoneStatus Door::
-tick_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus Door::tick_task( GenericAsyncTask *task, void *data )
 {
-        ( ( Door * )data )->tick();
+        ( (Door *)data )->tick();
         return AsyncTask::DS_cont;
 }
 
-void Door::
-start_tick()
+void Door::start_tick()
 {
         _tick_task = new GenericAsyncTask( "DoorTick", tick_task, this );
         g_task_mgr->add( _tick_task );
 }
 
-void Door::
-stop_tick()
+void Door::stop_tick()
 {
-        if ( _tick_task != ( GenericAsyncTask * )NULL )
+        if ( _tick_task != (GenericAsyncTask *)nullptr )
         {
                 _tick_task->remove();
-                _tick_task = ( GenericAsyncTask * )NULL;
+                _tick_task = (GenericAsyncTask *)nullptr;
         }
 }
 
@@ -165,8 +146,7 @@ stop_tick()
 * This function is called automatically by the Map class.
 * It will cause the door to open if it's closed.
 */
-void Door::
-handle_touch()
+void Door::handle_touch()
 {
         if ( _state == DS_closed )
         {
@@ -181,14 +161,12 @@ handle_touch()
 
 /////////////////////// BAM STUFF //////////////////////////
 
-void Door::
-register_with_read_factory()
+void Door::register_with_read_factory()
 {
         BamReader::get_factory()->register_factory( get_class_type(), make_from_bam );
 }
 
-void Door::
-write_datagram( BamWriter *manager, Datagram &dg )
+void Door::write_datagram( BamWriter *manager, Datagram &dg )
 {
         PandaNode::write_datagram( manager, dg );
 
@@ -200,8 +178,7 @@ write_datagram( BamWriter *manager, Datagram &dg )
         dg.add_string( _unlocked_sentence );
 }
 
-TypedWritable *Door::
-make_from_bam( const FactoryParams &params )
+TypedWritable *Door::make_from_bam( const FactoryParams &params )
 {
         Door *node = new Door( "" );
         DatagramIterator scan;
@@ -213,13 +190,12 @@ make_from_bam( const FactoryParams &params )
         return node;
 }
 
-void Door::
-fillin( DatagramIterator &scan, BamReader *manager )
+void Door::fillin( DatagramIterator &scan, BamReader *manager )
 {
         PandaNode::fillin( scan, manager );
 
         _move_dir.read_datagram( scan );
-        _spawn_pos = ( SpawnPos )scan.get_int8();
+        _spawn_pos = (SpawnPos)scan.get_int8();
         _wait = scan.get_stdfloat();
         _speed = scan.get_stdfloat();
         _locked_sentence = scan.get_string();

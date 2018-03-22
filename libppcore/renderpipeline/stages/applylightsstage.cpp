@@ -2,8 +2,7 @@
 
 #include "..\..\pp_globals.h"
 
-vector_string ApplyLightsStage::
-get_required_inputs()
+vector_string ApplyLightsStage::get_required_inputs()
 {
         vector_string vec;
         vec.push_back( "AllLightsData" );
@@ -12,8 +11,7 @@ get_required_inputs()
         return vec;
 }
 
-vector_string ApplyLightsStage::
-get_required_pipes()
+vector_string ApplyLightsStage::get_required_pipes()
 {
         vector_string vec;
         vec.push_back( "GBuffer" );
@@ -26,22 +24,19 @@ get_required_pipes()
         return vec;
 }
 
-ApplyLightsStage::
-ApplyLightsStage() :
+ApplyLightsStage::ApplyLightsStage() :
         RenderStage()
 {
 }
 
-void ApplyLightsStage::
-create()
+void ApplyLightsStage::create()
 {
         _target = create_target( "ApplyLights" );
         _target->add_color_attachment( 16 );
         _target->prepare_buffer();
 }
 
-void ApplyLightsStage::
-bind()
+void ApplyLightsStage::bind()
 {
         rpipeline->_gbuf_stage->_ubo.bind_to( _target ); // GBuffer
         set_shader_input( new ShaderInput( "CellIndices", rpipeline->get_light_mgr()->_collect_cells_stage->_cell_index_buffer ) );
@@ -58,8 +53,7 @@ bind()
         bind_to_commons();
 }
 
-void ApplyLightsStage::
-reload_shaders()
+void ApplyLightsStage::reload_shaders()
 {
         _target->set_shader( load_shader( "shader/apply_lights.frag.glsl" ) );
 }

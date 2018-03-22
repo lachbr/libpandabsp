@@ -2,20 +2,16 @@
 #include <fstream>
 #include <sstream>
 
-using namespace std;
-
-#include <vifTokenizer.h>
-#include <vifParser.h>
-#include "builder.h"
-
 #include <load_prc_file.h>
 #include <pandaFramework.h>
 #include <cullBinManager.h>
 
+#include "viftokenizer.h"
+#include "vifparser.h"
+#include "builder.h"
+
 int main( int argc, char *argv[] )
 {
-
-
         if ( argc < 2 )
         {
                 cerr << "No file was specfied! Program cannot run." << endl;
@@ -31,7 +27,6 @@ int main( int argc, char *argv[] )
         char *output_file = argv[2];
 
         // Load necessary prc data.
-        //load_prc_file_data("", "window-type none");
         load_prc_file_data( "", "load-display pandagl" );
         load_prc_file_data( "", "egg-object-type-portal          <Scalar> portal { 1 }" );
         load_prc_file_data( "", "egg-object-type-polylight       <Scalar> polylight { 1 }" );

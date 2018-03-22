@@ -13,15 +13,13 @@
 
 NotifyCategoryDef( clientRepositoryBase, "" );
 
-ClientRepositoryBase::
-ClientRepositoryBase()
+ClientRepositoryBase::ClientRepositoryBase()
 {
 }
 
-ClientRepositoryBase::
-ClientRepositoryBase( const string &dc_suffix,
-                      ConnectionRepository::ConnectMethod cm,
-                      vector<string> &dc_files ) :
+ClientRepositoryBase::ClientRepositoryBase( const string &dc_suffix,
+                                            ConnectionRepository::ConnectMethod cm,
+                                            vector<string> &dc_files ) :
         ConnectionRepository( dc_files, cm, false )
 {
 
@@ -29,67 +27,58 @@ ClientRepositoryBase( const string &dc_suffix,
         _no_defer = true;
         _dc_suffix = dc_suffix;
         _context = 100000;
-        _time_mgr = NULL;
+        _time_mgr = nullptr;
         _local_avatar_do_id = 0;
         _last_heartbeat = 0.0;
         _last_generate = 0.0;
         _server_delta = 0.0;
         _heartbeat_started = false;
         _context = 0;
-        _heartbeat_task = NULL;
+        _heartbeat_task = nullptr;
         _heartbeat_interval = ConfigVariableDouble( "heartbeat-interval", 10 );
 }
 
-void ClientRepositoryBase::
-set_local_avatar_do_id( DOID_TYPE do_id )
+void ClientRepositoryBase::set_local_avatar_do_id( DOID_TYPE do_id )
 {
         _local_avatar_do_id = do_id;
 }
 
-DOID_TYPE ClientRepositoryBase::
-get_local_avatar_do_id() const
+DOID_TYPE ClientRepositoryBase::get_local_avatar_do_id() const
 {
         return _local_avatar_do_id;
 }
 
-ParentMgr &ClientRepositoryBase::
-get_parent_mgr()
+ParentMgr &ClientRepositoryBase::get_parent_mgr()
 {
         return _parent_mgr;
 }
 
-void ClientRepositoryBase::
-set_time_manager( TimeManager *tm )
+void ClientRepositoryBase::set_time_manager( TimeManager *tm )
 {
         _time_mgr = tm;
 }
 
-TimeManager *ClientRepositoryBase::
-get_time_manager() const
+TimeManager *ClientRepositoryBase::get_time_manager() const
 {
         return _time_mgr;
 }
 
-int ClientRepositoryBase::
-allocate_context()
+int ClientRepositoryBase::allocate_context()
 {
         return ++_context;
 }
 
-void ClientRepositoryBase::
-set_server_delta( PN_stdfloat delta )
+void ClientRepositoryBase::set_server_delta( PN_stdfloat delta )
 {
         _server_delta = delta;
 }
 
-PN_stdfloat ClientRepositoryBase::
-get_server_delta() const
+PN_stdfloat ClientRepositoryBase::get_server_delta() const
 {
         return _server_delta;
 }
 
-PN_stdfloat ClientRepositoryBase::
-get_server_time_of_day() const
+PN_stdfloat ClientRepositoryBase::get_server_time_of_day() const
 {
 #ifdef _WIN32
 #pragma message("Using _WIN32 system time function")
@@ -104,9 +93,8 @@ get_server_time_of_day() const
 #endif // _WIN32
 }
 
-void ClientRepositoryBase::
-do_generate( uint32_t parent_id, uint32_t zone_id, uint16_t class_id,
-             uint32_t do_id, DatagramIterator &di )
+void ClientRepositoryBase::do_generate( uint32_t parent_id, uint32_t zone_id, uint16_t class_id,
+                                        uint32_t do_id, DatagramIterator &di )
 {
         DCClassPP *dclass = _dclass_by_number[class_id];
         dclass->get_dclass()->start_generate();
@@ -114,10 +102,9 @@ do_generate( uint32_t parent_id, uint32_t zone_id, uint16_t class_id,
         dclass->get_dclass()->stop_generate();
 }
 
-DistributedObjectBase *ClientRepositoryBase::
-generate_with_required_fields( DCClassPP *dclass, uint32_t do_id,
-                               DatagramIterator &di, uint32_t parent_id,
-                               uint32_t zone_id )
+DistributedObjectBase *ClientRepositoryBase::generate_with_required_fields( DCClassPP *dclass, uint32_t do_id,
+                                                                            DatagramIterator &di, uint32_t parent_id,
+                                                                            uint32_t zone_id )
 {
         DistributedObjectBase *dobj;
         if ( _do_id_2_do.find( do_id ) != _do_id_2_do.end() )
@@ -142,10 +129,9 @@ generate_with_required_fields( DCClassPP *dclass, uint32_t do_id,
         return dobj;
 }
 
-DistributedObjectBase *ClientRepositoryBase::
-generate_with_required_other_fields( DCClassPP *dclass, uint32_t do_id,
-                                     DatagramIterator &di, uint32_t parent_id,
-                                     uint32_t zone_id )
+DistributedObjectBase *ClientRepositoryBase::generate_with_required_other_fields( DCClassPP *dclass, uint32_t do_id,
+                                                                                  DatagramIterator &di, uint32_t parent_id,
+                                                                                  uint32_t zone_id )
 {
         DistributedObjectBase *dobj;
         if ( _do_id_2_do.find( do_id ) != _do_id_2_do.end() )
@@ -170,33 +156,28 @@ generate_with_required_other_fields( DCClassPP *dclass, uint32_t do_id,
         return dobj;
 }
 
-void ClientRepositoryBase::
-disable_do_id( uint32_t do_id, bool owner_view )
+void ClientRepositoryBase::disable_do_id( uint32_t do_id, bool owner_view )
 {
 
 }
 
-void ClientRepositoryBase::
-handle_delete( DatagramIterator &di )
+void ClientRepositoryBase::handle_delete( DatagramIterator &di )
 {
 }
 
-void ClientRepositoryBase::
-handle_update_field( DatagramIterator &di )
+void ClientRepositoryBase::handle_update_field( DatagramIterator &di )
 {
         uint32_t do_id = di.get_uint32();
         do_update( do_id, di, false );
 }
 
-void ClientRepositoryBase::
-do_update( uint32_t do_id, DatagramIterator &di, bool ov_updated )
+void ClientRepositoryBase::do_update( uint32_t do_id, DatagramIterator &di, bool ov_updated )
 {
         DistributedObjectBase *dobj = _do_id_2_do[do_id];
         dobj->get_dclass()->receive_update( dobj, di );
 }
 
-void ClientRepositoryBase::
-handle_go_get_lost( DatagramIterator &di )
+void ClientRepositoryBase::handle_go_get_lost( DatagramIterator &di )
 {
         if ( di.get_remaining_size() > 0 )
         {
@@ -204,48 +185,44 @@ handle_go_get_lost( DatagramIterator &di )
                 _booted_text = di.get_string();
 
                 connectionRepository_cat.warning()
-                                << "Server is booting us out (" << _booted_index << "): " << _booted_text << "\n";
+                        << "Server is booting us out (" << _booted_index << "): " << _booted_text << "\n";
         }
         else
         {
                 connectionRepository_cat.warning()
-                                << "Server is booting us out with no explanation.\n";
+                        << "Server is booting us out with no explanation.\n";
         }
 
         stop_reader_poll_task();
         lost_connection();
 }
 
-void ClientRepositoryBase::
-handle_server_heartbeat( DatagramIterator &di )
+void ClientRepositoryBase::handle_server_heartbeat( DatagramIterator &di )
 {
         if ( ConfigVariableBool( "server-heartbeat-info", true ) )
         {
                 connectionRepository_cat.info()
-                                << "Server heartbeat.\n";
+                        << "Server heartbeat.\n";
         }
 }
 
-string ClientRepositoryBase::
-handle_system_message( DatagramIterator &di )
+string ClientRepositoryBase::handle_system_message( DatagramIterator &di )
 {
         string message = di.get_string();
         connectionRepository_cat.info()
-                        << "Message from server: " << message << "\n";
+                << "Message from server: " << message << "\n";
         return message;
 }
 
-void ClientRepositoryBase::
-handle_system_message_acknowledge( DatagramIterator &di )
+void ClientRepositoryBase::handle_system_message_acknowledge( DatagramIterator &di )
 {
         string message = di.get_string();
         connectionRepository_cat.info()
-                        << "Message with acknowledge from server: " << message << "\n";
+                << "Message with acknowledge from server: " << message << "\n";
         throw_event( "system message acknowledge", EventParameter( message ) );
 }
 
-ClientRepositoryBase::ObjectsDict ClientRepositoryBase::
-get_objects_of_class( DistributedObjectBase *cls )
+ClientRepositoryBase::ObjectsDict ClientRepositoryBase::get_objects_of_class( DistributedObjectBase *cls )
 {
         ObjectsDict result;
         for ( ObjectsDict::iterator itr = _do_id_2_do.begin(); itr != _do_id_2_do.end(); ++itr )
@@ -265,8 +242,7 @@ get_objects_of_class( DistributedObjectBase *cls )
         return result;
 }
 
-ClientRepositoryBase::ObjectsDict ClientRepositoryBase::
-get_objects_of_exact_class( DistributedObjectBase *cls )
+ClientRepositoryBase::ObjectsDict ClientRepositoryBase::get_objects_of_exact_class( DistributedObjectBase *cls )
 {
         ObjectsDict result;
         for ( ObjectsDict::iterator itr = _do_id_2_do.begin(); itr != _do_id_2_do.end(); ++itr )
@@ -282,8 +258,7 @@ get_objects_of_exact_class( DistributedObjectBase *cls )
         return result;
 }
 
-void ClientRepositoryBase::
-consider_heartbeat()
+void ClientRepositoryBase::consider_heartbeat()
 {
         if ( !_heartbeat_started )
         {
@@ -294,24 +269,22 @@ consider_heartbeat()
         if ( elapsed < 0 || elapsed > _heartbeat_interval )
         {
                 connectionRepository_cat.debug()
-                                << "Sending heartbeat mid-frame.\n";
+                        << "Sending heartbeat mid-frame.\n";
                 start_heartbeat();
                 _last_heartbeat = g_global_clock->get_real_time();
         }
 }
 
-void ClientRepositoryBase::
-stop_heartbeat()
+void ClientRepositoryBase::stop_heartbeat()
 {
-        if ( _heartbeat_task != NULL )
+        if ( _heartbeat_task != nullptr )
         {
                 g_task_mgr->remove( _heartbeat_task );
         }
         _heartbeat_started = false;
 }
 
-void ClientRepositoryBase::
-start_heartbeat()
+void ClientRepositoryBase::start_heartbeat()
 {
         stop_heartbeat();
         _heartbeat_started = true;
@@ -319,15 +292,13 @@ start_heartbeat()
         wait_for_next_heartbeat();
 }
 
-AsyncTask::DoneStatus ClientRepositoryBase::
-send_heartbeat_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus ClientRepositoryBase::send_heartbeat_task( GenericAsyncTask *task, void *data )
 {
-        ( ( ClientRepositoryBase * )data )->send_heartbeat();
+        ( (ClientRepositoryBase *)data )->send_heartbeat();
         return AsyncTask::DS_again;
 }
 
-void ClientRepositoryBase::
-wait_for_next_heartbeat()
+void ClientRepositoryBase::wait_for_next_heartbeat()
 {
         _heartbeat_task = new GenericAsyncTask( "heartBeat", send_heartbeat_task, this );
         //_heartbeat_task->set_task_chain("net");
@@ -335,8 +306,7 @@ wait_for_next_heartbeat()
         g_task_mgr->add( _heartbeat_task );
 }
 
-NodePath ClientRepositoryBase::
-get_world( uint32_t do_id )
+NodePath ClientRepositoryBase::get_world( uint32_t do_id )
 {
         DistributedObjectBase *obj = _do_id_2_do[do_id];
 
@@ -363,8 +333,7 @@ get_world( uint32_t do_id )
         return g_render;
 }
 
-bool ClientRepositoryBase::
-is_local_id( uint32_t do_id )
+bool ClientRepositoryBase::is_local_id( uint32_t do_id )
 {
         return false;
 }

@@ -9,13 +9,11 @@ bool RenderTarget::use_r11g11b10 = true;
 pvector<PT( RenderTarget )> RenderTarget::registered_targets;
 int RenderTarget::current_sort = -300;
 
-RenderTarget::
-RenderTarget()
+RenderTarget::RenderTarget()
 {
 }
 
-RenderTarget::
-RenderTarget( const string &name )
+RenderTarget::RenderTarget( const string &name )
 {
         _name = name;
         _color_bits.set( 0.0, 0.0, 0.0, 0.0 );
@@ -36,97 +34,82 @@ RenderTarget( const string &name )
         }
 }
 
-void RenderTarget::
-set_active( bool active )
+void RenderTarget::set_active( bool active )
 {
         _active = active;
 }
 
-bool RenderTarget::
-get_active() const
+bool RenderTarget::get_active() const
 {
         return _active;
 }
 
-PT( Texture ) RenderTarget::
-get_aux_tex( int n ) const
+PT( Texture ) RenderTarget::get_aux_tex( int n ) const
 {
         return _aux_texs[n];
 }
 
-string RenderTarget::
-get_name() const
+string RenderTarget::get_name() const
 {
         return _name;
 }
 
-void RenderTarget::
-add_color_attachment( int bits, bool alpha )
+void RenderTarget::add_color_attachment( int bits, bool alpha )
 {
         _color_target = new Texture( "_color" );
         _color_bits.set( bits, bits, bits, alpha ? bits : 0 );
 }
 
-void RenderTarget::
-add_color_attachment( LVecBase4i &bits, bool alpha )
+void RenderTarget::add_color_attachment( LVecBase4i &bits, bool alpha )
 {
         _color_target = new Texture( "_color" );
         _color_bits.set( bits[0], bits[1], bits[2], bits[3] );
 }
 
-void RenderTarget::
-add_depth_attachment( int bits )
+void RenderTarget::add_depth_attachment( int bits )
 {
         _depth_target = new Texture( "_depth" );
         _depth_bits = bits;
 }
 
-void RenderTarget::
-add_aux_attachment( int bits )
+void RenderTarget::add_aux_attachment( int bits )
 {
         _aux_bits = bits;
         _aux_count++;
 }
 
-void RenderTarget::
-add_aux_attachments( int bits, int count )
+void RenderTarget::add_aux_attachments( int bits, int count )
 {
         _aux_bits = bits;
         _aux_count += count;
 }
 
-void RenderTarget::
-set_size( LVecBase2i &size )
+void RenderTarget::set_size( LVecBase2i &size )
 {
         _size_constraint = size;
 }
 
-LVecBase2i RenderTarget::
-get_size() const
+LVecBase2i RenderTarget::get_size() const
 {
         return _size_constraint;
 }
 
-PT( Texture ) RenderTarget::
-get_color_tex() const
+PT( Texture ) RenderTarget::get_color_tex() const
 {
         return _color_target;
 }
 
-PT( Texture ) RenderTarget::
-get_depth_tex() const
+PT( Texture ) RenderTarget::get_depth_tex() const
 {
         return _depth_target;
 }
 
-PT( GraphicsOutput ) RenderTarget::
-get_internal_buffer() const
+PT( GraphicsOutput ) RenderTarget::get_internal_buffer() const
 {
         return _internal_buffer;
 }
 
-bool RenderTarget::
-create_buffer()
+bool RenderTarget::create_buffer()
 {
         compute_size_from_constraint();
         if ( !create() )
@@ -149,15 +132,13 @@ create_buffer()
         return true;
 }
 
-void RenderTarget::
-set_clear_color( const LColor &color )
+void RenderTarget::set_clear_color( const LColor &color )
 {
         _internal_buffer->set_clear_color_active( true );
         _internal_buffer->set_clear_color( color );
 }
 
-void RenderTarget::
-set_shader_input( const ShaderInput *inp )
+void RenderTarget::set_shader_input( const ShaderInput *inp )
 {
         if ( _create_default_region )
         {
@@ -165,8 +146,7 @@ set_shader_input( const ShaderInput *inp )
         }
 }
 
-void RenderTarget::
-set_shader( const Shader *shad )
+void RenderTarget::set_shader( const Shader *shad )
 {
         if ( shad == NULL )
         {
@@ -176,8 +156,7 @@ set_shader( const Shader *shad )
         _source_region_def.set_shader( shad );
 }
 
-int RenderTarget::
-get_max_color_bits() const
+int RenderTarget::get_max_color_bits() const
 {
         int max = 0;
 
@@ -209,8 +188,7 @@ get_max_color_bits() const
         return max;
 }
 
-void RenderTarget::
-prepare_render( NodePath &camera )
+void RenderTarget::prepare_render( NodePath &camera )
 {
         _create_default_region = false;
         create_buffer();
@@ -264,22 +242,19 @@ prepare_render( NodePath &camera )
         _active = true;
 }
 
-void RenderTarget::
-prepare_buffer()
+void RenderTarget::prepare_buffer()
 {
         create_buffer();
         _active = true;
 }
 
-void RenderTarget::
-present_on_screen()
+void RenderTarget::present_on_screen()
 {
         _source_region_def = PostProcessRegion::make( ( GraphicsOutput * )_source_window );
         _source_region_def.set_sort( 5 );
 }
 
-void RenderTarget::
-remove()
+void RenderTarget::remove()
 {
         _internal_buffer->clear_render_textures();
         _engine->remove_window( _internal_buffer );
@@ -299,8 +274,7 @@ remove()
         registered_targets.erase( find( registered_targets.begin(), registered_targets.end(), this ) );
 }
 
-void RenderTarget::
-compute_size_from_constraint()
+void RenderTarget::compute_size_from_constraint()
 {
         int x = base->get_resolution_x();
         int y = base->get_resolution_y();
@@ -315,8 +289,7 @@ compute_size_from_constraint()
         }
 }
 
-RenderTarget::PropertiesData RenderTarget::
-make_properties()
+RenderTarget::PropertiesData RenderTarget::make_properties()
 {
         WindowProperties winprop = WindowProperties::size( _size.get_x(), _size.get_y() );
         FrameBufferProperties bufprop;
@@ -383,8 +356,7 @@ make_properties()
         return pdata;
 }
 
-void RenderTarget::
-setup_textures()
+void RenderTarget::setup_textures()
 {
         for ( int i = 0; i < _aux_count; i++ )
         {
@@ -401,8 +373,7 @@ setup_textures()
         }
 }
 
-bool RenderTarget::
-create()
+bool RenderTarget::create()
 {
         setup_textures();
         PropertiesData pdata = make_properties();
@@ -511,8 +482,7 @@ create()
         return true;
 }
 
-void RenderTarget::
-consider_resize()
+void RenderTarget::consider_resize()
 {
         LVecBase2i curr_size = _size;
         compute_size_from_constraint();

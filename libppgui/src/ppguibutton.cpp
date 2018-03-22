@@ -1,24 +1,21 @@
-#include "ppGuiButton.h"
+#include "ppguibutton.h"
+#include "pp_globals.h"
 
 #include <cardMaker.h>
-
-#include <pp_globals.h>
-
 #include <mouseButton.h>
-
 #include <colorAttrib.h>
+#include <throw_event.h>
 
 TypeDef( PPGuiButton );
 
-PPGuiButton::
-PPGuiButton( const string &name ) :
+PPGuiButton::PPGuiButton( const string &name ) :
         PGButton( name ),
-        _idle_tex( NULL ),
-        _rlvr_tex( NULL ),
-        _down_tex( NULL ),
-        _disabled_tex( NULL ),
-        _sound_click( NULL ),
-        _sound_rlvr( NULL ),
+        _idle_tex( nullptr ),
+        _rlvr_tex( nullptr ),
+        _down_tex( nullptr ),
+        _disabled_tex( nullptr ),
+        _sound_click( nullptr ),
+        _sound_rlvr( nullptr ),
         _geom_scale( LVector3f( 1 ) ),
         _geom_offset( LVector4f( 0 ) ),
         _fit_to_text( false ),
@@ -35,13 +32,18 @@ PPGuiButton( const string &name ) :
         _text1_pos( 0, 0, 0 ),
         _text2_pos( 0, 0, 0 ),
         _text3_pos( 0, 0, 0 ),
-        _text_only( true )
+        _text_only( true ),
+        _click_event( "" )
 {
         _text = new TextNode( "BTNTEXT" );
 }
 
-void PPGuiButton::
-set_text_pos( const LPoint3f &pos )
+void PPGuiButton::set_click_event( const string &event )
+{
+        _click_event = event;
+}
+
+void PPGuiButton::set_text_pos( const LPoint3f &pos )
 {
         set_text0_pos( pos );
         set_text1_pos( pos );
@@ -49,33 +51,28 @@ set_text_pos( const LPoint3f &pos )
         set_text3_pos( pos );
 }
 
-void PPGuiButton::
-set_text0_pos( const LPoint3f &pos )
+void PPGuiButton::set_text0_pos( const LPoint3f &pos )
 {
         _text0_pos = pos;
 }
 
-void PPGuiButton::
-set_text1_pos( const LPoint3f &pos )
+void PPGuiButton::set_text1_pos( const LPoint3f &pos )
 {
         _text1_pos = pos;
 }
 
-void PPGuiButton::
-set_text2_pos( const LPoint3f &pos )
+void PPGuiButton::set_text2_pos( const LPoint3f &pos )
 {
         _text2_pos = pos;
 }
 
-void PPGuiButton::
-set_text3_pos( const LPoint3f &pos )
+void PPGuiButton::set_text3_pos( const LPoint3f &pos )
 {
         _text3_pos = pos;
 }
 
 
-void PPGuiButton::
-set_text_color( LColorf &color )
+void PPGuiButton::set_text_color( LColorf &color )
 {
         _text0_color = color;
         _text1_color = color;
@@ -83,32 +80,27 @@ set_text_color( LColorf &color )
         _text3_color = color;
 }
 
-void PPGuiButton::
-set_text0_color( LColorf &color )
+void PPGuiButton::set_text0_color( LColorf &color )
 {
         _text0_color = color;
 }
 
-void PPGuiButton::
-set_text1_color( LColorf &color )
+void PPGuiButton::set_text1_color( LColorf &color )
 {
         _text1_color = color;
 }
 
-void PPGuiButton::
-set_text2_color( LColorf &color )
+void PPGuiButton::set_text2_color( LColorf &color )
 {
         _text2_color = color;
 }
 
-void PPGuiButton::
-set_text3_color( LColorf &color )
+void PPGuiButton::set_text3_color( LColorf &color )
 {
         _text3_color = color;
 }
 
-void PPGuiButton::
-set_text( const string &text )
+void PPGuiButton::set_text( const string &text )
 {
         _text->set_text( text );
         if ( _setup )
@@ -118,50 +110,47 @@ set_text( const string &text )
         }
 }
 
-TextNode *PPGuiButton::
-get_text()
+TextNode *PPGuiButton::get_text()
 {
         return _text;
 }
 
-void PPGuiButton::
-set_text_only( bool flag )
+void PPGuiButton::set_text_only( bool flag )
 {
         _text_only = flag;
 }
 
-bool PPGuiButton::
-get_text_only() const
+bool PPGuiButton::get_text_only() const
 {
         return _text_only;
 }
 
-void PPGuiButton::
-press( const MouseWatcherParameter &param, bool background )
+void PPGuiButton::press( const MouseWatcherParameter &param, bool background )
 {
         PGButton::press( param, background );
-        if ( _sound_click != NULL )
+        if ( _sound_click != nullptr )
         {
                 _sound_click->play();
+        }
+        if ( _click_event.length() > 0 )
+        {
+                throw_event( _click_event );
         }
 
 }
 
-void PPGuiButton::
-set_click_sound( PT( AudioSound ) s )
+void PPGuiButton::set_click_sound( PT( AudioSound ) s )
 {
         _sound_click = s;
 }
 
-void PPGuiButton::
-set_rollover_sound( PT( AudioSound ) s )
+void PPGuiButton::set_rollover_sound( PT( AudioSound ) s )
 {
         _sound_rlvr = s;
         set_sound( get_enter_event(), _sound_rlvr );
 }
 
-NodePath PPGuiButton::
-make_card( PT( Texture ) tex )
+NodePath PPGuiButton::make_card( PT( Texture ) tex )
 {
         CardMaker card( "texcard" );
         LVector4f frame( -0.5f, 0.5f, -0.5f, 0.5f );
@@ -177,8 +166,7 @@ make_card( PT( Texture ) tex )
         return node;
 }
 
-void PPGuiButton::
-setup_text()
+void PPGuiButton::setup_text()
 {
         if ( _setup )
         {
@@ -191,10 +179,9 @@ setup_text()
         }
 }
 
-void PPGuiButton::
-remove_text_from_state_nodes()
+void PPGuiButton::remove_text_from_state_nodes()
 {
-        if ( _text != NULL )
+        if ( _text != nullptr )
         {
                 _rlvr_np.find( "**/rlvrtextnode" ).remove_node();
                 _idle_np.find( "**/idletextnode" ).remove_node();
@@ -203,10 +190,9 @@ remove_text_from_state_nodes()
         }
 }
 
-void PPGuiButton::
-attach_text_to_state_nodes()
+void PPGuiButton::attach_text_to_state_nodes()
 {
-        if ( _text != NULL )
+        if ( _text != nullptr )
         {
                 PT( TextNode ) rlvr_text = new TextNode( "rlvrtextnode", *_text );
                 rlvr_text->set_text( _text->get_text() );
@@ -231,8 +217,7 @@ attach_text_to_state_nodes()
         }
 }
 
-void PPGuiButton::
-setup()
+void PPGuiButton::setup()
 {
         if ( _setup )
         {
@@ -251,22 +236,22 @@ setup()
         bool has_down_node = false;
         bool has_inac_node = false;
 
-        if ( _rlvr_tex != NULL )
+        if ( _rlvr_tex != nullptr )
         {
                 has_rlvr_node = true;
                 make_card( _rlvr_tex ).reparent_to( _rlvr_np );
         }
-        if ( _idle_tex != NULL )
+        if ( _idle_tex != nullptr )
         {
                 has_idle_node = true;
                 make_card( _idle_tex ).reparent_to( _idle_np );
         }
-        if ( _down_tex != NULL )
+        if ( _down_tex != nullptr )
         {
                 has_down_node = true;
                 make_card( _down_tex ).reparent_to( _down_np );
         }
-        if ( _disabled_tex != NULL )
+        if ( _disabled_tex != nullptr )
         {
                 has_inac_node = true;
                 make_card( _disabled_tex ).reparent_to( _inac_np );
@@ -370,44 +355,37 @@ setup()
         _setup = true;
 }
 
-void PPGuiButton::
-set_fit_to_text( bool flag )
+void PPGuiButton::set_fit_to_text( bool flag )
 {
         _fit_to_text = flag;
 }
 
-void PPGuiButton::
-set_geom_offset( LVector4f &offset )
+void PPGuiButton::set_geom_offset( LVector4f &offset )
 {
         _geom_offset = offset;
 }
 
-void PPGuiButton::
-set_geom_scale( LVector3f &scale )
+void PPGuiButton::set_geom_scale( LVector3f &scale )
 {
         _geom_scale = scale;
 }
 
-void PPGuiButton::
-set_idle( PT( Texture ) tex )
+void PPGuiButton::set_idle( PT( Texture ) tex )
 {
         _idle_tex = tex;
 }
 
-void PPGuiButton::
-set_rollover( PT( Texture ) tex )
+void PPGuiButton::set_rollover( PT( Texture ) tex )
 {
         _rlvr_tex = tex;
 }
 
-void PPGuiButton::
-set_down( PT( Texture ) tex )
+void PPGuiButton::set_down( PT( Texture ) tex )
 {
         _down_tex = tex;
 }
 
-void PPGuiButton::
-set_disabled( PT( Texture ) tex )
+void PPGuiButton::set_disabled( PT( Texture ) tex )
 {
         _disabled_tex = tex;
 }

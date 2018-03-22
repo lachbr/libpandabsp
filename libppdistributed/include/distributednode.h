@@ -66,7 +66,7 @@ private:
         DCFieldDef( set_h, set_h_field, get_h_field );
         DCFieldDef( set_p, set_p_field, get_p_field );
         DCFieldDef( set_r, set_r_field, get_r_field );
-        DCFieldDef( set_parent, set_parent_field, NULL );
+        DCFieldDef( set_parent, set_parent_field, nullptr );
 
         DCFieldDefEnd();
 

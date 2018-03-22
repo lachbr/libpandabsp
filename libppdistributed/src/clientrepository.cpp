@@ -6,10 +6,9 @@
 
 NotifyCategoryDef( clientRepository, "" );
 
-ClientRepository::
-ClientRepository( vector<string> &dc_files, const string &dc_suffix, ConnectMethod cm ) :
+ClientRepository::ClientRepository( vector<string> &dc_files, const string &dc_suffix, ConnectMethod cm ) :
         ClientRepositoryBase( dc_suffix, cm, dc_files ),
-        _do_id_allocator( NULL )
+        _do_id_allocator( nullptr )
 {
         set_handle_datagrams_internally( false );
 
@@ -22,40 +21,36 @@ ClientRepository( vector<string> &dc_files, const string &dc_suffix, ConnectMeth
 
 }
 
-ClientRepository::
-ClientRepository() :
+ClientRepository::ClientRepository() :
         ClientRepositoryBase(),
-        _do_id_allocator( NULL )
+        _do_id_allocator( nullptr )
 {
 }
 
-ClientRepository::
-~ClientRepository()
+ClientRepository::~ClientRepository()
 {
-        if ( _do_id_allocator != NULL )
+        if ( _do_id_allocator != nullptr )
         {
                 delete _do_id_allocator;
         }
 }
 
-CHANNEL_TYPE ClientRepository::
-get_our_channel() const
+CHANNEL_TYPE ClientRepository::get_our_channel() const
 {
         return _our_channel;
 }
 
-void ClientRepository::
-handle_set_doid_range( DatagramIterator &di )
+void ClientRepository::handle_set_doid_range( DatagramIterator &di )
 {
         _do_id_base = di.get_uint32();
         _do_id_last = _do_id_base + di.get_uint32();
         clientRepository_cat.info()
-                        << "Received DoId range from server (" << _do_id_base << " to " << _do_id_last - 1 << ")\n";
+                << "Received DoId range from server (" << _do_id_base << " to " << _do_id_last - 1 << ")\n";
 
-        if ( _do_id_allocator != NULL )
+        if ( _do_id_allocator != nullptr )
         {
                 delete _do_id_allocator;
-                _do_id_allocator = NULL;
+                _do_id_allocator = nullptr;
         }
 
         _do_id_allocator = new UniqueIdAllocator( _do_id_base, _do_id_last - 1 );
@@ -65,21 +60,19 @@ handle_set_doid_range( DatagramIterator &di )
         create_ready();
 }
 
-void ClientRepository::
-create_ready()
+void ClientRepository::create_ready()
 {
         throw_event( "createReady" );
         throw_event( PPUtils::unique_name( "createReady" ) );
 }
 
-void ClientRepository::
-handle_request_generates( DatagramIterator &di )
+void ClientRepository::handle_request_generates( DatagramIterator &di )
 {
         clientRepository_cat.debug()
-                        << "handle_request_generates:\n";
+                << "handle_request_generates:\n";
         ZONEID_TYPE zone = di.get_uint32();
         clientRepository_cat.debug()
-                        << "/tZone: " << zone << "\n";
+                << "/tZone: " << zone << "\n";
         for ( DoCollectionManager::DoMap::iterator itr = _do_id_2_do.begin(); itr != _do_id_2_do.end(); ++itr )
         {
                 DistributedObjectBase *dist_obj = itr->second;
@@ -88,24 +81,23 @@ handle_request_generates( DatagramIterator &di )
                         if ( is_local_id( dist_obj->get_do_id() ) )
                         {
                                 clientRepository_cat.debug()
-                                                << "Resending generate...\n";
+                                        << "Resending generate...\n";
                                 resend_generate( dist_obj );
                         }
                 }
         }
 }
 
-void ClientRepository::
-resend_generate( DistributedObjectBase *dist_obj )
+void ClientRepository::resend_generate( DistributedObjectBase *dist_obj )
 {
         pvector<string> extra_fields;
         for ( int i = 0; i < dist_obj->get_dclass()->get_dclass()->get_num_inherited_fields(); i++ )
         {
                 DCFieldPP *field = dist_obj->get_dclass()->get_field_wrapper(
-                                           dist_obj->get_dclass()->get_dclass()->get_inherited_field( i ) );
+                        dist_obj->get_dclass()->get_dclass()->get_inherited_field( i ) );
                 if ( field->get_field()->has_keyword( "broadcast" ) && ( field->get_field()->has_keyword( "required" ) ) )
                 {
-                        if ( field->get_field()->as_molecular_field() != NULL )
+                        if ( field->get_field()->as_molecular_field() != nullptr )
                         {
                                 continue;
                         }
@@ -114,12 +106,11 @@ resend_generate( DistributedObjectBase *dist_obj )
         }
 
         Datagram dg = dist_obj->get_dclass()->client_format_generate_cmu(
-                              dist_obj, dist_obj->get_do_id(), dist_obj->get_zone_id(), extra_fields );
+                dist_obj, dist_obj->get_do_id(), dist_obj->get_zone_id(), extra_fields );
         send( dg );
 }
 
-void ClientRepository::
-handle_generate( DatagramIterator &di )
+void ClientRepository::handle_generate( DatagramIterator &di )
 {
         _current_sender_id = di.get_uint32();
         ZONEID_TYPE zone_id = di.get_uint32();
@@ -152,57 +143,52 @@ handle_generate( DatagramIterator &di )
         dclass->get_dclass()->stop_generate();
 }
 
-DOID_TYPE ClientRepository::
-allocate_do_id()
+DOID_TYPE ClientRepository::allocate_do_id()
 {
         clientRepository_cat.debug()
-                        << "Allocating do_id\n" << endl;
-        nassertr( _do_id_allocator != NULL, 0 );
+                << "Allocating do_id\n" << endl;
+        nassertr( _do_id_allocator != nullptr, 0 );
         return _do_id_allocator->allocate();
 }
 
-DOID_TYPE ClientRepository::
-reserve_do_id( DOID_TYPE do_id )
+DOID_TYPE ClientRepository::reserve_do_id( DOID_TYPE do_id )
 {
-        nassertr( _do_id_allocator != NULL, do_id );
+        nassertr( _do_id_allocator != nullptr, do_id );
         _do_id_allocator->initial_reserve_id( do_id );
         return do_id;
 }
 
-void ClientRepository::
-free_do_id( DOID_TYPE do_id )
+void ClientRepository::free_do_id( DOID_TYPE do_id )
 {
         nassertv( is_local_id( do_id ) );
-        nassertv( _do_id_allocator != NULL );
+        nassertv( _do_id_allocator != nullptr );
         _do_id_allocator->free( do_id );
 }
 
-void ClientRepository::
-store_object_location( DistributedObjectBase *dist_obj, DOID_TYPE parent_id, ZONEID_TYPE zone_id )
+void ClientRepository::store_object_location( DistributedObjectBase *dist_obj, DOID_TYPE parent_id, ZONEID_TYPE zone_id )
 {
         dist_obj->set_parent_id( parent_id );
         dist_obj->set_zone_id( zone_id );
 }
 
-DistributedObjectBase *ClientRepository::
-create_distributed_object( DistributedObjectBase *obj, ZONEID_TYPE zone_id, bool explicit_do_id, DOID_TYPE do_id, DCClassPP *dclass )
+DistributedObjectBase *ClientRepository::create_distributed_object( DistributedObjectBase *obj, ZONEID_TYPE zone_id, bool explicit_do_id, DOID_TYPE do_id, DCClassPP *dclass )
 {
         if ( !explicit_do_id )
         {
                 do_id = allocate_do_id();
         }
 
-        if ( dclass == NULL )
+        if ( dclass == nullptr )
         {
                 string type_name = obj->get_type().get_name();
                 if ( _dclass_by_name.find( type_name ) == _dclass_by_name.end() )
                 {
                         stringstream ss;
                         ss
-                                        << "No Dclass exists with name " << type_name
-                                        << ". If this is an ownerview object, make "
-                                        << "sure to pass the dclass of the parent class. "
-                                        << "For example: A LocalToon's dclass should be DistributedToon.\n";
+                                << "No Dclass exists with name " << type_name
+                                << ". If this is an ownerview object, make "
+                                << "sure to pass the dclass of the parent class. "
+                                << "For example: A LocalToon's dclass should be DistributedToon.\n";
                         nassert_raise( ss.str() );
                         return obj;
                 }
@@ -222,8 +208,7 @@ create_distributed_object( DistributedObjectBase *obj, ZONEID_TYPE zone_id, bool
         return obj;
 }
 
-void ClientRepository::
-send_delete_msg( DOID_TYPE do_id )
+void ClientRepository::send_delete_msg( DOID_TYPE do_id )
 {
         Datagram dg;
         dg.add_uint16( OBJECT_DELETE_CMU );
@@ -231,8 +216,7 @@ send_delete_msg( DOID_TYPE do_id )
         send( dg );
 }
 
-void ClientRepository::
-send_disconnect()
+void ClientRepository::send_disconnect()
 {
         if ( is_connected() )
         {
@@ -240,14 +224,13 @@ send_disconnect()
                 dg.add_uint16( CLIENT_DISCONNECT_CMU );
                 send( dg );
                 clientRepository_cat.info()
-                                << "Sent disconnect message to server\n";
+                        << "Sent disconnect message to server\n";
                 disconnect();
         }
         stop_heartbeat();
 }
 
-void ClientRepository::
-set_interest_zones( vector<ZONEID_TYPE> &interest_zone_ids )
+void ClientRepository::set_interest_zones( vector<ZONEID_TYPE> &interest_zone_ids )
 {
         Datagram dg;
         dg.add_uint16( CLIENT_SET_INTEREST_CMU );
@@ -260,8 +243,7 @@ set_interest_zones( vector<ZONEID_TYPE> &interest_zone_ids )
         _interest_zones = interest_zone_ids;
 }
 
-void ClientRepository::
-set_object_zone( DistributedObject *dist_obj, ZONEID_TYPE zone_id )
+void ClientRepository::set_object_zone( DistributedObject *dist_obj, ZONEID_TYPE zone_id )
 {
         dist_obj->b_set_location( 0, zone_id );
         nassertv( dist_obj->get_zone_id() == zone_id );
@@ -269,8 +251,7 @@ set_object_zone( DistributedObject *dist_obj, ZONEID_TYPE zone_id )
         resend_generate( dist_obj );
 }
 
-void ClientRepository::
-send_set_location( DOID_TYPE do_id, DOID_TYPE parent_id, ZONEID_TYPE zone_id )
+void ClientRepository::send_set_location( DOID_TYPE do_id, DOID_TYPE parent_id, ZONEID_TYPE zone_id )
 {
         Datagram dg;
         dg.add_uint16( OBJECT_SET_ZONE_CMU );
@@ -279,8 +260,7 @@ send_set_location( DOID_TYPE do_id, DOID_TYPE parent_id, ZONEID_TYPE zone_id )
         send( dg );
 }
 
-void ClientRepository::
-send_heartbeat()
+void ClientRepository::send_heartbeat()
 {
         Datagram dg;
         dg.add_uint16( CLIENT_HEARTBEAT_CMU );
@@ -288,26 +268,22 @@ send_heartbeat()
 
 }
 
-bool ClientRepository::
-is_local_id( DOID_TYPE do_id ) const
+bool ClientRepository::is_local_id( DOID_TYPE do_id ) const
 {
         return ( ( do_id >= _do_id_base ) && ( do_id < _do_id_last ) );
 }
 
-bool ClientRepository::
-have_create_authority() const
+bool ClientRepository::have_create_authority() const
 {
         return ( _do_id_last > _do_id_base );
 }
 
-DOID_TYPE ClientRepository::
-get_avatar_id_from_sender() const
+DOID_TYPE ClientRepository::get_avatar_id_from_sender() const
 {
         return _current_sender_id;
 }
 
-void ClientRepository::
-handle_datagram( DatagramIterator &di )
+void ClientRepository::handle_datagram( DatagramIterator &di )
 {
         uint16_t msg_type = get_msg_type();
         _current_sender_id = 0;
@@ -340,24 +316,21 @@ handle_datagram( DatagramIterator &di )
         consider_heartbeat();
 }
 
-void ClientRepository::
-handle_update_field( DatagramIterator &di )
+void ClientRepository::handle_update_field( DatagramIterator &di )
 {
         _current_sender_id = di.get_uint32();
         clientRepository_cat.debug()
-                        << "update_field from " << _current_sender_id << "\n";
+                << "update_field from " << _current_sender_id << "\n";
         ClientRepositoryBase::handle_update_field( di );
 }
 
-void ClientRepository::
-handle_delete( DatagramIterator &di )
+void ClientRepository::handle_delete( DatagramIterator &di )
 {
         DOID_TYPE do_id = di.get_uint32();
         delete_object( do_id );
 }
 
-void ClientRepository::
-handle_disable( DatagramIterator &di )
+void ClientRepository::handle_disable( DatagramIterator &di )
 {
         while ( di.get_remaining_size() > 0 )
         {
@@ -367,8 +340,7 @@ handle_disable( DatagramIterator &di )
         }
 }
 
-void ClientRepository::
-delete_object( DOID_TYPE do_id )
+void ClientRepository::delete_object( DOID_TYPE do_id )
 {
         if ( _do_id_2_do.find( do_id ) != _do_id_2_do.end() )
         {
@@ -383,13 +355,12 @@ delete_object( DOID_TYPE do_id )
         else
         {
                 clientRepository_cat.warning()
-                                << "Asked to delete non-existent DistObj " << do_id << "\n";
+                        << "Asked to delete non-existent DistObj " << do_id << "\n";
         }
 }
 
-void ClientRepository::
-handle_message_type( uint16_t msg_type, DatagramIterator &di )
+void ClientRepository::handle_message_type( uint16_t msg_type, DatagramIterator &di )
 {
         clientRepository_cat.error()
-                        << "unrecognized message type " << msg_type << "\n";
+                << "unrecognized message type " << msg_type << "\n";
 }

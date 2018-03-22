@@ -3,9 +3,8 @@
 
 ConfigVariableBool ControlManager::_want_wasd( "want-WASD", false );
 
-ControlManager::
-ControlManager( bool enable_now, bool pass_messages_through ) :
-        _current_controls( NULL )
+ControlManager::ControlManager( bool enable_now, bool pass_messages_through ) :
+        _current_controls( nullptr )
 {
         _pass_messages_through = pass_messages_through;
         _wasd_turn = false;
@@ -24,8 +23,7 @@ ControlManager( bool enable_now, bool pass_messages_through ) :
         }
 }
 
-bool ControlManager::
-control_sys_exists( const string &name )
+bool ControlManager::control_sys_exists( const string &name )
 {
         for ( pmap<string, ControlSystemBase>::const_iterator itr = _controls.begin(); itr != _controls.end(); ++itr )
         {
@@ -38,8 +36,7 @@ control_sys_exists( const string &name )
         return false;
 }
 
-void ControlManager::
-add( ControlSystemBase &controls, const string &name )
+void ControlManager::add( ControlSystemBase &controls, const string &name )
 {
         if ( control_sys_exists( name ) )
         {
@@ -54,14 +51,12 @@ add( ControlSystemBase &controls, const string &name )
 }
 
 // Will crash if it doesn't exist!
-ControlSystemBase &ControlManager::
-get( const string &name )
+ControlSystemBase &ControlManager::get( const string &name )
 {
         return _controls[name];
 }
 
-void ControlManager::
-remove( const string &name )
+void ControlManager::remove( const string &name )
 {
         if ( control_sys_exists( name ) )
         {
@@ -71,8 +66,7 @@ remove( const string &name )
         }
 }
 
-void ControlManager::
-use( const string &name, NodePath &avatar )
+void ControlManager::use( const string &name, NodePath &avatar )
 {
         if ( control_sys_exists( name ) )
         {
@@ -90,17 +84,15 @@ use( const string &name, NodePath &avatar )
         }
 }
 
-void ControlManager::
-set_speeds( PN_stdfloat fwd, PN_stdfloat jump, PN_stdfloat rev, PN_stdfloat rot )
+void ControlManager::set_speeds( PN_stdfloat fwd, PN_stdfloat jump, PN_stdfloat rev, PN_stdfloat rot )
 {
         for ( pmap<string, ControlSystemBase>::const_iterator itr = _controls.begin(); itr != _controls.end(); ++itr )
         {
-                ( ( ControlSystemBase )itr->second ).set_walk_speed( fwd, jump, rev, rot );
+                ( (ControlSystemBase)itr->second ).set_walk_speed( fwd, jump, rev, rot );
         }
 }
 
-void ControlManager::
-cleanup()
+void ControlManager::cleanup()
 {
         for ( pmap<string, ControlSystemBase>::const_iterator itr = _controls.begin(); itr != _controls.end(); ++itr )
         {
@@ -116,65 +108,57 @@ cleanup()
         _inputs.clear();
 }
 
-ControlSystemBase::SpeedData ControlManager::
-get_speeds() const
+ControlSystemBase::SpeedData ControlManager::get_speeds() const
 {
         return _current_controls->get_speeds();
 }
 
-bool ControlManager::
-get_is_airborne() const
+bool ControlManager::get_is_airborne() const
 {
         return _current_controls->get_is_airborne();
 }
 
-void ControlManager::
-set_tag( const string &key, const string &value )
+void ControlManager::set_tag( const string &key, const string &value )
 {
         for ( pmap<string, ControlSystemBase>::const_iterator itr = _controls.begin(); itr != _controls.end(); ++itr )
         {
-                ( ( ControlSystemBase )itr->second ).set_tag( key, value );
+                ( (ControlSystemBase)itr->second ).set_tag( key, value );
         }
 }
 
-void ControlManager::
-delete_collisions()
+void ControlManager::delete_collisions()
 {
         for ( pmap<string, ControlSystemBase>::const_iterator itr = _controls.begin(); itr != _controls.end(); ++itr )
         {
-                ( ( ControlSystemBase )itr->second ).delete_collisions();
+                ( (ControlSystemBase)itr->second ).delete_collisions();
         }
 }
 
-void ControlManager::
-collisions_on()
+void ControlManager::collisions_on()
 {
         for ( pmap<string, ControlSystemBase>::const_iterator itr = _controls.begin(); itr != _controls.end(); ++itr )
         {
-                ( ( ControlSystemBase )itr->second ).set_collisions_active( true );
+                ( (ControlSystemBase)itr->second ).set_collisions_active( true );
         }
 }
 
-void ControlManager::
-collisions_off()
+void ControlManager::collisions_off()
 {
         for ( pmap<string, ControlSystemBase>::const_iterator itr = _controls.begin(); itr != _controls.end(); ++itr )
         {
-                ( ( ControlSystemBase )itr->second ).set_collisions_active( false );
+                ( (ControlSystemBase)itr->second ).set_collisions_active( false );
         }
 }
 
-void ControlManager::
-place_on_floor()
+void ControlManager::place_on_floor()
 {
         for ( pmap<string, ControlSystemBase>::const_iterator itr = _controls.begin(); itr != _controls.end(); ++itr )
         {
-                ( ( ControlSystemBase )itr->second ).place_on_floor();
+                ( (ControlSystemBase)itr->second ).place_on_floor();
         }
 }
 
-void ControlManager::
-enable()
+void ControlManager::enable()
 {
         if ( _enabled )
         {
@@ -231,8 +215,7 @@ enable()
         }
 }
 
-void ControlManager::
-disable()
+void ControlManager::disable()
 {
         _enabled = false;
 
@@ -242,7 +225,7 @@ disable()
         }
         _inputs.clear();
 
-        if ( _current_controls != NULL )
+        if ( _current_controls != nullptr )
         {
                 _current_controls->disable_avatar_controls();
         }
@@ -257,28 +240,24 @@ disable()
         }
 }
 
-void ControlManager::
-stop()
+void ControlManager::stop()
 {
         disable();
         _current_controls->set_collisions_active( 0 );
         _current_controls->set_avatar( NodePath() );
 }
 
-void ControlManager::
-disable_avatar_jump()
+void ControlManager::disable_avatar_jump()
 {
         g_input_state.force_input( "jump" );
 }
 
-void ControlManager::
-enable_avatar_jump()
+void ControlManager::enable_avatar_jump()
 {
         g_input_state.unforce_input( "jump" );
 }
 
-void ControlManager::
-set_wasd_turn( bool turn )
+void ControlManager::set_wasd_turn( bool turn )
 {
         _wasd_turn = turn;
 

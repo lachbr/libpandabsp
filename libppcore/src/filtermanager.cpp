@@ -6,18 +6,17 @@
 #include <auxBitplaneAttrib.h>
 #include <orthographicLens.h>
 
-FilterManager::
-FilterManager( PT( GraphicsOutput ) win, NodePath &cam, int force_x, int force_y ) :
+FilterManager::FilterManager( PT( GraphicsOutput ) win, NodePath &cam, int force_x, int force_y ) :
         _win( win ),
         _cam( cam ),
         _force_x( force_x ),
         _force_y( force_y ),
         _base_x( 0 ),
         _base_y( 0 ),
-        _engine( NULL ),
-        _region( NULL ),
-        _cam_init( NULL ),
-        _cam_state( NULL ),
+        _engine( nullptr ),
+        _region( nullptr ),
+        _cam_init( nullptr ),
+        _cam_state( nullptr ),
         _next_sort( 0 )
 {
 
@@ -33,7 +32,7 @@ FilterManager( PT( GraphicsOutput ) win, NodePath &cam, int force_x, int force_y
                 }
         }
 
-        if ( _region == NULL )
+        if ( _region == nullptr )
         {
                 cerr << "Could not find appropriate DisplayRegion to filter" << endl;
                 return;
@@ -48,15 +47,13 @@ FilterManager( PT( GraphicsOutput ) win, NodePath &cam, int force_x, int force_y
         g_base->define_key( "g_window-event", "filterManager handle g_window event", window_event, this );
 }
 
-void FilterManager::
-get_both_clears()
+void FilterManager::get_both_clears()
 {
         _w_clears = get_clears( _win );
         _r_clears = get_clears( _region );
 }
 
-FilterManager::ClearDataVec FilterManager::
-get_clears( GraphicsOutput *region ) const
+FilterManager::ClearDataVec FilterManager::get_clears( GraphicsOutput *region ) const
 {
         ClearDataVec clears;
 
@@ -71,8 +68,7 @@ get_clears( GraphicsOutput *region ) const
         return clears;
 }
 
-FilterManager::ClearDataVec FilterManager::
-get_clears( DisplayRegion *region ) const
+FilterManager::ClearDataVec FilterManager::get_clears( DisplayRegion *region ) const
 {
         ClearDataVec clears;
 
@@ -87,8 +83,7 @@ get_clears( DisplayRegion *region ) const
         return clears;
 }
 
-void FilterManager::
-set_clears( PT( GraphicsOutput ) region, ClearDataVec &clears )
+void FilterManager::set_clears( PT( GraphicsOutput ) region, ClearDataVec &clears )
 {
         for ( int i = 0; i < GraphicsOutput::RTP_COUNT; i++ )
         {
@@ -98,8 +93,7 @@ set_clears( PT( GraphicsOutput ) region, ClearDataVec &clears )
         }
 }
 
-void FilterManager::
-set_clears( PT( DisplayRegion ) region, ClearDataVec &clears )
+void FilterManager::set_clears( PT( DisplayRegion ) region, ClearDataVec &clears )
 {
         for ( int i = 0; i < GraphicsOutput::RTP_COUNT; i++ )
         {
@@ -109,9 +103,8 @@ set_clears( PT( DisplayRegion ) region, ClearDataVec &clears )
         }
 }
 
-FilterManager::ClearDataVec FilterManager::
-set_stacked_clears( PT( GraphicsOutput ) region, ClearDataVec &clears0,
-                    ClearDataVec &clears1 )
+FilterManager::ClearDataVec FilterManager::set_stacked_clears( PT( GraphicsOutput ) region, ClearDataVec &clears0,
+                                                               ClearDataVec &clears1 )
 {
         ClearDataVec clears;
 
@@ -129,8 +122,7 @@ set_stacked_clears( PT( GraphicsOutput ) region, ClearDataVec &clears0,
         return clears;
 }
 
-bool FilterManager::
-is_fullscreen() const
+bool FilterManager::is_fullscreen() const
 {
         return ( _region->get_left() == 0.0 &&
                  _region->get_right() == 1.0 &&
@@ -138,8 +130,7 @@ is_fullscreen() const
                  _region->get_top() == 1.0 );
 }
 
-LVector2f FilterManager::
-get_scaled_size( PN_stdfloat mul, PN_stdfloat div, PN_stdfloat align ) const
+LVector2f FilterManager::get_scaled_size( PN_stdfloat mul, PN_stdfloat div, PN_stdfloat align ) const
 {
         int win_x = _force_x;
         int win_y = _force_y;
@@ -169,15 +160,14 @@ get_scaled_size( PN_stdfloat mul, PN_stdfloat div, PN_stdfloat align ) const
         return LVector2f( win_x, win_y );
 }
 
-NodePath FilterManager::
-render_scene_into( PT( Texture ) depth_tex, PT( Texture ) color_tex,
-                   PT( Texture ) aux_tex, int aux_bits, TextureMap &textures )
+NodePath FilterManager::render_scene_into( PT( Texture ) depth_tex, PT( Texture ) color_tex,
+                                           PT( Texture ) aux_tex, int aux_bits, TextureMap &textures )
 {
 
-        PT( Texture ) aux_tex0 = NULL;
-        PT( Texture ) aux_tex1 = NULL;
+        PT( Texture ) aux_tex0 = nullptr;
+        PT( Texture ) aux_tex1 = nullptr;
 
-        if ( textures.size() > ( size_t )0 )
+        if ( textures.size() > (size_t)0 )
         {
                 if ( textures.find( "color" ) != textures.end() )
                 {
@@ -205,7 +195,7 @@ render_scene_into( PT( Texture ) depth_tex, PT( Texture ) color_tex,
                 aux_tex0 = aux_tex;
         }
 
-        if ( color_tex == NULL )
+        if ( color_tex == nullptr )
         {
                 color_tex = new Texture( "filter-base-color" );
                 color_tex->set_wrap_u( SamplerState::WM_clamp );
@@ -222,7 +212,7 @@ render_scene_into( PT( Texture ) depth_tex, PT( Texture ) color_tex,
 
         PT( GraphicsOutput ) buffer = create_buffer( "filter-base", size[0], size[1], tex_group );
 
-        if ( buffer == NULL )
+        if ( buffer == nullptr )
         {
                 return NodePath();
         }
@@ -255,12 +245,12 @@ render_scene_into( PT( Texture ) depth_tex, PT( Texture ) color_tex,
 
         set_stacked_clears( buffer, _r_clears, _w_clears );
 
-        if ( aux_tex0 != NULL )
+        if ( aux_tex0 != nullptr )
         {
                 buffer->set_clear_active( GraphicsOutput::RTP_aux_rgba_0, true );
                 buffer->set_clear_value( GraphicsOutput::RTP_aux_rgba_0, LColor( 0.5, 0.5, 1.0, 0.0 ) );
         }
-        if ( aux_tex1 != NULL )
+        if ( aux_tex1 != nullptr )
         {
                 buffer->set_clear_active( GraphicsOutput::RTP_aux_rgba_1, true );
         }
@@ -283,9 +273,8 @@ render_scene_into( PT( Texture ) depth_tex, PT( Texture ) color_tex,
         return quad;
 }
 
-NodePath FilterManager::
-render_quad_into( PN_stdfloat mul, PN_stdfloat div, PN_stdfloat align, PT( Texture ) depth_tex,
-                  PT( Texture ) color_tex, PT( Texture ) aux_tex0, PT( Texture ) aux_tex1 )
+NodePath FilterManager::render_quad_into( PN_stdfloat mul, PN_stdfloat div, PN_stdfloat align, PT( Texture ) depth_tex,
+                                          PT( Texture ) color_tex, PT( Texture ) aux_tex0, PT( Texture ) aux_tex1 )
 {
         TextureVec tex_group;
         tex_group.push_back( depth_tex );
@@ -295,11 +284,11 @@ render_quad_into( PN_stdfloat mul, PN_stdfloat div, PN_stdfloat align, PT( Textu
 
         LVector2f size = get_scaled_size( mul, div, align );
 
-        bool depth_bits = depth_tex != NULL;
+        bool depth_bits = depth_tex != nullptr;
 
         PT( GraphicsOutput ) buffer = create_buffer( "filter-stage", size[0], size[1], tex_group, depth_bits );
 
-        if ( buffer == NULL )
+        if ( buffer == nullptr )
         {
                 return NodePath();
         }
@@ -334,8 +323,7 @@ render_quad_into( PN_stdfloat mul, PN_stdfloat div, PN_stdfloat align, PT( Textu
         return quad;
 }
 
-PT( GraphicsOutput ) FilterManager::
-create_buffer( const string &name, int x_size, int y_size, TextureVec &tex_group, int depth_bits )
+PT( GraphicsOutput ) FilterManager::create_buffer( const string &name, int x_size, int y_size, TextureVec &tex_group, int depth_bits )
 {
         WindowProperties winprops;
         winprops.set_size( x_size, y_size );
@@ -346,37 +334,37 @@ create_buffer( const string &name, int x_size, int y_size, TextureVec &tex_group
         props.set_depth_bits( depth_bits );
         props.set_stereo( _win->is_stereo() );
 
-        if ( tex_group[2] != NULL )
+        if ( tex_group[2] != nullptr )
         {
                 props.set_aux_rgba( 1 );
         }
-        if ( tex_group[3] != NULL )
+        if ( tex_group[3] != nullptr )
         {
                 props.set_aux_rgba( 2 );
         }
 
         PT( GraphicsOutput ) buffer = g_base->_window->get_graphics_window()
-                                      ->get_engine()->make_output( _win->get_pipe(), name, -1, props, winprops,
-                                                                   GraphicsPipe::BF_refuse_window | GraphicsPipe::BF_resizeable,
-                                                                   _win->get_gsg(), _win );
-        if ( buffer == NULL )
+                ->get_engine()->make_output( _win->get_pipe(), name, -1, props, winprops,
+                                             GraphicsPipe::BF_refuse_window | GraphicsPipe::BF_resizeable,
+                                             _win->get_gsg(), _win );
+        if ( buffer == nullptr )
         {
                 return buffer;
         }
 
-        if ( tex_group[0] != NULL )
+        if ( tex_group[0] != nullptr )
         {
                 buffer->add_render_texture( tex_group[0], GraphicsOutput::RTM_bind_or_copy, GraphicsOutput::RTP_depth );
         }
-        if ( tex_group[1] != NULL )
+        if ( tex_group[1] != nullptr )
         {
                 buffer->add_render_texture( tex_group[1], GraphicsOutput::RTM_bind_or_copy, GraphicsOutput::RTP_color );
         }
-        if ( tex_group[2] != NULL )
+        if ( tex_group[2] != nullptr )
         {
                 buffer->add_render_texture( tex_group[2], GraphicsOutput::RTM_bind_or_copy, GraphicsOutput::RTP_aux_rgba_0 );
         }
-        if ( tex_group[3] != NULL )
+        if ( tex_group[3] != nullptr )
         {
                 buffer->add_render_texture( tex_group[3], GraphicsOutput::RTM_bind_or_copy, GraphicsOutput::RTP_aux_rgba_1 );
         }
@@ -389,14 +377,12 @@ create_buffer( const string &name, int x_size, int y_size, TextureVec &tex_group
         return buffer;
 }
 
-void FilterManager::
-window_event( const Event *e, void *data )
+void FilterManager::window_event( const Event *e, void *data )
 {
-        ( ( FilterManager * )data )->resize_buffers();
+        ( (FilterManager *)data )->resize_buffers();
 }
 
-void FilterManager::
-resize_buffers()
+void FilterManager::resize_buffers()
 {
         for ( size_t i = 0; i < _buffers.size(); i++ )
         {
@@ -406,8 +392,7 @@ resize_buffers()
         }
 }
 
-void FilterManager::
-cleanup()
+void FilterManager::cleanup()
 {
         for ( size_t i = 0; i < _buffers.size(); i++ )
         {
@@ -429,8 +414,7 @@ cleanup()
         _base_y = 0;
 }
 
-NodePath &FilterManager::
-get_cam()
+NodePath &FilterManager::get_cam()
 {
         return _cam;
 }

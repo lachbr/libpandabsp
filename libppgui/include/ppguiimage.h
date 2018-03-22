@@ -1,16 +1,12 @@
 #ifndef __GUIIMAGE_H__
 #define __GUIIMAGE_H__
 
-//#include "ppGuiItem.h"
-
 #include "config_ppgui.h"
+#include "pp_utils.h"
 
 #include <cardMaker.h>
 #include <texture.h>
-
 #include <pgItem.h>
-
-#include <pp_utils.h>
 
 class EXPCL_PPGUI GuiImage : public PGItem
 {

@@ -34,11 +34,11 @@ public:
 
         LVector2f get_scaled_size( PN_stdfloat mul, PN_stdfloat div, PN_stdfloat align ) const;
 
-        NodePath render_scene_into( PT( Texture ) depth_tex = NULL, PT( Texture ) color_tex = NULL,
-                                    PT( Texture ) aux_tex = NULL, int aux_bits = 0, TextureMap &textures = TextureMap() );
+        NodePath render_scene_into( PT( Texture ) depth_tex = nullptr, PT( Texture ) color_tex = nullptr,
+                                    PT( Texture ) aux_tex = nullptr, int aux_bits = 0, TextureMap &textures = TextureMap() );
 
-        NodePath render_quad_into( PN_stdfloat mul = 1, PN_stdfloat div = 1, PN_stdfloat align = 1, PT( Texture ) depth_tex = NULL,
-                                   PT( Texture ) color_tex = NULL, PT( Texture ) aux_tex0 = NULL, PT( Texture ) aux_tex1 = NULL );
+        NodePath render_quad_into( PN_stdfloat mul = 1, PN_stdfloat div = 1, PN_stdfloat align = 1, PT( Texture ) depth_tex = nullptr,
+                                   PT( Texture ) color_tex = nullptr, PT( Texture ) aux_tex0 = nullptr, PT( Texture ) aux_tex1 = nullptr );
 
         PT( GraphicsOutput ) create_buffer( const string &name, int x_size, int y_size, TextureVec &tex_group, int depth_bits = 1 );
 

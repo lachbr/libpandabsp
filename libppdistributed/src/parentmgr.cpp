@@ -1,13 +1,11 @@
-#include "parentMgr.h"
+#include "parentmgr.h"
 
-void ParentMgr::
-destroy()
+void ParentMgr::destroy()
 {
         _token_2_nodepath.clear();
 }
 
-void ParentMgr::
-request_reparent( NodePath *child, int parenttoken )
+void ParentMgr::request_reparent( NodePath *child, int parenttoken )
 {
         bool exists = _token_2_nodepath.find( parenttoken ) != _token_2_nodepath.end();
         if ( exists )
@@ -16,8 +14,7 @@ request_reparent( NodePath *child, int parenttoken )
         }
 }
 
-void ParentMgr::
-register_reparent( int token, NodePath *parent )
+void ParentMgr::register_reparent( int token, NodePath *parent )
 {
         if ( _token_2_nodepath.find( token ) != _token_2_nodepath.end() )
         {
@@ -26,8 +23,7 @@ register_reparent( int token, NodePath *parent )
         _token_2_nodepath[token] = parent;
 }
 
-void ParentMgr::
-unregister_reparent( int token )
+void ParentMgr::unregister_reparent( int token )
 {
         if ( _token_2_nodepath.find( token ) != _token_2_nodepath.end() )
         {

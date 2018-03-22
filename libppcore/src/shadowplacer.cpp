@@ -9,16 +9,14 @@ NotifyCategoryDef( shadowPlacer, "" );
 
 static const PN_stdfloat floor_offset = 0.025;
 
-ShadowPlacer::
-ShadowPlacer() :
-        _trav( NULL ),
+ShadowPlacer::ShadowPlacer() :
+        _trav( nullptr ),
         _is_active( false )
 {
 }
 
-ShadowPlacer::
-ShadowPlacer( CollisionTraverser *trav, const NodePath &shadow_np,
-              const BitMask32 &floor_mask ) :
+ShadowPlacer::ShadowPlacer( CollisionTraverser *trav, const NodePath &shadow_np,
+                            const BitMask32 &floor_mask ) :
         _trav( trav ),
         _shadow_np( shadow_np ),
         _floor_mask( floor_mask ),
@@ -26,13 +24,12 @@ ShadowPlacer( CollisionTraverser *trav, const NodePath &shadow_np,
 {
 }
 
-void ShadowPlacer::
-setup()
+void ShadowPlacer::setup()
 {
         PT( CollisionRay ) cray = new CollisionRay( 0.0, 0.0, 4000.0, 0.0, 0.0, -1.0 );
 
         shadowPlacer_cat.info()
-                        << "setup()\n";
+                << "setup()\n";
 
         PT( CollisionNode ) cnode = new CollisionNode( "shadowPlacer" );
         cnode->add_solid( cray );
@@ -48,19 +45,17 @@ setup()
         _lifter->add_collider( _ray_np, _shadow_np );
 }
 
-void ShadowPlacer::
-cleanup()
+void ShadowPlacer::cleanup()
 {
         off();
         _ray_np.remove_node();
 }
 
 /**
- * Turn on the shadow placement. The shadow z position will
- * start being updated until a call to off() is made.
- */
-void ShadowPlacer::
-on()
+* Turn on the shadow placement. The shadow z position will
+* start being updated until a call to off() is made.
+*/
+void ShadowPlacer::on()
 {
         if ( _is_active )
         {
@@ -68,9 +63,9 @@ on()
         }
 
         shadowPlacer_cat.info()
-                        << "on()\n";
+                << "on()\n";
 
-        nassertv( _trav != NULL );
+        nassertv( _trav != nullptr );
         nassertv( !_trav->has_collider( _ray_np ) );
 
         _trav->add_collider( _ray_np, _lifter );
@@ -79,19 +74,18 @@ on()
 }
 
 /**
- * Turn off the shadow placement. The shadow will still be
- * there, but the z position will not be updated until a call
- * to on() is made.
- */
-void ShadowPlacer::
-off()
+* Turn off the shadow placement. The shadow will still be
+* there, but the z position will not be updated until a call
+* to on() is made.
+*/
+void ShadowPlacer::off()
 {
         if ( !_is_active )
         {
                 return;
         }
 
-        nassertv( _trav != NULL );
+        nassertv( _trav != nullptr );
         nassertv( _trav->has_collider( _ray_np ) );
         nassertv( _trav->remove_collider( _ray_np ) );
 
@@ -102,16 +96,14 @@ off()
         _is_active = false;
 }
 
-void ShadowPlacer::
-one_time_collide()
+void ShadowPlacer::one_time_collide()
 {
         CollisionTraverser temp_trav( "oneTimeCollide" );
         temp_trav.add_collider( _ray_np, _lifter );
         temp_trav.traverse( g_render );
 }
 
-void ShadowPlacer::
-reset_to_origin()
+void ShadowPlacer::reset_to_origin()
 {
         if ( !_shadow_np.is_empty() )
         {

@@ -3,26 +3,22 @@
 
 #include <virtualFileSystem.h>
 
-SerialNumGen::
-SerialNumGen( int start )
+SerialNumGen::SerialNumGen( int start )
 {
         _counter = start - 1;
 }
 
-int SerialNumGen::
-next()
+int SerialNumGen::next()
 {
         return ++_counter;
 }
 
-FrameDelayedCall::
-FrameDelayedCall()
+FrameDelayedCall::FrameDelayedCall()
 {
         _finished = true;
 }
 
-FrameDelayedCall::
-FrameDelayedCall( const string &name, CallbackFunc *callback, void *data, int frames, CancelFunc *cancelfunc )
+FrameDelayedCall::FrameDelayedCall( const string &name, CallbackFunc *callback, void *data, int frames, CancelFunc *cancelfunc )
 {
         _name = name;
         _callback = callback;
@@ -35,21 +31,18 @@ FrameDelayedCall( const string &name, CallbackFunc *callback, void *data, int fr
         start_task();
 }
 
-bool FrameDelayedCall::
-is_finished() const
+bool FrameDelayedCall::is_finished() const
 {
         return _finished;
 }
 
-void FrameDelayedCall::
-destroy()
+void FrameDelayedCall::destroy()
 {
         _finished = true;
         stop_task();
 }
 
-void FrameDelayedCall::
-finish()
+void FrameDelayedCall::finish()
 {
         if ( !_finished )
         {
@@ -59,8 +52,7 @@ finish()
         destroy();
 }
 
-void FrameDelayedCall::
-start_task()
+void FrameDelayedCall::start_task()
 {
         _counter = 0;
         _finished = false;
@@ -68,17 +60,15 @@ start_task()
         g_task_mgr->add( _task );
 }
 
-void FrameDelayedCall::
-stop_task()
+void FrameDelayedCall::stop_task()
 {
         _finished = true;
         _task->remove();
 }
 
-AsyncTask::DoneStatus FrameDelayedCall::
-tick_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus FrameDelayedCall::tick_task( GenericAsyncTask *task, void *data )
 {
-        FrameDelayedCall *cls = ( FrameDelayedCall * )data;
+        FrameDelayedCall *cls = (FrameDelayedCall *)data;
         if ( ( *cls->_cancel_func )( cls->_data ) )
         {
                 cls->destroy();
@@ -95,29 +85,27 @@ tick_task( GenericAsyncTask *task, void *data )
 
 SerialNumGen PPUtils::serial_gen;
 
-int PPUtils::
-serial_num()
+int PPUtils::serial_num()
 {
         return serial_gen.next();
 }
 
-string PPUtils::
-unique_name( const string &name )
+string PPUtils::unique_name( const string &name )
 {
         stringstream ss;
         ss << name << "-" << serial_gen.next();
         return ss.str();
 }
 
-void PPUtils::
-mount_multifile( const string &mfpath )
+void PPUtils::mount_multifile( const string &mfpath )
 {
         VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
         vfs->mount( mfpath, ".", VirtualFileSystem::MF_read_only );
 }
 
-PT( CLerpNodePathInterval ) PPUtils::
-make_nodepath_interval( const string &name, double duration, const NodePath &node )
+PT( CLerpNodePathInterval ) PPUtils::make_nodepath_interval( const string &name, double duration,
+                                                             const NodePath &node )
 {
-        return new CLerpNodePathInterval( name, duration, CLerpInterval::BT_no_blend, false, true, node, NodePath() );
+        return new CLerpNodePathInterval( name, duration, CLerpInterval::BT_no_blend,
+                                          false, true, node, NodePath() );
 }

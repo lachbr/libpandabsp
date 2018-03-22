@@ -1,12 +1,10 @@
 #include "stageManager.h"
 
-StageManager::
-StageManager()
+StageManager::StageManager()
 {
 }
 
-void StageManager::
-add_stage( PT( RenderStage ) stage )
+void StageManager::add_stage( PT( RenderStage ) stage )
 {
 
         // Make sure this stage isn't already in the vector.
@@ -16,8 +14,7 @@ add_stage( PT( RenderStage ) stage )
         }
 }
 
-void StageManager::
-remove_stage( PT( RenderStage ) stage )
+void StageManager::remove_stage( PT( RenderStage ) stage )
 {
         pvector<PT( RenderStage )>::const_iterator itr = find( _stages.begin(), _stages.end(), stage );
         if ( itr != _stages.end() )
@@ -26,8 +23,7 @@ remove_stage( PT( RenderStage ) stage )
         }
 }
 
-RenderStage *StageManager::
-get_stage( TypeHandle &handle )
+RenderStage *StageManager::get_stage( TypeHandle &handle )
 {
         for ( size_t i = 0; i < _stages.size(); i++ )
         {
@@ -40,8 +36,7 @@ get_stage( TypeHandle &handle )
         return ( RenderStage * )NULL;
 }
 
-void StageManager::
-prepare_stages()
+void StageManager::prepare_stages()
 {
         pvector<RenderStage *> to_remove;
 
@@ -59,8 +54,7 @@ prepare_stages()
         }
 }
 
-void StageManager::
-setup()
+void StageManager::setup()
 {
         prepare_stages();
 
@@ -77,8 +71,7 @@ setup()
         }
 }
 
-void StageManager::
-update()
+void StageManager::update()
 {
         for ( size_t i = 0; i < _stages.size(); i++ )
         {
@@ -89,8 +82,7 @@ update()
         }
 }
 
-void StageManager::
-handle_window_resize()
+void StageManager::handle_window_resize()
 {
         for ( size_t i = 0; i < _stages.size(); i++ )
         {
@@ -98,8 +90,7 @@ handle_window_resize()
         }
 }
 
-void StageManager::
-reload_shaders()
+void StageManager::reload_shaders()
 {
         for ( size_t i = 0; i < _stages.size(); i++ )
         {

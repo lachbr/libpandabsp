@@ -6,8 +6,7 @@
 
 NotifyCategoryDef( serverRepository, "" );
 
-ServerRepository::
-ServerRepository( int tcp_port, const string &server_address, stringvec_t &dc_files ) :
+ServerRepository::ServerRepository( int tcp_port, const string &server_address, stringvec_t &dc_files ) :
         _qcl( &_qcm, 0 ),
         _qcr( &_qcm, 0 ),
         _cw( &_qcm, 0 ),
@@ -20,8 +19,7 @@ ServerRepository( int tcp_port, const string &server_address, stringvec_t &dc_fi
         _dc_suffix = "";
 }
 
-void ServerRepository::
-start_server()
+void ServerRepository::start_server()
 {
         _tcp_rendezvous = _qcm.open_TCP_server_rendezvous( _address, _port, 10 );
         _qcl.add_connection( _tcp_rendezvous );
@@ -33,26 +31,22 @@ start_server()
         read_dc_file( _dc_files );
 }
 
-ServerRepository::
-~ServerRepository()
+ServerRepository::~ServerRepository()
 {
 }
 
-void ServerRepository::
-set_tcp_header_size( int header_size )
+void ServerRepository::set_tcp_header_size( int header_size )
 {
         _qcr.set_tcp_header_size( header_size );
         _cw.set_tcp_header_size( header_size );
 }
 
-int ServerRepository::
-get_tcp_header_size() const
+int ServerRepository::get_tcp_header_size() const
 {
         return _qcr.get_tcp_header_size();
 }
 
-void ServerRepository::
-read_dc_file( stringvec_t &dc_file_names )
+void ServerRepository::read_dc_file( stringvec_t &dc_file_names )
 {
         _dc_file.clear();
         _dclasses_by_name.clear();
@@ -62,12 +56,12 @@ read_dc_file( stringvec_t &dc_file_names )
         for ( size_t i = 0; i < dc_file_names.size(); i++ )
         {
                 serverRepository_cat.info()
-                                << "Reading DC file: " << dc_file_names[i] << "...\n";
+                        << "Reading DC file: " << dc_file_names[i] << "...\n";
                 bool result = _dc_file.read( Filename( dc_file_names[i] ) );
                 if ( !result )
                 {
                         serverRepository_cat.error()
-                                        << "Could not read dc file!\n";
+                                << "Could not read dc file!\n";
                         return;
                 }
         }
@@ -91,7 +85,7 @@ read_dc_file( stringvec_t &dc_file_names )
                 for ( int k = 0; k < dclass->get_num_inherited_fields(); k++ )
                 {
                         DCField *field = dclass->get_inherited_field( k );
-                        DCFieldPP *field_wrapper = NULL;
+                        DCFieldPP *field_wrapper = nullptr;
                         if ( find( _wrapped_fields.begin(), _wrapped_fields.end(), field ) == _wrapped_fields.end() )
                         {
                                 field_wrapper = new DCFieldPP( field->as_atomic_field() );
@@ -108,8 +102,7 @@ read_dc_file( stringvec_t &dc_file_names )
         }
 }
 
-DCFieldPP *ServerRepository::
-get_field_wrapper( DCField *field )
+DCFieldPP *ServerRepository::get_field_wrapper( DCField *field )
 {
         for ( size_t i = 0; i < _wrapper_fields.size(); i++ )
         {
@@ -120,13 +113,12 @@ get_field_wrapper( DCField *field )
                 }
         }
 
-        return ( DCFieldPP * )NULL;
+        return (DCFieldPP *)nullptr;
 }
 
-AsyncTask::DoneStatus ServerRepository::
-listener_poll( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus ServerRepository::listener_poll( GenericAsyncTask *task, void *data )
 {
-        ServerRepository *sr = ( ServerRepository * )data;
+        ServerRepository *sr = (ServerRepository *)data;
         if ( sr->_qcl.new_connection_available() )
         {
                 PT( Connection ) rendezvous;
@@ -144,7 +136,7 @@ listener_poll( GenericAsyncTask *task, void *data )
                 DOID_TYPE do_id_base = id * sr->_do_id_range + 1;
 
                 serverRepository_cat.info()
-                                << "Got client " << do_id_base << " from " << net_address << "\n";
+                        << "Got client " << do_id_base << " from " << net_address << "\n";
 
                 Client *client = new Client;
                 client->connection = new_conn;
@@ -161,16 +153,14 @@ listener_poll( GenericAsyncTask *task, void *data )
         return AsyncTask::DS_cont;
 }
 
-AsyncTask::DoneStatus ServerRepository::
-reader_poll( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus ServerRepository::reader_poll( GenericAsyncTask *task, void *data )
 {
-        ServerRepository *sr = ( ServerRepository * )data;
+        ServerRepository *sr = (ServerRepository *)data;
         sr->reader_poll_once();
         return AsyncTask::DS_cont;
 }
 
-bool ServerRepository::
-reader_poll_once()
+bool ServerRepository::reader_poll_once()
 {
         bool avail_get = _qcr.data_available();
         if ( avail_get )
@@ -185,8 +175,7 @@ reader_poll_once()
         return avail_get;
 }
 
-void ServerRepository::
-handle_datagram( NetDatagram &datagram )
+void ServerRepository::handle_datagram( NetDatagram &datagram )
 {
         PT( Connection ) connection = datagram.get_connection();
 
@@ -195,8 +184,8 @@ handle_datagram( NetDatagram &datagram )
         {
                 // It doesn't, strange.
                 serverRepository_cat.warning()
-                                << "Ignoring datagram from unknown connection " <<
-                                datagram.get_connection() << "\n";
+                        << "Ignoring datagram from unknown connection " <<
+                        datagram.get_connection() << "\n";
                 return;
         }
 
@@ -206,7 +195,7 @@ handle_datagram( NetDatagram &datagram )
         uint16_t msg_type = dgi.get_uint16();
 
         serverRepository_cat.debug()
-                        << "Received datagram with msgType " << msg_type << "\n";
+                << "Received datagram with msgType " << msg_type << "\n";
 
         switch ( msg_type )
         {
@@ -240,18 +229,16 @@ handle_datagram( NetDatagram &datagram )
         }
 }
 
-void ServerRepository::
-handle_message_type( uint16_t msg_type, DatagramIterator &dgi )
+void ServerRepository::handle_message_type( uint16_t msg_type, DatagramIterator &dgi )
 {
         serverRepository_cat.warning()
-                        << "unrecognized message type " << msg_type << "\n";
+                << "unrecognized message type " << msg_type << "\n";
 }
 
-void ServerRepository::
-handle_client_create_object( NetDatagram &datagram, DatagramIterator &dgi )
+void ServerRepository::handle_client_create_object( NetDatagram &datagram, DatagramIterator &dgi )
 {
         serverRepository_cat.debug()
-                        << "handle_client_create_object:\n";
+                << "handle_client_create_object:\n";
 
         PT( Connection ) connection = datagram.get_connection();
         ZONEID_TYPE zone_id = dgi.get_uint32();
@@ -259,26 +246,26 @@ handle_client_create_object( NetDatagram &datagram, DatagramIterator &dgi )
         DOID_TYPE do_id = dgi.get_uint32();
 
         serverRepository_cat.debug()
-                        << "\tzoneId: " << zone_id << "\n";
+                << "\tzoneId: " << zone_id << "\n";
         serverRepository_cat.debug()
-                        << "\tclassId: " << class_id << "\n";
+                << "\tclassId: " << class_id << "\n";
         serverRepository_cat.debug()
-                        << "\tdoId: " << do_id << "\n";
+                << "\tdoId: " << do_id << "\n";
 
         Client *client = _clients_by_connection[connection];
 
         if ( get_do_id_base( do_id ) != client->do_id_base )
         {
                 serverRepository_cat.warning()
-                                << "Ignoring attempt to create invalid do_id " << do_id <<
-                                " from client " << client->do_id_base << "\n";
+                        << "Ignoring attempt to create invalid do_id " << do_id <<
+                        " from client " << client->do_id_base << "\n";
                 return;
         }
 
         DCClassPP *dclass = _dclasses_by_number[class_id];
 
         serverRepository_cat.debug()
-                        << "\tDClass: " << dclass->get_dclass()->get_name() << "\n";
+                << "\tDClass: " << dclass->get_dclass()->get_name() << "\n";
 
         Object *obj;
         if ( client->objects_by_doid.find( do_id ) != client->objects_by_doid.end() )
@@ -287,10 +274,10 @@ handle_client_create_object( NetDatagram &datagram, DatagramIterator &dgi )
                 if ( obj->dclass != dclass )
                 {
                         serverRepository_cat.warning()
-                                        << "Ignoring attempt to change object " << do_id << " from " <<
-                                        obj->dclass->get_dclass()->get_name() << " to " <<
-                                        dclass->get_dclass()->get_name() << " by client " <<
-                                        client->do_id_base << "\n";
+                                << "Ignoring attempt to change object " << do_id << " from " <<
+                                obj->dclass->get_dclass()->get_name() << " to " <<
+                                dclass->get_dclass()->get_name() << " by client " <<
+                                client->do_id_base << "\n";
                         return;
                 }
                 set_object_zone( client, obj, zone_id );
@@ -326,14 +313,13 @@ handle_client_create_object( NetDatagram &datagram, DatagramIterator &dgi )
 static void unknown_object_update( DOID_TYPE do_id, DOID_TYPE do_id_base )
 {
         serverRepository_cat.warning()
-                        << "Ignoring update for unknown object " << do_id << " from client " << do_id_base << "\n";
+                << "Ignoring update for unknown object " << do_id << " from client " << do_id_base << "\n";
 }
 
-void ServerRepository::
-handle_client_object_update_field( NetDatagram &datagram, DatagramIterator &dgi, bool targeted )
+void ServerRepository::handle_client_object_update_field( NetDatagram &datagram, DatagramIterator &dgi, bool targeted )
 {
         serverRepository_cat.debug()
-                        << "handle_client_object_update_field:\n";
+                << "handle_client_object_update_field:\n";
 
         PT( Connection ) connection = datagram.get_connection();
         Client *client = _clients_by_connection[connection];
@@ -342,24 +328,24 @@ handle_client_object_update_field( NetDatagram &datagram, DatagramIterator &dgi,
         if ( targeted )
         {
                 serverRepository_cat.debug()
-                                << "    targeted: " << targeted << "\n";
+                        << "    targeted: " << targeted << "\n";
                 target_id = dgi.get_uint32();
                 serverRepository_cat.debug()
-                                << "    target_id: " << target_id << "\n";
+                        << "    target_id: " << target_id << "\n";
         }
 
         DOID_TYPE do_id = dgi.get_uint32();
         serverRepository_cat.debug()
-                        << "    do_id: " << do_id << "\n";
+                << "    do_id: " << do_id << "\n";
         uint16_t field_id = dgi.get_uint16();
         serverRepository_cat.debug()
-                        << "    field_id: " << field_id << "\n";
+                << "    field_id: " << field_id << "\n";
 
         DOID_TYPE do_id_base = get_do_id_base( do_id );
         serverRepository_cat.debug()
-                        << "    do_id_base: " << do_id_base << "\n";
-        Client *owner = NULL;
-        Object *object = NULL;
+                << "    do_id_base: " << do_id_base << "\n";
+        Client *owner = nullptr;
+        Object *object = nullptr;
         if ( _clients_by_do_id_base.find( do_id_base ) != _clients_by_do_id_base.end() )
         {
                 owner = _clients_by_do_id_base[do_id_base];
@@ -367,11 +353,11 @@ handle_client_object_update_field( NetDatagram &datagram, DatagramIterator &dgi,
         else
         {
                 serverRepository_cat.warning()
-                                << "Unable to find client with do_id_base " << do_id_base << "\n";
+                        << "Unable to find client with do_id_base " << do_id_base << "\n";
                 unknown_object_update( do_id, do_id_base );
                 return;
         }
-        if ( owner == NULL || owner->objects_by_doid.find( do_id ) == owner->objects_by_doid.end() )
+        if ( owner == nullptr || owner->objects_by_doid.find( do_id ) == owner->objects_by_doid.end() )
         {
                 unknown_object_update( do_id, do_id_base );
                 return;
@@ -382,13 +368,13 @@ handle_client_object_update_field( NetDatagram &datagram, DatagramIterator &dgi,
         }
 
         DCFieldPP *dc_field = object->dclass->get_field_wrapper(
-                                      object->dclass->get_dclass()->get_field_by_index( field_id ) );
-        if ( dc_field == NULL )
+                object->dclass->get_dclass()->get_field_by_index( field_id ) );
+        if ( dc_field == nullptr )
         {
                 serverRepository_cat.warning()
-                                << "Ignoring update for field " << field_id << " on object " <<
-                                do_id << " from client " << client->do_id_base << "; no such field for class " <<
-                                object->dclass->get_dclass()->get_name() << ".\n";
+                        << "Ignoring update for field " << field_id << " on object " <<
+                        do_id << " from client " << client->do_id_base << "; no such field for class " <<
+                        object->dclass->get_dclass()->get_name() << ".\n";
                 return;
         }
 
@@ -398,9 +384,9 @@ handle_client_object_update_field( NetDatagram &datagram, DatagramIterator &dgi,
                      !dc_field->get_field()->has_keyword( "p2p" ) )
                 {
                         serverRepository_cat.warning()
-                                        << "Ignoring update for " << object->dclass->get_dclass()->get_name() <<
-                                        "." << dc_field->get_field()->get_name() << " on object " << do_id <<
-                                        " from client " << client->do_id_base << ": not owner\n";
+                                << "Ignoring update for " << object->dclass->get_dclass()->get_name() <<
+                                "." << dc_field->get_field()->get_name() << " on object " << do_id <<
+                                " from client " << client->do_id_base << ": not owner\n";
                         return;
                 }
         }
@@ -418,10 +404,10 @@ handle_client_object_update_field( NetDatagram &datagram, DatagramIterator &dgi,
                 if ( _clients_by_do_id_base.find( target_id ) == _clients_by_do_id_base.end() )
                 {
                         serverRepository_cat.warning()
-                                        << "Ignoring targeted update to " << target_id << " for " <<
-                                        object->dclass->get_dclass()->get_name() << "." <<
-                                        dc_field->get_field()->get_name() << " on object " << do_id <<
-                                        " from client " << client->do_id_base << ": target not known\n";
+                                << "Ignoring targeted update to " << target_id << " for " <<
+                                object->dclass->get_dclass()->get_name() << "." <<
+                                dc_field->get_field()->get_name() << " on object " << do_id <<
+                                " from client " << client->do_id_base << ": target not known\n";
                         return;
                 }
                 else
@@ -448,32 +434,30 @@ handle_client_object_update_field( NetDatagram &datagram, DatagramIterator &dgi,
         else
         {
                 serverRepository_cat.warning()
-                                << "Message is not broadcast or p2p\n";
+                        << "Message is not broadcast or p2p\n";
         }
 }
 
-DOID_TYPE ServerRepository::
-get_do_id_base( DOID_TYPE do_id )
+DOID_TYPE ServerRepository::get_do_id_base( DOID_TYPE do_id )
 {
-        return ( ( int )( do_id / _do_id_range ) ) * _do_id_range + 1;
+        return ( (int)( do_id / _do_id_range ) ) * _do_id_range + 1;
 }
 
-void ServerRepository::
-handle_client_delete_object( NetDatagram &datagram, DOID_TYPE do_id )
+void ServerRepository::handle_client_delete_object( NetDatagram &datagram, DOID_TYPE do_id )
 {
         serverRepository_cat.debug()
-                        << "handle_client_delete_object:\n";
+                << "handle_client_delete_object:\n";
         serverRepository_cat.debug()
-                        << "\tdoId: " << do_id << "\n";
+                << "\tdoId: " << do_id << "\n";
 
         PT( Connection ) connection = datagram.get_connection();
         Client *client = _clients_by_connection[connection];
-        Object *object = NULL;
+        Object *object = nullptr;
         if ( client->objects_by_doid.find( do_id ) == client->objects_by_doid.end() )
         {
                 serverRepository_cat.warning()
-                                << "Ignoring update for unkown object " << do_id << " from client "
-                                << client->do_id_base << "\n";
+                        << "Ignoring update for unkown object " << do_id << " from client "
+                        << client->do_id_base << "\n";
                 return;
         }
         else
@@ -486,14 +470,14 @@ handle_client_delete_object( NetDatagram &datagram, DOID_TYPE do_id )
 
         _objects_by_zone_id[object->zone_id].erase( find( _objects_by_zone_id[object->zone_id].begin(),
                                                           _objects_by_zone_id[object->zone_id].end(), object ) );
-        if ( _objects_by_zone_id[object->zone_id].size() == ( size_t )0 )
+        if ( _objects_by_zone_id[object->zone_id].size() == (size_t)0 )
         {
                 _objects_by_zone_id.erase( _objects_by_zone_id.find( object->zone_id ) );
         }
 
         client->objects_by_zoneid[object->zone_id].erase( find( client->objects_by_zoneid[object->zone_id].begin(),
                                                                 client->objects_by_zoneid[object->zone_id].end(), object ) );
-        if ( client->objects_by_zoneid[object->zone_id].size() == ( size_t )0 )
+        if ( client->objects_by_zoneid[object->zone_id].size() == (size_t)0 )
         {
                 client->objects_by_zoneid.erase( client->objects_by_zoneid.find( object->zone_id ) );
         }
@@ -506,26 +490,25 @@ handle_client_delete_object( NetDatagram &datagram, DOID_TYPE do_id )
         delete object;
 }
 
-void ServerRepository::
-handle_client_object_set_zone( NetDatagram &datagram, DatagramIterator &dgi )
+void ServerRepository::handle_client_object_set_zone( NetDatagram &datagram, DatagramIterator &dgi )
 {
         serverRepository_cat.debug()
-                        << "handle_client_object_set_zone:\n";
+                << "handle_client_object_set_zone:\n";
         DOID_TYPE do_id = dgi.get_uint32();
         ZONEID_TYPE zone_id = dgi.get_uint32();
 
         serverRepository_cat.debug()
-                        << "\tdoId: " << do_id << "\n";
+                << "\tdoId: " << do_id << "\n";
         serverRepository_cat.debug()
-                        << "\tzoneId: " << zone_id << "\n";
+                << "\tzoneId: " << zone_id << "\n";
 
         PT( Connection ) connection = datagram.get_connection();
         Client *client = _clients_by_connection[connection];
-        Object *object = NULL;
+        Object *object = nullptr;
         if ( client->objects_by_doid.find( do_id ) == client->objects_by_doid.end() )
         {
                 serverRepository_cat.warning()
-                                << "Ignoring object location for " << do_id << ": unknown\n";
+                        << "Ignoring object location for " << do_id << ": unknown\n";
                 return;
         }
         else
@@ -536,8 +519,7 @@ handle_client_object_set_zone( NetDatagram &datagram, DatagramIterator &dgi )
         set_object_zone( client, object, zone_id );
 }
 
-void ServerRepository::
-set_object_zone( Client *owner, Object *object, ZONEID_TYPE zone_id )
+void ServerRepository::set_object_zone( Client *owner, Object *object, ZONEID_TYPE zone_id )
 {
         if ( object->zone_id == zone_id )
         {
@@ -549,7 +531,7 @@ set_object_zone( Client *owner, Object *object, ZONEID_TYPE zone_id )
         _objects_by_zone_id[object->zone_id].erase( find( _objects_by_zone_id[object->zone_id].begin(),
                                                           _objects_by_zone_id[object->zone_id].end(),
                                                           object ) );
-        if ( _objects_by_zone_id[object->zone_id].size() == ( size_t )0 )
+        if ( _objects_by_zone_id[object->zone_id].size() == (size_t)0 )
         {
                 _objects_by_zone_id.erase( _objects_by_zone_id.find( object->zone_id ) );
         }
@@ -557,7 +539,7 @@ set_object_zone( Client *owner, Object *object, ZONEID_TYPE zone_id )
         owner->objects_by_zoneid[object->zone_id].erase( find( owner->objects_by_zoneid[object->zone_id].begin(),
                                                                owner->objects_by_zoneid[object->zone_id].end(),
                                                                object ) );
-        if ( owner->objects_by_zoneid[object->zone_id].size() == ( size_t )0 )
+        if ( owner->objects_by_zoneid[object->zone_id].size() == (size_t)0 )
         {
                 owner->objects_by_zoneid.erase( owner->objects_by_zoneid.find( object->zone_id ) );
         }
@@ -587,8 +569,7 @@ set_object_zone( Client *owner, Object *object, ZONEID_TYPE zone_id )
 
 }
 
-void ServerRepository::
-send_do_id_range( Client *client )
+void ServerRepository::send_do_id_range( Client *client )
 {
         NetDatagram datagram;
         datagram.add_uint16( SET_DOID_RANGE_CMU );
@@ -601,26 +582,26 @@ send_do_id_range( Client *client )
 void ServerRepository::handle_client_disconnect( Client *client )
 {
         serverRepository_cat.debug()
-                        << "handle_client_disconnect:\n";
+                << "handle_client_disconnect:\n";
         serverRepository_cat.debug()
-                        << "\tdoIdBase: " << client->do_id_base << "\n";
+                << "\tdoIdBase: " << client->do_id_base << "\n";
         serverRepository_cat.debug()
-                        << "\townedObjects: " << client->objects_by_doid.size() << "\n";
+                << "\townedObjects: " << client->objects_by_doid.size() << "\n";
         serverRepository_cat.debug()
-                        << "\tinterestZones: " << client->current_interest_zone_ids.size() << endl;
+                << "\tinterestZones: " << client->current_interest_zone_ids.size() << endl;
         for ( size_t i = 0; i < client->current_interest_zone_ids.size(); i++ )
         {
                 ZONEID_TYPE zone_id = client->current_interest_zone_ids[i];
-                if ( _zones_to_clients[zone_id].size() == ( size_t )1 )
+                if ( _zones_to_clients[zone_id].size() == (size_t)1 )
                 {
                         serverRepository_cat.debug()
-                                        << "Deleting zone id" << zone_id << "\n";
+                                << "Deleting zone id" << zone_id << "\n";
                         _zones_to_clients.erase( _zones_to_clients.find( zone_id ) );
                 }
                 else
                 {
                         serverRepository_cat.debug()
-                                        << "Deleting the client from zone " << zone_id << "\n";
+                                << "Deleting the client from zone " << zone_id << "\n";
                         _zones_to_clients[zone_id].erase( find( _zones_to_clients[zone_id].begin(),
                                                                 _zones_to_clients[zone_id].end(),
                                                                 client ) );
@@ -633,77 +614,75 @@ void ServerRepository::handle_client_disconnect( Client *client )
 
                 Object *object = itr->second;
                 serverRepository_cat.debug()
-                                << "Creating object_delete_cmu datagram\n";
+                        << "Creating object_delete_cmu datagram\n";
                 serverRepository_cat.debug()
-                                << "do_id: " << object->do_id << "\n";
+                        << "do_id: " << object->do_id << "\n";
                 NetDatagram dg;
                 dg.add_uint16( OBJECT_DELETE_CMU );
                 dg.add_uint32( object->do_id );
                 serverRepository_cat.debug()
-                                << "Sending it out!" << endl;
+                        << "Sending it out!" << endl;
                 send_to_zone_except( object->zone_id, dg, ClientVec() );
 
                 serverRepository_cat.debug()
-                                << "Removing object from zone " << object->zone_id << "\n";
+                        << "Removing object from zone " << object->zone_id << "\n";
                 _objects_by_zone_id[object->zone_id].erase( find( _objects_by_zone_id[object->zone_id].begin(),
                                                                   _objects_by_zone_id[object->zone_id].end(),
                                                                   object ) );
                 serverRepository_cat.debug()
-                                << "done\n";
-                if ( _objects_by_zone_id[object->zone_id].size() == ( size_t )0 )
+                        << "done\n";
+                if ( _objects_by_zone_id[object->zone_id].size() == (size_t)0 )
                 {
                         serverRepository_cat.debug()
-                                        << "Removing object zone " << object->zone_id << "\n";
+                                << "Removing object zone " << object->zone_id << "\n";
                         _objects_by_zone_id.erase( _objects_by_zone_id.find( object->zone_id ) );
                 }
 
                 serverRepository_cat.debug()
-                                << "Deleting object struct!\n";
+                        << "Deleting object struct!\n";
 
                 // Free the memory allocated for this object struct.
                 delete object;
         }
 
         serverRepository_cat.debug()
-                        << "Clearing client object maps...\n";
+                << "Clearing client object maps...\n";
         client->objects_by_doid.clear();
         client->objects_by_zoneid.clear();
 
         serverRepository_cat.debug()
-                        << "Removing client from connection and doidbase maps...\n";
+                << "Removing client from connection and doidbase maps...\n";
         _clients_by_connection.erase( _clients_by_connection.find( client->connection ) );
         _clients_by_do_id_base.erase( _clients_by_do_id_base.find( client->do_id_base ) );
 
         uint32_t id = client->do_id_base / _do_id_range;
         serverRepository_cat.debug()
-                        << "Freeing id " << id << "\n";
+                << "Freeing id " << id << "\n";
         _id_alloc->free( id );
 
         serverRepository_cat.debug()
-                        << "Removing connection of reader and manager...\n";
+                << "Removing connection of reader and manager...\n";
         _qcr.remove_connection( client->connection );
         _qcm.close_connection( client->connection );
 
         on_client_disconnect( client->do_id_base );
 
         serverRepository_cat.debug()
-                        << "Deleting client struct.\n";
+                << "Deleting client struct.\n";
         // Free the memory allocated for this client struct.
         delete client;
 }
 
-void ServerRepository::
-on_client_disconnect( DOID_TYPE do_id_base )
+void ServerRepository::on_client_disconnect( DOID_TYPE do_id_base )
 {
         // If you want to do something when a client disconnnects, override
         // this function.
 }
 
-void ServerRepository::
-handle_client_set_interest( Client *client, DatagramIterator &dgi )
+void ServerRepository::handle_client_set_interest( Client *client, DatagramIterator &dgi )
 {
         serverRepository_cat.debug()
-                        << "handle_client_set_interest:\n";
+                << "handle_client_set_interest:\n";
 
         stringstream ss;
         vector<ZONEID_TYPE> zone_ids;
@@ -719,14 +698,13 @@ handle_client_set_interest( Client *client, DatagramIterator &dgi )
         }
 
         serverRepository_cat.debug()
-                        << "\tinterestZones: " << ss.str() << "\n";
+                << "\tinterestZones: " << ss.str() << "\n";
 
         client->explicit_interest_zone_ids = zone_ids;
         update_client_interest_zones( client );
 }
 
-void ServerRepository::
-update_client_interest_zones( Client *client )
+void ServerRepository::update_client_interest_zones( Client *client )
 {
         vector<ZONEID_TYPE> orig_zone_ids = client->current_interest_zone_ids;
         vector<ZONEID_TYPE> new_zone_ids = vector<ZONEID_TYPE>( client->explicit_interest_zone_ids );
@@ -743,7 +721,7 @@ update_client_interest_zones( Client *client )
         {
                 // No change.
                 serverRepository_cat.debug()
-                                << "No change in interests zones\n" << endl;
+                        << "No change in interests zones\n" << endl;
                 return;
         }
 
@@ -755,7 +733,7 @@ update_client_interest_zones( Client *client )
                 if ( find( orig_zone_ids.begin(), orig_zone_ids.end(), new_zone ) == orig_zone_ids.end() )
                 {
                         serverRepository_cat.debug()
-                                        << "Found new zone: " << new_zone << "\n";
+                                << "Found new zone: " << new_zone << "\n";
                         added_zone_ids.push_back( new_zone );
                 }
         }
@@ -766,7 +744,7 @@ update_client_interest_zones( Client *client )
                 if ( find( new_zone_ids.begin(), new_zone_ids.end(), old_zone ) == new_zone_ids.end() )
                 {
                         serverRepository_cat.debug()
-                                        << "Found old zone: " << old_zone << "\n";
+                                << "Found old zone: " << old_zone << "\n";
                         removed_zone_ids.push_back( old_zone );
                 }
         }
@@ -779,7 +757,7 @@ update_client_interest_zones( Client *client )
                 _zones_to_clients[zone_id].push_back( client );
 
                 serverRepository_cat.debug()
-                                << "Sending request generates\n" << endl;
+                        << "Sending request generates\n" << endl;
 
                 NetDatagram dg;
                 dg.add_uint16( REQUEST_GENERATES_CMU );
@@ -803,20 +781,19 @@ update_client_interest_zones( Client *client )
                         {
                                 Object *object = object_vec[m];
                                 serverRepository_cat.debug()
-                                                << "Adding do_id " << object->do_id << " to object_disable_cmu list.\n" << endl;
+                                        << "Adding do_id " << object->do_id << " to object_disable_cmu list.\n" << endl;
                                 dg.add_uint32( object->do_id );
                         }
                 }
         }
         serverRepository_cat.debug()
-                        << "Sending OBJECT_DISABLE_CMU\n" << endl;
+                << "Sending OBJECT_DISABLE_CMU\n" << endl;
         _cw.send( dg, client->connection );
 }
 
-AsyncTask::DoneStatus ServerRepository::
-client_dc_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus ServerRepository::client_dc_task( GenericAsyncTask *task, void *data )
 {
-        ServerRepository *sr = ( ServerRepository * )data;
+        ServerRepository *sr = (ServerRepository *)data;
         for ( ClientsByConnection::iterator itr = sr->_clients_by_connection.begin(); itr != sr->_clients_by_connection.end(); ++itr )
         {
                 Client *client = itr->second;
@@ -829,8 +806,7 @@ client_dc_task( GenericAsyncTask *task, void *data )
         return AsyncTask::DS_cont;
 }
 
-void ServerRepository::
-send_to_zone_except( ZONEID_TYPE zone_id, NetDatagram &datagram, ClientVec &exception_list )
+void ServerRepository::send_to_zone_except( ZONEID_TYPE zone_id, NetDatagram &datagram, ClientVec &exception_list )
 {
         if ( _zones_to_clients.find( zone_id ) != _zones_to_clients.end() )
         {
@@ -846,8 +822,7 @@ send_to_zone_except( ZONEID_TYPE zone_id, NetDatagram &datagram, ClientVec &exce
         }
 }
 
-void ServerRepository::
-send_to_all_except( NetDatagram &datagram, ClientVec &exception_list )
+void ServerRepository::send_to_all_except( NetDatagram &datagram, ClientVec &exception_list )
 {
 
         ClientVec clients;

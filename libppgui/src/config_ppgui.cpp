@@ -1,11 +1,11 @@
 #include "config_ppgui.h"
 
-#include "ppGuiImage.h"
-#include "ppGuiLabel.h"
-#include "ppGuiScheme.h"
-#include "ppGuiButton.h"
-#include "ppGuiScrollFrame.h"
-#include "ppGuiEntry.h"
+#include "ppguiimage.h"
+#include "ppguilabel.h"
+#include "ppguischeme.h"
+#include "ppguibutton.h"
+#include "ppguiscrollframe.h"
+#include "ppguientry.h"
 
 ConfigureDef( config_ppGui );
 ConfigureFn( config_ppGui )

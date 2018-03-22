@@ -10,8 +10,7 @@ Map MapLoader::_map;
 * Loads and sets up a map.
 * Make sure to call unload_map to clean up an already existing map before loading a new one.
 */
-void MapLoader::
-load_map( const string &file )
+void MapLoader::load_map( const string &file )
 {
 
         // Load the map model.
@@ -32,8 +31,7 @@ load_map( const string &file )
 /**
 * Unloads the current loaded map.
 */
-void MapLoader::
-unload_map()
+void MapLoader::unload_map()
 {
 
         // Disable all of the special objects.
@@ -49,8 +47,7 @@ unload_map()
         _map.reparent_to( g_hidden );
 }
 
-Map &MapLoader::
-get_map()
+Map &MapLoader::get_map()
 {
         return _map;
 }

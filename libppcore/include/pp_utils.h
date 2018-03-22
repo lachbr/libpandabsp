@@ -24,7 +24,7 @@ public:
         typedef void CallbackFunc( void * );
         typedef bool CancelFunc( void * );
 
-        FrameDelayedCall( const string &name, CallbackFunc *callback, void *data, int frames = 1, CancelFunc *cancelfunc = NULL );
+        FrameDelayedCall( const string &name, CallbackFunc *callback, void *data, int frames = 1, CancelFunc *cancelfunc = nullptr );
         FrameDelayedCall();
 
         void destroy();

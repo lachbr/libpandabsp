@@ -4,18 +4,16 @@
 
 NotifyCategoryDef( fsm, "" );
 
-FSM::
-FSM( const string &name ) :
+FSM::FSM( const string &name ) :
         _name( name ),
-        _curr_state( NULL )
+        _curr_state( nullptr )
 {
 }
 
-void FSM::
-request( const string &state_name )
+void FSM::request( const string &state_name )
 {
         // Find the state with this name.
-        StateDef *state = NULL;
+        StateDef *state = nullptr;
         for ( size_t i = 0; i < _states.size(); i++ )
         {
                 StateDef &s = _states[i];
@@ -26,20 +24,20 @@ request( const string &state_name )
                 }
         }
 
-        if ( state == NULL )
+        if ( state == nullptr )
         {
                 fsm_cat.warning()
-                                << "[" << _name << "] " << "request: No state named " << state_name << "\n";
+                        << "[" << _name << "] " << "request: No state named " << state_name << "\n";
                 return;
         }
 
-        if ( _curr_state != NULL )
+        if ( _curr_state != nullptr )
         {
                 if ( find( _curr_state->transitions.begin(), _curr_state->transitions.end(), state_name ) == _curr_state->transitions.end() &&
-                     _curr_state->transitions.size() > ( size_t )0 )
+                     _curr_state->transitions.size() > (size_t)0 )
                 {
                         fsm_cat.warning()
-                                        << "[" << _name << "] " << "request: No transition exists from state " << _curr_state->name << " to " << state->name << "\n";
+                                << "[" << _name << "] " << "request: No transition exists from state " << _curr_state->name << " to " << state->name << "\n";
                         return;
                 }
 
@@ -52,14 +50,12 @@ request( const string &state_name )
         ( *_curr_state->enter_func )( _curr_state->func_data );
 }
 
-const StateDef *FSM::
-get_current_state() const
+const StateDef *FSM::get_current_state() const
 {
         return _curr_state;
 }
 
-void FSM::
-add_state( StateDef def )
+void FSM::add_state( StateDef def )
 {
         for ( size_t i = 0; i < _states.size(); i++ )
         {
@@ -67,7 +63,7 @@ add_state( StateDef def )
                 if ( s.name.compare( def.name ) == 0 )
                 {
                         fsm_cat.warning()
-                                        << "[" << _name << "] add_state: State named " << def.name << " already exists. Aborting.\n";
+                                << "[" << _name << "] add_state: State named " << def.name << " already exists. Aborting.\n";
                         return;
                 }
         }

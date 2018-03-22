@@ -1,14 +1,12 @@
-#include "ppGuiScheme.h"
+#include "ppguischeme.h"
 
 TypeDef( GuiScheme );
 
-GuiScheme::
-GuiScheme( const string &name ) :
+GuiScheme::GuiScheme( const string &name ) :
         PGItem( name )
 {
 }
 
-GuiScheme::
-~GuiScheme()
+GuiScheme::~GuiScheme()
 {
 }

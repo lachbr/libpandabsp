@@ -75,10 +75,10 @@ public:
 
         string get_current_anim( const string &part );
 
-        void set_play_rate( float rate, const string &anim, const char *part = NULL );
+        void set_play_rate( float rate, const string &anim, const char *part = nullptr );
 
-        ControlMap get_anim_controls( const char *anim = NULL, const char *part = NULL,
-                                      const char *lod = NULL, bool allow_async_bind = true );
+        ControlMap get_anim_controls( const char *anim = nullptr, const char *part = nullptr,
+                                      const char *lod = nullptr, bool allow_async_bind = true );
 
 private:
         void get_part_joints( vector<PartGroup *> &joints, GlobPattern &pattern, PartGroup *pPartNode, PartSubset *sub, bool bIncluded );

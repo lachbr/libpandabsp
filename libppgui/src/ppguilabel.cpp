@@ -1,9 +1,8 @@
-#include "ppGuiLabel.h"
+#include "ppguilabel.h"
 
 TypeDef( GuiLabel );
 
-GuiLabel::
-GuiLabel( const string &name ) :
+GuiLabel::GuiLabel( const string &name ) :
         TextNode( name )
 {
 }

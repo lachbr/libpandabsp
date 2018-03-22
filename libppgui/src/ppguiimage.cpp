@@ -1,31 +1,27 @@
-#include "ppGuiImage.h"
+#include "ppguiimage.h"
 
 #include <texturePool.h>
 
 TypeDef( GuiImage );
 
-GuiImage::
-GuiImage( const string &name ) :
-        _tex( NULL ),
+GuiImage::GuiImage( const string &name ) :
+        _tex( nullptr ),
         _card( "ImageCard" ),
         PGItem( name )
 {
 }
 
-GuiImage::
-~GuiImage()
+GuiImage::~GuiImage()
 {
 }
 
-void GuiImage::
-set_image( const string &texpath )
+void GuiImage::set_image( const string &texpath )
 {
         PT( Texture ) tex = TexturePool::load_texture( texpath );
         set_image( tex );
 }
 
-void GuiImage::
-set_image( PT( Texture ) tex )
+void GuiImage::set_image( PT( Texture ) tex )
 {
         _tex = tex;
 
@@ -48,8 +44,7 @@ set_image( PT( Texture ) tex )
         pnp.set_transform( trans );
 }
 
-Texture *GuiImage::
-get_image() const
+Texture *GuiImage::get_image() const
 {
         return _tex;
 }

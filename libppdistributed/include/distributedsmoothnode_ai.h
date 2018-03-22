@@ -43,11 +43,11 @@ protected:
 
         DCFieldDefStart();
 
-        DCFieldDef( set_sm_stop, set_sm_stop_field, NULL );
+        DCFieldDef( set_sm_stop, set_sm_stop_field, nullptr );
         DCFieldDef( set_sm_pos, set_sm_pos_field, get_sm_pos_field );
         DCFieldDef( set_sm_hpr, set_sm_hpr_field, get_sm_hpr_field );
         DCFieldDef( set_curr_l, set_curr_l_field, get_curr_l_field );
-        DCFieldDef( clear_smoothing, clear_smoothing_field, NULL );
+        DCFieldDef( clear_smoothing, clear_smoothing_field, nullptr );
 
         DCFieldDefEnd();
 

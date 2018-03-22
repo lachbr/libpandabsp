@@ -1,7 +1,7 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
-#include "vifTokenizer.h"
+#include "viftokenizer.h"
 
 struct Property
 {
@@ -16,23 +16,19 @@ struct Object
         vector<Object> objects;
 };
 
-//static vector<Solid> solids;
-
-//template <class T>
-//void walk(int &current, TokenVec &tokens);
-
-//void parser(TokenVec &tokens);
-
-
-
 class EXPCL_VIF Parser
 {
 public:
         vector<Object> _base_objects;
         vector<Object> _all_objects;
+
+        static vector<Object> _global_base_objects;
+        static vector<Object> _global_all_objects;
+
         Parser( TokenVec &tokens );
         static bool has_property( Object &obj, const string &key );
         static string get_property_value( Object &obj, const string &key );
+        static vector<Property> get_properties( Object &obj );
         static vector<int> parse_num_list_str( string &str );
         static vector<float> parse_float_list_str( string &str );
         static vector<vector<int>> parse_int_tuple_list_str( string &str );
@@ -42,6 +38,7 @@ public:
         vector<Object> get_base_objects_with_name( const string &name );
         vector<Object> get_objects_with_name( Object &base_obj, const string &name );
         bool has_object_named( Object &base_obj, const string &name );
+        void make_objects_global();
 private:
 
         Property walk_prop();

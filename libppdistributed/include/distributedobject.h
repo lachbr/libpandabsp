@@ -69,7 +69,7 @@ public:
 
         DCFieldDefStart();
 
-        DCFieldDef( set_location, set_location_field, NULL );
+        DCFieldDef( set_location, set_location_field, nullptr );
 
         DCFieldDefEnd();
 

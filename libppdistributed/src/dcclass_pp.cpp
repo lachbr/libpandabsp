@@ -6,40 +6,35 @@
 #include <string>
 #include <vector>
 
-DCClassPP::
-DCClassPP( DCClass *dclass ) :
+DCClassPP::DCClassPP( DCClass *dclass ) :
         _dclass( dclass )
 {
 }
 
-void DCClassPP::
-set_obj_singleton( DistributedObjectBase *singleton )
+void DCClassPP::set_obj_singleton( DistributedObjectBase *singleton )
 {
         _obj_singleton = singleton;
 }
 
-DistributedObjectBase *DCClassPP::
-get_obj_singleton()
+DistributedObjectBase *DCClassPP::get_obj_singleton()
 {
         return _obj_singleton;
 }
 
-//DCFieldPP *DCClassPP::
-//get_field_by_index(int n) {
+//DCFieldPP *DCClassPP:://get_field_by_index(int n) {
 //
 //}
 
-void DCClassPP::
-receive_update( DistributedObjectBase *obj, DatagramIterator &di ) const
+void DCClassPP::receive_update( DistributedObjectBase *obj, DatagramIterator &di ) const
 {
         DCPacker packer;
-        const char *data = ( const char * )di.get_datagram().get_data();
+        const char *data = (const char *)di.get_datagram().get_data();
         packer.set_unpack_data( data + di.get_current_index(),
                                 di.get_remaining_size(), false );
 
         int field_id = packer.raw_unpack_uint16();
         DCFieldPP *field = get_field_wrapper( _dclass->get_field_by_index( field_id ) );
-        if ( field == ( DCFieldPP * )NULL )
+        if ( field == (DCFieldPP *)nullptr )
         {
                 return;
         }
@@ -54,11 +49,10 @@ receive_update( DistributedObjectBase *obj, DatagramIterator &di ) const
         di.skip_bytes( packer.get_num_unpacked_bytes() );
 }
 
-void DCClassPP::
-receive_update_broadcast_required( DistributedObjectBase *obj, DatagramIterator &di ) const
+void DCClassPP::receive_update_broadcast_required( DistributedObjectBase *obj, DatagramIterator &di ) const
 {
         DCPacker packer;
-        const char *data = ( const char * )di.get_datagram().get_data();
+        const char *data = (const char *)di.get_datagram().get_data();
         packer.set_unpack_data( data + di.get_current_index(),
                                 di.get_remaining_size(), false );
 
@@ -66,18 +60,18 @@ receive_update_broadcast_required( DistributedObjectBase *obj, DatagramIterator 
         for ( int i = 0; i < num_fields; i++ )
         {
                 DCField *dcfield = _dclass->get_inherited_field( i );
-                if ( dcfield == ( DCField * )NULL )
+                if ( dcfield == (DCField *)nullptr )
                 {
                         continue;
                 }
 
                 DCFieldPP *field = get_field_wrapper( dcfield );
-                if ( field == ( DCFieldPP * )NULL )
+                if ( field == (DCFieldPP *)nullptr )
                 {
                         continue;
                 }
 
-                if ( field->get_field()->as_molecular_field() == ( DCMolecularField * )NULL &&
+                if ( field->get_field()->as_molecular_field() == (DCMolecularField *)nullptr &&
                      field->get_field()->is_required() && field->get_field()->is_broadcast() )
                 {
                         packer.begin_unpack( field->get_field() );
@@ -87,7 +81,7 @@ receive_update_broadcast_required( DistributedObjectBase *obj, DatagramIterator 
                         if ( !packer.end_unpack() )
                         {
                                 cout << "DCClassPP ERROR (receive_update_broadcast_required): Unpack failed for "
-                                     << dcfield->get_name() << endl;
+                                        << dcfield->get_name() << endl;
                         }
                 }
         }
@@ -95,11 +89,10 @@ receive_update_broadcast_required( DistributedObjectBase *obj, DatagramIterator 
         di.skip_bytes( packer.get_num_unpacked_bytes() );
 }
 
-void DCClassPP::
-receive_update_broadcast_required_owner( DistributedObjectBase *obj, DatagramIterator &di ) const
+void DCClassPP::receive_update_broadcast_required_owner( DistributedObjectBase *obj, DatagramIterator &di ) const
 {
         DCPacker packer;
-        const char *data = ( const char * )di.get_datagram().get_data();
+        const char *data = (const char *)di.get_datagram().get_data();
         packer.set_unpack_data( data + di.get_current_index(),
                                 di.get_remaining_size(), false );
 
@@ -108,11 +101,11 @@ receive_update_broadcast_required_owner( DistributedObjectBase *obj, DatagramIte
         {
                 DCField *dcfield = _dclass->get_inherited_field( i );
                 DCFieldPP *field = get_field_wrapper( dcfield );
-                if ( field == ( DCFieldPP * )NULL )
+                if ( field == (DCFieldPP *)nullptr )
                 {
                         continue;
                 }
-                if ( field->get_field()->as_molecular_field() == ( DCMolecularField * )NULL &&
+                if ( field->get_field()->as_molecular_field() == (DCMolecularField *)nullptr &&
                      field->get_field()->is_required() )
                 {
                         packer.begin_unpack( field->get_field() );
@@ -131,7 +124,7 @@ receive_update_broadcast_required_owner( DistributedObjectBase *obj, DatagramIte
                         if ( !packer.end_unpack() )
                         {
                                 cout << "DCClassPP ERROR (receive_update_broadcast_required_owner): Unpack failed for "
-                                     << dcfield->get_name() << endl;
+                                        << dcfield->get_name() << endl;
                         }
                 }
         }
@@ -139,11 +132,10 @@ receive_update_broadcast_required_owner( DistributedObjectBase *obj, DatagramIte
         di.skip_bytes( packer.get_num_unpacked_bytes() );
 }
 
-void DCClassPP::
-receive_update_all_required( DistributedObjectBase *obj, DatagramIterator &di ) const
+void DCClassPP::receive_update_all_required( DistributedObjectBase *obj, DatagramIterator &di ) const
 {
         DCPacker packer;
-        const char *data = ( const char * )di.get_datagram().get_data();
+        const char *data = (const char *)di.get_datagram().get_data();
         packer.set_unpack_data( data + di.get_current_index(),
                                 di.get_remaining_size(), false );
 
@@ -152,11 +144,11 @@ receive_update_all_required( DistributedObjectBase *obj, DatagramIterator &di ) 
         {
                 DCField *dcfield = _dclass->get_inherited_field( i );
                 DCFieldPP *field = get_field_wrapper( dcfield );
-                if ( field == ( DCFieldPP * )NULL )
+                if ( field == (DCFieldPP *)nullptr )
                 {
                         continue;
                 }
-                if ( field->get_field()->as_molecular_field() == ( DCMolecularField * )NULL &&
+                if ( field->get_field()->as_molecular_field() == (DCMolecularField *)nullptr &&
                      field->get_field()->is_required() )
                 {
                         packer.begin_unpack( field->get_field() );
@@ -166,7 +158,7 @@ receive_update_all_required( DistributedObjectBase *obj, DatagramIterator &di ) 
                         if ( !packer.end_unpack() )
                         {
                                 cout << "DCClassPP ERROR (receive_update_all_required): Unpack failed for "
-                                     << dcfield->get_name() << endl;
+                                        << dcfield->get_name() << endl;
                         }
                 }
         }
@@ -174,8 +166,7 @@ receive_update_all_required( DistributedObjectBase *obj, DatagramIterator &di ) 
         di.skip_bytes( packer.get_num_unpacked_bytes() );
 }
 
-void DCClassPP::
-receive_update_other( DistributedObjectBase *obj, DatagramIterator &di ) const
+void DCClassPP::receive_update_other( DistributedObjectBase *obj, DatagramIterator &di ) const
 {
         int num_fields = di.get_uint16();
         for ( int i = 0; i < num_fields; ++i )
@@ -184,12 +175,11 @@ receive_update_other( DistributedObjectBase *obj, DatagramIterator &di ) const
         }
 }
 
-void DCClassPP::
-direct_update( DistributedObjectBase *obj, const string &field_name,
-               const string &value_blob )
+void DCClassPP::direct_update( DistributedObjectBase *obj, const string &field_name,
+                               const string &value_blob )
 {
         DCFieldPP *field = get_field_wrapper( _dclass->get_field_by_name( field_name ) );
-        nassertv_always( field != NULL );
+        nassertv_always( field != nullptr );
 
         DCPacker packer;
         packer.set_unpack_data( value_blob );
@@ -200,14 +190,12 @@ direct_update( DistributedObjectBase *obj, const string &field_name,
         packer.end_unpack();
 }
 
-void DCClassPP::
-direct_update( DistributedObjectBase *obj, const string &field_name, const Datagram &datagram )
+void DCClassPP::direct_update( DistributedObjectBase *obj, const string &field_name, const Datagram &datagram )
 {
         direct_update( obj, field_name, datagram.get_message() );
 }
 
-bool DCClassPP::
-pack_required_field( Datagram &dg, DistributedObjectBase *obj, const DCFieldPP *field ) const
+bool DCClassPP::pack_required_field( Datagram &dg, DistributedObjectBase *obj, const DCFieldPP *field ) const
 {
         DCPacker packer;
         packer.begin_pack( field->get_field() );
@@ -215,14 +203,14 @@ pack_required_field( Datagram &dg, DistributedObjectBase *obj, const DCFieldPP *
         if ( !pack_required_field( packer, obj, field ) )
         {
                 cout << "DCClassPP ERROR (pack_required_field): pack_required_field() failed for "
-                     << field->get_field()->get_name() << endl;
+                        << field->get_field()->get_name() << endl;
                 return false;
         }
         packer.pop();
         if ( !packer.end_pack() )
         {
                 cout << "DCClassPP ERROR (pack_required_field): end_pack() failed for "
-                     << field->get_field()->get_name() << endl;
+                        << field->get_field()->get_name() << endl;
                 return false;
         }
 
@@ -230,23 +218,22 @@ pack_required_field( Datagram &dg, DistributedObjectBase *obj, const DCFieldPP *
         return true;
 }
 
-bool DCClassPP::
-pack_required_field( DCPacker &packer, DistributedObjectBase *obj,
-                     const DCFieldPP *field ) const
+bool DCClassPP::pack_required_field( DCPacker &packer, DistributedObjectBase *obj,
+                                     const DCFieldPP *field ) const
 {
 
-        if ( field->get_field()->as_molecular_field() != ( DCMolecularField * )NULL )
+        if ( field->get_field()->as_molecular_field() != (DCMolecularField *)nullptr )
         {
                 cout << "DCClassPP ERROR (pack_required_field): " << field->get_field()->get_name()
-                     << "is a molecular field." << endl;
+                        << "is a molecular field." << endl;
                 return false;
         }
 
         DCFunc *func = field->get_getter_func();
-        if ( func == NULL )
+        if ( func == nullptr )
         {
                 cout << "DCClassPP ERROR (pack_required_field): Getter function for "
-                     << field->get_field()->get_name() << " is undefined." << endl;
+                        << field->get_field()->get_name() << " is undefined." << endl;
                 return false;
         }
 
@@ -256,11 +243,10 @@ pack_required_field( DCPacker &packer, DistributedObjectBase *obj,
         return true;
 }
 
-DCPacker DCClassPP::
-start_client_format_update( const string &field_name, uint32_t do_id ) const
+DCPacker DCClassPP::start_client_format_update( const string &field_name, uint32_t do_id ) const
 {
         DCFieldPP *field = get_field_wrapper( _dclass->get_field_by_name( field_name ) );
-        if ( field == ( DCFieldPP * )NULL )
+        if ( field == (DCFieldPP *)nullptr )
         {
                 cerr << "No wrapper field named " << field_name << " in class " << _dclass->get_name() << endl;
                 return DCPacker();
@@ -269,11 +255,10 @@ start_client_format_update( const string &field_name, uint32_t do_id ) const
         return field->start_client_format_update( do_id );
 }
 
-Datagram DCClassPP::
-end_client_format_update( const string &field_name, DCPacker &pack ) const
+Datagram DCClassPP::end_client_format_update( const string &field_name, DCPacker &pack ) const
 {
         DCFieldPP *field = get_field_wrapper( _dclass->get_field_by_name( field_name ) );
-        if ( field == ( DCFieldPP * )NULL )
+        if ( field == (DCFieldPP *)nullptr )
         {
                 cerr << "No wrapper field named " << field_name << " in class " << _dclass->get_name() << endl;
                 return Datagram();
@@ -282,12 +267,11 @@ end_client_format_update( const string &field_name, DCPacker &pack ) const
         return field->end_client_format_update( pack );
 }
 
-DCPacker DCClassPP::
-start_ai_format_update( const string &field_name, uint32_t do_id,
-                        uint32_t to_id, uint32_t from_id ) const
+DCPacker DCClassPP::start_ai_format_update( const string &field_name, uint32_t do_id,
+                                            uint32_t to_id, uint32_t from_id ) const
 {
         DCFieldPP *field = get_field_wrapper( _dclass->get_field_by_name( field_name ) );
-        if ( field == ( DCFieldPP * )NULL )
+        if ( field == (DCFieldPP *)nullptr )
         {
                 cerr << "No wrapper for field named " << field_name << " in class " << _dclass->get_name() << endl;
                 return DCPacker();
@@ -296,11 +280,10 @@ start_ai_format_update( const string &field_name, uint32_t do_id,
         return field->start_ai_format_update( do_id, to_id, from_id );
 }
 
-Datagram DCClassPP::
-end_ai_format_update( const string &field_name, DCPacker &pack ) const
+Datagram DCClassPP::end_ai_format_update( const string &field_name, DCPacker &pack ) const
 {
         DCFieldPP *field = get_field_wrapper( _dclass->get_field_by_name( field_name ) );
-        if ( field == ( DCFieldPP * )NULL )
+        if ( field == (DCFieldPP *)nullptr )
         {
                 cerr << "No wrapper for field named " << field_name << " in class " << _dclass->get_name() << endl;
                 return Datagram();
@@ -309,12 +292,11 @@ end_ai_format_update( const string &field_name, DCPacker &pack ) const
         return field->end_ai_format_update( pack );
 }
 
-DCPacker DCClassPP::
-start_ai_format_update_msg_type( const string &field_name, uint32_t do_id,
-                                 uint32_t to_id, uint32_t from_id, int msgtype ) const
+DCPacker DCClassPP::start_ai_format_update_msg_type( const string &field_name, uint32_t do_id,
+                                                     uint32_t to_id, uint32_t from_id, int msgtype ) const
 {
         DCFieldPP *field = get_field_wrapper( _dclass->get_field_by_name( field_name ) );
-        if ( field == ( DCFieldPP * )NULL )
+        if ( field == (DCFieldPP *)nullptr )
         {
                 cerr << "No wrapper for field named " << field_name << " in class " << _dclass->get_name() << endl;
                 return DCPacker();
@@ -323,11 +305,10 @@ start_ai_format_update_msg_type( const string &field_name, uint32_t do_id,
         return field->start_ai_format_update_msg_type( do_id, to_id, from_id, msgtype );
 }
 
-Datagram DCClassPP::
-end_ai_format_update_msg_type( const string &field_name, DCPacker &packer ) const
+Datagram DCClassPP::end_ai_format_update_msg_type( const string &field_name, DCPacker &packer ) const
 {
         DCFieldPP *field = get_field_wrapper( _dclass->get_field_by_name( field_name ) );
-        if ( field == ( DCFieldPP * )NULL )
+        if ( field == (DCFieldPP *)nullptr )
         {
                 cerr << "No field named " << field_name << " in class " << _dclass->get_name() << endl;
                 return Datagram();
@@ -336,9 +317,8 @@ end_ai_format_update_msg_type( const string &field_name, DCPacker &packer ) cons
         return field->end_ai_format_update_msg_type( packer );
 }
 
-Datagram DCClassPP::
-ai_format_generate( DistributedObjectBase *obj, DOID_TYPE do_id, DOID_TYPE parent_id,
-                    ZONEID_TYPE zone_id, CHANNEL_TYPE dist_chan_id, CHANNEL_TYPE from_chan_id ) const
+Datagram DCClassPP::ai_format_generate( DistributedObjectBase *obj, DOID_TYPE do_id, DOID_TYPE parent_id,
+                                        ZONEID_TYPE zone_id, CHANNEL_TYPE dist_chan_id, CHANNEL_TYPE from_chan_id ) const
 {
         DCPacker packer;
 
@@ -359,11 +339,11 @@ ai_format_generate( DistributedObjectBase *obj, DOID_TYPE do_id, DOID_TYPE paren
         {
                 DCField *dcfield = _dclass->get_inherited_field( i );
                 DCFieldPP *field = get_field_wrapper( dcfield );
-                if ( field == ( DCFieldPP * )NULL )
+                if ( field == (DCFieldPP *)nullptr )
                 {
                         continue;
                 }
-                if ( field->get_field()->is_required() && field->get_field()->as_molecular_field() == NULL )
+                if ( field->get_field()->is_required() && field->get_field()->as_molecular_field() == nullptr )
                 {
                         // This is a required field. It should have a getter defined.
                         packer.begin_pack( field->get_field() );
@@ -372,7 +352,7 @@ ai_format_generate( DistributedObjectBase *obj, DOID_TYPE do_id, DOID_TYPE paren
                         if ( !pack_required_field( packer, obj, field ) )
                         {
                                 cout << "DCClassPP ERROR (ai_format_generate): pack_required_field() failed for "
-                                     << field->get_field()->get_name() << endl;
+                                        << field->get_field()->get_name() << endl;
                                 return Datagram();
                         }
                         packer.pop();
@@ -386,13 +366,12 @@ ai_format_generate( DistributedObjectBase *obj, DOID_TYPE do_id, DOID_TYPE paren
 /**
 * Find the wrapper of this DCField.
 */
-DCFieldPP *DCClassPP::
-get_field_wrapper( DCField *field ) const
+DCFieldPP *DCClassPP::get_field_wrapper( DCField *field ) const
 {
-        // Give us NULL? You get NULL.
-        if ( field == NULL )
+        // Give us nullptr? You get nullptr.
+        if ( field == nullptr )
         {
-                return NULL;
+                return nullptr;
         }
 
         for ( size_t i = 0; i < _pp_fields.size(); i++ )
@@ -404,17 +383,15 @@ get_field_wrapper( DCField *field ) const
                 }
         }
 
-        return NULL;
+        return nullptr;
 }
 
-DCClass *DCClassPP::
-get_dclass() const
+DCClass *DCClassPP::get_dclass() const
 {
         return _dclass;
 }
 
-void DCClassPP::
-add_ppfield( DCFieldPP *ppfield )
+void DCClassPP::add_ppfield( DCFieldPP *ppfield )
 {
         if ( find( _pp_fields.begin(), _pp_fields.end(), ppfield ) != _pp_fields.end() )
         {
@@ -424,9 +401,8 @@ add_ppfield( DCFieldPP *ppfield )
         _pp_fields.push_back( ppfield );
 }
 
-Datagram DCClassPP::
-client_format_generate_cmu( DistributedObjectBase *obj, DOID_TYPE do_id,
-                            ZONEID_TYPE zone_id, pvector<string> &optional_fields )
+Datagram DCClassPP::client_format_generate_cmu( DistributedObjectBase *obj, DOID_TYPE do_id,
+                                                ZONEID_TYPE zone_id, pvector<string> &optional_fields )
 {
         DCPacker packer;
         packer.raw_pack_uint16( CLIENT_OBJECT_GENERATE_CMU );
@@ -439,14 +415,14 @@ client_format_generate_cmu( DistributedObjectBase *obj, DOID_TYPE do_id,
         for ( int i = 0; i < num_fields; i++ )
         {
                 DCFieldPP *field = get_field_wrapper( get_dclass()->get_inherited_field( i ) );
-                if ( field->get_field()->is_required() && field->get_field()->as_molecular_field() == NULL )
+                if ( field->get_field()->is_required() && field->get_field()->as_molecular_field() == nullptr )
                 {
                         packer.begin_pack( field->get_field() );
                         packer.push();
                         if ( !pack_required_field( packer, obj, field ) )
                         {
                                 cout << "DCClassPP ERROR (client_format_generate_cmu): pack_required_field() failed for "
-                                     << field->get_field()->get_name() << endl;
+                                        << field->get_field()->get_name() << endl;
                                 return Datagram();
                         }
                         packer.pop();
@@ -459,7 +435,7 @@ client_format_generate_cmu( DistributedObjectBase *obj, DOID_TYPE do_id,
         {
                 string field_name = optional_fields[i];
                 DCField *dc_field = get_dclass()->get_field_by_name( field_name );
-                if ( dc_field == NULL )
+                if ( dc_field == nullptr )
                 {
                         ostringstream ss;
                         ss << "No field named " << field_name << " in class " << get_dclass()->get_name() << "\n";
@@ -473,7 +449,7 @@ client_format_generate_cmu( DistributedObjectBase *obj, DOID_TYPE do_id,
                 if ( !pack_required_field( packer, obj, field ) )
                 {
                         cout << "DCClassPP ERROR (client_format_generate_cmu): pack_required_field() failed for "
-                             << field->get_field()->get_name() << endl;
+                                << field->get_field()->get_name() << endl;
                         return Datagram();
                 }
                 packer.pop();

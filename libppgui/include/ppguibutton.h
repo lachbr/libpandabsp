@@ -4,12 +4,12 @@
 #include <pgButton.h>
 
 #include "config_ppgui.h"
-
-#include <pp_utils.h>
-
+#include "pp_utils.h"
 
 class EXPCL_PPGUI PPGuiButton : public PGButton
 {
+        TypeDecl( PPGuiButton, PGButton );
+
 public:
         PPGuiButton( const string &name );
 
@@ -50,6 +50,8 @@ public:
 
         void setup();
 
+        void set_click_event( const string &event );
+
 private:
         NodePath make_card( PT( Texture ) tex );
         void setup_text();
@@ -57,6 +59,7 @@ private:
         void attach_text_to_state_nodes();
         void remove_text_from_state_nodes();
 
+private:
         bool _setup;
 
         bool _fit_to_text;
@@ -93,7 +96,7 @@ private:
         LPoint3f _text2_pos;
         LPoint3f _text3_pos;
 
-        TypeDecl( PPGuiButton, PGButton );
+        string _click_event;
 };
 
 #endif // PPGUIBUTTON_H

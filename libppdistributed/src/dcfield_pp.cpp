@@ -12,32 +12,27 @@ DCFieldPP::DCFieldPP( DCAtomicField *field ) :
 {
 }
 
-void DCFieldPP::
-set_setter_func( DCFunc *func )
+void DCFieldPP::set_setter_func( DCFunc *func )
 {
         _set_func = func;
 }
 
-DCFunc *DCFieldPP::
-get_setter_func()
+DCFunc *DCFieldPP::get_setter_func()
 {
         return _set_func;
 }
 
-void DCFieldPP::
-set_getter_func( DCFunc *func )
+void DCFieldPP::set_getter_func( DCFunc *func )
 {
         _get_func = func;
 }
 
-DCFunc *DCFieldPP::
-get_getter_func() const
+DCFunc *DCFieldPP::get_getter_func() const
 {
         return _get_func;
 }
 
-DCPacker DCFieldPP::
-start_client_format_update( uint32_t do_id )
+DCPacker DCFieldPP::start_client_format_update( uint32_t do_id )
 {
         DCPacker packer;
         packer.raw_pack_uint16( CLIENT_OBJECT_SET_FIELD );
@@ -48,8 +43,7 @@ start_client_format_update( uint32_t do_id )
         return packer;
 }
 
-Datagram DCFieldPP::
-end_client_format_update( DCPacker &packer )
+Datagram DCFieldPP::end_client_format_update( DCPacker &packer )
 {
         packer.pop();
         bool result = packer.end_pack();
@@ -61,8 +55,7 @@ end_client_format_update( DCPacker &packer )
         return Datagram( packer.get_data(), packer.get_length() );
 }
 
-DCPacker DCFieldPP::
-start_ai_format_update( uint32_t do_id, uint32_t to_id, uint32_t from_id )
+DCPacker DCFieldPP::start_ai_format_update( uint32_t do_id, uint32_t to_id, uint32_t from_id )
 {
         DCPacker packer;
         packer.raw_pack_uint8( 1 );
@@ -76,15 +69,13 @@ start_ai_format_update( uint32_t do_id, uint32_t to_id, uint32_t from_id )
         return packer;
 }
 
-Datagram DCFieldPP::
-end_ai_format_update( DCPacker &packer )
+Datagram DCFieldPP::end_ai_format_update( DCPacker &packer )
 {
         // It does the same thing.
         return end_client_format_update( packer );
 }
 
-DCPacker DCFieldPP::
-start_ai_format_update_msg_type( uint32_t do_id, uint32_t to_id, uint32_t from_id, int msgtype )
+DCPacker DCFieldPP::start_ai_format_update_msg_type( uint32_t do_id, uint32_t to_id, uint32_t from_id, int msgtype )
 {
         DCPacker packer;
         packer.raw_pack_uint8( 1 );
@@ -98,14 +89,12 @@ start_ai_format_update_msg_type( uint32_t do_id, uint32_t to_id, uint32_t from_i
         return packer;
 }
 
-Datagram DCFieldPP::
-end_ai_format_update_msg_type( DCPacker &packer )
+Datagram DCFieldPP::end_ai_format_update_msg_type( DCPacker &packer )
 {
         return end_client_format_update( packer );
 }
 
-DCAtomicField *DCFieldPP::
-get_field() const
+DCAtomicField *DCFieldPP::get_field() const
 {
         return _field;
 }

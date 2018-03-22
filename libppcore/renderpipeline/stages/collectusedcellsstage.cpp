@@ -3,29 +3,25 @@
 
 #include "..\..\pp_globals.h"
 
-vector_string CollectUsedCellsStage::
-get_required_inputs()
+vector_string CollectUsedCellsStage::get_required_inputs()
 {
         vector_string vec;
         return vec;
 }
 
-vector_string CollectUsedCellsStage::
-get_required_pipes()
+vector_string CollectUsedCellsStage::get_required_pipes()
 {
         vector_string vec;
         vec.push_back( "FlaggedCells" );
         return vec;
 }
 
-CollectUsedCellsStage::
-CollectUsedCellsStage() :
+CollectUsedCellsStage::CollectUsedCellsStage() :
         RenderStage()
 {
 }
 
-void CollectUsedCellsStage::
-create()
+void CollectUsedCellsStage::create()
 {
         _target = create_target( "CollectUsedCells" );
         _target->set_size( LVecBase2i( 0, 0 ) );
@@ -38,23 +34,20 @@ create()
         _target->set_shader_input( new ShaderInput( "CellListIndices", _cell_index_buffer ) );
 }
 
-void CollectUsedCellsStage::
-bind()
+void CollectUsedCellsStage::bind()
 {
         set_shader_input( new ShaderInput( "FlaggedCells", rpipeline->get_light_mgr()->_flag_cells_stage->_cell_grid_flags ) );
 
         bind_to_commons();
 }
 
-void CollectUsedCellsStage::
-update()
+void CollectUsedCellsStage::update()
 {
         _cell_list_buffer->clear_image();
         _cell_index_buffer->clear_image();
 }
 
-void CollectUsedCellsStage::
-set_dimensions()
+void CollectUsedCellsStage::set_dimensions()
 {
         LVecBase2i tile_amt = rpipeline->get_light_mgr()->get_num_tiles();
         int num_slices = rp_lighting_culling_grid_slices;
@@ -71,8 +64,7 @@ set_dimensions()
         _target->set_size( tile_amt );
 }
 
-void CollectUsedCellsStage::
-reload_shaders()
+void CollectUsedCellsStage::reload_shaders()
 {
         _target->set_shader( load_shader( "shader/collect_used_cells.frag.glsl" ) );
 }

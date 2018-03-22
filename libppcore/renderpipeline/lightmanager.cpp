@@ -2,13 +2,11 @@
 
 #include "..\pp_globals.h"
 
-LightManager::
-LightManager()
+LightManager::LightManager()
 {
 }
 
-void LightManager::
-init()
+void LightManager::init()
 {
         compute_tile_size();
         init_internal_mgr();
@@ -17,50 +15,42 @@ init()
         init_stages();
 }
 
-int LightManager::
-get_total_tiles() const
+int LightManager::get_total_tiles() const
 {
         return _num_tiles.get_x() * _num_tiles.get_y() * rp_lighting_culling_grid_slices;
 }
 
-LVecBase2i LightManager::
-get_num_tiles() const
+LVecBase2i LightManager::get_num_tiles() const
 {
         return _num_tiles;
 }
 
-LVecBase2i LightManager::
-get_tile_size() const
+LVecBase2i LightManager::get_tile_size() const
 {
         return _tile_size;
 }
 
-int LightManager::
-get_num_lights() const
+int LightManager::get_num_lights() const
 {
         return _light_mgr.get_num_lights();
 }
 
-int LightManager::
-get_num_shadow_sources() const
+int LightManager::get_num_shadow_sources() const
 {
         return _light_mgr.get_num_shadow_sources();
 }
 
-PN_stdfloat LightManager::
-get_shadow_atlas_coverage() const
+PN_stdfloat LightManager::get_shadow_atlas_coverage() const
 {
         return _light_mgr.get_shadow_manager()->get_atlas()->get_coverage() * 100.0;
 }
 
-void LightManager::
-reload_shaders()
+void LightManager::reload_shaders()
 {
         _cmd_queue.reload_shaders();
 }
 
-void LightManager::
-compute_tile_size()
+void LightManager::compute_tile_size()
 {
         _tile_size = LVecBase2i( rp_lighting_culling_grid_size_x,
                                  rp_lighting_culling_grid_size_y );
@@ -69,8 +59,7 @@ compute_tile_size()
         _num_tiles = LVecBase2i( num_tiles_x, num_tiles_y );
 }
 
-void LightManager::
-init_command_queue()
+void LightManager::init_command_queue()
 {
         _cmd_queue.init();
         _cmd_queue.register_input( new ShaderInput( "LightData", _img_light_data ) );
@@ -78,8 +67,7 @@ init_command_queue()
         _light_mgr.set_command_list( _cmd_queue.get_command_list() );
 }
 
-void LightManager::
-init_shadow_mgr()
+void LightManager::init_shadow_mgr()
 {
         _shadow_mgr = new ShadowManager();
         _shadow_mgr->set_max_updates( rp_shadow_max_updates );
@@ -89,8 +77,7 @@ init_shadow_mgr()
         _light_mgr.set_shadow_manager( _shadow_mgr );
 }
 
-void LightManager::
-init_stages()
+void LightManager::init_stages()
 {
 
         _flag_cells_stage = new FlagUsedCellsStage();
@@ -110,15 +97,13 @@ init_stages()
         rpipeline->add_stage( _shadow_stage );
 }
 
-void LightManager::
-init_shadows()
+void LightManager::init_shadows()
 {
         _shadow_mgr->set_atlas_graphics_output( _shadow_stage->get_atlas_buffer() );
         _shadow_mgr->init();
 }
 
-void LightManager::
-init_internal_mgr()
+void LightManager::init_internal_mgr()
 {
         _light_mgr.set_shadow_update_distance( rp_shadow_update_distance );
 
@@ -134,8 +119,7 @@ init_internal_mgr()
         _img_source_data->clear_image();
 }
 
-void LightManager::
-update()
+void LightManager::update()
 {
         _light_mgr.set_camera_pos( base->_window->get_camera_group().get_pos( render ) );
         _light_mgr.update();
@@ -143,14 +127,12 @@ update()
         _cmd_queue.process_queue();
 }
 
-void LightManager::
-add_light( RPLight *light )
+void LightManager::add_light( RPLight *light )
 {
         _light_mgr.add_light( light );
 }
 
-void LightManager::
-remove_light( RPLight *light )
+void LightManager::remove_light( RPLight *light )
 {
         _light_mgr.remove_light( light );
 }

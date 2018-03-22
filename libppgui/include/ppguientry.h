@@ -1,7 +1,7 @@
 #include <pgEntry.h>
 
 #include "config_ppgui.h"
-#include <pp_utils.h>
+#include "pp_utils.h"
 
 class EXPCL_PPGUI PPGuiEntry : public PGEntry
 {

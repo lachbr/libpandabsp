@@ -1,39 +1,34 @@
 #include "do_hierarchy.h"
 #include "distributedobject_base.h"
 
-DoHierarchy::
-DoHierarchy()
+DoHierarchy::DoHierarchy()
 {
 }
 
-bool DoHierarchy::
-is_empty() const
+bool DoHierarchy::is_empty() const
 {
         return ( _table.size() == 0 && _all_do_ids.size() == 0 );
 }
 
-size_t DoHierarchy::
-get_length() const
+size_t DoHierarchy::get_length() const
 {
         return _all_do_ids.size();
 }
 
-void DoHierarchy::
-clear()
+void DoHierarchy::clear()
 {
         _table.clear();
         _all_do_ids.clear();
 }
 
-void DoHierarchy::
-store_object_location( DistributedObjectBase *dobj, DOID_TYPE parentid, ZONEID_TYPE zone )
+void DoHierarchy::store_object_location( DistributedObjectBase *dobj, DOID_TYPE parentid, ZONEID_TYPE zone )
 {
         DOID_TYPE doid = dobj->get_do_id();
         if ( find( _all_do_ids.begin(), _all_do_ids.end(), doid ) != _all_do_ids.end() )
         {
                 cerr << "storeObjectLocation(" << dobj->get_type().get_name() << " " << doid
-                     << ") already in _all_doids; duplicate generate()? or didn't cleanup previous instance of DO?"
-                     << endl;
+                        << ") already in _all_doids; duplicate generate()? or didn't cleanup previous instance of DO?"
+                        << endl;
                 return;
         }
 
@@ -45,15 +40,14 @@ store_object_location( DistributedObjectBase *dobj, DOID_TYPE parentid, ZONEID_T
         _table[parentid] = parentzonedict;
 }
 
-void DoHierarchy::
-delete_object_location( DistributedObjectBase *dobj, DOID_TYPE parentid, ZONEID_TYPE zone )
+void DoHierarchy::delete_object_location( DistributedObjectBase *dobj, DOID_TYPE parentid, ZONEID_TYPE zone )
 {
         DOID_TYPE doid = dobj->get_do_id();
         if ( find( _all_do_ids.begin(), _all_do_ids.end(), doid ) != _all_do_ids.end() )
         {
                 cerr << "storeObjectLocation(" << dobj->get_type().get_name() << " " << doid
-                     << ") already in _all_doids; duplicate generate()? or didn't cleanup previous instance of DO?"
-                     << endl;
+                        << ") already in _all_doids; duplicate generate()? or didn't cleanup previous instance of DO?"
+                        << endl;
                 return;
         }
 

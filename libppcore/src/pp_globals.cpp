@@ -3,14 +3,14 @@
 #define EMPTY_NP NodePath()
 
 // Give the global variables default values. They should be set later on by code that links with PandaPlus.
-WindowFramework *g_window = ( WindowFramework * )NULL;
-PandaFramework *g_framework = ( PandaFramework * )NULL;
-PT( AudioManager ) g_music_mgr = ( PT( AudioManager ) )NULL;
-PT( AudioManager ) g_sfx_mgr = ( PT( AudioManager ) )NULL;
-ClientRepository *g_cr = ( ClientRepository * )NULL;
-ClientRepository *g_air = ( ClientRepository * )NULL;
-Audio3DManager *g_audio3d = ( Audio3DManager * )NULL;
-PPBase *g_base = ( PPBase * )NULL;
+WindowFramework *g_window = nullptr;
+PandaFramework *g_framework = nullptr;
+PT( AudioManager ) g_music_mgr = nullptr;
+PT( AudioManager ) g_sfx_mgr = nullptr;
+ClientRepository *g_cr = nullptr;
+ClientRepository *g_air = nullptr;
+Audio3DManager *g_audio3d = nullptr;
+PPBase *g_base = nullptr;
 NodePath g_render = EMPTY_NP;
 NodePath g_hidden = EMPTY_NP;
 NodePath g_render2d = EMPTY_NP;

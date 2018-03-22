@@ -4,43 +4,37 @@
 
 TypeDef( DevshotCamera );
 
-DevshotCamera::
-DevshotCamera( const string &name ) :
+DevshotCamera::DevshotCamera( const string &name ) :
         PandaNode( name ),
         _fov( 0.0 )
 {
 }
 
-void DevshotCamera::
-set_fov( PN_stdfloat fov )
+void DevshotCamera::set_fov( PN_stdfloat fov )
 {
         _fov = fov;
 }
 
-PN_stdfloat DevshotCamera::
-get_fov() const
+PN_stdfloat DevshotCamera::get_fov() const
 {
         return _fov;
 }
 
 ///////////////////////////// BAM STUFF ////////////////////////////////
 
-void DevshotCamera::
-register_with_read_factory()
+void DevshotCamera::register_with_read_factory()
 {
         BamReader::get_factory()->register_factory( get_class_type(), make_from_bam );
 }
 
-void DevshotCamera::
-write_datagram( BamWriter *manager, Datagram &dg )
+void DevshotCamera::write_datagram( BamWriter *manager, Datagram &dg )
 {
         PandaNode::write_datagram( manager, dg );
 
         dg.add_stdfloat( _fov );
 }
 
-TypedWritable *DevshotCamera::
-make_from_bam( const FactoryParams &params )
+TypedWritable *DevshotCamera::make_from_bam( const FactoryParams &params )
 {
         DevshotCamera *node = new DevshotCamera( "" );
         DatagramIterator scan;
@@ -52,8 +46,7 @@ make_from_bam( const FactoryParams &params )
         return node;
 }
 
-void DevshotCamera::
-fillin( DatagramIterator &scan, BamReader *manager )
+void DevshotCamera::fillin( DatagramIterator &scan, BamReader *manager )
 {
         PandaNode::fillin( scan, manager );
 

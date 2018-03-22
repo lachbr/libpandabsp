@@ -2,16 +2,14 @@
 
 #include "..\..\pp_globals.h"
 
-vector_string CullLightsStage::
-get_required_inputs()
+vector_string CullLightsStage::get_required_inputs()
 {
         vector_string vec;
         vec.push_back( "CellListBuffer" );
         return vec;
 }
 
-vector_string CullLightsStage::
-get_required_pipes()
+vector_string CullLightsStage::get_required_pipes()
 {
         vector_string vec;
         vec.push_back( "AllLightsData" );
@@ -19,16 +17,14 @@ get_required_pipes()
         return vec;
 }
 
-CullLightsStage::
-CullLightsStage() :
+CullLightsStage::CullLightsStage() :
         RenderStage()
 {
         _cull_threads = 32;
         _num_light_classes = 4;
 }
 
-void CullLightsStage::
-create()
+void CullLightsStage::create()
 {
         _target = create_target( "GetVisibleLights" );
         _target->set_size( LVecBase2i( 16, 16 ) );
@@ -69,8 +65,7 @@ create()
         _target_group->set_shader_input( new ShaderInput( "theadCount", 1 ) );
 }
 
-void CullLightsStage::
-bind()
+void CullLightsStage::bind()
 {
         set_shader_input( new ShaderInput( "CellListBuffer", rpipeline->get_light_mgr()->_collect_cells_stage->_cell_list_buffer ) );
         set_shader_input( new ShaderInput( "AllLightsData", rpipeline->get_light_mgr()->_img_light_data ) );
@@ -79,22 +74,19 @@ bind()
         bind_to_commons();
 }
 
-void CullLightsStage::
-reload_shaders()
+void CullLightsStage::reload_shaders()
 {
         _target_cull->set_shader( load_shader( "shader/tiled_culling.vert.glsl", "shader/cull_lights.frag.glsl" ) );
         _target_group->set_shader( load_shader( "shader/tiled_culling.vert.glsl", "shader/group_lights.frag.glsl" ) );
         _target->set_shader( load_shader( "shader/view_frustum_cell.frag.glsl" ) );
 }
 
-void CullLightsStage::
-update()
+void CullLightsStage::update()
 {
         _frustum_lights_ctr->clear_image();
 }
 
-void CullLightsStage::
-set_dimensions()
+void CullLightsStage::set_dimensions()
 {
         int max_cells = rpipeline->get_light_mgr()->get_total_tiles();
         int num_rows_threaded = ( int )ceil( ( max_cells * _cull_threads ) / ( float )rp_lighting_culling_slice_width );

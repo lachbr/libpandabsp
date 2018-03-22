@@ -1,11 +1,11 @@
 #include "do_interestmanager.h"
-#include <throw_event.h>
 #include "distributedobject.h"
 
-InterestState::
-InterestState( const string &desc, InterestState::State state, int context,
-               const string &event, DOID_TYPE parentid, vector<ZONEID_TYPE> zones,
-               int &event_counter, bool isauto ) :
+#include <throw_event.h>
+
+InterestState::InterestState( const string &desc, InterestState::State state, int context,
+                              const string &event, DOID_TYPE parentid, vector<ZONEID_TYPE> zones,
+                              int &event_counter, bool isauto ) :
         _event_counter( event_counter )
 {
 
@@ -21,83 +21,70 @@ InterestState( const string &desc, InterestState::State state, int context,
         _auto = isauto;
 }
 
-void InterestState::
-set_state( State state )
+void InterestState::set_state( State state )
 {
         _state = state;
 }
 
-InterestState::State InterestState::
-get_state() const
+InterestState::State InterestState::get_state() const
 {
         return _state;
 }
 
-void InterestState::
-set_context_id( int context )
+void InterestState::set_context_id( int context )
 {
         _context = context;
 }
 
-int InterestState::
-get_context_id() const
+int InterestState::get_context_id() const
 {
         return _context;
 }
 
-void InterestState::
-set_desc( const string &desc )
+void InterestState::set_desc( const string &desc )
 {
         _desc = desc;
 }
 
-string InterestState::
-get_desc() const
+string InterestState::get_desc() const
 {
         return _desc;
 }
 
-void InterestState::
-set_parent_id( DOID_TYPE parentid )
+void InterestState::set_parent_id( DOID_TYPE parentid )
 {
         _parent_id = parentid;
 }
 
-DOID_TYPE InterestState::
-get_parent_id() const
+DOID_TYPE InterestState::get_parent_id() const
 {
         return _parent_id;
 }
 
-void InterestState::
-set_zones( vector<ZONEID_TYPE> zones )
+void InterestState::set_zones( vector<ZONEID_TYPE> zones )
 {
         _zones = zones;
 }
 
-void InterestState::
-add_event( const string &event )
+void InterestState::add_event( const string &event )
 {
         _events.push_back( event );
         _event_counter++;
 }
 
-vector<string> InterestState::
-get_events() const
+vector<string> InterestState::get_events() const
 {
         return _events;
 }
 
-void InterestState::
-clear_events()
+void InterestState::clear_events()
 {
         _event_counter -= _events.size();
         nassertv( _event_counter >= 0 );
         _events.clear();
 }
 
-void InterestState::
-send_events()
+void InterestState::send_events()
 {
         for ( size_t i = 0; i < _events.size(); i++ )
         {
@@ -106,8 +93,7 @@ send_events()
         clear_events();
 }
 
-bool InterestState::
-is_pending_delete() const
+bool InterestState::is_pending_delete() const
 {
         return _state == IS_pending_del;
 }
@@ -125,8 +111,7 @@ int DoInterestManager::_serial_num = PPUtils::serial_num();
 
 NotifyCategoryDef( doInterestManager, "" );
 
-DoInterestManager::
-DoInterestManager()
+DoInterestManager::DoInterestManager()
 {
         _add_interest_event = PPUtils::unique_name( "DoInterestManager-Add" );
         _remove_interest_event = PPUtils::unique_name( "DoInterestManager-Remove" );
@@ -134,72 +119,64 @@ DoInterestManager()
         _event_counter = 0;
 }
 
-string DoInterestManager::
-get_anonymous_event( const string &desc ) const
+string DoInterestManager::get_anonymous_event( const string &desc ) const
 {
         stringstream ss;
         ss << "anonymous-" << desc << "-" << _serial_gen.next();
         return ss.str();
 }
 
-void DoInterestManager::
-set_no_new_interests( bool flag )
+void DoInterestManager::set_no_new_interests( bool flag )
 {
         _no_new_interests = flag;
 }
 
-bool DoInterestManager::
-no_new_interests() const
+bool DoInterestManager::no_new_interests() const
 {
         return _no_new_interests;
 }
 
 ////setallinterestscompletecallback
 
-string DoInterestManager::
-get_all_interests_complete_callback() const
+string DoInterestManager::get_all_interests_complete_callback() const
 {
         stringstream ss;
         ss << "allInterestsComplete-" << _serial_num;
         return ss.str();
 }
 
-void DoInterestManager::
-reset_interest_state_for_connection_loss()
+void DoInterestManager::reset_interest_state_for_connection_loss()
 {
         _interests.clear();
         _event_counter = 0;
 }
 
-bool DoInterestManager::
-is_valid_interest_handle( int handle )
+bool DoInterestManager::is_valid_interest_handle( int handle )
 {
         return _interests.find( handle ) != _interests.end();
 }
 
-void DoInterestManager::
-update_interest_description( int handle, const string &desc )
+void DoInterestManager::update_interest_description( int handle, const string &desc )
 {
         PT( InterestState ) istate = _interests[handle];
         istate->set_desc( desc );
 }
 
-int DoInterestManager::
-add_interest( DOID_TYPE parentid, vector<ZONEID_TYPE> zones,
-              const string &desc, const string &event )
+int DoInterestManager::add_interest( DOID_TYPE parentid, vector<ZONEID_TYPE> zones,
+                                     const string &desc, const string &event )
 {
         int handle = get_next_handle();
         if ( _no_new_interests )
         {
                 doInterestManager_cat.warning()
-                                << "addInterest: addingInterests on delete: " << handle << "\n";
+                        << "addInterest: addingInterests on delete: " << handle << "\n";
                 return -1;
         }
 
         if ( parentid != game_globals_id )
         {
                 DistributedObjectBase *par = get_do( parentid );
-                if ( par == NULL )
+                if ( par == nullptr )
                 {
                         return -1;
                 }
@@ -229,8 +206,7 @@ add_interest( DOID_TYPE parentid, vector<ZONEID_TYPE> zones,
         return handle;
 }
 
-int DoInterestManager::
-add_auto_interest( DOID_TYPE parent, vector<ZONEID_TYPE> zones, const string &desc )
+int DoInterestManager::add_auto_interest( DOID_TYPE parent, vector<ZONEID_TYPE> zones, const string &desc )
 {
         int handle = get_next_handle();
         if ( _no_new_interests )
@@ -241,7 +217,7 @@ add_auto_interest( DOID_TYPE parent, vector<ZONEID_TYPE> zones, const string &de
         if ( parent != game_globals_id )
         {
                 DistributedObjectBase *par = get_do( parent );
-                if ( par == NULL )
+                if ( par == nullptr )
                 {
                         return -1;
                 }
@@ -260,8 +236,7 @@ add_auto_interest( DOID_TYPE parent, vector<ZONEID_TYPE> zones, const string &de
         return handle;
 }
 
-void DoInterestManager::
-remove_interest( int handle, const string &event )
+void DoInterestManager::remove_interest( int handle, const string &event )
 {
         string event_final;
         if ( event.length() == 0 )
@@ -311,8 +286,7 @@ remove_interest( int handle, const string &event )
         }
 }
 
-void DoInterestManager::
-remove_auto_interest( int handle )
+void DoInterestManager::remove_auto_interest( int handle )
 {
         if ( _interests.find( handle ) != _interests.end() )
         {
@@ -334,15 +308,13 @@ remove_auto_interest( int handle )
         }
 }
 
-void DoInterestManager::
-remove_ai_interest( int handle )
+void DoInterestManager::remove_ai_interest( int handle )
 {
         send_remove_ai_interest( handle );
 }
 
-void DoInterestManager::
-alter_interest( int handle, DOID_TYPE parent, vector<ZONEID_TYPE> zones,
-                const string &desc, const string &event )
+void DoInterestManager::alter_interest( int handle, DOID_TYPE parent, vector<ZONEID_TYPE> zones,
+                                        const string &desc, const string &event )
 {
         if ( _no_new_interests )
         {
@@ -389,8 +361,7 @@ alter_interest( int handle, DOID_TYPE parent, vector<ZONEID_TYPE> zones,
 
 // Client side only:
 
-void DoInterestManager::
-open_auto_interests( DistributedObject *dobj )
+void DoInterestManager::open_auto_interests( DistributedObject *dobj )
 {
         if ( dobj->_auto_interest_handle > -1 )
         {
@@ -413,8 +384,7 @@ open_auto_interests( DistributedObject *dobj )
         dobj->_auto_interest_handle = add_auto_interest( dobj->get_do_id(), autointerests, desc.str() );
 }
 
-void DoInterestManager::
-close_auto_interests( DistributedObject *dobj )
+void DoInterestManager::close_auto_interests( DistributedObject *dobj )
 {
         if ( dobj->_auto_interest_handle <= -1 )
         {
@@ -428,26 +398,22 @@ close_auto_interests( DistributedObject *dobj )
 
 ////////////////////////////////////////////////////
 
-string DoInterestManager::
-get_add_interest_event() const
+string DoInterestManager::get_add_interest_event() const
 {
         return _add_interest_event;
 }
 
-string DoInterestManager::
-get_remove_interest_event() const
+string DoInterestManager::get_remove_interest_event() const
 {
         return _remove_interest_event;
 }
 
-PT( InterestState ) DoInterestManager::
-get_interest_state( int handle )
+PT( InterestState ) DoInterestManager::get_interest_state( int handle )
 {
         return _interests[handle];
 }
 
-int DoInterestManager::
-get_next_handle()
+int DoInterestManager::get_next_handle()
 {
         int handle = _handle_serial_num;
         while ( true )
@@ -463,8 +429,7 @@ get_next_handle()
         return _handle_serial_num;
 }
 
-int DoInterestManager::
-get_next_context_id()
+int DoInterestManager::get_next_context_id()
 {
         int contextid = _context_id_serial_num;
         while ( true )
@@ -479,8 +444,7 @@ get_next_context_id()
         return _context_id_serial_num;
 }
 
-void DoInterestManager::
-consider_remove_interest( int handle )
+void DoInterestManager::consider_remove_interest( int handle )
 {
         if ( _interests.find( handle ) != _interests.end() )
         {
@@ -494,36 +458,31 @@ consider_remove_interest( int handle )
         }
 }
 
-void DoInterestManager::
-send_add_interest( int handle, int context, DOID_TYPE parentid, vector<ZONEID_TYPE> zones,
-                   const string &desc )
+void DoInterestManager::send_add_interest( int handle, int context, DOID_TYPE parentid, vector<ZONEID_TYPE> zones,
+                                           const string &desc )
 {
         // Implementation is in ConnectionRepository.
 }
 
-void DoInterestManager::
-send_remove_interest( int handle, int context )
+void DoInterestManager::send_remove_interest( int handle, int context )
 {
         // Implementation is in ConnectionRepository.
 }
 
-void DoInterestManager::
-send_remove_ai_interest( int handle )
+void DoInterestManager::send_remove_ai_interest( int handle )
 {
         // Implementation is in ConnectionRepository.
 }
 
-void DoInterestManager::
-cleanup_wait_all_interests_complete()
+void DoInterestManager::cleanup_wait_all_interests_complete()
 {
         _complete_delayed_callback.destroy();
 }
 
 ////////////////////////// Static callbacks ///////////////////////////////
-void DoInterestManager::
-send_event_clbk( void *data )
+void DoInterestManager::send_event_clbk( void *data )
 {
-        DoInterestManager *mgr = ( DoInterestManager * )data;
+        DoInterestManager *mgr = (DoInterestManager *)data;
         throw_event( mgr->get_all_interests_complete_callback() );
         for ( InterestClbkMap::iterator itr = mgr->_all_interest_complete_callbacks.begin();
               itr != mgr->_all_interest_complete_callbacks.end(); ++itr )
@@ -533,29 +492,26 @@ send_event_clbk( void *data )
         mgr->_all_interest_complete_callbacks.clear();
 }
 
-bool DoInterestManager::
-check_more_interests( void *data )
+bool DoInterestManager::check_more_interests( void *data )
 {
-        DoInterestManager *mgr = ( DoInterestManager * )data;
+        DoInterestManager *mgr = (DoInterestManager *)data;
         return mgr->_event_counter > 0;
 }
 ///////////////////////////////////////////////////////////////////////////
 
-void DoInterestManager::
-queue_all_interests_complete( int frames )
+void DoInterestManager::queue_all_interests_complete( int frames )
 {
         cleanup_wait_all_interests_complete();
         _complete_delayed_callback = FrameDelayedCall(
-                                             "waitForAllInterestCompletes",
-                                             send_event_clbk,
-                                             this,
-                                             frames,
-                                             check_more_interests
-                                     );
+                "waitForAllInterestCompletes",
+                send_event_clbk,
+                this,
+                frames,
+                check_more_interests
+        );
 }
 
-void DoInterestManager::
-handle_interest_done_message( DatagramIterator &di )
+void DoInterestManager::handle_interest_done_message( DatagramIterator &di )
 {
         int context = di.get_uint32();
         int handle = di.get_uint16();
@@ -579,8 +535,7 @@ handle_interest_done_message( DatagramIterator &di )
         }
 }
 
-void DoInterestManager::
-set_all_interests_complete_callback( DoInterestManager::InterestCompleteCallback *callback, void *data )
+void DoInterestManager::set_all_interests_complete_callback( DoInterestManager::InterestCompleteCallback *callback, void *data )
 {
         if ( _event_counter == 0 && _complete_delayed_callback.is_finished() )
         {

@@ -1,42 +1,36 @@
 #include "shadowStage.h"
 #include "..\..\pp_globals.h"
 
-vector_string ShadowStage::
-get_required_inputs()
+vector_string ShadowStage::get_required_inputs()
 {
         vector_string vec;
         return vec;
 }
 
-vector_string ShadowStage::
-get_required_pipes()
+vector_string ShadowStage::get_required_pipes()
 {
         vector_string vec;
         return vec;
 }
 
-ShadowStage::
-ShadowStage() :
+ShadowStage::ShadowStage() :
         RenderStage()
 {
         _size = 4096;
 }
 
-void ShadowStage::
-make_pcf_state()
+void ShadowStage::make_pcf_state()
 {
         _pcf.set_minfilter( SamplerState::FT_shadow );
         _pcf.set_magfilter( SamplerState::FT_shadow );
 }
 
-PT( GraphicsOutput ) ShadowStage::
-get_atlas_buffer() const
+PT( GraphicsOutput ) ShadowStage::get_atlas_buffer() const
 {
         return _target->get_internal_buffer();
 }
 
-void ShadowStage::
-create()
+void ShadowStage::create()
 {
         make_pcf_state();
 
@@ -53,25 +47,21 @@ create()
         _target->_source_region_def.set_clear_depth_active( false );
 }
 
-void ShadowStage::
-bind()
+void ShadowStage::bind()
 {
 }
 
-void ShadowStage::
-set_size( int size )
+void ShadowStage::set_size( int size )
 {
         _size = size;
 }
 
-int ShadowStage::
-get_size() const
+int ShadowStage::get_size() const
 {
         return _size;
 }
 
-void ShadowStage::
-set_shader_input( const ShaderInput *inp )
+void ShadowStage::set_shader_input( const ShaderInput *inp )
 {
         render.set_shader_input( inp );
 }

@@ -2,8 +2,7 @@
 #include "..\pp_globals.h"
 #include <texturePool.h>
 
-RenderPipeline::
-RenderPipeline()
+RenderPipeline::RenderPipeline()
 {
         // Initialize all of the PTAs.
         _view_mat_z_up                    = PTA_LMatrix4::empty_array( 1 );
@@ -26,8 +25,7 @@ RenderPipeline()
         _lc_tile_count                    = PTA_LVecBase2i::empty_array( 1 );
 }
 
-void RenderPipeline::
-initialize_managers()
+void RenderPipeline::initialize_managers()
 {
         _stage_mgr.setup();
         _stage_mgr.reload_shaders();
@@ -36,21 +34,18 @@ initialize_managers()
         _light_mgr.init_shadows();
 }
 
-void RenderPipeline::
-manager_tick()
+void RenderPipeline::manager_tick()
 {
         _light_mgr.update();
 }
 
-AsyncTask::DoneStatus RenderPipeline::
-manager_tick_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus RenderPipeline::manager_tick_task( GenericAsyncTask *task, void *data )
 {
         ( ( RenderPipeline * )data )->manager_tick();
         return AsyncTask::DS_cont;
 }
 
-void RenderPipeline::
-inp_and_st_tick()
+void RenderPipeline::inp_and_st_tick()
 {
         // Update all of the MainSceneData inputs:
         LMatrix4 view_mat = render.get_transform( base->_window->get_camera_group() )->get_mat();
@@ -134,15 +129,13 @@ inp_and_st_tick()
         _stage_mgr.update();
 }
 
-AsyncTask::DoneStatus RenderPipeline::
-inp_and_st_tick_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus RenderPipeline::inp_and_st_tick_task( GenericAsyncTask *task, void *data )
 {
         ( ( RenderPipeline * )data )->inp_and_st_tick();
         return AsyncTask::DS_cont;
 }
 
-void RenderPipeline::
-init_bindings()
+void RenderPipeline::init_bindings()
 {
         _manager_update_task = new GenericAsyncTask( "RP_UpdateManagers", manager_tick_task, this );
         _manager_update_task->set_sort( 10 );
@@ -155,14 +148,12 @@ init_bindings()
         base->_framework.get_event_handler().add_hook( "window-event", handle_window_event, this );
 }
 
-void RenderPipeline::
-handle_window_event( const Event *e, void *data )
+void RenderPipeline::handle_window_event( const Event *e, void *data )
 {
         LVecBase2i win_dims = LVecBase2i( base->get_resolution_x(), base->get_resolution_y() );
 }
 
-void RenderPipeline::
-init()
+void RenderPipeline::init()
 {
         _def_envmap = TexturePool::load_cube_map( "data/default_cubemap/cubemap.txo", true );
         _def_envmap->set_minfilter( SamplerState::FT_linear_mipmap_linear );
@@ -202,60 +193,51 @@ init()
         initialize_managers();
 }
 
-LightManager *RenderPipeline::
-get_light_mgr()
+LightManager *RenderPipeline::get_light_mgr()
 {
         return &_light_mgr;
 }
 
-void RenderPipeline::
-add_stage( RenderStage *stage )
+void RenderPipeline::add_stage( RenderStage *stage )
 {
         _stage_mgr.add_stage( stage );
 }
 
-void RenderPipeline::
-remove_stage( RenderStage *stage )
+void RenderPipeline::remove_stage( RenderStage *stage )
 {
         _stage_mgr.remove_stage( stage );
 }
 
-void RenderPipeline::
-create_managers()
+void RenderPipeline::create_managers()
 {
         tag_mgr = TagStateManager( base->_window->get_camera_group() );
         init_common_stages();
 }
 
-void RenderPipeline::
-reload_shaders()
+void RenderPipeline::reload_shaders()
 {
         tag_mgr.cleanup_states();
         _stage_mgr.reload_shaders();
         _light_mgr.reload_shaders();
 }
 
-void RenderPipeline::
-adjust_camera_settings()
+void RenderPipeline::adjust_camera_settings()
 {
         base->_window->get_camera( 0 )->get_lens()->set_near_far( 0.1, 70000 );
         base->_window->get_camera( 0 )->get_lens()->set_fov( 40 );
 }
 
-void RenderPipeline::
-add_light( RPLight *light )
+void RenderPipeline::add_light( RPLight *light )
 {
         _light_mgr.add_light( light );
 }
 
-void RenderPipeline::
-remove_light( RPLight *light )
+void RenderPipeline::remove_light( RPLight *light )
 {
         _light_mgr.remove_light( light );
 }
 
-void RenderPipeline::
-init_common_stages()
+void RenderPipeline::init_common_stages()
 {
         _amb_stage = new AmbientStage();
         add_stage( _amb_stage );

@@ -6,89 +6,87 @@
 #include <shaderPool.h>
 
 static const string cartoon_body0 =
-        "float4 cartoondelta = k_cartoonseparation * texpix_txaux.xwyw;"
-        "float4 cartoon_c0 = tex2D(k_txaux, ";
+"float4 cartoondelta = k_cartoonseparation * texpix_txaux.xwyw;"
+"float4 cartoon_c0 = tex2D(k_txaux, ";
 
 static const string cartoon_body1 =
-        " + cartoondelta.xy);"
-        "float4 cartoon_c1 = tex2D(k_txaux, ";
+" + cartoondelta.xy);"
+"float4 cartoon_c1 = tex2D(k_txaux, ";
 
 static const string cartoon_body2 =
-        " - cartoondelta.xy);"
-        "float4 cartoon_c2 = tex2D(k_txaux, ";
+" - cartoondelta.xy);"
+"float4 cartoon_c2 = tex2D(k_txaux, ";
 
 static const string cartoon_body3 =
-        " + cartoondelta.wz);"
-        "float4 cartoon_c3 = tex2D(k_txaux, ";
+" + cartoondelta.wz);"
+"float4 cartoon_c3 = tex2D(k_txaux, ";
 
 static const string cartoon_body4 =
-        " - cartoondelta.wz);"
-        "float4 cartoon_mx = max(cartoon_c0, max(cartoon_c1, max(cartoon_c2, cartoon_c3)));"
-        "float4 cartoon_mn = min(cartoon_c0, min(cartoon_c1, min(cartoon_c2, cartoon_c3)));"
-        "float cartoon_thresh = saturate(dot(cartoon_mx - cartoon_mn, float4(3,3,0,0)) - 0.5);"
-        "o_color = lerp(o_color, k_cartooncolor, cartoon_thresh);";
+" - cartoondelta.wz);"
+"float4 cartoon_mx = max(cartoon_c0, max(cartoon_c1, max(cartoon_c2, cartoon_c3)));"
+"float4 cartoon_mn = min(cartoon_c0, min(cartoon_c1, min(cartoon_c2, cartoon_c3)));"
+"float cartoon_thresh = saturate(dot(cartoon_mx - cartoon_mn, float4(3,3,0,0)) - 0.5);"
+"o_color = lerp(o_color, k_cartooncolor, cartoon_thresh);";
 
 static const string ssao_body0 =
-        "void vshader(float4 vtx_position : POSITION,"
-        "             out float4 l_position : POSITION,"
-        "             out float2 l_texcoord : TEXCOORD0,"
-        "             out float2 l_texcoordD : TEXCOORD1, "
-        "             out float2 l_texcoordN : TEXCOORD2, "
-        "             uniform float4 texpad_depth, "
-        "             uniform float4 texpad_normal, "
-        "             uniform float4x4 mat_modelproj)"
-        "{"
-        "  l_position = mul(mat_modelproj, vtx_position); "
-        "  l_texcoord = vtx_position.xz; "
-        "  l_texcoordD = (vtx_position.xz * texpad_depth.xy) + texpad_depth.xy; "
-        "  l_texcoordN = (vtx_position.xz * texpad_normal.xy) + texpad_normal.xy; "
-        "}"
-        ""
-        "float3 sphere[16] = float3[](float3(0.53812504, 0.18565957, -0.43192), float3(0.13790712, 0.24864247, 0.44301823), float3(0.33715037, 0.56794053, -0.005789503), float3(-0.6999805, -0.04511441, -0.0019965635), float3(0.06896307, -0.15983082, -0.85477847), float3(0.056099437, 0.006954967, -0.1843352), float3(-0.014653638, 0.14027752, 0.0762037), float3(0.010019933, -0.1924225, -0.034443386), float3(-0.35775623, -0.5301969, -0.43581226), float3(-0.3169221, 0.106360726, 0.015860917), float3(0.010350345, -0.58698344, 0.0046293875), float3(-0.08972908, -0.49408212, 0.3287904), float3(0.7119986, -0.0154690035, -0.09183723), float3(-0.053382345, 0.059675813, -0.5411899), float3(0.035267662, -0.063188605, 0.54602677), float3(-0.47761092, 0.2847911, -0.0271716));"
-        ""
-        "void fshader(out float4 o_color : COLOR, "
-        "             uniform float4 k_params1, "
-        "             uniform float4 k_params2, "
-        "             float2 l_texcoord : TEXCOORD0, "
-        "             float2 l_texcoordD : TEXCOORD1, "
-        "             float2 l_texcoordN : TEXCOORD2, "
-        "             uniform sampler2D k_random : TEXUNIT0, "
-        "             uniform sampler2D k_depth : TEXUNIT1, "
-        "             uniform sampler2D k_normal : TEXUNIT2)"
-        "{"
-        "  float pixel_depth = tex2D(k_depth, l_texcoordD).a; "
-        "  float3 pixel_normal = (tex2D(k_normal, l_texcoordN).xyz * 2.0 - 1.0); "
-        "  float3 random_vector = normalize((tex2D(k_random, l_texcoord * 18.0 + pixel_depth + pixel_normal.xy).xyz * 2.0) - float3(1.0)).xyz; "
-        "  float occlusion = 0.0; "
-        "  float radius = k_params1.z / pixel_depth; "
-        "  float depth_difference; "
-        "  float3 sample_normal; "
-        "  float3 ray; "
-        "  for (int i = 0; i < ";
+"void vshader(float4 vtx_position : POSITION,"
+"             out float4 l_position : POSITION,"
+"             out float2 l_texcoord : TEXCOORD0,"
+"             out float2 l_texcoordD : TEXCOORD1, "
+"             out float2 l_texcoordN : TEXCOORD2, "
+"             uniform float4 texpad_depth, "
+"             uniform float4 texpad_normal, "
+"             uniform float4x4 mat_modelproj)"
+"{"
+"  l_position = mul(mat_modelproj, vtx_position); "
+"  l_texcoord = vtx_position.xz; "
+"  l_texcoordD = (vtx_position.xz * texpad_depth.xy) + texpad_depth.xy; "
+"  l_texcoordN = (vtx_position.xz * texpad_normal.xy) + texpad_normal.xy; "
+"}"
+""
+"float3 sphere[16] = float3[](float3(0.53812504, 0.18565957, -0.43192), float3(0.13790712, 0.24864247, 0.44301823), float3(0.33715037, 0.56794053, -0.005789503), float3(-0.6999805, -0.04511441, -0.0019965635), float3(0.06896307, -0.15983082, -0.85477847), float3(0.056099437, 0.006954967, -0.1843352), float3(-0.014653638, 0.14027752, 0.0762037), float3(0.010019933, -0.1924225, -0.034443386), float3(-0.35775623, -0.5301969, -0.43581226), float3(-0.3169221, 0.106360726, 0.015860917), float3(0.010350345, -0.58698344, 0.0046293875), float3(-0.08972908, -0.49408212, 0.3287904), float3(0.7119986, -0.0154690035, -0.09183723), float3(-0.053382345, 0.059675813, -0.5411899), float3(0.035267662, -0.063188605, 0.54602677), float3(-0.47761092, 0.2847911, -0.0271716));"
+""
+"void fshader(out float4 o_color : COLOR, "
+"             uniform float4 k_params1, "
+"             uniform float4 k_params2, "
+"             float2 l_texcoord : TEXCOORD0, "
+"             float2 l_texcoordD : TEXCOORD1, "
+"             float2 l_texcoordN : TEXCOORD2, "
+"             uniform sampler2D k_random : TEXUNIT0, "
+"             uniform sampler2D k_depth : TEXUNIT1, "
+"             uniform sampler2D k_normal : TEXUNIT2)"
+"{"
+"  float pixel_depth = tex2D(k_depth, l_texcoordD).a; "
+"  float3 pixel_normal = (tex2D(k_normal, l_texcoordN).xyz * 2.0 - 1.0); "
+"  float3 random_vector = normalize((tex2D(k_random, l_texcoord * 18.0 + pixel_depth + pixel_normal.xy).xyz * 2.0) - float3(1.0)).xyz; "
+"  float occlusion = 0.0; "
+"  float radius = k_params1.z / pixel_depth; "
+"  float depth_difference; "
+"  float3 sample_normal; "
+"  float3 ray; "
+"  for (int i = 0; i < ";
 
 static const string ssao_body1 =
-        "; ++i) {"
-        "    ray = radius * reflect(sphere[i], random_vector);"
-        "    sample_normal = (tex2D(k_normal, l_texcoordN + ray.xy).xyz * 2.0 - 1.0);"
-        "    depth_difference = (pixel_depth - tex2D(k_depth, l_texcoordD + ray.xy).r);"
-        "    occlusion += step(k_params2.y, depth_difference) * (1.0 - dot(sample_normal.xyz, pixel_normal)) * (1.0 - smoothstep(k_params2.y, k_params2.x, depth_difference));"
-        "  }"
-        "  o_color.rgb = 1.0 + (occlusion * k_params1.y);"
-        "  o_color.a = 1.0;"
-        "}";
+"; ++i) {"
+"    ray = radius * reflect(sphere[i], random_vector);"
+"    sample_normal = (tex2D(k_normal, l_texcoordN + ray.xy).xyz * 2.0 - 1.0);"
+"    depth_difference = (pixel_depth - tex2D(k_depth, l_texcoordD + ray.xy).r);"
+"    occlusion += step(k_params2.y, depth_difference) * (1.0 - dot(sample_normal.xyz, pixel_normal)) * (1.0 - smoothstep(k_params2.y, k_params2.x, depth_difference));"
+"  }"
+"  o_color.rgb = 1.0 + (occlusion * k_params1.y);"
+"  o_color.a = 1.0;"
+"}";
 
-CommonFilters::
-CommonFilters( GraphicsOutput *win, NodePath &cam ) :
+CommonFilters::CommonFilters( GraphicsOutput *win, NodePath &cam ) :
         _manager( win, cam ),
-        _task( NULL ),
+        _task( nullptr ),
         _config_mode( false )
 {
 
         cleanup();
 }
 
-void CommonFilters::
-cleanup()
+void CommonFilters::cleanup()
 {
         _manager.cleanup();
         _textures.clear();
@@ -96,47 +94,42 @@ cleanup()
         _bloom.clear();
         _blur.clear();
         _ssao.clear();
-        if ( _task != NULL )
+        if ( _task != nullptr )
         {
                 g_base->stop_task( _task );
-                _task = NULL;
+                _task = nullptr;
         }
 }
 
-void CommonFilters::
-begin_config_mode()
+void CommonFilters::begin_config_mode()
 {
         _config_mode = true;
 }
 
-void CommonFilters::
-end_config_mode()
+void CommonFilters::end_config_mode()
 {
         _config_mode = false;
         reconfigure( true, FT_none );
 }
 
-bool CommonFilters::
-has_configuration( FilterType filter ) const
+bool CommonFilters::has_configuration( FilterType filter ) const
 {
         return ( _configuration.find( filter ) != _configuration.end() );
 }
 
-void CommonFilters::
-update_clears()
+void CommonFilters::update_clears()
 {
         _manager.get_both_clears();
         //reconfigure(true, FT_none);
 }
 
-void CommonFilters::
-reconfigure( bool full_rebuild, FilterType changed )
+void CommonFilters::reconfigure( bool full_rebuild, FilterType changed )
 {
         if ( full_rebuild )
         {
                 cleanup();
 
-                if ( _configuration.size() == ( size_t )0 )
+                if ( _configuration.size() == (size_t)0 )
                 {
                         return;
                 }
@@ -189,7 +182,7 @@ reconfigure( bool full_rebuild, FilterType changed )
 
                 if ( has_configuration( FT_volumetric_lighting ) )
                 {
-                        need_tex.push_back( ( ( VolumetricLightingConfig * )_configuration[FT_volumetric_lighting] )->_source );
+                        need_tex.push_back( ( (VolumetricLightingConfig *)_configuration[FT_volumetric_lighting] )->_source );
                 }
 
                 for ( size_t i = 0; i < need_tex.size(); i++ )
@@ -204,7 +197,7 @@ reconfigure( bool full_rebuild, FilterType changed )
                 //if (!_final_quad.is_empty()) {
                 // _final_quad.remove_node();
                 //}
-                _final_quad = _manager.render_scene_into( NULL, NULL, NULL, aux_bits, _textures );
+                _final_quad = _manager.render_scene_into( nullptr, nullptr, nullptr, aux_bits, _textures );
                 if ( _final_quad.is_empty() )
                 {
                         cleanup();
@@ -236,7 +229,7 @@ reconfigure( bool full_rebuild, FilterType changed )
                         _ssao[0].set_shader_input( "random", TexturePool::load_texture( "maps/random.rgb" ) );
 
                         stringstream ss;
-                        ss << ssao_body0 << ( ( AmbientOcclusionConfig * )_configuration[FT_ambient_occlusion] )->_num_samples << ssao_body1;
+                        ss << ssao_body0 << ( (AmbientOcclusionConfig *)_configuration[FT_ambient_occlusion] )->_num_samples << ssao_body1;
                         _ssao[0].set_shader( Shader::make( ss.str(), Shader::SL_Cg ) );
 
                         _ssao[1].set_shader_input( "src", ssao0 );
@@ -248,7 +241,7 @@ reconfigure( bool full_rebuild, FilterType changed )
 
                 if ( has_configuration( FT_bloom ) )
                 {
-                        BloomConfig *bconf = ( BloomConfig * )_configuration[FT_bloom];
+                        BloomConfig *bconf = (BloomConfig *)_configuration[FT_bloom];
                         PT( Texture ) bloom0 = _textures["bloom0"];
                         PT( Texture ) bloom1 = _textures["bloom1"];
                         PT( Texture ) bloom2 = _textures["bloom2"];
@@ -431,7 +424,7 @@ reconfigure( bool full_rebuild, FilterType changed )
 
                 if ( has_configuration( FT_volumetric_lighting ) )
                 {
-                        VolumetricLightingConfig *vconf = ( VolumetricLightingConfig * )_configuration[FT_volumetric_lighting];
+                        VolumetricLightingConfig *vconf = (VolumetricLightingConfig *)_configuration[FT_volumetric_lighting];
 
                         text += "  float decay = 1.0f;\n";
                         text += "  float2 curcoord = " + texcoords["color"] + ";\n";
@@ -441,7 +434,7 @@ reconfigure( bool full_rebuild, FilterType changed )
                         text += "  float3 vlcolor = sample.rgb * sample.a;\n";
 
                         stringstream ss;
-                        ss   << "  for (int i = 0; i < " << vconf->_num_samples << "; i++) {\n";
+                        ss << "  for (int i = 0; i < " << vconf->_num_samples << "; i++) {\n";
                         text += ss.str();
                         text += "    curcoord -= lightdir;\n";
                         text += "    sample = tex2D(k_tx" + vconf->_source + ", curcoord);\n";
@@ -454,7 +447,7 @@ reconfigure( bool full_rebuild, FilterType changed )
 
                 if ( has_configuration( FT_gamma_adjust ) )
                 {
-                        PN_stdfloat gamma = ( ( GammaAdjustConfig * )_configuration[FT_gamma_adjust] )->_gamma;
+                        PN_stdfloat gamma = ( (GammaAdjustConfig *)_configuration[FT_gamma_adjust] )->_gamma;
                         if ( gamma == 0.5 )
                         {
                                 text += "  o_color.rgb = sqrt(o_color.rgb);\n";
@@ -484,10 +477,10 @@ reconfigure( bool full_rebuild, FilterType changed )
                         _final_quad.set_shader_input( "tx" + itr->first, itr->second );
                 }
 
-                if ( _task != NULL )
+                if ( _task != nullptr )
                 {
                         g_base->stop_task( _task );
-                        _task = NULL;
+                        _task = nullptr;
                 }
                 _task = g_base->start_task( update_task, this, "common-filters-update" );
 
@@ -497,7 +490,7 @@ reconfigure( bool full_rebuild, FilterType changed )
         {
                 if ( has_configuration( FT_cartoon_ink ) )
                 {
-                        CartoonInkConfig *c = ( CartoonInkConfig * )_configuration[FT_cartoon_ink];
+                        CartoonInkConfig *c = (CartoonInkConfig *)_configuration[FT_cartoon_ink];
                         _final_quad.set_shader_input( "cartoonseparation", LVecBase4( c->_separation, 0, c->_separation, 0 ) );
                         _final_quad.set_shader_input( "cartooncolor", c->_color );
                 }
@@ -507,7 +500,7 @@ reconfigure( bool full_rebuild, FilterType changed )
         {
                 if ( has_configuration( FT_blur_sharpen ) )
                 {
-                        BlurSharpenConfig *c = ( BlurSharpenConfig * )_configuration[FT_blur_sharpen];
+                        BlurSharpenConfig *c = (BlurSharpenConfig *)_configuration[FT_blur_sharpen];
                         _final_quad.set_shader_input( "blurval", LVecBase4( c->_amount, c->_amount, c->_amount, c->_amount ) );
                 }
         }
@@ -516,7 +509,7 @@ reconfigure( bool full_rebuild, FilterType changed )
         {
                 if ( has_configuration( FT_bloom ) )
                 {
-                        BloomConfig *c = ( BloomConfig * )_configuration[FT_bloom];
+                        BloomConfig *c = (BloomConfig *)_configuration[FT_bloom];
                         PN_stdfloat intensity = c->_intensity * 3.0;
                         _bloom[0].set_shader_input( "blend", c->_blend[0], c->_blend[1], c->_blend[2], c->_blend[3] * 2.0 );
                         _bloom[0].set_shader_input( "trigger", c->_min_trigger, 1.0 / ( c->_max_trigger - c->_min_trigger ), 0.0, 0.0 );
@@ -529,8 +522,8 @@ reconfigure( bool full_rebuild, FilterType changed )
         {
                 if ( has_configuration( FT_volumetric_lighting ) )
                 {
-                        VolumetricLightingConfig *c = ( VolumetricLightingConfig * )_configuration[FT_volumetric_lighting];
-                        PN_stdfloat tc_param = c->_density / ( PN_stdfloat )c->_num_samples;
+                        VolumetricLightingConfig *c = (VolumetricLightingConfig *)_configuration[FT_volumetric_lighting];
+                        PN_stdfloat tc_param = c->_density / (PN_stdfloat)c->_num_samples;
                         _final_quad.set_shader_input( "vlparams", tc_param, c->_decay, c->_exposure, 0.0 );
                 }
         }
@@ -539,10 +532,10 @@ reconfigure( bool full_rebuild, FilterType changed )
         {
                 if ( has_configuration( FT_ambient_occlusion ) )
                 {
-                        AmbientOcclusionConfig *c = ( AmbientOcclusionConfig * )_configuration[FT_ambient_occlusion];
-                        _ssao[0].set_shader_input( "params1", ( PN_stdfloat )c->_num_samples, ( PN_stdfloat ) - c->_amount / ( PN_stdfloat )c->_num_samples,
-                                                   ( PN_stdfloat )c->_radius, ( PN_stdfloat )0 );
-                        _ssao[0].set_shader_input( "params2", ( PN_stdfloat )c->_strength, ( PN_stdfloat )c->_falloff, ( PN_stdfloat )0, ( PN_stdfloat )0 );
+                        AmbientOcclusionConfig *c = (AmbientOcclusionConfig *)_configuration[FT_ambient_occlusion];
+                        _ssao[0].set_shader_input( "params1", (PN_stdfloat)c->_num_samples, (PN_stdfloat)-c->_amount / (PN_stdfloat)c->_num_samples,
+                                (PN_stdfloat)c->_radius, (PN_stdfloat)0 );
+                        _ssao[0].set_shader_input( "params2", (PN_stdfloat)c->_strength, (PN_stdfloat)c->_falloff, (PN_stdfloat)0, (PN_stdfloat)0 );
 
                 }
         }
@@ -550,19 +543,17 @@ reconfigure( bool full_rebuild, FilterType changed )
         update();
 }
 
-AsyncTask::DoneStatus CommonFilters::
-update_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus CommonFilters::update_task( GenericAsyncTask *task, void *data )
 {
-        ( ( CommonFilters * )data )->update();
+        ( (CommonFilters *)data )->update();
         return AsyncTask::DS_cont;
 }
 
-void CommonFilters::
-update()
+void CommonFilters::update()
 {
         if ( _configuration.find( FT_volumetric_lighting ) != _configuration.end() )
         {
-                NodePath caster = ( ( VolumetricLightingConfig * )_configuration[FT_volumetric_lighting] )->_caster;
+                NodePath caster = ( (VolumetricLightingConfig *)_configuration[FT_volumetric_lighting] )->_caster;
                 LPoint2 caster_pos;
                 DCAST( Camera, _manager.get_cam().node() )->get_lens()->project( caster.get_pos( _manager.get_cam() ), caster_pos );
                 _final_quad.set_shader_input( "casterpos",
@@ -575,8 +566,7 @@ classname *oldconf = (classname *)_configuration[type];\
 _configuration.erase(_configuration.find(type));\
 delete oldconf;
 
-void CommonFilters::
-set_cartoon_ink( PN_stdfloat separation, LColor &color )
+void CommonFilters::set_cartoon_ink( PN_stdfloat separation, LColor &color )
 {
         bool full_rebuild = ( _configuration.find( FT_cartoon_ink ) == _configuration.end() );
 
@@ -596,8 +586,7 @@ set_cartoon_ink( PN_stdfloat separation, LColor &color )
         }
 }
 
-void CommonFilters::
-del_cartoon_ink()
+void CommonFilters::del_cartoon_ink()
 {
         if ( _configuration.find( FT_cartoon_ink ) != _configuration.end() )
         {
@@ -609,9 +598,8 @@ del_cartoon_ink()
         }
 }
 
-void CommonFilters::
-set_bloom( LColor &blend, PN_stdfloat min_trigger, PN_stdfloat max_trigger, PN_stdfloat desat,
-           PN_stdfloat intensity, Size size )
+void CommonFilters::set_bloom( LColor &blend, PN_stdfloat min_trigger, PN_stdfloat max_trigger, PN_stdfloat desat,
+                               PN_stdfloat intensity, Size size )
 {
         if ( size == S_off )
         {
@@ -623,7 +611,7 @@ set_bloom( LColor &blend, PN_stdfloat min_trigger, PN_stdfloat max_trigger, PN_s
 
         if ( _configuration.find( FT_cartoon_ink ) != _configuration.end() )
         {
-                if ( ( ( BloomConfig * )_configuration[FT_bloom] )->_size == size )
+                if ( ( (BloomConfig *)_configuration[FT_bloom] )->_size == size )
                 {
                         DeleteConfig( BloomConfig, FT_bloom );
                         full_rebuild = false;
@@ -646,8 +634,7 @@ set_bloom( LColor &blend, PN_stdfloat min_trigger, PN_stdfloat max_trigger, PN_s
         }
 }
 
-void CommonFilters::
-del_bloom()
+void CommonFilters::del_bloom()
 {
         if ( _configuration.find( FT_bloom ) != _configuration.end() )
         {
@@ -659,8 +646,7 @@ del_bloom()
         }
 }
 
-void CommonFilters::
-set_half_pixel_shift()
+void CommonFilters::set_half_pixel_shift()
 {
         bool full_rebuild = ( _configuration.find( FT_half_pixel_shift ) == _configuration.end() );
         if ( !full_rebuild )
@@ -680,8 +666,7 @@ set_half_pixel_shift()
 
 }
 
-void CommonFilters::
-del_half_pixel_shift()
+void CommonFilters::del_half_pixel_shift()
 {
         if ( _configuration.find( FT_half_pixel_shift ) != _configuration.end() )
         {
@@ -694,8 +679,7 @@ del_half_pixel_shift()
         }
 }
 
-void CommonFilters::
-set_view_glow()
+void CommonFilters::set_view_glow()
 {
         bool full_rebuild = ( _configuration.find( FT_view_glow ) != _configuration.end() );
         if ( !full_rebuild )
@@ -714,8 +698,7 @@ set_view_glow()
         }
 }
 
-void CommonFilters::
-del_view_glow()
+void CommonFilters::del_view_glow()
 {
         if ( _configuration.find( FT_view_glow ) != _configuration.end() )
         {
@@ -727,8 +710,7 @@ del_view_glow()
         }
 }
 
-void CommonFilters::
-set_inverted()
+void CommonFilters::set_inverted()
 {
         bool full_rebuild = ( _configuration.find( FT_inverted ) != _configuration.end() );
         if ( !full_rebuild )
@@ -747,8 +729,7 @@ set_inverted()
         }
 }
 
-void CommonFilters::
-del_inverted()
+void CommonFilters::del_inverted()
 {
         if ( _configuration.find( FT_inverted ) != _configuration.end() )
         {
@@ -760,17 +741,16 @@ del_inverted()
         }
 }
 
-void CommonFilters::
-set_volumetric_lighting( NodePath &caster, int num_samples, PN_stdfloat density,
-                         PN_stdfloat decay, PN_stdfloat exposure,
-                         string source )
+void CommonFilters::set_volumetric_lighting( NodePath &caster, int num_samples, PN_stdfloat density,
+                                             PN_stdfloat decay, PN_stdfloat exposure,
+                                             string source )
 {
 
         bool full_rebuild = true;
 
         if ( _configuration.find( FT_volumetric_lighting ) != _configuration.end() )
         {
-                VolumetricLightingConfig *oldconf = ( VolumetricLightingConfig * )_configuration[FT_volumetric_lighting];
+                VolumetricLightingConfig *oldconf = (VolumetricLightingConfig *)_configuration[FT_volumetric_lighting];
                 if ( oldconf->_source == source && oldconf->_num_samples == num_samples )
                 {
                         DeleteConfig( VolumetricLightingConfig, FT_volumetric_lighting );
@@ -794,8 +774,7 @@ set_volumetric_lighting( NodePath &caster, int num_samples, PN_stdfloat density,
         }
 }
 
-void CommonFilters::
-del_volumetric_lighting()
+void CommonFilters::del_volumetric_lighting()
 {
         if ( _configuration.find( FT_volumetric_lighting ) != _configuration.end() )
         {
@@ -807,8 +786,7 @@ del_volumetric_lighting()
         }
 }
 
-void CommonFilters::
-set_blur_sharpen( PN_stdfloat amount )
+void CommonFilters::set_blur_sharpen( PN_stdfloat amount )
 {
         bool full_rebuild = ( _configuration.find( FT_blur_sharpen ) == _configuration.end() );
         if ( !full_rebuild )
@@ -827,8 +805,7 @@ set_blur_sharpen( PN_stdfloat amount )
         }
 }
 
-void CommonFilters::
-del_blur_sharpen()
+void CommonFilters::del_blur_sharpen()
 {
         if ( _configuration.find( FT_blur_sharpen ) != _configuration.end() )
         {
@@ -840,14 +817,13 @@ del_blur_sharpen()
         }
 }
 
-void CommonFilters::
-set_ambient_occlusion( int num_samples, PN_stdfloat radius, PN_stdfloat amount,
-                       PN_stdfloat strength, PN_stdfloat falloff )
+void CommonFilters::set_ambient_occlusion( int num_samples, PN_stdfloat radius, PN_stdfloat amount,
+                                           PN_stdfloat strength, PN_stdfloat falloff )
 {
         bool full_rebuild = ( _configuration.find( FT_ambient_occlusion ) == _configuration.end() );
         if ( !full_rebuild )
         {
-                full_rebuild = ( num_samples != ( ( AmbientOcclusionConfig * )_configuration[FT_ambient_occlusion] )->_num_samples );
+                full_rebuild = ( num_samples != ( (AmbientOcclusionConfig *)_configuration[FT_ambient_occlusion] )->_num_samples );
                 DeleteConfig( AmbientOcclusionConfig, FT_ambient_occlusion );
         }
 
@@ -867,8 +843,7 @@ set_ambient_occlusion( int num_samples, PN_stdfloat radius, PN_stdfloat amount,
 
 }
 
-void CommonFilters::
-del_ambient_occlusion()
+void CommonFilters::del_ambient_occlusion()
 {
         if ( _configuration.find( FT_ambient_occlusion ) != _configuration.end() )
         {
@@ -881,8 +856,7 @@ del_ambient_occlusion()
         }
 }
 
-void CommonFilters::
-set_gamma_adjust( PN_stdfloat gamma )
+void CommonFilters::set_gamma_adjust( PN_stdfloat gamma )
 {
         bool full_rebuild = ( _configuration.find( FT_gamma_adjust ) == _configuration.end() );
         if ( !full_rebuild )
@@ -901,8 +875,7 @@ set_gamma_adjust( PN_stdfloat gamma )
         }
 }
 
-void CommonFilters::
-del_gamma_adjust()
+void CommonFilters::del_gamma_adjust()
 {
         if ( _configuration.find( FT_gamma_adjust ) != _configuration.end() )
         {

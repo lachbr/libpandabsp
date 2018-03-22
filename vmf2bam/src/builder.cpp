@@ -1,50 +1,41 @@
+// RPBM includes
 #include "builder.h"
-#include <vifParser.h>
+#include "vifparser.h"
+#include "door.h"
+#include "mapinfo.h"
+#include "sun.h"
+#include "devshotcamera.h"
 
-#include <string>
-
+// Panda includes
 #include <eggData.h>
 #include <eggVertexPool.h>
 #include <eggPolygon.h>
 #include <eggVertex.h>
 #include <eggVertexUV.h>
 #include <load_egg_file.h>
-
 #include <geomVertexData.h>
 #include <geomVertexWriter.h>
 #include <geomTriangles.h>
 #include <geomNode.h>
 #include <geomVertexFormat.h>
 #include <geom.h>
-
 #include <shadeModelAttrib.h>
-
 #include <orthographicLens.h>
-
 #include <occluderNode.h>
-
 #include <texturePool.h>
-
 #include <fog.h>
-
 #include <ambientLight.h>
 #include <directionalLight.h>
-
 #include <collisionBox.h>
 #include <collisionNode.h>
 #include <collisionPolygon.h>
-
 #include <pointLight.h>
 #include <spotlight.h>
-
 #include <bitMask.h>
 
+// std includes
+#include <string>
 #include <algorithm>
-
-#include <door.h>
-#include <mapInfo.h>
-#include <sun.h>
-#include <devshotCamera.h>
 
 #define FLR_BITMASK BitMask32(2)
 #define WALL_BITMASK BitMask32(1)
@@ -53,7 +44,7 @@
 #define FLOOR_NORMAL_LEEWAY 0.5
 #define WALL_NORMAL_LEEWAY 0.72
 
-static WindowFramework *pWindow = NULL;
+static WindowFramework *pWindow = nullptr;
 
 static const double pi = 3.14159265359;
 static const PN_stdfloat scene_scale = 0.075;
@@ -88,7 +79,7 @@ DispVert *get_disp_vert_by_index( DispPlane &plane, int index )
                 }
         }
 
-        return NULL;
+        return nullptr;
 }
 
 LVector3 get_major_axis( LVector3 &vec )
@@ -577,9 +568,9 @@ DispPlane create_displacement( Quad &quad, int nPower, Parser *p, Object &objDis
                 {
                         DispVertVec quad = result[j];
                         if ( find_if( quad.begin(), quad.end(), [vert]( const DispVert & other )
-                {
-                        return other.index == vert.index;
-                } ) != quad.end() )
+                                      {
+                                              return other.index == vert.index;
+                                      } ) != quad.end() )
                         {
                                 quadsSharingVert.push_back( quad );
                         }
@@ -787,9 +778,9 @@ vector<LVecBase3f> make_vectors( vector<vector<int>> &verts_pos )
         LVecBase3f vert2 = LVecBase3f( verts_pos[1][0], verts_pos[1][1], verts_pos[1][2] );
         LVecBase3f vert3 = LVecBase3f( verts_pos[2][0], verts_pos[2][1], verts_pos[2][2] );
         LVecBase3f vert4 = LVecBase3f(
-                                   vert1.get_x() + vert3.get_x() - vert2.get_x(),
-                                   vert1.get_y() + vert3.get_y() - vert2.get_y(),
-                                   vert1.get_z() + vert3.get_z() - vert2.get_z() );
+                vert1.get_x() + vert3.get_x() - vert2.get_x(),
+                vert1.get_y() + vert3.get_y() - vert2.get_y(),
+                vert1.get_z() + vert3.get_z() - vert2.get_z() );
 
         result.push_back( vert1 );
         result.push_back( vert2 );
@@ -934,8 +925,7 @@ void apply_smooth_shading( NodePath &np )
         np.set_attrib( ShadeModelAttrib::make( ShadeModelAttrib::M_smooth ) );
 }
 
-Builder::
-Builder( const char *output, WindowFramework *window, Parser *p )
+Builder::Builder( const char *output, WindowFramework *window, Parser *p )
 {
         cout << "Building..." << endl;
 
@@ -1243,7 +1233,7 @@ Builder( const char *output, WindowFramework *window, Parser *p )
                                 NodePath fog_np = scene.attach_new_node( pFog );
 
                                 cout << "Made env_fog_controller (" << fog_np.get_name() << "):\n"
-                                     << "\t" << pFog->get_exp_density() << pFog->get_color() << endl;
+                                        << "\t" << pFog->get_exp_density() << pFog->get_color() << endl;
 
                                 //float flFarZ = stof( p->get_property_value( obj, "farz" ) );
                         }
@@ -1335,7 +1325,7 @@ Builder( const char *output, WindowFramework *window, Parser *p )
                                 cam_np.set_hpr( render, LVector3( hpr[1], hpr[0], hpr[2] ) );
 
                                 cout << "Made point_devshot_camera (" << cam->get_name() << "):\n"
-                                     << "\t" << fov << " " << cam_np.get_pos() << " " << cam_np.get_hpr() << endl;
+                                        << "\t" << fov << " " << cam_np.get_pos() << " " << cam_np.get_hpr() << endl;
 
                                 //} else if (classname.compare("entity_spawn_point") == 0) {
                                 //  string point_name = p->get_property_value(obj, "targetname");
@@ -1357,7 +1347,7 @@ Builder( const char *output, WindowFramework *window, Parser *p )
                                 null_np.set_pos( render, pos[0], pos[1], pos[2] );
 
                                 cout << "Made info_null, which is just a PandaNode (" << null_np.get_name() << "):\n"
-                                     << "\t" << null_np.get_pos( render ) << endl;
+                                        << "\t" << null_np.get_pos( render ) << endl;
                         }
                 }
         }

@@ -9,8 +9,7 @@
 
 NotifyCategoryDef( connectionRepository, "" );
 
-ConnectionRepository::
-ConnectionRepository( vector<string> &dc_files, ConnectMethod cm, bool owner_view )
+ConnectionRepository::ConnectionRepository( vector<string> &dc_files, ConnectMethod cm, bool owner_view )
 {
         ConfigVariableBool threaded_net = ConfigVariableBool( "threaded-net", false );
 
@@ -21,17 +20,17 @@ ConnectionRepository( vector<string> &dc_files, ConnectMethod cm, bool owner_vie
         if ( _connect_method == CM_HTTP )
         {
                 connectionRepository_cat.info()
-                                << "Using connect method 'http'\n";
+                        << "Using connect method 'http'\n";
         }
         else if ( _connect_method == CM_NET )
         {
                 connectionRepository_cat.info()
-                                << "Using connect method 'net'\n";
+                        << "Using connect method 'net'\n";
         }
         else if ( _connect_method == CM_NATIVE )
         {
                 connectionRepository_cat.info()
-                                << "Using connect method 'native'\n";
+                        << "Using connect method 'native'\n";
         }
 
         dc_has_owner_view = owner_view;
@@ -43,13 +42,11 @@ ConnectionRepository( vector<string> &dc_files, ConnectMethod cm, bool owner_vie
         set_handle_datagrams_internally( false );
 }
 
-ConnectionRepository::
-ConnectionRepository()
+ConnectionRepository::ConnectionRepository()
 {
 }
 
-DistributedObjectBase *ConnectionRepository::
-generate_global_object( uint32_t do_id, const string &dcname )
+DistributedObjectBase *ConnectionRepository::generate_global_object( uint32_t do_id, const string &dcname )
 {
         DCClassPP *dclass = _dclass_by_name[dcname + _dc_suffix];
         DistributedObjectBase *dobj = dclass->get_obj_singleton()->make_new();
@@ -64,8 +61,7 @@ generate_global_object( uint32_t do_id, const string &dcname )
         return dobj;
 }
 
-DCFieldPP *ConnectionRepository::
-get_field_wrapper( DCField *field )
+DCFieldPP *ConnectionRepository::get_field_wrapper( DCField *field )
 {
         for ( size_t i = 0; i < _wrapper_fields.size(); i++ )
         {
@@ -76,11 +72,10 @@ get_field_wrapper( DCField *field )
                 }
         }
 
-        return ( DCFieldPP * )NULL;
+        return (DCFieldPP *)nullptr;
 }
 
-void ConnectionRepository::
-read_dc_file()
+void ConnectionRepository::read_dc_file()
 {
 
         dc_file.clear();
@@ -88,12 +83,12 @@ read_dc_file()
         for ( size_t i = 0; i < _dc_files.size(); i++ )
         {
                 connectionRepository_cat.info()
-                                << "Reading DC file: " << _dc_files[i] << "...\n";
+                        << "Reading DC file: " << _dc_files[i] << "...\n";
                 bool result = dc_file.read( Filename( _dc_files[i] ) );
                 if ( !result )
                 {
                         connectionRepository_cat.error()
-                                        << "Could not read dc file!\n";
+                                << "Could not read dc file!\n";
                         return;
                 }
         }
@@ -107,10 +102,10 @@ read_dc_file()
                 string classname = dclass->get_name() + _dc_suffix;
 
                 DistributedObjectBase *singleton = dc_singleton_by_name[classname];
-                if ( singleton == ( DistributedObjectBase * )NULL )
+                if ( singleton == (DistributedObjectBase *)nullptr )
                 {
                         connectionRepository_cat.error()
-                                        << "DClass " << classname << " is not registered as a class in c++ code\n";
+                                << "DClass " << classname << " is not registered as a class in c++ code\n";
                         continue;
                 }
                 DCClassPP *cls_wrapper = new DCClassPP( dclass );
@@ -149,7 +144,7 @@ read_dc_file()
                 else
                 {
                         connectionRepository_cat.error()
-                                        << "dclass from dcfile " << classname << " not defined in code!\n";
+                                << "dclass from dcfile " << classname << " not defined in code!\n";
                 }
 
                 _dclass_by_name[classname] = cls_wrapper;
@@ -158,14 +153,12 @@ read_dc_file()
 
 }
 
-DCClassPP *ConnectionRepository::
-get_dclass_by_name( const string &name ) const
+DCClassPP *ConnectionRepository::get_dclass_by_name( const string &name ) const
 {
         return _dclass_by_name.at( name );
 }
 
-void ConnectionRepository::
-start_reader_poll_task()
+void ConnectionRepository::start_reader_poll_task()
 {
         stop_reader_poll_task();
 
@@ -179,27 +172,24 @@ start_reader_poll_task()
 
 }
 
-void ConnectionRepository::
-stop_reader_poll_task()
+void ConnectionRepository::stop_reader_poll_task()
 {
-        if ( _reader_poll_task != NULL )
+        if ( _reader_poll_task != nullptr )
         {
                 _reader_poll_task->remove();
-                _reader_poll_task = NULL;
+                _reader_poll_task = nullptr;
         }
         /* ignore overflow event */
 }
 
-void ConnectionRepository::
-reader_poll_until_empty()
+void ConnectionRepository::reader_poll_until_empty()
 {
         while ( reader_poll_once() )
         {
         }
 }
 
-bool ConnectionRepository::
-reader_poll_once()
+bool ConnectionRepository::reader_poll_once()
 {
         if ( check_datagram() )
         {
@@ -216,22 +206,19 @@ reader_poll_once()
         return false;
 }
 
-AsyncTask::DoneStatus ConnectionRepository::
-reader_poll_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus ConnectionRepository::reader_poll_task( GenericAsyncTask *task, void *data )
 {
-        ( ( ConnectionRepository * )data )->reader_poll_until_empty();
+        ( (ConnectionRepository *)data )->reader_poll_until_empty();
         return AsyncTask::DS_cont;
 }
 
-void ConnectionRepository::
-lost_connection()
+void ConnectionRepository::lost_connection()
 {
         connectionRepository_cat.warning()
-                        << "Lost connection to gameserver.\n";
+                << "Lost connection to gameserver.\n";
 }
 
-void ConnectionRepository::
-send( Datagram &dg )
+void ConnectionRepository::send( Datagram &dg )
 {
         if ( dg.get_length() > 0 )
         {
@@ -239,20 +226,18 @@ send( Datagram &dg )
         }
 }
 
-void ConnectionRepository::
-request_delete( DistributedObjectBase *obj )
+void ConnectionRepository::request_delete( DistributedObjectBase *obj )
 {
         // Nothing happens in this implementation.
 }
 
-void ConnectionRepository::
-handle_update_field()
+void ConnectionRepository::handle_update_field()
 {
         DOID_TYPE do_id = _private_di.get_uint32();
         DistributedObjectBase *dobj = get_do( do_id );
-        nassertv( dobj != NULL );
+        nassertv( dobj != nullptr );
         DCClassPP *dclass = dobj->get_dclass();
-        nassertv( dclass != NULL );
+        nassertv( dclass != nullptr );
         if ( get_in_quiet_zone() )
         {
                 if ( !dobj->get_never_disable() )
@@ -263,14 +248,13 @@ handle_update_field()
         dclass->receive_update( dobj, _private_di );
 }
 
-void ConnectionRepository::
-handle_update_field_owner()
+void ConnectionRepository::handle_update_field_owner()
 {
         DOID_TYPE do_id = _private_di.get_uint32();
         DistributedObjectBase *ownerobj = get_owner_view( do_id );
-        nassertv( ownerobj != NULL );
+        nassertv( ownerobj != nullptr );
         DCClassPP *ovdclass = ownerobj->get_dclass();
-        nassertv( ovdclass != NULL );
+        nassertv( ovdclass != nullptr );
         DCPacker ovpacker;
         ovpacker.set_unpack_data( _private_di.get_remaining_bytes() );
         int ovfield_id = ovpacker.raw_unpack_uint16();
@@ -282,9 +266,9 @@ handle_update_field_owner()
         }
 
         DistributedObjectBase *dobj = get_do( do_id );
-        nassertv( dobj != NULL );
+        nassertv( dobj != nullptr );
         DCClassPP *dclass = dobj->get_dclass();
-        nassertv( dclass != NULL );
+        nassertv( dclass != nullptr );
         DCPacker packer;
         packer.set_unpack_data( _private_di.get_remaining_bytes() );
         int field_id = packer.raw_unpack_uint16();
@@ -292,8 +276,7 @@ handle_update_field_owner()
         dclass->receive_update( dobj, _private_di );
 }
 
-void ConnectionRepository::
-handle_datagram( DatagramIterator &di )
+void ConnectionRepository::handle_datagram( DatagramIterator &di )
 {
         unsigned int msgtype = get_msg_type();
         switch ( msgtype )
@@ -314,10 +297,9 @@ handle_datagram( DatagramIterator &di )
         }
 }
 
-PT( HTTPClient ) ConnectionRepository::
-check_http()
+PT( HTTPClient ) ConnectionRepository::check_http()
 {
-        if ( _http == NULL )
+        if ( _http == nullptr )
         {
                 _http = new HTTPClient();
         }
@@ -325,9 +307,8 @@ check_http()
         return _http;
 }
 
-void ConnectionRepository::
-connect( vector<URLSpec> &servers, ConnectCallbackFunc *callback,
-         ConnectFailCallbackFunc *failcallback, void *data )
+void ConnectionRepository::connect( vector<URLSpec> &servers, ConnectCallbackFunc *callback,
+                                    ConnectFailCallbackFunc *failcallback, void *data )
 {
         bool has_proxy = false;
         string proxies;
@@ -340,12 +321,12 @@ connect( vector<URLSpec> &servers, ConnectCallbackFunc *callback,
         if ( has_proxy )
         {
                 connectionRepository_cat.info()
-                                << "Connecting to gameserver via proxy list: " << proxies << "\n";
+                        << "Connecting to gameserver via proxy list: " << proxies << "\n";
         }
         else
         {
                 connectionRepository_cat.info()
-                                << "Connecting to gameserver directly (no proxy).\n";
+                        << "Connecting to gameserver directly (no proxy).\n";
         }
 
         if ( _connect_method == CM_HTTP )
@@ -359,7 +340,7 @@ connect( vector<URLSpec> &servers, ConnectCallbackFunc *callback,
                 {
                         URLSpec url = servers[i];
                         connectionRepository_cat.info()
-                                        << "Connecting to " << url.get_server_and_port() << " via NET interface.\n";
+                                << "Connecting to " << url.get_server_and_port() << " via NET interface.\n";
                         if ( try_connect_net( url ) )
                         {
                                 start_reader_poll_task();
@@ -372,7 +353,7 @@ connect( vector<URLSpec> &servers, ConnectCallbackFunc *callback,
         else if ( _connect_method == CM_NATIVE )
         {
                 connectionRepository_cat.error()
-                                << "no support for native net.\n";
+                        << "no support for native net.\n";
                 //for (size_t i = 0; i < servers.size(); i++) {
                 //  URLSpec url = servers[i];
                 //  connectionRepository_cat.info()
@@ -388,42 +369,38 @@ connect( vector<URLSpec> &servers, ConnectCallbackFunc *callback,
         else
         {
                 connectionRepository_cat.warning()
-                                << "Cannot connect using an unknown connect method.\n";
+                        << "Cannot connect using an unknown connect method.\n";
                 ( *failcallback )( data, 0, "", "", 0 );
         }
 }
 
-void ConnectionRepository::
-handle_connected_http( HTTPChannel *ch, URLSpec &url )
+void ConnectionRepository::handle_connected_http( HTTPChannel *ch, URLSpec &url )
 {
         set_connection_http( ch );
         _server_address = url;
 
         connectionRepository_cat.info()
-                        << "Successfully connected to " << url.get_server_and_port() << ".\n";
+                << "Successfully connected to " << url.get_server_and_port() << ".\n";
 
         start_reader_poll_task();
 }
 
-void ConnectionRepository::
-disconnect()
+void ConnectionRepository::disconnect()
 {
         connectionRepository_cat.info()
-                        << "Closing connection to server.\n";
+                << "Closing connection to server.\n";
         _server_address = URLSpec( "" );
         CConnectionRepository::disconnect();
         stop_reader_poll_task();
 }
 
-void ConnectionRepository::
-shutdown()
+void ConnectionRepository::shutdown()
 {
         CConnectionRepository::shutdown();
 }
 
-void ConnectionRepository::
-send_add_interest( int handle, int context, DOID_TYPE parentid,
-                   vector<ZONEID_TYPE> zones, const string &desc )
+void ConnectionRepository::send_add_interest( int handle, int context, DOID_TYPE parentid,
+                                              vector<ZONEID_TYPE> zones, const string &desc )
 {
         if ( parentid == 0 )
         {
@@ -431,7 +408,7 @@ send_add_interest( int handle, int context, DOID_TYPE parentid,
         }
 
         Datagram dg;
-        if ( zones.size() > ( size_t )1 )
+        if ( zones.size() > (size_t)1 )
         {
                 dg.add_uint16( CLIENT_ADD_INTEREST_MULTIPLE );
         }
@@ -443,9 +420,9 @@ send_add_interest( int handle, int context, DOID_TYPE parentid,
         dg.add_uint32( context );
         dg.add_uint16( handle );
         dg.add_uint32( parentid );
-        if ( zones.size() > ( size_t )1 )
+        if ( zones.size() > (size_t)1 )
         {
-                dg.add_uint16( ( uint16_t )zones.size() );
+                dg.add_uint16( (uint16_t)zones.size() );
         }
         for ( size_t i = 0; i < zones.size(); i++ )
         {
@@ -454,8 +431,7 @@ send_add_interest( int handle, int context, DOID_TYPE parentid,
         send( dg );
 }
 
-void ConnectionRepository::
-send_remove_interest( int handle, int context )
+void ConnectionRepository::send_remove_interest( int handle, int context )
 {
         Datagram dg;
         dg.add_uint16( CLIENT_REMOVE_INTEREST );
@@ -465,8 +441,7 @@ send_remove_interest( int handle, int context )
         send( dg );
 }
 
-void ConnectionRepository::
-send_remove_ai_interest( int handle )
+void ConnectionRepository::send_remove_ai_interest( int handle )
 {
         Datagram dg;
         dg.add_uint16( CLIENT_REMOVE_INTEREST );
@@ -474,14 +449,13 @@ send_remove_ai_interest( int handle )
         send( dg );
 }
 
-ConnectionRepository::HTTPConnectProcess::
-HTTPConnectProcess( ConnectionRepository *repo,
-                    PT( HTTPChannel ) ch,
-                    ConnectionRepository::vector_url &servers,
-                    ConnectionRepository::ConnectCallbackFunc *callback,
-                    ConnectionRepository::ConnectFailCallbackFunc *failcallback,
-                    void *data,
-                    int start_index )
+ConnectionRepository::HTTPConnectProcess::HTTPConnectProcess( ConnectionRepository *repo,
+                                                              PT( HTTPChannel ) ch,
+                                                              ConnectionRepository::vector_url &servers,
+                                                              ConnectionRepository::ConnectCallbackFunc *callback,
+                                                              ConnectionRepository::ConnectFailCallbackFunc *failcallback,
+                                                              void *data,
+                                                              int start_index )
 {
         _data = data;
         _repo = repo;
@@ -493,13 +467,11 @@ HTTPConnectProcess( ConnectionRepository *repo,
         connect_callback();
 }
 
-ConnectionRepository::HTTPConnectProcess::
-~HTTPConnectProcess()
+ConnectionRepository::HTTPConnectProcess::~HTTPConnectProcess()
 {
 }
 
-void ConnectionRepository::HTTPConnectProcess::
-connect_callback()
+void ConnectionRepository::HTTPConnectProcess::connect_callback()
 {
         URLSpec addr;
         if ( _ch->is_connection_ready() )
@@ -509,11 +481,11 @@ connect_callback()
                 ( *_callback )( _data );
                 delete this;
         }
-        else if ( ( size_t )_index < _servers.size() )
+        else if ( (size_t)_index < _servers.size() )
         {
                 addr = _servers[_index];
                 connectionRepository_cat.info()
-                                << "Connecting to " << addr.get_server_and_port() << " via HTTP interface.\n";
+                        << "Connecting to " << addr.get_server_and_port() << " via HTTP interface.\n";
                 _ch->preserve_status();
                 _ch->begin_connect_to( DocumentSpec( addr ) );
                 _poll_task = new GenericAsyncTask( "pollConnection", poll_connection_task, this );
@@ -522,20 +494,19 @@ connect_callback()
         else
         {
                 connectionRepository_cat.error()
-                                << "Ran out of servers to connect to!\n";
+                        << "Ran out of servers to connect to!\n";
                 addr = _servers[_index - 1];
                 ( *_fail_callback )( _data, _ch->get_status_code(), _ch->get_status_string(), addr.get_server(), addr.get_port() );
                 delete this;
         }
 }
 
-AsyncTask::DoneStatus ConnectionRepository::HTTPConnectProcess::
-poll_connection()
+AsyncTask::DoneStatus ConnectionRepository::HTTPConnectProcess::poll_connection()
 {
-        if ( _ch == NULL )
+        if ( _ch == nullptr )
         {
                 connectionRepository_cat.error()
-                                << "Shit, _ch is NULL\n";
+                        << "Shit, _ch is nullptr\n";
         }
 
         if ( _ch->run() )
@@ -547,10 +518,9 @@ poll_connection()
         return AsyncTask::DS_done;
 }
 
-AsyncTask::DoneStatus ConnectionRepository::HTTPConnectProcess::
-poll_connection_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus ConnectionRepository::HTTPConnectProcess::poll_connection_task( GenericAsyncTask *task, void *data )
 {
-        HTTPConnectProcess *cls = ( HTTPConnectProcess * )data;
+        HTTPConnectProcess *cls = (HTTPConnectProcess *)data;
         AsyncTask::DoneStatus status = cls->poll_connection();
         return status;
 }

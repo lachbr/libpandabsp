@@ -10,8 +10,7 @@ static const PN_stdfloat soft_landing = -5.0;
 static const PN_stdfloat diagonal_factor = sqrt( 2.0 ) / 2.0;
 static const PN_stdfloat slide_factor = 0.75;
 
-GravityWalker::
-GravityWalker( PN_stdfloat grav, PN_stdfloat standable_ground, PN_stdfloat hard_landing_force, bool legacy_lifter )
+GravityWalker::GravityWalker( PN_stdfloat grav, PN_stdfloat standable_ground, PN_stdfloat hard_landing_force, bool legacy_lifter )
 {
         _gravity = grav;
         _standable_ground = standable_ground;
@@ -21,8 +20,7 @@ GravityWalker( PN_stdfloat grav, PN_stdfloat standable_ground, PN_stdfloat hard_
         _may_jump = true;
 }
 
-void GravityWalker::
-setup_ray( BitMask32 &bitmask, PN_stdfloat floor_offset, PN_stdfloat reach )
+void GravityWalker::setup_ray( BitMask32 &bitmask, PN_stdfloat floor_offset, PN_stdfloat reach )
 {
         _coll_ray = new CollisionRay( 0.0, 0.0, COLL_HANDLER_RAY_START, 0.0, 0.0, -1.0 );
         PT( CollisionNode ) craynode = new CollisionNode( "GW.cRayNode" );
@@ -43,8 +41,7 @@ setup_ray( BitMask32 &bitmask, PN_stdfloat floor_offset, PN_stdfloat reach )
         _lifter->add_collider( _coll_ray_np, _avatar_np );
 }
 
-void GravityWalker::
-setup_wall_sphere( BitMask32 &bitmask, PN_stdfloat avatar_radius )
+void GravityWalker::setup_wall_sphere( BitMask32 &bitmask, PN_stdfloat avatar_radius )
 {
         _avatar_radius = avatar_radius;
         PT( CollisionSphere ) csphere = new CollisionSphere( 0.0, 0.0, avatar_radius, avatar_radius );
@@ -66,8 +63,7 @@ setup_wall_sphere( BitMask32 &bitmask, PN_stdfloat avatar_radius )
         }
 }
 
-void GravityWalker::
-setup_event_sphere( BitMask32 &bitmask, PN_stdfloat avatar_radius )
+void GravityWalker::setup_event_sphere( BitMask32 &bitmask, PN_stdfloat avatar_radius )
 {
         _avatar_radius = avatar_radius;
         PT( CollisionSphere ) csphere = new CollisionSphere( 0.0, 0.0, avatar_radius - 0.1, avatar_radius * 1.04 );
@@ -83,8 +79,7 @@ setup_event_sphere( BitMask32 &bitmask, PN_stdfloat avatar_radius )
         _event->add_out_pattern( "exit%in" );
 }
 
-void GravityWalker::
-setup_floor_sphere( BitMask32 &bitmask, PN_stdfloat avatar_radius )
+void GravityWalker::setup_floor_sphere( BitMask32 &bitmask, PN_stdfloat avatar_radius )
 {
         _avatar_radius = avatar_radius;
         PT( CollisionSphere ) csphere = new CollisionSphere( 0.0, 0.0, avatar_radius, 0.01 );
@@ -98,26 +93,22 @@ setup_floor_sphere( BitMask32 &bitmask, PN_stdfloat avatar_radius )
         _pusher_floor->add_collider( _cfloorsphere_np, _avatar_np );
 }
 
-void GravityWalker::
-set_wall_bitmask( BitMask32 &bitmask )
+void GravityWalker::set_wall_bitmask( BitMask32 &bitmask )
 {
         _wall_bitmask = bitmask;
 }
 
-void GravityWalker::
-set_floor_bitmask( BitMask32 &bitmask )
+void GravityWalker::set_floor_bitmask( BitMask32 &bitmask )
 {
         _floor_bitmask = bitmask;
 }
 
-void GravityWalker::
-set_event_bitmask( BitMask32 &bitmask )
+void GravityWalker::set_event_bitmask( BitMask32 &bitmask )
 {
         _event_bitmask = bitmask;
 }
 
-void GravityWalker::
-swap_floor_bitmask( BitMask32 &old_bm, BitMask32 &new_bm )
+void GravityWalker::swap_floor_bitmask( BitMask32 &old_bm, BitMask32 &new_bm )
 {
         _floor_bitmask = _floor_bitmask & ~old_bm;
         _floor_bitmask |= new_bm;
@@ -126,23 +117,20 @@ swap_floor_bitmask( BitMask32 &old_bm, BitMask32 &new_bm )
         cnode->set_from_collide_mask( _floor_bitmask );
 }
 
-void GravityWalker::
-set_gravity( PN_stdfloat grav )
+void GravityWalker::set_gravity( PN_stdfloat grav )
 {
         _gravity = grav;
         _lifter->set_gravity( _gravity );
 }
 
-PN_stdfloat GravityWalker::
-get_gravity() const
+PN_stdfloat GravityWalker::get_gravity() const
 {
         return _gravity;
 }
 
-void GravityWalker::
-initialize_collisions( CollisionTraverser *ctrav, NodePath &avatar_np,
-                       PN_stdfloat avatar_radius, PN_stdfloat floor_offset,
-                       PN_stdfloat reach )
+void GravityWalker::initialize_collisions( CollisionTraverser *ctrav, NodePath &avatar_np,
+                                           PN_stdfloat avatar_radius, PN_stdfloat floor_offset,
+                                           PN_stdfloat reach )
 {
         _avatar_np = avatar_np;
         _ctrav = ctrav;
@@ -158,26 +146,22 @@ initialize_collisions( CollisionTraverser *ctrav, NodePath &avatar_np,
         set_collisions_active( true );
 }
 
-void GravityWalker::
-set_tag( const string &key, const string &value )
+void GravityWalker::set_tag( const string &key, const string &value )
 {
         _ceventsphere_np.set_tag( key, value );
 }
 
-PN_stdfloat GravityWalker::
-get_airborne_height() const
+PN_stdfloat GravityWalker::get_airborne_height() const
 {
         return _lifter->get_airborne_height();
 }
 
-void GravityWalker::
-set_avatar_physics_indicator( NodePath &np )
+void GravityWalker::set_avatar_physics_indicator( NodePath &np )
 {
         _cwallsphere_np.show();
 }
 
-void GravityWalker::
-delete_collisions()
+void GravityWalker::delete_collisions()
 {
         _cwallsphere_np.remove_node();
         if ( gw_floor_sphere )
@@ -186,8 +170,7 @@ delete_collisions()
         }
 }
 
-void GravityWalker::
-set_collisions_active( bool active )
+void GravityWalker::set_collisions_active( bool active )
 {
         if ( _collisions_active != active )
         {
@@ -224,7 +207,7 @@ set_collisions_active( bool active )
                 }
                 else
                 {
-                        if ( _ctrav != ( CollisionTraverser * )NULL )
+                        if ( _ctrav != (CollisionTraverser *)nullptr )
                         {
                                 _ctrav->remove_collider( _cwallsphere_np );
                                 if ( gw_floor_sphere )
@@ -240,21 +223,18 @@ set_collisions_active( bool active )
         }
 }
 
-bool GravityWalker::
-get_collisions_active() const
+bool GravityWalker::get_collisions_active() const
 {
         return _collisions_active;
 }
 
-void GravityWalker::
-place_on_floor()
+void GravityWalker::place_on_floor()
 {
         one_time_collide();
         _avatar_np.set_z( _avatar_np.get_z() - _lifter->get_airborne_height() );
 }
 
-void GravityWalker::
-one_time_collide()
+void GravityWalker::one_time_collide()
 {
         if ( _cwallsphere_np.is_empty() )
         {
@@ -281,23 +261,20 @@ one_time_collide()
         temp_ctrav.traverse( g_render );
 }
 
-void GravityWalker::
-set_may_jump()
+void GravityWalker::set_may_jump()
 {
         _may_jump = true;
 }
 
-AsyncTask::DoneStatus GravityWalker::
-jump_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus GravityWalker::jump_task( GenericAsyncTask *task, void *data )
 {
-        ( ( GravityWalker * )data )->set_may_jump();
+        ( (GravityWalker *)data )->set_may_jump();
         return AsyncTask::DS_done;
 }
 
-void GravityWalker::
-start_jump_delay( PN_stdfloat delay )
+void GravityWalker::start_jump_delay( PN_stdfloat delay )
 {
-        if ( _jump_delay_task != ( GenericAsyncTask * )NULL )
+        if ( _jump_delay_task != (GenericAsyncTask *)nullptr )
         {
                 _jump_delay_task->remove();
         }
@@ -307,38 +284,32 @@ start_jump_delay( PN_stdfloat delay )
         g_task_mgr->add( _jump_delay_task );
 }
 
-void GravityWalker::
-add_blast_force( LVecBase3f &vector )
+void GravityWalker::add_blast_force( LVecBase3f &vector )
 {
         _lifter->add_velocity( vector.length() );
 }
 
-string GravityWalker::
-get_hard_land_event() const
+string GravityWalker::get_hard_land_event() const
 {
         return "jumpHardLand";
 }
 
-string GravityWalker::
-get_land_event() const
+string GravityWalker::get_land_event() const
 {
         return "jumpLand";
 }
 
-string GravityWalker::
-get_jump_start_event() const
+string GravityWalker::get_jump_start_event() const
 {
         return "jumpStart";
 }
 
-string GravityWalker::
-get_moving_event() const
+string GravityWalker::get_moving_event() const
 {
         return "moving";
 }
 
-void GravityWalker::
-handle_avatar_controls()
+void GravityWalker::handle_avatar_controls()
 {
         bool run = g_input_state.is_set( "run" );
         bool fwd = g_input_state.is_set( "forward" );
@@ -511,21 +482,18 @@ handle_avatar_controls()
         }
 }
 
-AsyncTask::DoneStatus GravityWalker::
-av_ctrl_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus GravityWalker::av_ctrl_task( GenericAsyncTask *task, void *data )
 {
-        ( ( GravityWalker * )data )->handle_avatar_controls();
+        ( (GravityWalker *)data )->handle_avatar_controls();
         return AsyncTask::DS_cont;
 }
 
-void GravityWalker::
-do_delta_pos()
+void GravityWalker::do_delta_pos()
 {
         _need_to_delta_pos = true;
 }
 
-void GravityWalker::
-set_prior_parent_vector()
+void GravityWalker::set_prior_parent_vector()
 {
         LVector3 vel;
         if ( _old_dt == 0 )
@@ -540,23 +508,20 @@ set_prior_parent_vector()
         _prior_parent = vel;
 }
 
-void GravityWalker::
-reset()
+void GravityWalker::reset()
 {
         _lifter->set_velocity( 0.0 );
         _prior_parent = LVector3::zero();
 }
 
-const LVector3 &GravityWalker::
-get_velocity() const
+const LVector3 &GravityWalker::get_velocity() const
 {
         return _vel;
 }
 
-void GravityWalker::
-enable_avatar_controls()
+void GravityWalker::enable_avatar_controls()
 {
-        if ( _controls_task != ( GenericAsyncTask * )NULL )
+        if ( _controls_task != (GenericAsyncTask *)nullptr )
         {
                 _controls_task->remove();
         }
@@ -570,27 +535,25 @@ enable_avatar_controls()
         g_task_mgr->add( _controls_task );
 }
 
-void GravityWalker::
-disable_avatar_controls()
+void GravityWalker::disable_avatar_controls()
 {
-        if ( _controls_task != ( GenericAsyncTask * )NULL )
+        if ( _controls_task != (GenericAsyncTask *)nullptr )
         {
                 _controls_task->remove();
         }
-        if ( _indicator_task != ( GenericAsyncTask * )NULL )
+        if ( _indicator_task != (GenericAsyncTask *)nullptr )
         {
                 _indicator_task->remove();
         }
-        if ( _jump_delay_task != ( GenericAsyncTask * )NULL )
+        if ( _jump_delay_task != (GenericAsyncTask *)nullptr )
         {
                 _jump_delay_task->remove();
         }
 }
 
-void GravityWalker::
-flush_event_handlers()
+void GravityWalker::flush_event_handlers()
 {
-        if ( _ctrav != ( CollisionTraverser * )NULL )
+        if ( _ctrav != (CollisionTraverser *)nullptr )
         {
                 if ( gw_fluid_pusher )
                 {
@@ -609,8 +572,7 @@ flush_event_handlers()
         _lifter->flush();
 }
 
-void GravityWalker::
-set_collision_ray_height( PN_stdfloat height )
+void GravityWalker::set_collision_ray_height( PN_stdfloat height )
 {
         _coll_ray->set_origin( 0.0, 0.0, height );
 }

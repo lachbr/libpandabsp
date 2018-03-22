@@ -13,15 +13,14 @@
 
 NotifyCategoryDef( ppBase, "" );
 
-PPBase::
-PPBase( int argc, char *argv[] )
+PPBase::PPBase( int argc, char *argv[] )
 {
         _framework.open_framework( argc, argv );
 
         _last_mus_t = 0.0f;
         _min_stop_sfx = false;
         _min_stop_mus = false;
-        _current_music = NULL;
+        _current_music = nullptr;
 
         bool use_win = ConfigVariableString( "window-type", "onscreen" ) != "none";
 
@@ -76,24 +75,22 @@ PPBase( int argc, char *argv[] )
         g_base = this;
 }
 
-void PPBase::
-mount_multifile( const string &mfpath )
+void PPBase::mount_multifile( const string &mfpath )
 {
         VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
         vfs->mount( mfpath, ".", VirtualFileSystem::MF_read_only );
 }
 
-void PPBase::
-handle_window_event( const Event *e, void *data )
+void PPBase::handle_window_event( const Event *e, void *data )
 {
-        PPBase *obj = ( PPBase * )data;
+        PPBase *obj = (PPBase *)data;
         const WindowProperties props = obj->_window->get_graphics_window()->get_properties();
         if ( !props.get_foreground() || props.get_minimized() )
         {
                 // Window is minimized or not in the foreground. Maybe disable the audio.
                 if ( obj->_min_stop_mus )
                 {
-                        if ( obj->_current_music != NULL )
+                        if ( obj->_current_music != nullptr )
                         {
                                 obj->_last_mus_t = obj->_current_music->get_time();
                         }
@@ -109,7 +106,7 @@ handle_window_event( const Event *e, void *data )
                 if ( obj->_min_stop_mus )
                 {
                         obj->enable_music();
-                        if ( obj->_current_music != NULL )
+                        if ( obj->_current_music != nullptr )
                         {
                                 obj->_current_music->set_time( obj->_last_mus_t );
                         }
@@ -121,25 +118,22 @@ handle_window_event( const Event *e, void *data )
         }
 }
 
-void PPBase::
-shutdown( int exit_code )
+void PPBase::shutdown( int exit_code )
 {
         ppBase_cat.info()
-                        << "Exit code: " << exit_code << "\n";
+                << "Exit code: " << exit_code << "\n";
 
         _framework.close_all_windows();
         _framework.close_framework();
         exit( exit_code );
 }
 
-void PPBase::
-run()
+void PPBase::run()
 {
         _framework.main_loop();
 }
 
-void PPBase::
-set_sleep( PN_stdfloat sleep )
+void PPBase::set_sleep( PN_stdfloat sleep )
 {
         if ( _sleep_time == sleep )
         {
@@ -149,14 +143,14 @@ set_sleep( PN_stdfloat sleep )
         _sleep_time = sleep;
         if ( _sleep_time == 0.0 )
         {
-                if ( _sleep_task != NULL )
+                if ( _sleep_task != nullptr )
                 {
                         _sleep_task->remove();
                 }
         }
         else
         {
-                if ( _sleep_task != NULL )
+                if ( _sleep_task != nullptr )
                 {
                         _sleep_task->remove();
                 }
@@ -165,62 +159,53 @@ set_sleep( PN_stdfloat sleep )
         }
 }
 
-AsyncTask::DoneStatus PPBase::
-sleep_cycle_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus PPBase::sleep_cycle_task( GenericAsyncTask *task, void *data )
 {
-        PPBase *cls = ( PPBase * )data;
+        PPBase *cls = (PPBase *)data;
         Thread::sleep( cls->_sleep_time );
         return AsyncTask::DS_cont;
 }
 
-PN_stdfloat PPBase::
-get_sleep() const
+PN_stdfloat PPBase::get_sleep() const
 {
         return _sleep_time;
 }
 
-int PPBase::
-get_resolution_x() const
+int PPBase::get_resolution_x() const
 {
         return _window->get_graphics_window()->get_x_size();
 }
 
-int PPBase::
-get_resolution_y() const
+int PPBase::get_resolution_y() const
 {
         return _window->get_graphics_window()->get_y_size();
 }
 
-void PPBase::
-define_key( const string &name, const string &description, void( *function )( const Event *, void * ), void *data )
+void PPBase::define_key( const string &name, const string &description, void( *function )( const Event *, void * ), void *data )
 {
         _framework.define_key( name, description, function, data );
 }
 
-void PPBase::
-undefine_key( const string &name )
+void PPBase::undefine_key( const string &name )
 {
         EventHandler::get_global_event_handler()->remove_hooks( name );
 }
 
-void PPBase::
-load_map( const string &file )
+void PPBase::load_map( const string &file )
 {
         unload_map();
 
         MapLoader::load_map( file );
 }
 
-void PPBase::
-unload_map()
+void PPBase::unload_map()
 {
         MapLoader::unload_map();
 }
 
-AsyncTask::DoneStatus PPBase::
-tick_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus PPBase::tick_task( GenericAsyncTask *task, void *data )
 {
-        PPBase *base = ( PPBase * )data;
+        PPBase *base = (PPBase *)data;
         g_base->_music_mgr->update();
         g_base->_sfx_mgr->update();
         if ( ConfigVariableString( "window-type", "onscreen" ) != "none" )
@@ -231,121 +216,104 @@ tick_task( GenericAsyncTask *task, void *data )
 
         CIntervalManager::get_global_ptr()->step();
 
-        if ( g_base->_current_music != NULL )
+        if ( g_base->_current_music != nullptr )
         {
                 if ( g_base->_current_music->status() != AudioSound::PLAYING )
                 {
-                        // Set the current music to NULL if the current music is not playing.
-                        g_base->_current_music = NULL;
+                        // Set the current music to nullptr if the current music is not playing.
+                        g_base->_current_music = nullptr;
                 }
         }
 
         return AsyncTask::DS_cont;
 }
 
-PT( AudioSound ) PPBase::
-load_music( const string &path )
+PT( AudioSound ) PPBase::load_music( const string &path )
 {
         return _music_mgr->get_sound( path );
 }
 
-PT( AudioSound ) PPBase::
-load_sfx( const string &path )
+PT( AudioSound ) PPBase::load_sfx( const string &path )
 {
         return _sfx_mgr->get_sound( path );
 }
 
-NodePath PPBase::
-load_model( const string &path )
+NodePath PPBase::load_model( const string &path )
 {
         return _window->load_model( _framework.get_models(), path );
 }
 
-PT( Texture ) PPBase::
-load_texture( const string &path )
+PT( Texture ) PPBase::load_texture( const string &path )
 {
         return TexturePool::load_texture( path );
 }
 
-PT( TextFont ) PPBase::
-load_font( const string &path )
+PT( TextFont ) PPBase::load_font( const string &path )
 {
         return FontPool::load_font( path );
 }
 
-void PPBase::
-set_background_color( PN_stdfloat r, PN_stdfloat g, PN_stdfloat b )
+void PPBase::set_background_color( PN_stdfloat r, PN_stdfloat g, PN_stdfloat b )
 {
         _window->get_display_region_3d()->set_clear_color( LColor( r, g, b, 1.0 ) );
 }
 
-void PPBase::
-enable_music()
+void PPBase::enable_music()
 {
         _music_mgr->set_active( true );
 }
 
-void PPBase::
-disable_music()
+void PPBase::disable_music()
 {
         _music_mgr->set_active( false );
 }
 
-void PPBase::
-enable_sfx()
+void PPBase::enable_sfx()
 {
         _sfx_mgr->set_active( true );
 }
 
-void PPBase::
-disable_sfx()
+void PPBase::disable_sfx()
 {
         _sfx_mgr->set_active( false );
 }
 
-void PPBase::
-set_music_volume( PN_stdfloat vol )
+void PPBase::set_music_volume( PN_stdfloat vol )
 {
         _music_mgr->set_volume( vol );
 }
 
-void PPBase::
-set_sfx_volume( PN_stdfloat vol )
+void PPBase::set_sfx_volume( PN_stdfloat vol )
 {
         _sfx_mgr->set_volume( vol );
 }
 
-void PPBase::
-enable_mouse()
+void PPBase::enable_mouse()
 {
         _window->setup_trackball();
 }
 
-void PPBase::
-disable_mouse()
+void PPBase::disable_mouse()
 {
         ppBase_cat.warning()
-                        << "disable_mouse: not implemented\n";
+                << "disable_mouse: not implemented\n";
 }
 
-void PPBase::
-set_mouse_cursor_visible( bool flag )
+void PPBase::set_mouse_cursor_visible( bool flag )
 {
         WindowProperties props;
         props.set_cursor_hidden( !flag );
         _window->get_graphics_window()->request_properties( props );
 }
 
-PT( GenericAsyncTask ) PPBase::
-start_task( GenericAsyncTask::TaskFunc func, void *data, const string &name )
+PT( GenericAsyncTask ) PPBase::start_task( GenericAsyncTask::TaskFunc func, void *data, const string &name )
 {
         PT( GenericAsyncTask ) task = new GenericAsyncTask( name, func, data );
         _task_mgr->add( task );
         return task;
 }
 
-PT( GenericAsyncTask ) PPBase::
-do_task_later( PN_stdfloat delay, GenericAsyncTask::TaskFunc func, void *data, const string &name )
+PT( GenericAsyncTask ) PPBase::do_task_later( PN_stdfloat delay, GenericAsyncTask::TaskFunc func, void *data, const string &name )
 {
         PT( GenericAsyncTask ) task = new GenericAsyncTask( name, func, data );
         task->set_delay( delay );
@@ -353,14 +321,12 @@ do_task_later( PN_stdfloat delay, GenericAsyncTask::TaskFunc func, void *data, c
         return task;
 }
 
-void PPBase::
-stop_task( AsyncTask *task )
+void PPBase::stop_task( AsyncTask *task )
 {
         _task_mgr->remove( task );
 }
 
-void PPBase::
-use_ortho_lens()
+void PPBase::use_ortho_lens()
 {
         int numcams = _window->get_num_cameras();
         for ( int i = 0; i < numcams; i++ )
@@ -371,8 +337,7 @@ use_ortho_lens()
         }
 }
 
-void PPBase::
-use_persp_lens()
+void PPBase::use_persp_lens()
 {
         int numcams = _window->get_num_cameras();
         for ( int i = 0; i < numcams; i++ )
@@ -383,22 +348,20 @@ use_persp_lens()
         }
 }
 
-void PPBase::
-set_stop_audio_on_minimize( bool sfx, bool mus )
+void PPBase::set_stop_audio_on_minimize( bool sfx, bool mus )
 {
         _min_stop_mus = mus;
         _min_stop_sfx = sfx;
 }
 
-void PPBase::
-play_music( PT( AudioSound ) music, bool looping, PN_stdfloat volume, bool interrupt )
+void PPBase::play_music( PT( AudioSound ) music, bool looping, PN_stdfloat volume, bool interrupt )
 {
         music->set_loop( looping );
         music->set_volume( volume );
         if ( interrupt )
         {
                 // Stop the current song if specified.
-                if ( _current_music != NULL )
+                if ( _current_music != nullptr )
                 {
                         _current_music->stop();
                 }
@@ -407,20 +370,17 @@ play_music( PT( AudioSound ) music, bool looping, PN_stdfloat volume, bool inter
         _current_music = music;
 }
 
-void PPBase::
-set_camera_fov( PN_stdfloat fov )
+void PPBase::set_camera_fov( PN_stdfloat fov )
 {
         _window->get_camera( 0 )->get_lens()->set_min_fov( fov / ( 4. / 3. ) );
 }
 
-void PPBase::
-set_camera_near( PN_stdfloat val )
+void PPBase::set_camera_near( PN_stdfloat val )
 {
         _window->get_camera( 0 )->get_lens()->set_near( val );
 }
 
-void PPBase::
-set_camera_far( PN_stdfloat val )
+void PPBase::set_camera_far( PN_stdfloat val )
 {
         _window->get_camera( 0 )->get_lens()->set_far( val );
 }

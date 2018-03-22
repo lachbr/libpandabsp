@@ -9,19 +9,16 @@
 #include <omniBoundingVolume.h>
 #include <orthographicLens.h>
 
-PostProcessRegion PostProcessRegion::
-make( PT( GraphicsOutput ) internal_buffer )
+PostProcessRegion PostProcessRegion::make( PT( GraphicsOutput ) internal_buffer )
 {
         return PostProcessRegion( internal_buffer );
 }
 
-PostProcessRegion::
-PostProcessRegion()
+PostProcessRegion::PostProcessRegion()
 {
 }
 
-PostProcessRegion::
-PostProcessRegion( PT( GraphicsOutput ) internal_buffer )
+PostProcessRegion::PostProcessRegion( PT( GraphicsOutput ) internal_buffer )
 {
         _buffer = internal_buffer;
         _region = _buffer->make_display_region();
@@ -30,86 +27,72 @@ PostProcessRegion( PT( GraphicsOutput ) internal_buffer )
         make_fullscreen_cam();
 }
 
-void PostProcessRegion::
-set_attrib( CPT( RenderAttrib ) attrib, int priority )
+void PostProcessRegion::set_attrib( CPT( RenderAttrib ) attrib, int priority )
 {
         _tri.set_attrib( attrib, priority );
 }
 
-void PostProcessRegion::
-set_sort( int sort )
+void PostProcessRegion::set_sort( int sort )
 {
         _region->set_sort( sort );
 }
 
-void PostProcessRegion::
-set_instance_count( int count )
+void PostProcessRegion::set_instance_count( int count )
 {
         _tri.set_instance_count( count );
 }
 
-void PostProcessRegion::
-disable_clears()
+void PostProcessRegion::disable_clears()
 {
         _region->disable_clears();
 }
 
-void PostProcessRegion::
-set_active( bool active )
+void PostProcessRegion::set_active( bool active )
 {
         _region->set_active( active );
 }
 
-void PostProcessRegion::
-set_clear_depth_active( bool active )
+void PostProcessRegion::set_clear_depth_active( bool active )
 {
         _region->set_clear_depth_active( active );
 }
 
-void PostProcessRegion::
-set_clear_depth( PN_stdfloat depth )
+void PostProcessRegion::set_clear_depth( PN_stdfloat depth )
 {
         _region->set_clear_depth( depth );
 }
 
-void PostProcessRegion::
-set_shader( CPT( Shader ) shader, int priority )
+void PostProcessRegion::set_shader( CPT( Shader ) shader, int priority )
 {
         _tri.set_shader( shader, priority );
 }
 
-void PostProcessRegion::
-set_camera( const NodePath &cam )
+void PostProcessRegion::set_camera( const NodePath &cam )
 {
         _region->set_camera( cam );
 }
 
-void PostProcessRegion::
-set_clear_color_active( bool active )
+void PostProcessRegion::set_clear_color_active( bool active )
 {
         _region->set_clear_color_active( active );
 }
 
-void PostProcessRegion::
-set_clear_color( const LColor &color )
+void PostProcessRegion::set_clear_color( const LColor &color )
 {
         _region->set_clear_color( color );
 }
 
-const NodePath &PostProcessRegion::
-get_node() const
+const NodePath &PostProcessRegion::get_node() const
 {
         return _node;
 }
 
-const NodePath &PostProcessRegion::
-get_tri() const
+const NodePath &PostProcessRegion::get_tri() const
 {
         return _tri;
 }
 
-void PostProcessRegion::
-set_shader_input( const ShaderInput *inp, bool override )
+void PostProcessRegion::set_shader_input( const ShaderInput *inp, bool override )
 {
         if ( override )
         {
@@ -121,8 +104,7 @@ set_shader_input( const ShaderInput *inp, bool override )
         }
 }
 
-void PostProcessRegion::
-make_fullscreen_tri()
+void PostProcessRegion::make_fullscreen_tri()
 {
         CPT( GeomVertexFormat ) form = GeomVertexFormat::get_v3();
         PT( GeomVertexData ) vdata = new GeomVertexData( "vertices", form, Geom::UH_static );
@@ -149,8 +131,7 @@ make_fullscreen_tri()
         _tri = tri;
 }
 
-void PostProcessRegion::
-make_fullscreen_cam()
+void PostProcessRegion::make_fullscreen_cam()
 {
         PT( Camera ) cam = new Camera( "BufferCamera" );
         PT( OrthographicLens ) lens = new OrthographicLens();

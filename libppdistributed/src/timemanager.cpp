@@ -1,18 +1,16 @@
-#include "timeManager.h"
-#include "clockDelta.h"
-#include <throw_event.h>
+#include "timemanager.h"
+#include "clockdelta.h"
+#include "clientrepository.h"
 #include "pp_globals.h"
 
+#include <throw_event.h>
 #include <eventHandler.h>
-
-#include "clientRepository.h"
 
 DClassDef( TimeManager );
 
 NotifyCategoryDef( timeManager, "" );
 
-TimeManager::
-TimeManager()
+TimeManager::TimeManager()
 {
         _this_context = -1;
         _next_context = 0;
@@ -21,8 +19,7 @@ TimeManager()
         _last_attempt = -timemanager_min_wait * 2;
 }
 
-void TimeManager::
-generate()
+void TimeManager::generate()
 {
         DistributedObject::generate();
 
@@ -36,35 +33,31 @@ generate()
         }
 }
 
-void TimeManager::
-announce_generate()
+void TimeManager::announce_generate()
 {
         DistributedObject::announce_generate();
         g_cr->set_time_manager( this );
         synchronize( "TimeManager::anounce_generate" );
 }
 
-void TimeManager::
-disable()
+void TimeManager::disable()
 {
         EventHandler::get_global_event_handler()->remove_hook( "clock_error", handle_clock_error_event, this );
         stop_task();
         _update_task->remove();
         if ( g_cr->get_time_manager() == this )
         {
-                g_cr->set_time_manager( NULL );
+                g_cr->set_time_manager( nullptr );
         }
         DistributedObject::disable();
 }
 
-void TimeManager::
-delete_do()
+void TimeManager::delete_do()
 {
         DistributedObject::delete_do();
 }
 
-void TimeManager::
-start_task()
+void TimeManager::start_task()
 {
         stop_task();
         _update_task = new GenericAsyncTask( "timeMgrTask", do_update_task, this );
@@ -72,19 +65,17 @@ start_task()
         g_task_mgr->add( _update_task );
 }
 
-void TimeManager::
-stop_task()
+void TimeManager::stop_task()
 {
-        if ( _update_task != NULL )
+        if ( _update_task != nullptr )
         {
                 _update_task->remove();
         }
 }
 
-AsyncTask::DoneStatus TimeManager::
-do_update_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus TimeManager::do_update_task( GenericAsyncTask *task, void *data )
 {
-        TimeManager *tm = ( TimeManager * )data;
+        TimeManager *tm = (TimeManager *)data;
         tm->synchronize( "timer" );
 
         task->set_delay( timemanager_update_freq );
@@ -92,20 +83,18 @@ do_update_task( GenericAsyncTask *task, void *data )
         return AsyncTask::DS_again;
 }
 
-void TimeManager::
-handle_clock_error_event( const Event *e, void *data )
+void TimeManager::handle_clock_error_event( const Event *e, void *data )
 {
-        ( ( TimeManager * )data )->synchronize( "clock error" );
+        ( (TimeManager *)data )->synchronize( "clock error" );
 }
 
-bool TimeManager::
-synchronize( const string &desc )
+bool TimeManager::synchronize( const string &desc )
 {
         double now = g_global_clock->get_real_time();
 
         double time = now - _last_attempt;
         timeManager_cat.debug()
-                        << "Time since last sync: " << time << " seconds\n";
+                << "Time since last sync: " << time << " seconds\n";
         if ( time < timemanager_min_wait )
         {
                 return false;
@@ -116,7 +105,7 @@ synchronize( const string &desc )
         _attempt_count = 0;
         _next_context = ( _next_context + 1 ) & 255;
         timeManager_cat.info()
-                        << "Clock sync: " << desc << "\n";
+                << "Clock sync: " << desc << "\n";
         _start = now;
         _last_attempt = now;
 
@@ -125,22 +114,21 @@ synchronize( const string &desc )
         return true;
 }
 
-void TimeManager::
-server_time( uint8_t context, int32_t timestamp )
+void TimeManager::server_time( uint8_t context, int32_t timestamp )
 {
         double end = g_global_clock->get_real_time();
 
         if ( context != _this_context )
         {
                 timeManager_cat.info()
-                                << "Ignoring TimeManager response for old context " << context << "\n";
+                        << "Ignoring TimeManager response for old context " << context << "\n";
                 return;
         }
 
         double elapsed = end - _start;
         _attempt_count++;
         timeManager_cat.info()
-                        << "Clock sync roundtrip took " << elapsed * 1000.0 << " ms\n";
+                << "Clock sync roundtrip took " << elapsed * 1000.0 << " ms\n";
 
         double avg = ( _start + end ) / 2.0 - timemanager_extra_skew;
         double uncertainty = ( end - _start ) / 2.0 + abs( timemanager_extra_skew );
@@ -150,36 +138,34 @@ server_time( uint8_t context, int32_t timestamp )
         gcd->resynchronize( avg, timestamp, uncertainty );
 
         timeManager_cat.info()
-                        << "Local clock uncertainty +/- " << gcd->get_uncertainty() << " s\n";
+                << "Local clock uncertainty +/- " << gcd->get_uncertainty() << " s\n";
 
         if ( gcd->get_uncertainty() > timemanager_max_uncertainty )
         {
                 if ( _attempt_count < timemanager_max_attemps )
                 {
                         timeManager_cat.info()
-                                        << "Uncertainty is too high, trying again.\n";
+                                << "Uncertainty is too high, trying again.\n";
                         _start = g_global_clock->get_real_time();
                         d_request_server_time( _this_context );
                         return;
                 }
                 timeManager_cat.info()
-                                << "Giving up on uncertainty requirement.\n";
+                        << "Giving up on uncertainty requirement.\n";
         }
 
         throw_event( "gotTimeSync" );
         throw_event( unique_name( "gotTimeSync" ) );
 }
 
-void TimeManager::
-server_time_field( DCPacker &packer, void *data )
+void TimeManager::server_time_field( DCPacker &packer, void *data )
 {
         uint8_t context = packer.unpack_uint();
         int32_t timestamp = packer.unpack_int();
-        ( ( TimeManager * )data )->server_time( context, timestamp );
+        ( (TimeManager *)data )->server_time( context, timestamp );
 }
 
-void TimeManager::
-d_request_server_time( uint8_t context )
+void TimeManager::d_request_server_time( uint8_t context )
 {
         BeginCLUpdate( "request_server_time" );
         AddArg( uint, context );

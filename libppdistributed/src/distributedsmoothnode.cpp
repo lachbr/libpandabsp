@@ -2,9 +2,9 @@
 #include "pp_globals.h"
 #include "clientrepository.h"
 #include "timemanager.h"
+#include "clockdelta.h"
 
 #include <clockObject.h>
-#include <clockDelta.h>
 
 ConfigVariableDouble max_future( "smooth-max-future", 0.2 );
 ConfigVariableDouble min_suggest_resync( "smooth-min-suggest-resync", 15 );
@@ -17,8 +17,7 @@ NotifyCategoryDef( distributedSmoothNode, "" );
 
 DClassDef( DistributedSmoothNode );
 
-DistributedSmoothNode::
-DistributedSmoothNode() :
+DistributedSmoothNode::DistributedSmoothNode() :
         DistributedNode()
 {
         _snbase = new DistributedSmoothNodeBase;
@@ -27,20 +26,17 @@ DistributedSmoothNode() :
         _stopped = false;
 }
 
-DistributedSmoothNode::
-~DistributedSmoothNode()
+DistributedSmoothNode::~DistributedSmoothNode()
 {
         delete _snbase;
 }
 
-DistributedSmoothNodeBase *DistributedSmoothNode::
-get_snbase() const
+DistributedSmoothNodeBase *DistributedSmoothNode::get_snbase() const
 {
         return _snbase;
 }
 
-void DistributedSmoothNode::
-generate()
+void DistributedSmoothNode::generate()
 {
         _smoother = SmoothMover();
         _smooth_started = false;
@@ -57,40 +53,34 @@ generate()
         _stopped = false;
 }
 
-void DistributedSmoothNode::
-disable()
+void DistributedSmoothNode::disable()
 {
         _snbase->disable();
         DistributedNode::disable();
 }
 
-void DistributedSmoothNode::
-delete_do()
+void DistributedSmoothNode::delete_do()
 {
         DistributedNode::delete_do();
 }
 
-void DistributedSmoothNode::
-smooth_position()
+void DistributedSmoothNode::smooth_position()
 {
         _smoother.compute_and_apply_smooth_pos_hpr( *this, *this );
 }
 
-AsyncTask::DoneStatus DistributedSmoothNode::
-do_smooth_task( GenericAsyncTask *pTask, void *pData )
+AsyncTask::DoneStatus DistributedSmoothNode::do_smooth_task( GenericAsyncTask *pTask, void *pData )
 {
-        ( ( DistributedSmoothNode * )pData )->smooth_position();
+        ( (DistributedSmoothNode *)pData )->smooth_position();
         return AsyncTask::DS_cont;
 }
 
-bool DistributedSmoothNode::
-wants_smoothing() const
+bool DistributedSmoothNode::wants_smoothing() const
 {
         return true;
 }
 
-void DistributedSmoothNode::
-start_smooth()
+void DistributedSmoothNode::start_smooth()
 {
         if ( !wants_smoothing() || is_disabled() || is_local() )
         {
@@ -107,8 +97,7 @@ start_smooth()
         }
 }
 
-void DistributedSmoothNode::
-stop_smooth()
+void DistributedSmoothNode::stop_smooth()
 {
         if ( _smooth_started )
         {
@@ -118,20 +107,17 @@ stop_smooth()
         }
 }
 
-void DistributedSmoothNode::
-set_smooth_wrt_reparents( bool bFlag )
+void DistributedSmoothNode::set_smooth_wrt_reparents( bool bFlag )
 {
         _smooth_wrt_reparents = bFlag;
 }
 
-bool DistributedSmoothNode::
-get_smooth_wrt_reparents() const
+bool DistributedSmoothNode::get_smooth_wrt_reparents() const
 {
         return _smooth_wrt_reparents;
 }
 
-void DistributedSmoothNode::
-force_to_true_position()
+void DistributedSmoothNode::force_to_true_position()
 {
         if ( !is_local() && _smoother.get_latest_position() )
         {
@@ -140,8 +126,7 @@ force_to_true_position()
         _smoother.clear_positions( 1 );
 }
 
-void DistributedSmoothNode::
-reload_position()
+void DistributedSmoothNode::reload_position()
 {
         _smoother.clear_positions( 0 );
         _smoother.set_pos_hpr( get_pos(), get_hpr() );
@@ -149,8 +134,7 @@ reload_position()
         _smoother.mark_position();
 }
 
-void DistributedSmoothNode::
-check_resume( int timestamp )
+void DistributedSmoothNode::check_resume( int timestamp )
 {
         if ( _stopped )
         {
@@ -160,7 +144,7 @@ check_resume( int timestamp )
                 if ( now > last )
                 {
                         double local = ClockDelta::get_global_ptr()->network_to_local_time(
-                                               timestamp, curr_time );
+                                timestamp, curr_time );
 
                         _smoother.set_phony_timestamp( local, true );
                         _smoother.mark_position();
@@ -170,21 +154,18 @@ check_resume( int timestamp )
         _stopped = false;
 }
 
-void DistributedSmoothNode::
-set_sm_stop( int timestamp )
+void DistributedSmoothNode::set_sm_stop( int timestamp )
 {
         set_component_t_live( timestamp );
         _stopped = true;
 }
 
-void DistributedSmoothNode::
-set_sm_stop_field( DCFuncArgs )
+void DistributedSmoothNode::set_sm_stop_field( DCFuncArgs )
 {
-        ( ( DistributedSmoothNode * )data )->set_sm_stop( packer.unpack_int() );
+        ( (DistributedSmoothNode *)data )->set_sm_stop( packer.unpack_int() );
 }
 
-void DistributedSmoothNode::
-set_sm_pos( float x, float y, float z, int timestamp )
+void DistributedSmoothNode::set_sm_pos( float x, float y, float z, int timestamp )
 {
         check_resume( timestamp );
         _smoother.set_x( x );
@@ -193,10 +174,9 @@ set_sm_pos( float x, float y, float z, int timestamp )
         set_component_t_live( timestamp );
 }
 
-void DistributedSmoothNode::
-set_sm_pos_field( DCFuncArgs )
+void DistributedSmoothNode::set_sm_pos_field( DCFuncArgs )
 {
-        DistributedSmoothNode *obj = ( DistributedSmoothNode * )data;
+        DistributedSmoothNode *obj = (DistributedSmoothNode *)data;
         float x = packer.unpack_double();
         float y = packer.unpack_double();
         float z = packer.unpack_double();
@@ -204,18 +184,16 @@ set_sm_pos_field( DCFuncArgs )
         obj->set_sm_pos( x, y, z, ts );
 }
 
-void DistributedSmoothNode::
-get_sm_pos_field( DCFuncArgs )
+void DistributedSmoothNode::get_sm_pos_field( DCFuncArgs )
 {
-        DistributedSmoothNode *obj = ( DistributedSmoothNode * )data;
+        DistributedSmoothNode *obj = (DistributedSmoothNode *)data;
         packer.pack_double( obj->get_x() );
         packer.pack_double( obj->get_y() );
         packer.pack_double( obj->get_z() );
         packer.pack_int( 0 );
 }
 
-void DistributedSmoothNode::
-set_sm_hpr( float h, float p, float r, int timestamp )
+void DistributedSmoothNode::set_sm_hpr( float h, float p, float r, int timestamp )
 {
         check_resume( timestamp );
         _smoother.set_h( h );
@@ -224,65 +202,57 @@ set_sm_hpr( float h, float p, float r, int timestamp )
         set_component_t_live( timestamp );
 }
 
-void DistributedSmoothNode::
-set_sm_hpr_field( DCFuncArgs )
+void DistributedSmoothNode::set_sm_hpr_field( DCFuncArgs )
 {
         float h = packer.unpack_double();
         float p = packer.unpack_double();
         float r = packer.unpack_double();
         int ts = packer.unpack_int();
-        ( ( DistributedSmoothNode * )data )->set_sm_hpr( h, p, r, ts );
+        ( (DistributedSmoothNode *)data )->set_sm_hpr( h, p, r, ts );
 }
 
-void DistributedSmoothNode::
-get_sm_hpr_field( DCFuncArgs )
+void DistributedSmoothNode::get_sm_hpr_field( DCFuncArgs )
 {
-        DistributedSmoothNode *obj = ( DistributedSmoothNode * )data;
+        DistributedSmoothNode *obj = (DistributedSmoothNode *)data;
         packer.pack_double( obj->get_h() );
         packer.pack_double( obj->get_p() );
         packer.pack_double( obj->get_r() );
         packer.pack_int( 0 );
 }
 
-void DistributedSmoothNode::
-set_curr_l_field( DCFuncArgs )
+void DistributedSmoothNode::set_curr_l_field( DCFuncArgs )
 {
-        DistributedSmoothNode *obj = ( DistributedSmoothNode * )data;
+        DistributedSmoothNode *obj = (DistributedSmoothNode *)data;
 
         CHANNEL_TYPE l = packer.unpack_uint64();
         int ts = packer.unpack_int();
         obj->_snbase->set_curr_l( l );
 }
 
-void DistributedSmoothNode::
-get_curr_l_field( DCFuncArgs )
+void DistributedSmoothNode::get_curr_l_field( DCFuncArgs )
 {
-        DistributedSmoothNode *obj = ( DistributedSmoothNode * )data;
+        DistributedSmoothNode *obj = (DistributedSmoothNode *)data;
         packer.pack_uint64( obj->get_zone_id() );
         packer.pack_int( 0 );
 }
 
-void DistributedSmoothNode::
-clear_smoothing()
+void DistributedSmoothNode::clear_smoothing()
 {
         _smoother.clear_positions( 1 );
 }
 
-void DistributedSmoothNode::
-b_clear_smoothing()
+void DistributedSmoothNode::b_clear_smoothing()
 {
         _snbase->d_clear_smoothing();
         clear_smoothing();
 }
 
-void DistributedSmoothNode::
-clear_smoothing_field( DCFuncArgs )
+void DistributedSmoothNode::clear_smoothing_field( DCFuncArgs )
 {
-        ( ( DistributedSmoothNode * )data )->clear_smoothing();
+        ( (DistributedSmoothNode *)data )->clear_smoothing();
 }
 
-void DistributedSmoothNode::
-wrt_reparent_to( NodePath &parent )
+void DistributedSmoothNode::wrt_reparent_to( NodePath &parent )
 {
         if ( _smooth_started )
         {
@@ -304,8 +274,7 @@ wrt_reparent_to( NodePath &parent )
         }
 }
 
-void DistributedSmoothNode::
-d_set_parent( int parent_token )
+void DistributedSmoothNode::d_set_parent( int parent_token )
 {
         DistributedNode::d_set_parent( parent_token );
 
@@ -313,9 +282,8 @@ d_set_parent( int parent_token )
         _snbase->send_current_position();
 }
 
-void DistributedSmoothNode::
-d_suggest_resync( DOID_TYPE av_id, int timestamp_a, int timestamp_b,
-                  double server_time, float uncertainty )
+void DistributedSmoothNode::d_suggest_resync( DOID_TYPE av_id, int timestamp_a, int timestamp_b,
+                                              double server_time, float uncertainty )
 {
         double server_time_sec = cfloor( server_time );
         double server_time_usec = ( server_time - server_time_sec ) * 10000.0;
@@ -330,27 +298,26 @@ d_suggest_resync( DOID_TYPE av_id, int timestamp_a, int timestamp_b,
         SendCLUpdate( "suggest_resync" );
 }
 
-void DistributedSmoothNode::
-suggest_resync( DOID_TYPE av_id, int timestamp_a, int timestamp_b,
-                int server_time_sec, uint16_t server_time_usec, float uncertainty )
+void DistributedSmoothNode::suggest_resync( DOID_TYPE av_id, int timestamp_a, int timestamp_b,
+                                            int server_time_sec, uint16_t server_time_usec, float uncertainty )
 {
         double server_time = ( server_time_sec + server_time_usec ) / 10000.0;
         bool result = p2p_resync( av_id, timestamp_a, server_time, uncertainty );
         if ( ClockDelta::get_global_ptr()->get_uncertainty() > -1.0 )
         {
-                DistributedSmoothNode *other = ( DistributedSmoothNode * )g_cr->get_do( av_id );
-                if ( other == NULL )
+                DistributedSmoothNode *other = (DistributedSmoothNode *)g_cr->get_do( av_id );
+                if ( other == nullptr )
                 {
                         distributedSmoothNode_cat.info()
-                                        << "Warning: couldn't find the avatar " << av_id << "\n";
+                                << "Warning: couldn't find the avatar " << av_id << "\n";
                 }
                 else
                 {
                         double real_time = g_global_clock->get_real_time();
                         server_time = real_time - ClockDelta::get_global_ptr()->get_delta();
                         distributedSmoothNode_cat.info()
-                                        << "Returning resync for " << _do_id << "; local time is " << real_time
-                                        << " and server time is " << server_time << ".\n";
+                                << "Returning resync for " << _do_id << "; local time is " << real_time
+                                << " and server time is " << server_time << ".\n";
                         other->d_return_resync( g_cr->get_local_avatar_do_id(), timestamp_b,
                                                 server_time,
                                                 ClockDelta::get_global_ptr()->get_uncertainty() );
@@ -358,8 +325,7 @@ suggest_resync( DOID_TYPE av_id, int timestamp_a, int timestamp_b,
         }
 }
 
-void DistributedSmoothNode::
-suggest_resync_field( DCFuncArgs )
+void DistributedSmoothNode::suggest_resync_field( DCFuncArgs )
 {
         DOID_TYPE av_id = packer.unpack_uint();
         int timestamp_a = packer.unpack_int();
@@ -368,13 +334,12 @@ suggest_resync_field( DCFuncArgs )
         uint16_t server_time_usec = packer.unpack_uint();
         double uncertainty = packer.unpack_double();
 
-        ( ( DistributedSmoothNode * )data )->suggest_resync( av_id, timestamp_a, timestamp_b,
-                                                             server_time_sec, server_time_usec,
-                                                             uncertainty );
+        ( (DistributedSmoothNode *)data )->suggest_resync( av_id, timestamp_a, timestamp_b,
+                                                           server_time_sec, server_time_usec,
+                                                           uncertainty );
 }
 
-void DistributedSmoothNode::
-d_return_resync( DOID_TYPE av_id, int timestamp_b, double server_time, float uncertainty )
+void DistributedSmoothNode::d_return_resync( DOID_TYPE av_id, int timestamp_b, double server_time, float uncertainty )
 {
         double server_time_sec = cfloor( server_time );
         double server_time_usec = ( server_time - server_time_sec ) * 10000.0;
@@ -388,16 +353,14 @@ d_return_resync( DOID_TYPE av_id, int timestamp_b, double server_time, float unc
         SendCLUpdate( "return_resync" );
 }
 
-void DistributedSmoothNode::
-return_resync( DOID_TYPE av_id, int timestamp_b, int server_time_sec, uint16_t server_time_usec,
-               float uncertainty )
+void DistributedSmoothNode::return_resync( DOID_TYPE av_id, int timestamp_b, int server_time_sec, uint16_t server_time_usec,
+                                           float uncertainty )
 {
         double server_time = ( server_time_sec + server_time_usec ) / 10000.0;
         p2p_resync( av_id, timestamp_b, server_time, uncertainty );
 }
 
-void DistributedSmoothNode::
-return_resync_field( DCFuncArgs )
+void DistributedSmoothNode::return_resync_field( DCFuncArgs )
 {
         DOID_TYPE av_id = packer.unpack_uint();
         int timestamp_b = packer.unpack_int();
@@ -405,18 +368,17 @@ return_resync_field( DCFuncArgs )
         uint16_t server_time_usec = packer.unpack_uint();
         double uncertainty = packer.unpack_double();
 
-        ( ( DistributedSmoothNode * )data )->return_resync( av_id, timestamp_b, server_time_sec,
-                                                            server_time_usec, uncertainty );
+        ( (DistributedSmoothNode *)data )->return_resync( av_id, timestamp_b, server_time_sec,
+                                                          server_time_usec, uncertainty );
 }
 
-bool DistributedSmoothNode::
-p2p_resync( DOID_TYPE av_id, int timestamp, double server_time, float uncertainty )
+bool DistributedSmoothNode::p2p_resync( DOID_TYPE av_id, int timestamp, double server_time, float uncertainty )
 {
         bool got_sync = ClockDelta::get_global_ptr()->p2p_resync( av_id, timestamp, server_time, uncertainty );
 
         if ( !got_sync )
         {
-                if ( g_cr->get_time_manager() != NULL )
+                if ( g_cr->get_time_manager() != nullptr )
                 {
                         stringstream ss;
                         ss << "suggested by " << av_id;
@@ -427,8 +389,7 @@ p2p_resync( DOID_TYPE av_id, int timestamp, double server_time, float uncertaint
         return got_sync;
 }
 
-void DistributedSmoothNode::
-activate_smoothing( bool smoothing, bool prediction )
+void DistributedSmoothNode::activate_smoothing( bool smoothing, bool prediction )
 {
         if ( smoothing )
         {
@@ -456,8 +417,7 @@ activate_smoothing( bool smoothing, bool prediction )
         }
 }
 
-void DistributedSmoothNode::
-set_component_t( int timestamp )
+void DistributedSmoothNode::set_component_t( int timestamp )
 {
         _smoother.set_phony_timestamp();
         _smoother.clear_positions( 1 );
@@ -466,8 +426,7 @@ set_component_t( int timestamp )
         force_to_true_position();
 }
 
-void DistributedSmoothNode::
-set_component_t_live( int timestamp )
+void DistributedSmoothNode::set_component_t_live( int timestamp )
 {
         if ( timestamp == 0 )
         {
@@ -498,8 +457,8 @@ set_component_t_live( int timestamp )
                                 int timestamp_b = ClockDelta::get_global_ptr()->local_to_network_time( real_time );
                                 double server_time = real_time - ClockDelta::get_global_ptr()->get_delta();
                                 distributedSmoothNode_cat.info()
-                                                << "Suggesting resync for " << _do_id << ", with discrepency " << how_far_future - chug
-                                                << "; local time is " << real_time << " and server time is " << server_time << "." << endl;
+                                        << "Suggesting resync for " << _do_id << ", with discrepency " << how_far_future - chug
+                                        << "; local time is " << real_time << " and server time is " << server_time << "." << endl;
                                 d_suggest_resync( g_cr->get_local_avatar_do_id(), timestamp,
                                                   timestamp_b, server_time,
                                                   ClockDelta::get_global_ptr()->get_uncertainty() );

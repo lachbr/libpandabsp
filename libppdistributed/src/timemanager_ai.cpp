@@ -5,15 +5,13 @@
 
 DClassDef( TimeManagerAI );
 
-void TimeManagerAI::
-announce_generate()
+void TimeManagerAI::announce_generate()
 {
         cout << "TimeManagerAI: announceGenerate" << endl;
         DistributedObjectAI::announce_generate();
 }
 
-void TimeManagerAI::
-request_server_time( uint8_t context )
+void TimeManagerAI::request_server_time( uint8_t context )
 {
         int32_t timestamp = ClockDelta::get_global_ptr()->get_real_network_time( 32 );
 
@@ -35,9 +33,8 @@ request_server_time( uint8_t context )
 #endif // ASTRON_IMPL
 }
 
-void TimeManagerAI::
-request_server_time_field( DCPacker &packer, void *data )
+void TimeManagerAI::request_server_time_field( DCPacker &packer, void *data )
 {
         uint8_t context = packer.unpack_uint();
-        ( ( TimeManagerAI * )data )->request_server_time( context );
+        ( (TimeManagerAI *)data )->request_server_time( context );
 }

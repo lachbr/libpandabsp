@@ -1,21 +1,20 @@
-#include "vifTokenizer.h"
+#include "viftokenizer.h"
 
 #include <string>
-
 #include <algorithm>
 
 TokenVec tokenizer( string &input )
 {
 
         char chars[63] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-                           'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                           'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
-                           'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F',
-                           'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-                           'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
-                           'W', 'X', 'Y', 'Z', '0', '1', '2', '3',
-                           '4', '5', '6', '7', '8', '9', '_'
-                         };
+                'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+                'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
+                'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F',
+                'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+                'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+                'W', 'X', 'Y', 'Z', '0', '1', '2', '3',
+                '4', '5', '6', '7', '8', '9', '_'
+        };
         vector<char> valid_chars;
         for ( int i = 0; i < 63; i++ )
         {
@@ -49,6 +48,13 @@ TokenVec tokenizer( string &input )
                         val = "";
                         val += let;
                         tokens.push_back( Token( "bracket", val ) );
+                        current++;
+                }
+                else if ( let == '(' || let == ')' && !comment )
+                {
+                        val = "";
+                        val += let;
+                        tokens.push_back( Token( "parenthesis", val ) );
                         current++;
                 }
                 else if ( let == '"' && !comment )

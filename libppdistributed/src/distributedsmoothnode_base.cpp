@@ -36,31 +36,27 @@ else\
 }
 
 
-DistributedSmoothNodeBase::
-DistributedSmoothNodeBase()
+DistributedSmoothNodeBase::DistributedSmoothNodeBase()
 {
-        _repo = NULL;
+        _repo = nullptr;
         _is_ai = false;
         _ai_id = 0;
         _curr_l[0] = 0;
         _curr_l[1] = 0;
 }
 
-DistributedSmoothNodeBase::
-~DistributedSmoothNodeBase()
+DistributedSmoothNodeBase::~DistributedSmoothNodeBase()
 {
 }
 
-void DistributedSmoothNodeBase::
-set_repository( ClientRepository *repo, bool is_ai, CHANNEL_TYPE ai_id )
+void DistributedSmoothNodeBase::set_repository( ClientRepository *repo, bool is_ai, CHANNEL_TYPE ai_id )
 {
         _repo = repo;
         _is_ai = is_ai;
         _ai_id = ai_id;
 }
 
-void DistributedSmoothNodeBase::
-initialize( const NodePath &np, DCClassPP *dclass, DOID_TYPE do_id )
+void DistributedSmoothNodeBase::initialize( const NodePath &np, DCClassPP *dclass, DOID_TYPE do_id )
 {
         _np = np;
         _dclass = dclass;
@@ -73,8 +69,7 @@ initialize( const NodePath &np, DCClassPP *dclass, DOID_TYPE do_id )
         _store_stop = false;
 }
 
-void DistributedSmoothNodeBase::
-send_everything()
+void DistributedSmoothNodeBase::send_everything()
 {
         _curr_l[0] = _curr_l[1];
         d_set_sm_pos( _store_xyz[0], _store_xyz[1], _store_xyz[2] );
@@ -82,14 +77,12 @@ send_everything()
         d_set_curr_l( _curr_l[0] );
 }
 
-bool DistributedSmoothNodeBase::
-only_changed( int flags, int compare )
+bool DistributedSmoothNodeBase::only_changed( int flags, int compare )
 {
         return ( flags & compare ) != 0 && ( flags & ~compare ) == 0;
 }
 
-void DistributedSmoothNodeBase::
-broadcast_pos_hpr_full()
+void DistributedSmoothNodeBase::broadcast_pos_hpr_full()
 {
         LPoint3 xyz = _np.get_pos();
         LVecBase3 hpr = _np.get_hpr();
@@ -147,22 +140,19 @@ broadcast_pos_hpr_full()
         }
 }
 
-void DistributedSmoothNodeBase::
-d_set_curr_l( uint64_t l )
+void DistributedSmoothNodeBase::d_set_curr_l( uint64_t l )
 {
         BeginSmUpdate( "set_curr_l" );
         AddArg( uint64, l );
         SendSmUpdate( "set_curr_l" );
 }
 
-void DistributedSmoothNodeBase::
-set_curr_l( uint64_t l )
+void DistributedSmoothNodeBase::set_curr_l( uint64_t l )
 {
         _curr_l[1] = l;
 }
 
-void DistributedSmoothNodeBase::
-d_set_sm_hpr( float h, float p, float r )
+void DistributedSmoothNodeBase::d_set_sm_hpr( float h, float p, float r )
 {
         BeginSmUpdate( "set_sm_hpr" );
         AddArg( double, h );
@@ -173,8 +163,7 @@ d_set_sm_hpr( float h, float p, float r )
 
 // SetSmHpr is pure virtual, defined in distributedSmoothNode/AI.cpp
 
-void DistributedSmoothNodeBase::
-d_set_sm_pos( float x, float y, float z )
+void DistributedSmoothNodeBase::d_set_sm_pos( float x, float y, float z )
 {
         BeginSmUpdate( "set_sm_pos" );
         AddArg( double, x );
@@ -185,8 +174,7 @@ d_set_sm_pos( float x, float y, float z )
 
 // SetSmPos is pure virtual, defined in DistributedSmoothNode/AI.cpp
 
-void DistributedSmoothNodeBase::
-d_set_sm_stop()
+void DistributedSmoothNodeBase::d_set_sm_stop()
 {
         BeginSmUpdate( "set_sm_stop" );
         SendSmUpdate( "set_sm_stop" );
@@ -194,65 +182,55 @@ d_set_sm_stop()
 
 // SetSmStop is pure virtual, defined in distributedSmoothNode/AI.cpp
 
-void DistributedSmoothNodeBase::
-generate()
+void DistributedSmoothNodeBase::generate()
 {
 }
 
-void DistributedSmoothNodeBase::
-disable()
+void DistributedSmoothNodeBase::disable()
 {
         stop_pos_hpr_broadcast();
 }
 
-void DistributedSmoothNodeBase::
-d_clear_smoothing()
+void DistributedSmoothNodeBase::d_clear_smoothing()
 {
         SendBlankSmUpdate( "clear_smoothing" );
 }
 
 // ClearSmoothing is pure virtual, defined in DistributedSmoothNodeBase/AI.cpp
 
-string DistributedSmoothNodeBase::
-get_pos_hpr_broadcast_task_name() const
+string DistributedSmoothNodeBase::get_pos_hpr_broadcast_task_name() const
 {
         stringstream ss;
         ss << "sendPosHpr-" << _do_id;
         return ss.str();
 }
 
-void DistributedSmoothNodeBase::
-set_pos_hpr_broadcast_period( float period )
+void DistributedSmoothNodeBase::set_pos_hpr_broadcast_period( float period )
 {
         _broadcast_period = period;
 }
 
-float DistributedSmoothNodeBase::
-get_pos_hpr_broadcast_period() const
+float DistributedSmoothNodeBase::get_pos_hpr_broadcast_period() const
 {
         return _broadcast_period;
 }
 
-void DistributedSmoothNodeBase::
-stop_pos_hpr_broadcast()
+void DistributedSmoothNodeBase::stop_pos_hpr_broadcast()
 {
         g_base->stop_task( _broadcast_task );
 }
 
-bool DistributedSmoothNodeBase::
-pos_hpr_broadcast_started() const
+bool DistributedSmoothNodeBase::pos_hpr_broadcast_started() const
 {
         return true;
 }
 
-bool DistributedSmoothNodeBase::
-want_smooth_broadcast_task() const
+bool DistributedSmoothNodeBase::want_smooth_broadcast_task() const
 {
         return true;
 }
 
-void DistributedSmoothNodeBase::
-start_pos_hpr_broadcast( float period, bool stagger )
+void DistributedSmoothNodeBase::start_pos_hpr_broadcast( float period, bool stagger )
 {
 
         string task_name = get_pos_hpr_broadcast_task_name();
@@ -265,17 +243,15 @@ start_pos_hpr_broadcast( float period, bool stagger )
         }
 }
 
-AsyncTask::DoneStatus DistributedSmoothNodeBase::
-pos_hpr_broadcast_task( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus DistributedSmoothNodeBase::pos_hpr_broadcast_task( GenericAsyncTask *task, void *data )
 {
-        DistributedSmoothNodeBase *obj = ( DistributedSmoothNodeBase * )data;
+        DistributedSmoothNodeBase *obj = (DistributedSmoothNodeBase *)data;
         obj->broadcast_pos_hpr_full();
         task->set_delay( obj->_broadcast_period );
         return AsyncTask::DS_again;
 }
 
-void DistributedSmoothNodeBase::
-send_current_position()
+void DistributedSmoothNodeBase::send_current_position()
 {
         send_everything();
 }

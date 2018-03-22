@@ -2,8 +2,7 @@
 
 #include "..\..\pp_globals.h"
 
-vector_string AmbientStage::
-get_required_inputs()
+vector_string AmbientStage::get_required_inputs()
 {
         vector_string vec;
         vec.push_back( "DefaultEnvmap" );
@@ -13,8 +12,7 @@ get_required_inputs()
         return vec;
 }
 
-vector_string AmbientStage::
-get_required_pipes()
+vector_string AmbientStage::get_required_pipes()
 {
         vector_string vec;
         vec.push_back( "ShadedScene" );
@@ -22,22 +20,19 @@ get_required_pipes()
         return vec;
 }
 
-AmbientStage::
-AmbientStage() :
+AmbientStage::AmbientStage() :
         RenderStage()
 {
 }
 
-void AmbientStage::
-create()
+void AmbientStage::create()
 {
         _target = create_target( "AmbientStage" );
         _target->add_color_attachment( 16 );
         _target->prepare_buffer();
 }
 
-void AmbientStage::
-bind()
+void AmbientStage::bind()
 {
         // required pipes
         rpipeline->_gbuf_stage->_ubo.bind_to( _target ); // GBuffer
@@ -55,8 +50,7 @@ bind()
         bind_to_commons();
 }
 
-void AmbientStage::
-reload_shaders()
+void AmbientStage::reload_shaders()
 {
         _target->set_shader( load_shader( "shader/ambient_stage.frag.glsl" ) );
 }

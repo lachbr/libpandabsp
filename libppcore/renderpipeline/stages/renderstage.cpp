@@ -11,22 +11,19 @@ bool RenderStage::disabled = false;
 
 UniqueIdAllocator RenderStage::id_alloc( 0, 9999 );
 
-vector_string RenderStage::
-get_required_inputs()
+vector_string RenderStage::get_required_inputs()
 {
         vector_string vec;
         return vec;
 }
 
-vector_string RenderStage::
-get_required_pipes()
+vector_string RenderStage::get_required_pipes()
 {
         vector_string vec;
         return vec;
 }
 
-RenderStage::
-RenderStage()
+RenderStage::RenderStage()
 {
         _id = id_alloc.allocate();
         _active = true;
@@ -40,25 +37,21 @@ string get_def_vert_path()
 /**
  * Loads the fragment shader specified along with the default vert shader.
  */
-PT( Shader ) RenderStage::
-load_shader( const string &frag_path )
+PT( Shader ) RenderStage::load_shader( const string &frag_path )
 {
         return Shader::load( Shader::SL_GLSL, get_def_vert_path(), frag_path );
 }
 
-PT( Shader ) RenderStage::
-load_shader( const string &vert_path, const string &frag_path )
+PT( Shader ) RenderStage::load_shader( const string &vert_path, const string &frag_path )
 {
         return Shader::load( Shader::SL_GLSL, vert_path, frag_path );
 }
 
-void RenderStage::
-create()
+void RenderStage::create()
 {
 }
 
-void RenderStage::
-set_active( bool active )
+void RenderStage::set_active( bool active )
 {
         if ( _active != active )
         {
@@ -70,14 +63,12 @@ set_active( bool active )
         }
 }
 
-bool RenderStage::
-get_active() const
+bool RenderStage::get_active() const
 {
         return _active;
 }
 
-PT( RenderTarget ) RenderStage::
-create_target( const string &name )
+PT( RenderTarget ) RenderStage::create_target( const string &name )
 {
         string nname = to_string( ( long long )_id ) + "." + name;
         PT( RenderTarget ) target = new RenderTarget( nname );
@@ -85,8 +76,7 @@ create_target( const string &name )
         return target;
 }
 
-void RenderStage::
-bind_to_commons()
+void RenderStage::bind_to_commons()
 {
         // MainSceneData:
         set_shader_input( new ShaderInput( "view_mat_z_up", rpipeline->_view_mat_z_up ) );
@@ -113,19 +103,16 @@ bind_to_commons()
         set_shader_input( new ShaderInput( "mainRender", render ) );
 }
 
-void RenderStage::
-bind()
+void RenderStage::bind()
 {
 }
 
-PT( RenderTarget ) RenderStage::
-get_target() const
+PT( RenderTarget ) RenderStage::get_target() const
 {
         return _target;
 }
 
-void RenderStage::
-set_shader_input( const ShaderInput *inp )
+void RenderStage::set_shader_input( const ShaderInput *inp )
 {
         for ( size_t i = 0; i < _targets.size(); i++ )
         {
@@ -133,14 +120,12 @@ set_shader_input( const ShaderInput *inp )
         }
 }
 
-const pvector<PT( RenderTarget )> &RenderStage::
-get_targets() const
+const pvector<PT( RenderTarget )> &RenderStage::get_targets() const
 {
         return _targets;
 }
 
-void RenderStage::
-remove_target( PT( RenderTarget ) target )
+void RenderStage::remove_target( PT( RenderTarget ) target )
 {
         target->remove();
 
@@ -151,8 +136,7 @@ remove_target( PT( RenderTarget ) target )
         }
 }
 
-int RenderStage::
-get_target_index( const string &name )
+int RenderStage::get_target_index( const string &name )
 {
         int index = -1;
         for ( size_t i = 0; i < _targets.size(); i++ )
@@ -166,23 +150,19 @@ get_target_index( const string &name )
         return index;
 }
 
-void RenderStage::
-reload_shaders()
+void RenderStage::reload_shaders()
 {
 }
 
-void RenderStage::
-update()
+void RenderStage::update()
 {
 }
 
-void RenderStage::
-set_dimensions()
+void RenderStage::set_dimensions()
 {
 }
 
-void RenderStage::
-handle_window_resize()
+void RenderStage::handle_window_resize()
 {
         set_dimensions();
         for ( size_t i = 0; i < _targets.size(); i++ )

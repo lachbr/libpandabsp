@@ -2,29 +2,25 @@
 
 #include "..\..\pp_globals.h"
 
-vector_string FinalStage::
-get_required_inputs()
+vector_string FinalStage::get_required_inputs()
 {
         vector_string vec;
         return vec;
 }
 
-vector_string FinalStage::
-get_required_pipes()
+vector_string FinalStage::get_required_pipes()
 {
         vector_string vec;
         vec.push_back( "ShadedScene" );
         return vec;
 }
 
-FinalStage::
-FinalStage() :
+FinalStage::FinalStage() :
         RenderStage()
 {
 }
 
-void FinalStage::
-create()
+void FinalStage::create()
 {
         _target = create_target( "FinalStage" );
         _target->add_color_attachment( 16 );
@@ -44,16 +40,14 @@ create()
         _present_target->set_shader_input( new ShaderInput( "SourceTex", _target->get_color_tex() ) );
 }
 
-void FinalStage::
-bind()
+void FinalStage::bind()
 {
         set_shader_input( new ShaderInput( "ShadedScene", _target->get_color_tex() ) );
 
         bind_to_commons();
 }
 
-void FinalStage::
-reload_shaders()
+void FinalStage::reload_shaders()
 {
         _target->set_shader( load_shader( "shader/final_stage.frag.glsl" ) );
         _present_target->set_shader( load_shader( "shader/final_present_stage.frag.glsl" ) );
