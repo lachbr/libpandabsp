@@ -26,11 +26,19 @@ void GuiImage::set_image( PT( Texture ) tex )
         _tex = tex;
 
         NodePath oldcard( _card_node );
-
-        const TransformState *trans = oldcard.get_transform();
-        int sort = oldcard.get_sort();
-
-        oldcard.remove_node();
+        const TransformState *trans;
+        int sort;
+        if ( oldcard.is_empty() )
+        {
+                trans = TransformState::make_identity();
+                sort = 0;
+        }
+        else
+        {
+                trans = oldcard.get_transform();
+                sort = oldcard.get_sort();
+                oldcard.remove_node();
+        }
 
         _card = CardMaker( "ImageCard" );
         _card.set_frame( -1, 1, -1, 1 );

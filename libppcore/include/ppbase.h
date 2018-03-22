@@ -28,6 +28,15 @@ public:
         NodePath _render2d;
         NodePath _camera;
 
+        NodePath _a2d_bottom_left;
+        NodePath _a2d_bottom_right;
+        NodePath _a2d_bottom_center;
+        NodePath _a2d_right_center;
+        NodePath _a2d_left_center;
+        NodePath _a2d_top_left;
+        NodePath _a2d_top_right;
+        NodePath _a2d_top_center;
+
         Audio3DManager _audio3d;
 
         PT( AudioManager ) _sfx_mgr;
@@ -109,8 +118,14 @@ public:
 
         void play_music( PT( AudioSound ) music, bool looping = false, PN_stdfloat volume = 1.0, bool interrupt = true );
 
+        PN_stdfloat get_aspect_ratio() const;
+
+        bool has_window() const;
+
 private:
         static AsyncTask::DoneStatus tick_task( GenericAsyncTask *task, void *data );
+
+        void update_aspect_ratio();
 
         bool _min_stop_sfx;
         bool _min_stop_mus;
@@ -128,6 +143,13 @@ private:
         PT( AudioSound ) _current_music;
 
         static void handle_window_event( const Event *e, void *data );
+
+        PN_stdfloat _a2d_top;
+        PN_stdfloat _a2d_bottom;
+        PN_stdfloat _a2d_left;
+        PN_stdfloat _a2d_right;
+
+        PN_stdfloat _old_aspect_ratio;
 };
 
 #endif // __PP_BASE_H__

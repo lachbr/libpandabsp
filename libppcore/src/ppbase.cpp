@@ -17,10 +17,13 @@ PPBase::PPBase( int argc, char *argv[] )
 {
         _framework.open_framework( argc, argv );
 
+        _old_aspect_ratio = 0.0;
+
         _last_mus_t = 0.0f;
         _min_stop_sfx = false;
         _min_stop_mus = false;
         _current_music = nullptr;
+        _window = nullptr;
 
         bool use_win = ConfigVariableString( "window-type", "onscreen" ) != "none";
 
@@ -49,6 +52,20 @@ PPBase::PPBase( int argc, char *argv[] )
         g_aspect2d = _aspect2d;
         g_render2d = _render2d;
         g_camera = _camera;
+
+        _a2d_top = 1.0;
+        _a2d_bottom = -1.0;
+        _a2d_left = -get_aspect_ratio();
+        _a2d_right = get_aspect_ratio();
+
+        _a2d_top_center = _aspect2d.attach_new_node( "a2dTopCenter" );
+        _a2d_top_left = _aspect2d.attach_new_node( "a2dTopLeft" );
+        _a2d_top_right = _aspect2d.attach_new_node( "a2dTopRight" );
+        _a2d_bottom_center = _aspect2d.attach_new_node( "a2dBottomCenter" );
+        _a2d_bottom_left = _aspect2d.attach_new_node( "a2dBottomLeft" );
+        _a2d_bottom_right = _aspect2d.attach_new_node( "a2dBottomRight" );
+        _a2d_left_center = _aspect2d.attach_new_node( "a2dLeftCenter" );
+        _a2d_right_center = _aspect2d.attach_new_node( "a2dRightCenter" );
 
         EventHandler::get_global_event_handler()->add_hook( "window-event", handle_window_event, this );
 
@@ -166,6 +183,11 @@ AsyncTask::DoneStatus PPBase::sleep_cycle_task( GenericAsyncTask *task, void *da
         return AsyncTask::DS_cont;
 }
 
+bool PPBase::has_window() const
+{
+        return _window != nullptr && _window->get_graphics_window() != nullptr;
+}
+
 PN_stdfloat PPBase::get_sleep() const
 {
         return _sleep_time;
@@ -173,12 +195,16 @@ PN_stdfloat PPBase::get_sleep() const
 
 int PPBase::get_resolution_x() const
 {
-        return _window->get_graphics_window()->get_x_size();
+        if ( has_window() )
+                return _window->get_graphics_window()->get_x_size();
+        return 0;
 }
 
 int PPBase::get_resolution_y() const
 {
-        return _window->get_graphics_window()->get_y_size();
+        if ( has_window() )
+                return _window->get_graphics_window()->get_y_size();
+        return 0;
 }
 
 void PPBase::define_key( const string &name, const string &description, void( *function )( const Event *, void * ), void *data )
@@ -203,27 +229,70 @@ void PPBase::unload_map()
         MapLoader::unload_map();
 }
 
+PN_stdfloat PPBase::get_aspect_ratio() const
+{
+        return (PN_stdfloat)get_resolution_x() / (PN_stdfloat)get_resolution_y();
+}
+
+void PPBase::update_aspect_ratio()
+{
+        PN_stdfloat aspect_ratio = get_aspect_ratio();
+        if ( _old_aspect_ratio != aspect_ratio )
+        {
+                // The aspect ratio has changed since the last frame.
+                _old_aspect_ratio = aspect_ratio;
+                if ( aspect_ratio < 1.0 )
+                {
+                        // If the window is TALL, let's expand the top and bottom
+                        _a2d_top = 1.0 / aspect_ratio;
+                        _a2d_bottom = -1.0 / aspect_ratio;
+                        _a2d_left = -1;
+                        _a2d_right = 1;
+                }
+                else
+                {
+                        // If the window is WIDE, let's expand the left and right
+                        _a2d_top = 1.0;
+                        _a2d_bottom = -1.0;
+                        _a2d_left = -aspect_ratio;
+                        _a2d_right = aspect_ratio;
+                }
+
+                // Update the positions of the aspect 2d marker nodes
+                _a2d_top_center.set_pos( 0, 0, _a2d_top );
+                _a2d_bottom_center.set_pos( 0, 0, _a2d_bottom );
+                _a2d_left_center.set_pos( _a2d_left, 0, 0 );
+                _a2d_right_center.set_pos( _a2d_right, 0, 0 );
+
+                _a2d_top_left.set_pos( _a2d_left, 0, _a2d_top );
+                _a2d_top_right.set_pos( _a2d_right, 0, _a2d_top );
+                _a2d_bottom_left.set_pos( _a2d_left, 0, _a2d_bottom );
+                _a2d_bottom_right.set_pos( _a2d_right, 0, _a2d_bottom );
+        }
+}
+
 AsyncTask::DoneStatus PPBase::tick_task( GenericAsyncTask *task, void *data )
 {
-        PPBase *base = (PPBase *)data;
-        g_base->_music_mgr->update();
-        g_base->_sfx_mgr->update();
-        if ( ConfigVariableString( "window-type", "onscreen" ) != "none" )
+        PPBase *self = (PPBase *)data;
+        self->_music_mgr->update();
+        self->_sfx_mgr->update();
+        if ( self->has_window() )
         {
-                g_base->_ctrav.traverse( g_base->_render );
-                g_base->_shadow_trav.traverse( g_base->_render );
+                self->_ctrav.traverse( self->_render );
+                self->_shadow_trav.traverse( self->_render );
+                self->update_aspect_ratio();
         }
 
         CIntervalManager::get_global_ptr()->step();
 
-        if ( g_base->_current_music != nullptr )
+        if ( self->_current_music != nullptr )
         {
-                if ( g_base->_current_music->status() != AudioSound::PLAYING )
+                if ( self->_current_music->status() != AudioSound::PLAYING )
                 {
                         // Set the current music to nullptr if the current music is not playing.
-                        g_base->_current_music = nullptr;
+                        self->_current_music = nullptr;
                 }
-        }
+        } 
 
         return AsyncTask::DS_cont;
 }
