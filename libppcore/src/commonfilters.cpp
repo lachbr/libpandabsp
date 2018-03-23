@@ -25,7 +25,7 @@ static const string cartoon_body4 =
 " - cartoondelta.wz);"
 "float4 cartoon_mx = max(cartoon_c0, max(cartoon_c1, max(cartoon_c2, cartoon_c3)));"
 "float4 cartoon_mn = min(cartoon_c0, min(cartoon_c1, min(cartoon_c2, cartoon_c3)));"
-"float cartoon_thresh = saturate(dot(cartoon_mx - cartoon_mn, float4(3,3,0,0)) - 0.5);"
+"PN_stdfloat cartoon_thresh = saturate(dot(cartoon_mx - cartoon_mn, float4(3,3,0,0)) - 0.5);"
 "o_color = lerp(o_color, k_cartooncolor, cartoon_thresh);";
 
 static const string ssao_body0 =
@@ -56,12 +56,12 @@ static const string ssao_body0 =
 "             uniform sampler2D k_depth : TEXUNIT1, "
 "             uniform sampler2D k_normal : TEXUNIT2)"
 "{"
-"  float pixel_depth = tex2D(k_depth, l_texcoordD).a; "
+"  PN_stdfloat pixel_depth = tex2D(k_depth, l_texcoordD).a; "
 "  float3 pixel_normal = (tex2D(k_normal, l_texcoordN).xyz * 2.0 - 1.0); "
 "  float3 random_vector = normalize((tex2D(k_random, l_texcoord * 18.0 + pixel_depth + pixel_normal.xy).xyz * 2.0) - float3(1.0)).xyz; "
-"  float occlusion = 0.0; "
-"  float radius = k_params1.z / pixel_depth; "
-"  float depth_difference; "
+"  PN_stdfloat occlusion = 0.0; "
+"  PN_stdfloat radius = k_params1.z / pixel_depth; "
+"  PN_stdfloat depth_difference; "
 "  float3 sample_normal; "
 "  float3 ray; "
 "  for (int i = 0; i < ";
@@ -426,7 +426,7 @@ void CommonFilters::reconfigure( bool full_rebuild, FilterType changed )
                 {
                         VolumetricLightingConfig *vconf = (VolumetricLightingConfig *)_configuration[FT_volumetric_lighting];
 
-                        text += "  float decay = 1.0f;\n";
+                        text += "  PN_stdfloat decay = 1.0f;\n";
                         text += "  float2 curcoord = " + texcoords["color"] + ";\n";
                         text += "  float2 lightdir = curcoord - k_casterpos.xy;\n";
                         text += "  lightdir *= k_vlparams.x;\n";

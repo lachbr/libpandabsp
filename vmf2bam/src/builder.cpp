@@ -57,7 +57,7 @@ struct DispVert
         int index;
         LVecBase3f pos;
         LVecBase3f normal;
-        float offset; // Relative to the normal
+        PN_stdfloat offset; // Relative to the normal
         LVecBase2f uv_coord;
         LVecBase3f sm_vert_normal;
 };
@@ -333,7 +333,7 @@ DispPlane create_displacement( Quad &quad, int nPower, Parser *p, Object &objDis
 
         LVecBase3f normal = calc_face_normal( quad );
 
-        float flHeight;
+        PN_stdfloat flHeight;
         if ( is_facing_up( normal ) )
         {
                 flHeight = abs( a[1] - c[1] );
@@ -344,7 +344,7 @@ DispPlane create_displacement( Quad &quad, int nPower, Parser *p, Object &objDis
         }
 
 
-        float flWidth;
+        PN_stdfloat flWidth;
         if ( is_facing_up( normal ) ||
              is_facing_forward( normal ) ||
              is_facing_backward( normal ) )
@@ -366,8 +366,8 @@ DispPlane create_displacement( Quad &quad, int nPower, Parser *p, Object &objDis
                 nQuads = ( nPower * nPower );
         }
 
-        float flRowHeight = flHeight / nQuads;
-        float flColWidth = flWidth / nQuads;
+        PN_stdfloat flRowHeight = flHeight / nQuads;
+        PN_stdfloat flColWidth = flWidth / nQuads;
 
 
         int nColsPerRow;
@@ -390,15 +390,15 @@ DispPlane create_displacement( Quad &quad, int nPower, Parser *p, Object &objDis
         Object objNormal = p->get_object_with_name( objDisp, "normals" );
         Object objDistances = p->get_object_with_name( objDisp, "distances" );
 
-        vector<float> normals;
-        vector<float> offsets;
+        vector<PN_stdfloat> normals;
+        vector<PN_stdfloat> offsets;
 
         for ( int i = 0; i < nColsPerRow; i++ )
         {
                 stringstream ss;
                 ss << "row" << i;
-                vector<float> rowNorms = Parser::parse_float_list_str( p->get_property_value( objNormal, ss.str() ) );
-                vector<float> rowOffs = Parser::parse_float_list_str( p->get_property_value( objDistances, ss.str() ) );
+                vector<PN_stdfloat> rowNorms = Parser::parse_float_list_str( p->get_property_value( objNormal, ss.str() ) );
+                vector<PN_stdfloat> rowOffs = Parser::parse_float_list_str( p->get_property_value( objDistances, ss.str() ) );
                 for ( size_t j = 0; j < rowNorms.size(); j++ )
                 {
                         normals.push_back( rowNorms[j] );
@@ -438,8 +438,8 @@ DispPlane create_displacement( Quad &quad, int nPower, Parser *p, Object &objDis
                         }
                 }
 
-                float flRowBot = iRow * flRowHeight;
-                float flRowTop = flRowBot + flRowHeight;
+                PN_stdfloat flRowBot = iRow * flRowHeight;
+                PN_stdfloat flRowTop = flRowBot + flRowHeight;
 
                 int iCol;
                 if ( is_facing_backward( normal ) )
@@ -467,8 +467,8 @@ DispPlane create_displacement( Quad &quad, int nPower, Parser *p, Object &objDis
                                 }
                         }
 
-                        float flColLeft = iCol * flColWidth;
-                        float flColRight = flColLeft + flColWidth;
+                        PN_stdfloat flColLeft = iCol * flColWidth;
+                        PN_stdfloat flColRight = flColLeft + flColWidth;
 
                         DispVert vert;
 
@@ -795,8 +795,8 @@ LVecBase3f get_origin( Object &bside, Parser *p )
 
         vector<LVecBase3f> verts = make_vectors( Parser::parse_int_tuple_list_str( p->get_property_value( bside, "plane" ) ) );
 
-        float w = abs( verts[0].get_y() - verts[2].get_y() );
-        float l = abs( verts[0].get_x() - verts[1].get_x() );
+        PN_stdfloat w = abs( verts[0].get_y() - verts[2].get_y() );
+        PN_stdfloat l = abs( verts[0].get_x() - verts[1].get_x() );
 
         LVecBase3f origin( l / 2.0, w / 2.0, verts[0].get_z() );
         return origin;
@@ -884,9 +884,9 @@ void apply_textures( string &mat, string &sideId, Object &sideObj,
 
 
 
-        vector<vector<float>> u_data = p->parse_num_array_str( p->get_property_value( sideObj, "uaxis" ) );
+        vector<vector<PN_stdfloat>> u_data = p->parse_num_array_str( p->get_property_value( sideObj, "uaxis" ) );
         LVecBase3f uaxis( u_data[0][0], u_data[0][1], u_data[0][2] );
-        vector<vector<float>> v_data = p->parse_num_array_str( p->get_property_value( sideObj, "vaxis" ) );
+        vector<vector<PN_stdfloat>> v_data = p->parse_num_array_str( p->get_property_value( sideObj, "vaxis" ) );
         LVecBase3f vaxis( v_data[0][0], v_data[0][1], v_data[0][2] );
 
         side_np.set_texture( ts, tex, 1 );
@@ -1167,7 +1167,7 @@ Builder::Builder( const char *output, WindowFramework *window, Parser *p )
                         {
                                 // Occluder!
                                 Object solObj = p->get_object_with_name( obj, "solid" );
-                                vector<float> side_lengths;
+                                vector<PN_stdfloat> side_lengths;
                                 vector<Object> sides = p->get_objects_with_name( solObj, "side" );
                                 for ( size_t i = 0; i < sides.size(); i++ )
                                 {
@@ -1181,25 +1181,25 @@ Builder::Builder( const char *output, WindowFramework *window, Parser *p )
                                         if ( is_facing_left( norm ) || is_facing_right( norm ) )
                                         {
                                                 // Calculate the diagonal length of the side.
-                                                float w = abs( verts[0].get_z() - verts[2].get_z() );
-                                                float l = abs( verts[0].get_y() - verts[1].get_y() );
-                                                float d = sqrtf( ( w * w ) + ( l * l ) );
+                                                PN_stdfloat w = abs( verts[0].get_z() - verts[2].get_z() );
+                                                PN_stdfloat l = abs( verts[0].get_y() - verts[1].get_y() );
+                                                PN_stdfloat d = sqrtf( ( w * w ) + ( l * l ) );
                                                 side_lengths.push_back( d );
                                         }
                                         else if ( is_facing_forward( norm ) || is_facing_backward( norm ) )
                                         {
                                                 // Calculate the diagonal length of the side.
-                                                float w = abs( verts[0].get_z() - verts[2].get_z() );
-                                                float l = abs( verts[0].get_x() - verts[1].get_x() );
-                                                float d = sqrtf( ( w * w ) + ( l * l ) );
+                                                PN_stdfloat w = abs( verts[0].get_z() - verts[2].get_z() );
+                                                PN_stdfloat l = abs( verts[0].get_x() - verts[1].get_x() );
+                                                PN_stdfloat d = sqrtf( ( w * w ) + ( l * l ) );
                                                 side_lengths.push_back( d );
                                         }
                                         else if ( is_facing_up( norm ) || is_facing_down( norm ) )
                                         {
                                                 // Calculate the diagonal length of the side.
-                                                float w = abs( verts[0].get_x() - verts[1].get_x() );
-                                                float l = abs( verts[0].get_y() - verts[2].get_y() );
-                                                float d = sqrtf( ( w * w ) + ( l * l ) );
+                                                PN_stdfloat w = abs( verts[0].get_x() - verts[1].get_x() );
+                                                PN_stdfloat l = abs( verts[0].get_y() - verts[2].get_y() );
+                                                PN_stdfloat d = sqrtf( ( w * w ) + ( l * l ) );
                                                 side_lengths.push_back( d );
                                         }
                                 }
@@ -1223,11 +1223,11 @@ Builder::Builder( const char *output, WindowFramework *window, Parser *p )
 
                                 PT( Fog ) pFog = new Fog( id );
 
-                                vector<float> color = Parser::parse_float_list_str( p->get_property_value( obj, "fogcolor" ) );
+                                vector<PN_stdfloat> color = Parser::parse_float_list_str( p->get_property_value( obj, "fogcolor" ) );
                                 pFog->set_color( color[0] / 255.0, color[1] / 255.0, color[2] / 255.0 );
 
-                                float flStart = stof( p->get_property_value( obj, "fogstart" ) );
-                                float flEnd = stof( p->get_property_value( obj, "fogend" ) );
+                                PN_stdfloat flStart = stof( p->get_property_value( obj, "fogstart" ) );
+                                PN_stdfloat flEnd = stof( p->get_property_value( obj, "fogend" ) );
                                 pFog->set_exp_density( flStart / flEnd );
 
                                 NodePath fog_np = scene.attach_new_node( pFog );
@@ -1235,24 +1235,24 @@ Builder::Builder( const char *output, WindowFramework *window, Parser *p )
                                 cout << "Made env_fog_controller (" << fog_np.get_name() << "):\n"
                                         << "\t" << pFog->get_exp_density() << pFog->get_color() << endl;
 
-                                //float flFarZ = stof( p->get_property_value( obj, "farz" ) );
+                                //PN_stdfloat flFarZ = stof( p->get_property_value( obj, "farz" ) );
                         }
                         else if ( classname.compare( "light" ) == 0 )
                         {
                                 // Point light entity
                                 PT( PointLight ) pLight = new PointLight( "pointlight." + id );
 
-                                float flQuad = stof( p->get_property_value( obj, "_quadratic_attn" ) );
-                                float flConst = stof( p->get_property_value( obj, "_constant_attn" ) );
-                                float flLinear = stof( p->get_property_value( obj, "_linear_attn" ) );
+                                PN_stdfloat flQuad = stof( p->get_property_value( obj, "_quadratic_attn" ) );
+                                PN_stdfloat flConst = stof( p->get_property_value( obj, "_constant_attn" ) );
+                                PN_stdfloat flLinear = stof( p->get_property_value( obj, "_linear_attn" ) );
                                 //pLight->set_attenuation( LVecBase3f( flConst, flLinear, flQuad ) );
 
-                                vector<float> color = Parser::parse_float_list_str( p->get_property_value( obj, "_light" ) );
+                                vector<PN_stdfloat> color = Parser::parse_float_list_str( p->get_property_value( obj, "_light" ) );
                                 pLight->set_color( LColor( color[0] / 255.0, color[1] / 255.0, color[2] / 255.0, 1.0 ) );
 
                                 //pLight->set_shadow_caster(true, 1024, 1024);
 
-                                vector<float> pos = Parser::parse_float_list_str( p->get_property_value( obj, "origin" ) );
+                                vector<PN_stdfloat> pos = Parser::parse_float_list_str( p->get_property_value( obj, "origin" ) );
 
                                 NodePath npLight = scene.attach_new_node( pLight );
                                 npLight.set_pos( render, pos[0], pos[1], pos[2] );
@@ -1262,21 +1262,21 @@ Builder::Builder( const char *output, WindowFramework *window, Parser *p )
                                 // Spot light entity
                                 PT( Spotlight ) pLight = new Spotlight( "spotlight." + id );
 
-                                float flQuad = stof( p->get_property_value( obj, "_quadratic_attn" ) );
-                                float flConst = stof( p->get_property_value( obj, "_constant_attn" ) );
-                                float flLinear = stof( p->get_property_value( obj, "_linear_attn" ) );
+                                PN_stdfloat flQuad = stof( p->get_property_value( obj, "_quadratic_attn" ) );
+                                PN_stdfloat flConst = stof( p->get_property_value( obj, "_constant_attn" ) );
+                                PN_stdfloat flLinear = stof( p->get_property_value( obj, "_linear_attn" ) );
                                 //pLight->set_attenuation( LVecBase3f( flConst, flLinear, flQuad ) );
 
-                                vector<float> color = Parser::parse_float_list_str( p->get_property_value( obj, "_light" ) );
+                                vector<PN_stdfloat> color = Parser::parse_float_list_str( p->get_property_value( obj, "_light" ) );
                                 pLight->set_color( LColor( color[0] / 255.0, color[1] / 255.0, color[2] / 255.0, 1.0 ) );
 
-                                float flExp = stof( p->get_property_value( obj, "_exponent" ) );
+                                PN_stdfloat flExp = stof( p->get_property_value( obj, "_exponent" ) );
                                 pLight->set_exponent( flExp );
 
                                 //pLight->set_shadow_caster(true, 1024, 1024);
 
-                                vector<float> pos = Parser::parse_float_list_str( p->get_property_value( obj, "origin" ) );
-                                vector<float> hpr = Parser::parse_float_list_str( p->get_property_value( obj, "angles" ) );
+                                vector<PN_stdfloat> pos = Parser::parse_float_list_str( p->get_property_value( obj, "origin" ) );
+                                vector<PN_stdfloat> hpr = Parser::parse_float_list_str( p->get_property_value( obj, "angles" ) );
 
                                 NodePath npLight = scene.attach_new_node( pLight );
                                 npLight.set_pos( render, pos[0], pos[1], pos[2] );
@@ -1287,12 +1287,12 @@ Builder::Builder( const char *output, WindowFramework *window, Parser *p )
                                 // Sun visual model thingy.
 
                                 PT( Sun ) sun = new Sun( "env_sun." + id );
-                                vector<float> col = Parser::parse_float_list_str( p->get_property_value( obj, "rendercolor" ) );
+                                vector<PN_stdfloat> col = Parser::parse_float_list_str( p->get_property_value( obj, "rendercolor" ) );
                                 sun->set_sun_color( LColor( col[0] / 255.0, col[1] / 255.0, col[2] / 255.0, 1.0 ) );
 
-                                vector<float> pos = Parser::parse_float_list_str( p->get_property_value( obj, "origin" ) );
+                                vector<PN_stdfloat> pos = Parser::parse_float_list_str( p->get_property_value( obj, "origin" ) );
 
-                                float scale = stof( p->get_property_value( obj, "size" ) );
+                                PN_stdfloat scale = stof( p->get_property_value( obj, "size" ) );
 
                                 NodePath sun_np = scene.attach_new_node( sun );
                                 //sun_np.set_bin("background", 1);
@@ -1317,8 +1317,8 @@ Builder::Builder( const char *output, WindowFramework *window, Parser *p )
                                 PN_stdfloat fov = stof( p->get_property_value( obj, "FOV" ) );
                                 cam->set_fov( fov );
 
-                                vector<float> pos = Parser::parse_float_list_str( p->get_property_value( obj, "origin" ) );
-                                vector<float> hpr = Parser::parse_float_list_str( p->get_property_value( obj, "angles" ) );
+                                vector<PN_stdfloat> pos = Parser::parse_float_list_str( p->get_property_value( obj, "origin" ) );
+                                vector<PN_stdfloat> hpr = Parser::parse_float_list_str( p->get_property_value( obj, "angles" ) );
 
                                 NodePath cam_np = scene.attach_new_node( cam );
                                 cam_np.set_pos( render, LPoint3( pos[0], pos[1], pos[2] ) );
@@ -1330,7 +1330,7 @@ Builder::Builder( const char *output, WindowFramework *window, Parser *p )
                                 //} else if (classname.compare("entity_spawn_point") == 0) {
                                 //  string point_name = p->get_property_value(obj, "targetname");
                                 //  string spm_name = p->get_property_value(obj, "spawn_manager_name");
-                                //  vector<float> pos = Parser::parse_float_list_str(p->get_property_value(obj, "origin"));
+                                //  vector<PN_stdfloat> pos = Parser::parse_float_list_str(p->get_property_value(obj, "origin"));
 
                         }
                         else if ( classname.compare( "info_null" ) == 0 )
@@ -1339,7 +1339,7 @@ Builder::Builder( const char *output, WindowFramework *window, Parser *p )
                                 // Very useful.
                                 // It's just a PandaNode with a position applied to it.
 
-                                vector<float> pos = Parser::parse_float_list_str( p->get_property_value( obj, "origin" ) );
+                                vector<PN_stdfloat> pos = Parser::parse_float_list_str( p->get_property_value( obj, "origin" ) );
 
                                 PT( PandaNode ) null_node = new PandaNode( id );
 

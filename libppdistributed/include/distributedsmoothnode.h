@@ -47,11 +47,11 @@ public:
         void set_sm_stop( int timestamp );
         DCFuncDecl( set_sm_stop_field );
 
-        void set_sm_pos( float x, float y, float z, int timestamp );
+        void set_sm_pos( PN_stdfloat x, PN_stdfloat y, PN_stdfloat z, int timestamp );
         DCFuncDecl( set_sm_pos_field );
         DCFuncDecl( get_sm_pos_field );
 
-        void set_sm_hpr( float h, float p, float r, int timestamp );
+        void set_sm_hpr( PN_stdfloat h, PN_stdfloat p, PN_stdfloat r, int timestamp );
         DCFuncDecl( set_sm_hpr_field );
         DCFuncDecl( get_sm_hpr_field );
 
@@ -67,18 +67,18 @@ public:
         virtual void d_set_parent( int parent_token );
 
         void d_suggest_resync( DOID_TYPE av_id, int timestamp_a, int timestamp_b,
-                               double server_time, float uncertainty );
+                               double server_time, PN_stdfloat uncertainty );
         void suggest_resync( DOID_TYPE av_id, int timestamp_a, int timestamp_b,
-                             int server_time, uint16_t server_time_usec, float uncertainty );
+                             int server_time, uint16_t server_time_usec, PN_stdfloat uncertainty );
         DCFuncDecl( suggest_resync_field );
 
-        void d_return_resync( DOID_TYPE av_id, int timestamp_b, double server_time, float uncertainty );
+        void d_return_resync( DOID_TYPE av_id, int timestamp_b, double server_time, PN_stdfloat uncertainty );
         void return_resync( DOID_TYPE av_id, int timestamp_b, int server_time, uint16_t server_time_usec,
-                            float uncertainty );
+                            PN_stdfloat uncertainty );
         DCFuncDecl( return_resync_field );
 
         bool p2p_resync( DOID_TYPE av_id, int timestamp, double server_time,
-                         float uncertainty );
+                         PN_stdfloat uncertainty );
 
         void activate_smoothing( bool smoothing, bool prediction );
 
@@ -100,7 +100,7 @@ private:
         bool _stopped;
         bool _smooth_wrt_reparents;
 
-        float _last_suggest_resync;
+        PN_stdfloat _last_suggest_resync;
 
 
 

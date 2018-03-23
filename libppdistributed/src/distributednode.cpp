@@ -79,7 +79,7 @@ void DistributedNode::set_parent_field( DCFuncArgs )
         ( (DistributedNode *)data )->set_parent( packer.unpack_int() );
 }
 
-void DistributedNode::d_set_x( float x )
+void DistributedNode::d_set_x( PN_stdfloat x )
 {
         BeginCLUpdate( "set_x" );
         AddArg( double, x );
@@ -96,7 +96,7 @@ void DistributedNode::get_x_field( DCFuncArgs )
         packer.pack_double( ( (DistributedNode *)data )->get_x() );
 }
 
-void DistributedNode::d_set_y( float y )
+void DistributedNode::d_set_y( PN_stdfloat y )
 {
         BeginCLUpdate( "set_y" );
         AddArg( double, y );
@@ -113,7 +113,7 @@ void DistributedNode::get_y_field( DCFuncArgs )
         packer.pack_double( ( (DistributedNode *)data )->get_y() );
 }
 
-void DistributedNode::d_set_z( float z )
+void DistributedNode::d_set_z( PN_stdfloat z )
 {
         BeginCLUpdate( "set_z" );
         AddArg( double, z );
@@ -130,7 +130,7 @@ void DistributedNode::get_z_field( DCFuncArgs )
         packer.pack_double( ( (DistributedNode *)data )->get_z() );
 }
 
-void DistributedNode::d_set_h( float h )
+void DistributedNode::d_set_h( PN_stdfloat h )
 {
         BeginCLUpdate( "set_h" );
         AddArg( double, h );
@@ -147,7 +147,7 @@ void DistributedNode::get_h_field( DCFuncArgs )
         packer.pack_double( ( (DistributedNode *)data )->get_h() );
 }
 
-void DistributedNode::d_set_p( float p )
+void DistributedNode::d_set_p( PN_stdfloat p )
 {
         BeginCLUpdate( "set_p" );
         AddArg( double, p );
@@ -164,7 +164,7 @@ void DistributedNode::get_p_field( DCFuncArgs )
         packer.pack_double( ( (DistributedNode *)data )->get_p() );
 }
 
-void DistributedNode::d_set_r( float r )
+void DistributedNode::d_set_r( PN_stdfloat r )
 {
         BeginCLUpdate( "set_r" );
         AddArg( double, r );

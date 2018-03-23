@@ -33,17 +33,17 @@ static void apply_basic_props( Parser &parser, Object &obj, NodePath item )
                 }
                 else if ( prop.name == "pos" )
                 {
-                        vector<float> pos = parser.parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> pos = parser.parse_float_list_str( prop.value );
                         item.set_pos( pos[0], pos[1], pos[2] );
                 }
                 else if ( prop.name == "hpr" )
                 {
-                        vector<float> hpr = parser.parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> hpr = parser.parse_float_list_str( prop.value );
                         item.set_hpr( hpr[0], hpr[1], hpr[2] );
                 }
                 else if ( prop.name == "scale" )
                 {
-                        vector<float> scale = parser.parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> scale = parser.parse_float_list_str( prop.value );
                         item.set_scale( scale[0], scale[1], scale[2] );
                 }
                 else if ( prop.name == "transparency" )
@@ -53,12 +53,12 @@ static void apply_basic_props( Parser &parser, Object &obj, NodePath item )
                 }
                 else if ( prop.name == "colorscale" )
                 {
-                        vector<float> cs = parser.parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> cs = parser.parse_float_list_str( prop.value );
                         item.set_color_scale( cs[0], cs[1], cs[2], cs[3] );
                 }
                 else if ( prop.name == "color" )
                 {
-                        vector<float> cl = parser.parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> cl = parser.parse_float_list_str( prop.value );
                         item.set_color( cl[0], cl[1], cl[2], cl[3] );
                 }
         }
@@ -217,12 +217,12 @@ static void make_label( Object &pobj, Parser &parser, const NodePath &schemenode
                         lbl->set_align( get_align( prop.value ) );
                 else if ( prop.name == "shadow" )
                 {
-                        vector<float> shadow = parser.parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> shadow = parser.parse_float_list_str( prop.value );
                         lbl->set_shadow_color( shadow[0], shadow[1], shadow[2], shadow[3] );
                 }
                 else if ( prop.name == "shadowoffset" )
                 {
-                        vector<float> shoffset = parser.parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> shoffset = parser.parse_float_list_str( prop.value );
                         lbl->set_shadow( shoffset[0], shoffset[1] );
                 }
                 else if ( prop.name == "slant" )
@@ -231,12 +231,12 @@ static void make_label( Object &pobj, Parser &parser, const NodePath &schemenode
                 }
                 else if ( prop.name == "textcolor" )
                 {
-                        vector<float> tcolor = parser.parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> tcolor = parser.parse_float_list_str( prop.value );
                         lbl->set_text_color( tcolor[0], tcolor[1], tcolor[2], tcolor[3] );
                 }
                 else if ( prop.name == "framecolor" )
                 {
-                        vector<float> fcolor = parser.parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> fcolor = parser.parse_float_list_str( prop.value );
                         lbl->set_frame_color( fcolor[0], fcolor[1], fcolor[2], fcolor[3] );
                 }
                 else if ( prop.name == "smallcaps" )
@@ -343,67 +343,67 @@ static void make_button( Object &pobj, Parser &parser, const NodePath &schemenod
 
                 else if ( prop.name == "textpos" )
                 {
-                        vector<float> p = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> p = Parser::parse_float_list_str( prop.value );
                         btn->set_text_pos( LPoint3f( p[0], p[1], p[2] ) );
                 }
 
                 else if ( prop.name == "text0pos" )
                 {
-                        vector<float> p = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> p = Parser::parse_float_list_str( prop.value );
                         btn->set_text0_pos( LPoint3f( p[0], p[1], p[2] ) );
                 }
 
                 else if ( prop.name == "text1pos" )
                 {
-                        vector<float> p = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> p = Parser::parse_float_list_str( prop.value );
                         btn->set_text1_pos( LPoint3f( p[0], p[1], p[2] ) );
                 }
 
                 else if ( prop.name == "text2pos" )
                 {
-                        vector<float> p = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> p = Parser::parse_float_list_str( prop.value );
                         btn->set_text2_pos( LPoint3f( p[0], p[1], p[2] ) );
                 }
 
                 else if ( prop.name == "text3pos" )
                 {
-                        vector<float> p = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> p = Parser::parse_float_list_str( prop.value );
                         btn->set_text3_pos( LPoint3f( p[0], p[1], p[2] ) );
                 }
 
                 else if ( prop.name == "textcolor" )
                 {
-                        vector<float> tc = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> tc = Parser::parse_float_list_str( prop.value );
                         btn->set_text_color( LColor( tc[0], tc[1], tc[2], tc[3] ) );
                 }
 
                 else if ( prop.name == "text0color" )
                 {
-                        vector<float> t0 = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> t0 = Parser::parse_float_list_str( prop.value );
                         btn->set_text0_color( LColorf( t0[0], t0[1], t0[2], t0[3] ) );
                 }
 
                 else if ( prop.name == "text1color" )
                 {
-                        vector<float> t1 = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> t1 = Parser::parse_float_list_str( prop.value );
                         btn->set_text1_color( LColorf( t1[0], t1[1], t1[2], t1[3] ) );
                 }
 
                 else if ( prop.name == "text2color" )
                 {
-                        vector<float> t2 = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> t2 = Parser::parse_float_list_str( prop.value );
                         btn->set_text2_color( LColorf( t2[0], t2[1], t2[2], t2[3] ) );
                 }
 
                 else if ( prop.name == "text3color" )
                 {
-                        vector<float> t3 = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> t3 = Parser::parse_float_list_str( prop.value );
                         btn->set_text3_color( LColorf( t3[0], t3[1], t3[2], t3[3] ) );
                 }
 
                 else if ( prop.name == "textshadow" )
                 {
-                        vector<float> ts = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> ts = Parser::parse_float_list_str( prop.value );
                         btn->get_text()->set_shadow( .04, .04 );
                         btn->get_text()->set_shadow_color( LColor( ts[0], ts[1], ts[2], ts[3] ) );
                 }
@@ -432,7 +432,7 @@ static void make_button( Object &pobj, Parser &parser, const NodePath &schemenod
 
                 else if ( prop.name == "geomscale" )
                 {
-                        vector<float> gscale = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> gscale = Parser::parse_float_list_str( prop.value );
                         btn->set_geom_scale( LVector3f( gscale[0], gscale[1], gscale[2] ) );
                 }
 
@@ -447,7 +447,7 @@ static void make_button( Object &pobj, Parser &parser, const NodePath &schemenod
 
                 else if ( prop.name == "geomOffset" )
                 {
-                        vector<float> offsetvec = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> offsetvec = Parser::parse_float_list_str( prop.value );
                         btn->set_geom_offset( LVector4f( offsetvec[0], offsetvec[1], offsetvec[2], offsetvec[3] ) );
                 }
 
@@ -471,14 +471,14 @@ static void make_scrolled_frame( Object &pobj, Parser &parser, const NodePath &s
         NodePath frame_np( sframe );
         apply_basic_props( parser, pobj, frame_np );
 
-        float scrollbar_width = 0.08;
-        float bevel = 0.0;
-        vector<float> virtual_frame;
+        PN_stdfloat scrollbar_width = 0.08;
+        PN_stdfloat bevel = 0.0;
+        vector<PN_stdfloat> virtual_frame;
         virtual_frame.push_back( -0.5 );
         virtual_frame.push_back( 0.5 );
         virtual_frame.push_back( -0.5 );
         virtual_frame.push_back( 0.5 );
-        vector<float> width_height;
+        vector<PN_stdfloat> width_height;
         width_height.push_back( 1.0 );
         width_height.push_back( 1.0 );
 
@@ -625,13 +625,13 @@ static void make_text_entry( Object &pobj, Parser &parser, const NodePath &schem
 
                 else if ( prop.name == "textcolor" )
                 {
-                        vector<float> col = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> col = Parser::parse_float_list_str( prop.value );
                         text_def->set_text_color( col[0], col[1], col[2], col[3] );
                 }
 
                 else if ( prop.name == "textshadow" )
                 {
-                        vector<float> sh = Parser::parse_float_list_str( prop.value );
+                        vector<PN_stdfloat> sh = Parser::parse_float_list_str( prop.value );
                         text_def->set_shadow_color( sh[0], sh[1], sh[2], sh[3] );
                 }
         }
@@ -719,13 +719,13 @@ NodePath Gui::load_scheme( const string &filename )
 
                         if ( parser.has_property( obj, "spacewidth" ) )
                         {
-                                float spw = stof( parser.get_property_value( obj, "spacewidth" ) );
+                                PN_stdfloat spw = stof( parser.get_property_value( obj, "spacewidth" ) );
                                 font->set_space_advance( spw );
                         }
 
                         if ( parser.has_property( obj, "lineheight" ) )
                         {
-                                float lih = stof( parser.get_property_value( obj, "lineheight" ) );
+                                PN_stdfloat lih = stof( parser.get_property_value( obj, "lineheight" ) );
                                 font->set_line_height( lih );
                         }
 
@@ -741,7 +741,7 @@ NodePath Gui::load_scheme( const string &filename )
 
                         if ( parser.has_property( obj, "volume" ) )
                         {
-                                float vol = stof( parser.get_property_value( obj, "volume" ) );
+                                PN_stdfloat vol = stof( parser.get_property_value( obj, "volume" ) );
                                 sound->set_volume( vol );
                         }
 

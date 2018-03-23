@@ -36,12 +36,12 @@ public:
         virtual void d_set_parent( int parent_token );
         void b_set_parent( int parent_token );
 
-        void d_set_x( float x );
-        void d_set_y( float y );
-        void d_set_z( float z );
-        void d_set_h( float h );
-        void d_set_p( float p );
-        void d_set_r( float r );
+        void d_set_x( PN_stdfloat x );
+        void d_set_y( PN_stdfloat y );
+        void d_set_z( PN_stdfloat z );
+        void d_set_h( PN_stdfloat h );
+        void d_set_p( PN_stdfloat p );
+        void d_set_r( PN_stdfloat r );
 
         void set_parent( int parent_token );
         virtual void do_set_parent( int parent_token );

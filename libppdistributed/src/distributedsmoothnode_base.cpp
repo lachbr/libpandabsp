@@ -6,7 +6,7 @@
 
 #include <genericAsyncTask.h>
 
-static const float smooth_node_epsilon = 0.01;
+static const PN_stdfloat smooth_node_epsilon = 0.01;
 
 #define BeginSmUpdate(fieldname)\
 DCPacker packer = _dclass->start_client_format_update(fieldname, _do_id);
@@ -152,7 +152,7 @@ void DistributedSmoothNodeBase::set_curr_l( uint64_t l )
         _curr_l[1] = l;
 }
 
-void DistributedSmoothNodeBase::d_set_sm_hpr( float h, float p, float r )
+void DistributedSmoothNodeBase::d_set_sm_hpr( PN_stdfloat h, PN_stdfloat p, PN_stdfloat r )
 {
         BeginSmUpdate( "set_sm_hpr" );
         AddArg( double, h );
@@ -163,7 +163,7 @@ void DistributedSmoothNodeBase::d_set_sm_hpr( float h, float p, float r )
 
 // SetSmHpr is pure virtual, defined in distributedSmoothNode/AI.cpp
 
-void DistributedSmoothNodeBase::d_set_sm_pos( float x, float y, float z )
+void DistributedSmoothNodeBase::d_set_sm_pos( PN_stdfloat x, PN_stdfloat y, PN_stdfloat z )
 {
         BeginSmUpdate( "set_sm_pos" );
         AddArg( double, x );
@@ -205,12 +205,12 @@ string DistributedSmoothNodeBase::get_pos_hpr_broadcast_task_name() const
         return ss.str();
 }
 
-void DistributedSmoothNodeBase::set_pos_hpr_broadcast_period( float period )
+void DistributedSmoothNodeBase::set_pos_hpr_broadcast_period( PN_stdfloat period )
 {
         _broadcast_period = period;
 }
 
-float DistributedSmoothNodeBase::get_pos_hpr_broadcast_period() const
+PN_stdfloat DistributedSmoothNodeBase::get_pos_hpr_broadcast_period() const
 {
         return _broadcast_period;
 }
@@ -230,7 +230,7 @@ bool DistributedSmoothNodeBase::want_smooth_broadcast_task() const
         return true;
 }
 
-void DistributedSmoothNodeBase::start_pos_hpr_broadcast( float period, bool stagger )
+void DistributedSmoothNodeBase::start_pos_hpr_broadcast( PN_stdfloat period, bool stagger )
 {
 
         string task_name = get_pos_hpr_broadcast_task_name();

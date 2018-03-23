@@ -1,7 +1,10 @@
+#include "actor.h"
+
 #include <auto_bind.h>
 #include <character.h>
+#include <loader.h>
 
-#include "actor.h"
+NotifyCategoryDef( actor, "" );
 
 Actor::Actor() :
         NodePath( "actor" )
@@ -46,53 +49,44 @@ void Actor::setup_geom_node()
 //    hierarchyMatchFlags: idem as the same parameter from auto_bind().
 void Actor::load_actor( const string &model_file,
                         const AnimMap *anim_map,
-                        const string &part,
                         int hierarchy_match_flags )
 {
-
-        const string lod_name = "lodRoot";
-
-        // Setup the geom node
-        //PT(PandaNode) root = new PandaNode("actor");
-        //NodePath::operator=(NodePath(root));
-        //set_geom_node(NodePath(*this));
+        Loader *loader = Loader::get_global_ptr();
 
         // load the actor model and parent it to the geom node
-        NodePath model_np = g_base->load_model( model_file );
+        NodePath model_np = NodePath( loader->load_sync( model_file ) );
+        if ( model_np.is_empty() )
+        {
+                actor_cat.error()
+                        << "Could not load actor model!\n";
+                return;
+        }
         model_np.reparent_to( get_geom_node() );
 
-        NodePath bundle_np;
+        // Path to the Character node on this model.
+        NodePath char_np;
 
         if ( model_np.node()->is_of_type( Character::get_class_type() ) )
         {
-                bundle_np = model_np;
+                char_np = model_np;
         }
         else
         {
-                bundle_np = model_np.find( "**/+Character" );
+                char_np = model_np.find( "**/+Character" );
         }
 
         PartBundleHandle *bhandle;
-        BundleDict bundle_dict;
-        AnimControlCollection control;
 
-        if ( bundle_np.is_empty() )
+        if ( char_np.is_empty() )
         {
-                cout << model_file << " is not a Character!" << endl;
+                actor_cat.error()
+                        << model_file << " is not a Character!\n";
                 return;
         }
         else
         {
-                bundle_np.reparent_to( _geom_np );
-
-                bhandle = prepare_bundle( &bundle_np, part, lod_name );
-
-                if ( _part_bundle_dict.find( lod_name ) != _part_bundle_dict.end() )
-                {
-                        bundle_dict = _part_bundle_dict[lod_name];
-                }
-
-                bundle_np.node()->set_name( "__Actor_" + part );
+                char_np.reparent_to( _geom_np );
+                bhandle = prepare_bundle( char_np );
         }
 
         // If there are no animations to bind to the actor, we are done here.
@@ -102,7 +96,7 @@ void Actor::load_actor( const string &model_file,
         }
 
         // load anims from the actor model first
-        load_anims( anim_map, model_file, part, &bundle_np, &control, hierarchy_match_flags );
+        load_anims( anim_map, model_file, char_np, hierarchy_match_flags );
 
         NodePathVec anim_np_vec;
         anim_np_vec.reserve( anim_map->size() );
@@ -114,11 +108,17 @@ void Actor::load_actor( const string &model_file,
                 if ( filename != model_file )
                 {
                         // load the animation as a child of the actor
-                        NodePath anim_np = g_base->load_model( filename );
-                        anim_np.reparent_to( bundle_np );
+                        NodePath anim_np = NodePath( loader->load_sync( filename ) );
+                        if ( anim_np.is_empty() )
+                        {
+                                actor_cat.error()
+                                        << "Could not load actor animation '" << filename << "'\n";
+                                continue;
+                        }
+                        anim_np.reparent_to( char_np );
 
                         // load anims from that file
-                        load_anims( anim_map, filename, part, &bundle_np, &control, hierarchy_match_flags );
+                        load_anims( anim_map, filename, char_np, hierarchy_match_flags );
 
                         // detach the node so that it will not appear in a new call to auto_bind()
                         anim_np.detach_node();
@@ -130,112 +130,89 @@ void Actor::load_actor( const string &model_file,
         // re-attach the animation nodes to the actor
         for ( NodePathVec::iterator npItr = anim_np_vec.begin(); npItr < anim_np_vec.end(); ++npItr )
         {
-                ( *npItr ).reparent_to( bundle_np );
+                ( *npItr ).reparent_to( char_np );
         }
 
-        PartDef partdef = { bundle_np, bhandle, model_np.node(), control };
-        bundle_dict[part] = partdef;
-        _part_bundle_dict[lod_name] = bundle_dict;
-
+        _character_np = char_np;
+        _part_bundle_handle = bhandle;
+        _part_model = model_np.node();
 }
 
-PartBundleHandle *Actor::prepare_bundle( NodePath *bundle_np,
-                                         string part_name, const string &lod_name )
+PartBundleHandle *Actor::prepare_bundle( const NodePath &bundle_np )
 {
-
         if ( !_got_name )
         {
-                node()->set_name( bundle_np->node()->get_name() );
+                node()->set_name( bundle_np.node()->get_name() );
                 _got_name = true;
         }
 
-        Character *node = (Character *)bundle_np->node();
-        nassertr( node->get_num_bundles() == 1, (PartBundleHandle *)nullptr );
-        PartBundleHandle *bundleHandle = node->get_bundle_handle( 0 );
+        Character *char_node = DCAST(Character, bundle_np.node());
+        nassertr( char_node->get_num_bundles() == 1, nullptr );
+        PartBundleHandle *bhandle = char_node->get_bundle_handle( 0 );
 
-        if ( true )
-        {
-                if ( _common_bundle_handles.find( part_name ) == _common_bundle_handles.end() )
-                {
-                        // We haven't already got a bundle for this part; store it.
-                        _common_bundle_handles[part_name] = bundleHandle;
-                }
-                else
-                {
-                        // We've already got a bundle for this part; merge it.
-                        PartBundleHandle *loaded_bundle_handle = _common_bundle_handles[part_name];
-
-                        node->merge_bundles( bundleHandle, loaded_bundle_handle );
-                        bundleHandle = loaded_bundle_handle;
-                }
-        }
-
-
-        _part_names.push_back( part_name );
-
-        return bundleHandle;
+        return bhandle;
 }
 
-void Actor::set_geom_node( NodePath &node )
+void Actor::set_geom_node( const NodePath &node )
 {
         _geom_np = node;
 }
 
-NodePath &Actor::get_geom_node()
+NodePath Actor::get_geom_node() const
 {
         return _geom_np;
 }
 
 void Actor::load_anims( const AnimMap *anim_map,
                         const string &filename,
-                        string part_name,
-                        NodePath *bundle_np,
-                        AnimControlCollection *control,
+                        const NodePath &bundle_np,
                         int hierarchy_match_flags )
 {
-        // precondition
         if ( anim_map == nullptr )
         {
-                nout << "ERROR: parameter anim_map cannot be nullptr." << endl;
+                actor_cat.error()
+                        << "load_anims(): anim_map is nullptr" << endl;
                 return;
         }
 
         // use auto_bind() to gather the anims
         AnimControlCollection temp_collection;
-        auto_bind( bundle_np->node(), temp_collection, hierarchy_match_flags );
+        auto_bind( bundle_np.node(), temp_collection, hierarchy_match_flags );
 
         // get the anim names for the current file
-        AnimMap::const_iterator animMapItr = anim_map->find( filename );
-        if ( animMapItr != anim_map->end() )
+        AnimMap::const_iterator anim_map_itr = anim_map->find( filename );
+        if ( anim_map_itr != anim_map->end() )
         {
                 // first, test the anim names
-                for ( NameVec::const_iterator nameItr = ( *animMapItr ).second.begin(); nameItr != ( *animMapItr ).second.end(); ++nameItr )
+                for ( NameVec::const_iterator name_itr = ( *anim_map_itr ).second.begin();
+                      name_itr != ( *anim_map_itr ).second.end(); ++name_itr )
                 {
                         // make sure this name is not currently stored by the actor
-                        if ( control->find_anim( *nameItr ) == nullptr )
+                        if ( _control.find_anim( *name_itr ) == nullptr )
                         {
                                 // check if auto_bind() found an animation with the right name
-                                PT( AnimControl ) animPtr = temp_collection.find_anim( *nameItr );
-                                if ( animPtr != nullptr )
+                                PT( AnimControl ) anim_ptr = temp_collection.find_anim( *name_itr );
+                                if ( anim_ptr != nullptr )
                                 {
-                                        control->store_anim( animPtr, *nameItr );
-                                        temp_collection.unbind_anim( *nameItr );
+                                        _control.store_anim( anim_ptr, *name_itr );
+                                        temp_collection.unbind_anim( *name_itr );
                                 }
                         }
                 }
 
                 // deal the remaining anims
                 int animIdx = 0;
-                for ( NameVec::const_iterator nameItr = ( *animMapItr ).second.begin(); nameItr != ( *animMapItr ).second.end(); ++nameItr )
+                for ( NameVec::const_iterator name_itr = ( *anim_map_itr ).second.begin();
+                      name_itr != ( *anim_map_itr ).second.end(); ++name_itr )
                 {
                         // make sure this name is not currently stored by the actor
-                        if ( control->find_anim( *nameItr ) == nullptr )
+                        if ( _control.find_anim( *name_itr ) == nullptr )
                         {
                                 // make sure there is at least one anim left to store
                                 PT( AnimControl ) animPtr = temp_collection.get_anim( animIdx );
                                 if ( animPtr != nullptr )
                                 {
-                                        control->store_anim( animPtr, *nameItr );
+                                        _control.store_anim( animPtr, *name_itr );
                                         ++animIdx;
                                 }
                         }
@@ -243,14 +220,14 @@ void Actor::load_anims( const AnimMap *anim_map,
         }
 }
 
-bool Actor::is_stored( const AnimControl *animPtr, const AnimControlCollection *control )
+bool Actor::is_stored( const AnimControl *anim, const AnimControlCollection *control )
 {
         for ( int i = 0; i < control->get_num_anims(); ++i )
         {
-                PT( AnimControl ) storedAnimPtr = control->get_anim( i );
+                PT( AnimControl ) stored_anim = control->get_anim( i );
 
-                if ( animPtr->get_anim() == storedAnimPtr->get_anim() &&
-                     animPtr->get_part() == storedAnimPtr->get_part() )
+                if ( anim->get_anim() == stored_anim->get_anim() &&
+                     anim->get_part() == stored_anim->get_part() )
                 {
                         return true;
                 }
@@ -266,33 +243,22 @@ bool Actor::is_stored( const AnimControl *animPtr, const AnimControlCollection *
 //
 // Parameter:
 //    jointName: the joint's name as found in the model file.
-NodePath Actor::control_joint( const string &jointName )
+NodePath Actor::control_joint( const string &joint_name )
 {
-        bool foundJoint = false;
-        NodePath npJoint = attach_new_node( jointName );
-        NodePath characterNP = find( "**/+Character" );
-        PT( Character ) characterPtr = DCAST( Character, characterNP.node() );
-        if ( characterPtr != nullptr )
+        Character *char_node;
+        DCAST_INTO_R( char_node, _character_np.node(), NodePath() );
+
+        CharacterJoint *joint = char_node->find_joint( joint_name );
+        nassertr( joint != nullptr, NodePath() );
+
+        NodePath joint_np = attach_new_node( joint_name );
+        for ( int i = 0; i < char_node->get_num_bundles(); ++i )
         {
-                PT( CharacterJoint ) characterJointPtr = characterPtr->find_joint( jointName );
-                if ( characterJointPtr != nullptr )
-                {
-                        for ( int i = 0; !foundJoint && i < characterPtr->get_num_bundles(); ++i )
-                        {
-                                if ( characterPtr->get_bundle( i )->control_joint( jointName, npJoint.node() ) )
-                                {
-                                        foundJoint = true;
-                                        npJoint.set_mat( characterJointPtr->get_default_value() );
-                                }
-                        }
-                }
+                if ( char_node->get_bundle( i )->control_joint( joint_name, joint_np.node() ) )
+                        joint_np.set_mat( joint->get_default_value() );
         }
-        if ( !foundJoint )
-        {
-                nout << "ERROR: cannot control joint `" << jointName << "'." << endl;
-                npJoint.remove_node();
-        }
-        return npJoint;
+
+        return joint_np;
 }
 
 // This function exposes a joint via its NodePath handle.
@@ -303,243 +269,114 @@ NodePath Actor::control_joint( const string &jointName )
 //
 // Parameter:
 //    jointName: the joint's name as found in the model file.
-NodePath Actor::expose_joint( const string &jointName )
+NodePath Actor::expose_joint( const string &joint_name )
 {
-        bool foundJoint = false;
-        NodePath npJoint = attach_new_node( jointName );
-        NodePath npCharacter = find( "**/+Character" );
-        PT( Character ) characterPtr = DCAST( Character, npCharacter.node() );
-        if ( characterPtr != nullptr )
-        {
-                PT( CharacterJoint ) characterJointPtr = characterPtr->find_joint( jointName );
-                if ( characterJointPtr != nullptr )
-                {
-                        foundJoint = true;
-                        characterJointPtr->add_net_transform( npJoint.node() );
-                }
-        }
-        if ( !foundJoint )
-        {
-                nout << "ERROR: no joint named `" << jointName << "'." << endl;
-                npJoint.remove_node();
-        }
-        return npJoint;
+        bool found_joint = false;
+        NodePath joint_np = attach_new_node( joint_name );
+
+        Character *char_node;
+        DCAST_INTO_R( char_node, _character_np.node(), NodePath() );
+
+        CharacterJoint *joint = char_node->find_joint( joint_name );
+        nassertr( joint != nullptr, NodePath() );
+        joint->add_net_transform( joint_np.node() );
+
+        return joint_np;
 }
 
-void Actor::play( const string &animName )
+void Actor::play( const string &anim_name )
 {
-        // Play this anim on all parts from start to finish.
-
-        for ( PartBundleMap::const_iterator lodItr = _part_bundle_dict.begin(); lodItr != _part_bundle_dict.end(); ++lodItr )
-        {
-                BundleDict bundleDict = _part_bundle_dict[lodItr->first];
-                for ( BundleDict::iterator bundleItr = bundleDict.begin(); bundleItr != bundleDict.end(); ++bundleItr )
-                {
-                        ( (PartDef)bundleItr->second ).control.play( animName );
-                }
-        }
+        // Play this anim from start to finish.
+        _control.play( anim_name );
 }
 
-void Actor::play( const string &animName, int fromFrame, int toFrame )
+void Actor::play( const string &anim_name, int from_frame, int to_frame )
 {
-        for ( PartBundleMap::const_iterator lodItr = _part_bundle_dict.begin(); lodItr != _part_bundle_dict.end(); ++lodItr )
-        {
-                BundleDict bundleDict = _part_bundle_dict[lodItr->first];
-                for ( BundleDict::iterator bundleItr = bundleDict.begin(); bundleItr != bundleDict.end(); ++bundleItr )
-                {
-                        ( (PartDef)bundleItr->second ).control.play( animName, fromFrame, toFrame );
-                }
-        }
+        _control.play( anim_name, from_frame, to_frame );
 }
 
-void Actor::play( const string &animName, const string &partName )
+void Actor::play( const string &anim_name, const string &subpart_name )
 {
-        if ( _part_bundle_dict["lodRoot"].find( partName ) != _part_bundle_dict["lodRoot"].end() )
-        {
-                _part_bundle_dict["lodRoot"][partName].control.play( animName );
-        }
-        else if ( _subpart_dict.find( partName ) != _subpart_dict.end() )
-        {
-                _subpart_dict[partName].control.play( animName );
-        }
-        else
-        {
-                cout << "Actor ERROR: Could not find part/subpart with _name " << partName << endl;
-        }
-
+        nassertv( _subpart_dict.find( subpart_name ) != _subpart_dict.end() );
+        _subpart_dict[subpart_name].control.play( anim_name );
 }
 
-void Actor::play( const string &animName, const string &partName, int fromFrame, int toFrame )
+void Actor::play( const string &anim_name, const string &subpart_name, int from_frame, int to_frame )
 {
-        if ( _part_bundle_dict["lodRoot"].find( partName ) != _part_bundle_dict["lodRoot"].end() )
-        {
-                _part_bundle_dict["lodRoot"][partName].control.play( animName, fromFrame, toFrame );
-        }
-        else if ( _subpart_dict.find( partName ) != _subpart_dict.end() )
-        {
-                _subpart_dict[partName].control.play( animName, fromFrame, toFrame );
-        }
-        else
-        {
-                cout << "Actor ERROR: Could not find part/subpart with _name " << partName << endl;
-        }
+        nassertv( _subpart_dict.find( subpart_name ) != _subpart_dict.end() );
+        _subpart_dict[subpart_name].control.play( anim_name, from_frame, to_frame );
 }
 
-void Actor::loop( const string &animName )
+void Actor::loop( const string &anim_name )
 {
         // Loop this anim on all parts from start to finish.
-
-        for ( PartBundleMap::const_iterator lodItr = _part_bundle_dict.begin(); lodItr != _part_bundle_dict.end(); ++lodItr )
-        {
-                BundleDict bundleDict = _part_bundle_dict[lodItr->first];
-                for ( BundleDict::iterator bundleItr = bundleDict.begin(); bundleItr != bundleDict.end(); ++bundleItr )
-                {
-                        ( (PartDef)bundleItr->second ).control.loop( animName, true );
-                }
-        }
+        _control.loop( anim_name, true );
 }
 
-void Actor::loop( const string &animName, int fromFrame, int toFrame )
+void Actor::loop( const string &anim_name, int from_frame, int to_frame )
 {
-        for ( PartBundleMap::const_iterator lodItr = _part_bundle_dict.begin(); lodItr != _part_bundle_dict.end(); ++lodItr )
-        {
-                BundleDict bundleDict = _part_bundle_dict[lodItr->first];
-                for ( BundleDict::iterator bundleItr = bundleDict.begin(); bundleItr != bundleDict.end(); ++bundleItr )
-                {
-                        ( (PartDef)bundleItr->second ).control.loop( animName, true, fromFrame, toFrame );
-                }
-        }
+        _control.loop( anim_name, true, from_frame, to_frame );
 }
 
-void Actor::loop( const string &animName, const string &partName )
+void Actor::loop( const string &anim_name, const string &subpart_name )
 {
-        if ( _part_bundle_dict["lodRoot"].find( partName ) != _part_bundle_dict["lodRoot"].end() )
-        {
-                _part_bundle_dict["lodRoot"][partName].control.loop( animName, true );
-        }
-        else if ( _subpart_dict.find( partName ) != _subpart_dict.end() )
-        {
-                _subpart_dict[partName].control.loop( animName, true );
-        }
-        else
-        {
-                cout << "Actor ERROR: Could not find part/subpart with _name " << partName << endl;
-        }
+        nassertv( _subpart_dict.find( subpart_name ) != _subpart_dict.end() );
+        _subpart_dict[subpart_name].control.loop( anim_name, true );
 }
 
-void Actor::loop( const string &animName, const string &partName, int fromFrame, int toFrame )
+void Actor::loop( const string &anim_name, const string &subpart_name, int from_frame, int to_frame )
 {
-        if ( _part_bundle_dict["lodRoot"].find( partName ) != _part_bundle_dict["lodRoot"].end() )
-        {
-                _part_bundle_dict["lodRoot"][partName].control.loop( animName, true, fromFrame, toFrame );
-        }
-        else if ( _subpart_dict.find( partName ) != _subpart_dict.end() )
-        {
-                _subpart_dict[partName].control.loop( animName, true, fromFrame, toFrame );
-        }
-        else
-        {
-                cout << "Actor ERROR: Could not find part/subpart with _name " << partName << endl;
-        }
+        nassertv( _subpart_dict.find( subpart_name ) != _subpart_dict.end() );
+        _subpart_dict[subpart_name].control.loop( anim_name, true, from_frame, to_frame );
 }
 
 void Actor::stop()
 {
-        for ( PartBundleMap::const_iterator lodItr = _part_bundle_dict.begin(); lodItr != _part_bundle_dict.end(); ++lodItr )
-        {
-                BundleDict bundleDict = _part_bundle_dict[lodItr->first];
-                for ( BundleDict::iterator bundleItr = bundleDict.begin(); bundleItr != bundleDict.end(); ++bundleItr )
-                {
-                        AnimControlCollection control = ( (PartDef)bundleItr->second ).control;
-                        control.stop( control.which_anim_playing() );
-                }
-        }
+        _control.stop( _control.which_anim_playing() );
 }
 
-void Actor::stop( const string &partName )
+void Actor::stop( const string &subpart_name )
 {
-        if ( _part_bundle_dict["lodRoot"].find( partName ) != _part_bundle_dict["lodRoot"].end() )
-        {
-                AnimControlCollection *pACC = &_part_bundle_dict["lodRoot"][partName].control;
-                _part_bundle_dict["lodRoot"][partName].control.stop( pACC->which_anim_playing() );
-        }
-        else if ( _subpart_dict.find( partName ) != _subpart_dict.end() )
-        {
-                AnimControlCollection *pACC = &_subpart_dict[partName].control;
-                _subpart_dict[partName].control.stop( pACC->which_anim_playing() );
-        }
-        else
-        {
-                cout << "Actor ERROR: Could not find part/subpart with _name " << partName << endl;
-        }
+        nassertv( _subpart_dict.find( subpart_name ) != _subpart_dict.end() );
+        AnimControlCollection &control = _subpart_dict[subpart_name].control;
+        control.stop( control.which_anim_playing() );
 }
 
-NodePath Actor::get_part( string partName, string lod )
-{
-        if ( _part_bundle_dict.find( lod ) != _part_bundle_dict.end() )
-        {
-
-                // We have a bundle dictionary in this LOD.
-                BundleDict bundledict = _part_bundle_dict[lod];
-
-                if ( bundledict.find( partName ) != bundledict.end() )
-                {
-
-                        // We have a PartDef tied to this partName in bundledict.
-                        PartDef part = bundledict[partName];
-                        return part.bundle_np;
-                }
-        }
-
-        return NodePath::not_found();
-}
-
-void Actor::make_subpart( const string &strPart, Actor::NameVec &includeJoints, Actor::NameVec &excludeJoints,
-                          const string &strParent, bool bOverlapping )
+void Actor::make_subpart( const string &part_name, Actor::NameVec &include_joints,
+                          Actor::NameVec &exclude_joints, bool overlapping )
 {
         SubpartDef def;
-
-        if ( _subpart_dict.find( strParent ) != _subpart_dict.end() )
-        {
-                def = _subpart_dict[strParent];
-        }
-
         AnimControlCollection acc;
 
         PartSubset subset( def.subset );
-        for ( size_t i = 0; i < includeJoints.size(); i++ )
+        for ( size_t i = 0; i < include_joints.size(); i++ )
         {
-                subset.add_include_joint( GlobPattern( includeJoints[i] ) );
+                subset.add_include_joint( GlobPattern( include_joints[i] ) );
         }
-        for ( size_t i = 0; i < excludeJoints.size(); i++ )
+        for ( size_t i = 0; i < exclude_joints.size(); i++ )
         {
-                subset.add_exclude_joint( GlobPattern( excludeJoints[i] ) );
+                subset.add_exclude_joint( GlobPattern( exclude_joints[i] ) );
         }
 
-        def.true_part_name = strParent;
+        def.part_name = part_name;
         def.subset = subset;
 
 
         // Now we have to bind this subpart to all the animations of the parent part.
-        if ( _part_bundle_dict["lodRoot"].find( strParent ) != _part_bundle_dict["lodRoot"].end() )
-        {
-                PartDef *pdef = &_part_bundle_dict["lodRoot"][strParent];
-                AnimControlCollection *pACC = &pdef->control;
-                PartBundle *pBundle = pdef->part_bundle_handle->get_bundle();
+        PartBundle *bundle = _part_bundle_handle->get_bundle();
 
-                int nAnims = pACC->get_num_anims();
-                for ( int i = 0; i < nAnims; i++ )
-                {
-                        PT( AnimControl ) pAnimC = pACC->get_anim( i );
-                        string anim_name = pACC->get_anim_name( i );
-                        PT( AnimControl ) pNewAnim = pBundle->bind_anim( pAnimC->get_anim(), -1, subset );
-                        acc.store_anim( pNewAnim, anim_name );
-                }
+        int num_anims = _control.get_num_anims();
+        for ( int i = 0; i < num_anims; i++ )
+        {
+                PT( AnimControl ) anim_c = _control.get_anim( i );
+                string anim_name = _control.get_anim_name( i );
+                PT( AnimControl ) new_anim = bundle->bind_anim( anim_c->get_anim(), -1, subset );
+                acc.store_anim( new_anim, anim_name );
         }
 
         def.control = acc;
 
-        _subpart_dict[strPart] = def;
+        _subpart_dict[part_name] = def;
 }
 
 void Actor::set_subparts_complete( bool bFlag )
@@ -552,67 +389,65 @@ bool Actor::get_subparts_complete() const
         return _subparts_complete;
 }
 
-void Actor::verify_subparts_complete( const string &strPart, const string &strLOD )
-{
-        NameVec subJoints;
-        for ( SubpartDict::iterator itr = _subpart_dict.begin(); itr != _subpart_dict.end(); ++itr )
-        {
-                string strSubpart = itr->first;
-                SubpartDef def = itr->second;
-                if ( strSubpart != strPart && def.true_part_name == strPart )
-                {
-                        vector<PartGroup *> joints;
-                }
-        }
-}
-
-vector<PartGroup *> Actor::get_joints( const string &strPart, const string &strJoint, const string &strLOD )
+vector<PartGroup *> Actor::get_joints( const string &joint )
 {
         vector<PartGroup *> joints;
 
-        GlobPattern pattern( strJoint );
+        GlobPattern pattern( joint );
+        PartBundle *bundle = _part_bundle_handle->get_bundle();
 
-        map<string, PartDef> partBundleDict = _part_bundle_dict[strLOD];
+        if ( pattern.has_glob_characters() )
+        {
+                PartGroup *partgroup = bundle->find_child( joint );
+                if ( partgroup != nullptr )
+                {
+                        joints.push_back( partgroup );
+                }
+        }
+
+        return joints;
+}
+
+vector<PartGroup *> Actor::get_joints( const string &subpart_name, const string &joint )
+{
+        vector<PartGroup *> joints;
+
+        GlobPattern pattern( joint );
 
         SubpartDef *sub = nullptr;
         PartSubset *subset = nullptr;
-        PartDef *part = nullptr;
-        if ( _subpart_dict.find( strPart ) == _subpart_dict.end() )
-        {
-                part = &partBundleDict[strPart];
-        }
-        else
-        {
-                sub = &_subpart_dict[strPart];
-                subset = &sub->subset;
-                part = &partBundleDict[sub->true_part_name];
-        }
 
-        if ( part == nullptr )
+        sub = &_subpart_dict[subpart_name];
+        subset = &sub->subset;
+        /*
+        subpart_name = &partBundleDict[sub->true_part_name];
+
+        if ( subpart_name == nullptr )
         {
-                cout << "No part named " << strPart << "!" << endl;
+                cout << "No part named " << subpart_name << "!" << endl;
                 return joints;
         }
 
-        PartBundle *pBundle = part->part_bundle_handle->get_bundle();
+        PartBundle *bundle = _part_bundle_handle->get_bundle();
 
         if ( pattern.has_glob_characters() && subset == nullptr )
         {
-                PartGroup *pJoint = pBundle->find_child( strJoint );
-                if ( pJoint != nullptr )
+                PartGroup *joint = bundle->find_child( joint );
+                if ( joint != nullptr )
                 {
-                        joints.push_back( pJoint );
+                        joints.push_back( joint );
                 }
         }
         else
         {
-                bool bIncluded = true;
+                bool included = true;
                 if ( subset != nullptr )
                 {
-                        bIncluded = subset->is_include_empty();
+                        included = subset->is_include_empty();
                 }
-                get_part_joints( joints, pattern, pBundle, subset, bIncluded );
+                get_part_joints( joints, pattern, bundle, subset, included );
         }
+        */
 
         return joints;
 }
@@ -646,75 +481,40 @@ void Actor::get_part_joints( vector<PartGroup *> &joints, GlobPattern &pattern, 
         }
 }
 
-Actor::ControlMap Actor::get_anim_controls( const char *szAnim, const char *szPart,
-                                            const char *szLOD, bool bAllowAsyncBind )
+string Actor::get_current_anim() const
 {
-
-        vector<AnimControlCollection *> controls;
-        if ( szPart == nullptr && _subparts_complete )
-        {
-
-        }
-
-
-
-        if ( szLOD == nullptr )
-        {
-                szLOD = "lodRoot";
-        }
-
-        //m_AnimCon
-
-        return controls;
+        return _control.which_anim_playing();
 }
 
-string Actor::get_current_anim( const string &strPart )
+string Actor::get_current_anim( const string &subpart )
 {
-        if ( _part_bundle_dict["lodRoot"].find( strPart ) != _part_bundle_dict["lodRoot"].end() )
-        {
-                return _part_bundle_dict["lodRoot"][strPart].control.which_anim_playing();
-        }
-        else if ( _subpart_dict.find( strPart ) != _subpart_dict.end() )
-        {
-                return _subpart_dict[strPart].control.which_anim_playing();
-        }
+        nassertr( _subpart_dict.find( subpart ) != _subpart_dict.end(), "" );
 
-        return "PART_NOT_FOUND";
+        return _subpart_dict[subpart].control.which_anim_playing();
 }
 
-void Actor::set_play_rate( float flRate, const string &strAnim, const char *szPart )
+void Actor::set_play_rate( PN_stdfloat rate, const string &anim_name, const char *subpart )
 {
-        if ( szPart != nullptr )
+        AnimControlCollection *acc;
+        if ( subpart != nullptr )
         {
-                if ( _part_bundle_dict["lodRoot"].find( szPart ) != _part_bundle_dict["lodRoot"].end() )
-                {
-                        AnimControlCollection *pACC = &_part_bundle_dict["lodRoot"][szPart].control;
-                        int nAnims = pACC->get_num_anims();
-                        for ( int i = 0; i < nAnims; i++ )
-                        {
-                                PT( AnimControl ) pAnim = pACC->get_anim( i );
-                                if ( pAnim->get_name().compare( strAnim ) == 0 )
-                                {
-                                        pAnim->set_play_rate( flRate );
-                                }
-                        }
-                }
-                else if ( _subpart_dict.find( szPart ) != _subpart_dict.end() )
-                {
-                        AnimControlCollection *pACC = &_subpart_dict[szPart].control;
-                        int nAnims = pACC->get_num_anims();
-                        for ( int i = 0; i < nAnims; i++ )
-                        {
-                                PT( AnimControl ) pAnim = pACC->get_anim( i );
-                                if ( pAnim->get_name().compare( strAnim ) == 0 )
-                                {
-                                        pAnim->set_play_rate( flRate );
-                                }
-                        }
-                }
+                // If a subpart was specified, use the AnimControlCollection associated with the subpart.
+                nassertv( _subpart_dict.find( subpart ) != _subpart_dict.end() );
+                acc = &_subpart_dict[subpart].control;
         }
         else
         {
-                cout << "Actor ERROR: no partname specified, not changing playrate" << endl;
+                // No subpart was specified, use the actor wide AnimControlCollection
+                acc = &_control;
+        }
+
+        int num_anims = acc->get_num_anims();
+        for ( int i = 0; i < num_anims; i++ )
+        {
+                PT( AnimControl ) anim = acc->get_anim( i );
+                if ( anim->get_name() == anim_name )
+                {
+                        anim->set_play_rate( rate );
+                }
         }
 }

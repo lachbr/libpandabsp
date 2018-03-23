@@ -19,11 +19,11 @@ public:
         void set_sm_stop( int timestamp );
         DCFuncDecl( set_sm_stop_field );
 
-        void set_sm_pos( float x, float y, float z, int timestamp );
+        void set_sm_pos( PN_stdfloat x, PN_stdfloat y, PN_stdfloat z, int timestamp );
         DCFuncDecl( set_sm_pos_field );
         DCFuncDecl( get_sm_pos_field );
 
-        void set_sm_hpr( float h, float p, float r, int timestamp );
+        void set_sm_hpr( PN_stdfloat h, PN_stdfloat p, PN_stdfloat r, int timestamp );
         DCFuncDecl( set_sm_hpr_field );
         DCFuncDecl( get_sm_hpr_field );
 

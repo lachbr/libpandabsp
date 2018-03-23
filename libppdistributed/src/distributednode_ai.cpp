@@ -53,7 +53,7 @@ void DistributedNodeAI::set_parent_field( DCFuncArgs )
 //        packer.pack_int(((DistributedNodeAI *) )
 //}
 
-void DistributedNodeAI::d_set_x( float x )
+void DistributedNodeAI::d_set_x( PN_stdfloat x )
 {
         BeginAIUpdate( "set_x" );
         AddArg( double, x );
@@ -70,7 +70,7 @@ void DistributedNodeAI::get_x_field( DCFuncArgs )
         packer.pack_double( ( (DistributedNodeAI *)data )->get_x() );
 }
 
-void DistributedNodeAI::d_set_y( float y )
+void DistributedNodeAI::d_set_y( PN_stdfloat y )
 {
         BeginAIUpdate( "set_y" );
         AddArg( double, y );
@@ -87,7 +87,7 @@ void DistributedNodeAI::get_y_field( DCFuncArgs )
         packer.pack_double( ( (DistributedNodeAI *)data )->get_y() );
 }
 
-void DistributedNodeAI::d_set_z( float z )
+void DistributedNodeAI::d_set_z( PN_stdfloat z )
 {
         BeginAIUpdate( "set_z" );
         AddArg( double, z );
@@ -104,7 +104,7 @@ void DistributedNodeAI::get_z_field( DCFuncArgs )
         packer.pack_double( ( (DistributedNodeAI *)data )->get_z() );
 }
 
-void DistributedNodeAI::d_set_h( float h )
+void DistributedNodeAI::d_set_h( PN_stdfloat h )
 {
         BeginAIUpdate( "set_h" );
         AddArg( double, h );
@@ -121,7 +121,7 @@ void DistributedNodeAI::get_h_field( DCFuncArgs )
         packer.pack_double( ( (DistributedNodeAI *)data )->get_h() );
 }
 
-void DistributedNodeAI::d_set_p( float p )
+void DistributedNodeAI::d_set_p( PN_stdfloat p )
 {
         BeginAIUpdate( "set_p" );
         AddArg( double, p );
@@ -138,7 +138,7 @@ void DistributedNodeAI::get_p_field( DCFuncArgs )
         packer.pack_double( ( (DistributedNodeAI *)data )->get_p() );
 }
 
-void DistributedNodeAI::d_set_r( float r )
+void DistributedNodeAI::d_set_r( PN_stdfloat r )
 {
         BeginAIUpdate( "set_r" );
         AddArg( double, r );

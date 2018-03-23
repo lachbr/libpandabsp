@@ -24,9 +24,9 @@ public:
 
         void d_set_sm_stop();
 
-        void d_set_sm_hpr( float h, float p, float r );
+        void d_set_sm_hpr( PN_stdfloat h, PN_stdfloat p, PN_stdfloat r );
 
-        void d_set_sm_pos( float x, float y, float z );
+        void d_set_sm_pos( PN_stdfloat x, PN_stdfloat y, PN_stdfloat z );
 
         void d_set_curr_l( uint64_t l );
         void set_curr_l( uint64_t l );
@@ -38,8 +38,8 @@ public:
 
         string get_pos_hpr_broadcast_task_name() const;
 
-        void set_pos_hpr_broadcast_period( float period );
-        float get_pos_hpr_broadcast_period() const;
+        void set_pos_hpr_broadcast_period( PN_stdfloat period );
+        PN_stdfloat get_pos_hpr_broadcast_period() const;
 
         void stop_pos_hpr_broadcast();
 
@@ -47,7 +47,7 @@ public:
 
         bool want_smooth_broadcast_task() const;
 
-        virtual void start_pos_hpr_broadcast( float period = 0.2, bool stagger = false );
+        virtual void start_pos_hpr_broadcast( PN_stdfloat period = 0.2, bool stagger = false );
 
         virtual void send_current_position();
 
@@ -78,7 +78,7 @@ private:
 
         PT( GenericAsyncTask ) _broadcast_task;
 
-        float _broadcast_period;
+        PN_stdfloat _broadcast_period;
 };
 
 #endif // DISTRIBUTED_SMOOTH_NODE_BASE_H

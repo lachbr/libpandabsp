@@ -47,7 +47,7 @@ void DistributedSmoothNodeAI::set_sm_stop_field( DCFuncArgs )
         ( (DistributedSmoothNodeAI *)data )->set_sm_stop( packer.unpack_int() );
 }
 
-void DistributedSmoothNodeAI::set_sm_pos( float x, float y, float z, int timestamp )
+void DistributedSmoothNodeAI::set_sm_pos( PN_stdfloat x, PN_stdfloat y, PN_stdfloat z, int timestamp )
 {
         set_pos( x, y, z );
 }
@@ -55,9 +55,9 @@ void DistributedSmoothNodeAI::set_sm_pos( float x, float y, float z, int timesta
 void DistributedSmoothNodeAI::set_sm_pos_field( DCFuncArgs )
 {
         DistributedSmoothNodeAI *obj = (DistributedSmoothNodeAI *)data;
-        float x = packer.unpack_double();
-        float y = packer.unpack_double();
-        float z = packer.unpack_double();
+        PN_stdfloat x = packer.unpack_double();
+        PN_stdfloat y = packer.unpack_double();
+        PN_stdfloat z = packer.unpack_double();
         int ts = packer.unpack_int();
         obj->set_sm_pos( x, y, z, ts );
 }
@@ -71,16 +71,16 @@ void DistributedSmoothNodeAI::get_sm_pos_field( DCFuncArgs )
         packer.pack_int( 0 );
 }
 
-void DistributedSmoothNodeAI::set_sm_hpr( float h, float p, float r, int timestamp )
+void DistributedSmoothNodeAI::set_sm_hpr( PN_stdfloat h, PN_stdfloat p, PN_stdfloat r, int timestamp )
 {
         set_hpr( h, p, r );
 }
 
 void DistributedSmoothNodeAI::set_sm_hpr_field( DCFuncArgs )
 {
-        float h = packer.unpack_double();
-        float p = packer.unpack_double();
-        float r = packer.unpack_double();
+        PN_stdfloat h = packer.unpack_double();
+        PN_stdfloat p = packer.unpack_double();
+        PN_stdfloat r = packer.unpack_double();
         int ts = packer.unpack_int();
         ( (DistributedSmoothNodeAI *)data )->set_sm_hpr( h, p, r, ts );
 }
