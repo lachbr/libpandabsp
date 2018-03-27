@@ -23,6 +23,7 @@ target_link_libraries(libppcore libpanda.lib
 					        libp3dtool.lib
 					        libp3dtoolconfig.lib
 					        libp3direct.lib
-						    libp3framework.lib)
+						    libp3framework.lib
+                                                    libpandaphysics.lib)
 
 add_dependencies(libppcore vifparser)

@@ -7,6 +7,10 @@
 #include <genericAsyncTask.h>
 #include <collisionTraverser.h>
 #include <audioManager.h>
+#include <dynamicTextFont.h>
+#include <frameRateMeter.h>
+#include <physicsManager.h>
+#include <particleSystemManager.h>
 
 #include "config_pandaplus.h"
 #include "audio3dmanager.h"
@@ -65,13 +69,16 @@ public:
         PT( AudioSound ) load_sfx( const string &path );
         NodePath load_model( const string &path );
         PT( Texture ) load_texture( const string &path );
-        PT( TextFont ) load_font( const string &path );
+        PT( DynamicTextFont ) load_font( const string &path, int pixels_per_unit = 72 );
 
         // Create a task and run it now.
         PT( GenericAsyncTask ) start_task( GenericAsyncTask::TaskFunc func, void *data, const string &name );
 
         // Create a task and run it after the specified delay.
         PT( GenericAsyncTask ) do_task_later( PN_stdfloat delay, GenericAsyncTask::TaskFunc func, void *data, const string &name );
+
+        // Toggles a simple frame rate meter in the corner of the window.
+        void set_frame_rate_meter( bool flag );
 
         // Stop a currently running task.
         void stop_task( AsyncTask *task );
@@ -123,7 +130,6 @@ public:
         bool has_window() const;
 
 private:
-        static AsyncTask::DoneStatus tick_task( GenericAsyncTask *task, void *data );
 
         void update_aspect_ratio();
 
@@ -133,9 +139,15 @@ private:
         PN_stdfloat _last_mus_t;
 
         static AsyncTask::DoneStatus sleep_cycle_task( GenericAsyncTask *task, void *data );
+        static AsyncTask::DoneStatus reset_prev_transform_task( GenericAsyncTask *task, void *data );
+        static AsyncTask::DoneStatus ival_loop_task( GenericAsyncTask *task, void *data );
+        static AsyncTask::DoneStatus coll_loop_task( GenericAsyncTask *task, void *data );
+        static AsyncTask::DoneStatus audio_loop_task( GenericAsyncTask *task, void *data );
 
-        PT( GenericAsyncTask ) _tick_task;
-
+        PT( GenericAsyncTask ) _reset_prev_transform_task;
+        PT( GenericAsyncTask ) _ival_loop_task;
+        PT( GenericAsyncTask ) _coll_loop_task;
+        PT( GenericAsyncTask ) _audio_loop_task;
         PT( GenericAsyncTask ) _sleep_task;
 
         PN_stdfloat _sleep_time;
@@ -150,6 +162,8 @@ private:
         PN_stdfloat _a2d_right;
 
         PN_stdfloat _old_aspect_ratio;
+
+        PT( FrameRateMeter ) _fps_meter;
 };
 
 #endif // __PP_BASE_H__

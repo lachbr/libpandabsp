@@ -18,12 +18,13 @@ NotifyCategoryDef( distributedSmoothNode, "" );
 DClassDef( DistributedSmoothNode );
 
 DistributedSmoothNode::DistributedSmoothNode() :
-        DistributedNode()
+        DistributedNode(),
+        _smooth_task( nullptr ),
+        _snbase( new DistributedSmoothNodeBase ),
+        _smooth_started( false ),
+        _local_control( false ),
+        _stopped( false )
 {
-        _snbase = new DistributedSmoothNodeBase;
-        _smooth_started = false;
-        _local_control = false;
-        _stopped = false;
 }
 
 DistributedSmoothNode::~DistributedSmoothNode()
@@ -90,7 +91,9 @@ void DistributedSmoothNode::start_smooth()
         if ( !_smooth_started )
         {
                 string strTaskName = task_name( "smooth" );
-                g_base->stop_task( _smooth_task );
+                if (_smooth_task != nullptr )
+                        g_base->stop_task( _smooth_task );
+
                 reload_position();
                 _smooth_task = g_base->start_task( do_smooth_task, this, strTaskName );
                 _smooth_started = true;
@@ -101,7 +104,8 @@ void DistributedSmoothNode::stop_smooth()
 {
         if ( _smooth_started )
         {
-                g_base->stop_task( _smooth_task );
+                if (_smooth_task != nullptr )
+                        g_base->stop_task( _smooth_task );
                 force_to_true_position();
                 _smooth_started = false;
         }

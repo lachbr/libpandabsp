@@ -12,7 +12,7 @@
 #include "dcclass_pp.h"
 #include "pp_dcbase.h"
 
-#define DClassDecl(classname, parentname)\
+#define DClassDecl_omitInitType(classname, parentname)\
   private:\
     static TypeHandle _type_handle;\
     static bool _initialized;\
@@ -21,12 +21,6 @@
   public:\
     static TypeHandle get_class_type() {\
       return _type_handle;\
-    }\
-    static void init_type() {\
-      parentname::init_type();\
-      register_type(_type_handle, #classname,\
-                    parentname::get_class_type());\
-      _initialized = true;\
     }\
     virtual TypeHandle get_type() const {\
       return classname::get_class_type();\
@@ -54,6 +48,16 @@
     virtual bool is_global_do() {\
       return classname::is_global_do_static();\
     }
+
+#define DClassDecl(classname, parentname)\
+  DClassDecl_omitInitType(classname, parentname);\
+  public:\
+    static void init_type() {\
+      parentname::init_type();\
+      register_type(_type_handle, #classname,\
+                    parentname::get_class_type());\
+      _initialized = true;\
+    }\
 
 #define DClassDef(classname)\
 TypeHandle classname::_type_handle;\

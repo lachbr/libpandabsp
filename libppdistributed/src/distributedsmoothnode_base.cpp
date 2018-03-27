@@ -39,6 +39,7 @@ else\
 DistributedSmoothNodeBase::DistributedSmoothNodeBase()
 {
         _repo = nullptr;
+        _np = nullptr;
         _is_ai = false;
         _ai_id = 0;
         _curr_l[0] = 0;
@@ -56,16 +57,17 @@ void DistributedSmoothNodeBase::set_repository( ClientRepository *repo, bool is_
         _ai_id = ai_id;
 }
 
-void DistributedSmoothNodeBase::initialize( const NodePath &np, DCClassPP *dclass, DOID_TYPE do_id )
+void DistributedSmoothNodeBase::initialize( NodePath *np, DCClassPP *dclass, DOID_TYPE do_id )
 {
         _np = np;
         _dclass = dclass;
         _do_id = do_id;
 
-        nassertv( !_np.is_empty() );
+        nassertv( np != nullptr );
+        nassertv( !_np->is_empty() );
 
-        _store_xyz = _np.get_pos();
-        _store_hpr = _np.get_hpr();
+        _store_xyz = _np->get_pos();
+        _store_hpr = _np->get_hpr();
         _store_stop = false;
 }
 
@@ -84,8 +86,8 @@ bool DistributedSmoothNodeBase::only_changed( int flags, int compare )
 
 void DistributedSmoothNodeBase::broadcast_pos_hpr_full()
 {
-        LPoint3 xyz = _np.get_pos();
-        LVecBase3 hpr = _np.get_hpr();
+        LPoint3 xyz = _np->get_pos();
+        LVecBase3 hpr = _np->get_hpr();
 
         int flags = 0;
 

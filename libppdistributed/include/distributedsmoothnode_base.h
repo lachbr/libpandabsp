@@ -17,7 +17,7 @@ public:
 
         void set_repository( ClientRepository *repo, bool is_ai, CHANNEL_TYPE ai_id );
 
-        void initialize( const NodePath &np, DCClassPP *dclass, DOID_TYPE do_id );
+        void initialize( NodePath *np, DCClassPP *dclass, DOID_TYPE do_id );
 
         void send_everything();
         void broadcast_pos_hpr_full();
@@ -62,7 +62,7 @@ private:
                 F_new_hpr = 0x02
         };
 
-        NodePath _np;
+        NodePath *_np;
         DCClassPP *_dclass;
         DOID_TYPE _do_id;
         ClientRepository *_repo;

@@ -6,6 +6,7 @@
 #include "ppguiscrollframe.h"
 #include "ppguientry.h"
 #include "pp_globals.h"
+#include "pp_utils.h"
 #include "vifparser.h"
 #include "viftokenizer.h"
 
@@ -72,7 +73,7 @@ void Gui::store_sound( const string &name, PT( AudioSound ) sound )
         _sounds.push_back( sd );
 }
 
-void Gui::store_font( const string &name, PT( TextFont ) font )
+void Gui::store_font( const string &name, PT( DynamicTextFont ) font )
 {
         FontDef fd;
         fd.name = name;
@@ -88,9 +89,9 @@ void Gui::store_texture( const string &name, PT( Texture ) tex )
         _textures.push_back( td );
 }
 
-PT( TextFont ) Gui::get_font( const string &name )
+PT( DynamicTextFont ) Gui::get_font( const string &name )
 {
-        PT( TextFont ) result;
+        PT( DynamicTextFont ) result;
         for ( size_t i = 0; i < Gui::_fonts.size(); i++ )
         {
                 FontDef font = Gui::_fonts[i];
@@ -252,7 +253,7 @@ static void make_label( Object &pobj, Parser &parser, const NodePath &schemenode
                 {
                         string font = prop.value;
                         // Hopefully the font they want was loaded.
-                        PT( TextFont ) ptfont = Gui::get_font( font );
+                        PT( DynamicTextFont ) ptfont = Gui::get_font( font );
                         if ( ptfont != nullptr )
                         {
                                 lbl->set_font( ptfont );
@@ -715,7 +716,7 @@ NodePath Gui::load_scheme( const string &filename )
                         string path = parser.get_property_value( obj, "file" );
                         string name = parser.get_property_value( obj, "name" );
 
-                        PT( TextFont ) font = FontPool::load_font( path );
+                        PT( DynamicTextFont ) font = PPUtils::load_dynamic_font( path );
 
                         if ( parser.has_property( obj, "spacewidth" ) )
                         {
@@ -727,6 +728,12 @@ NodePath Gui::load_scheme( const string &filename )
                         {
                                 PN_stdfloat lih = stof( parser.get_property_value( obj, "lineheight" ) );
                                 font->set_line_height( lih );
+                        }
+
+                        if ( parser.has_property( obj, "quality" ) )
+                        {
+                                int quality = stoi( parser.get_property_value( obj, "quality" ) );
+                                font->set_pixels_per_unit( quality );
                         }
 
                         store_font( name, font );

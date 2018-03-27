@@ -1,11 +1,13 @@
 #include "ppbase.h"
 #include "pp_globals.h"
 #include "maploader.h"
+#include "pp_utils.h"
+#include "global_physicsmanager.h"
+#include "global_particlemanager.h"
 
 #include <cIntervalManager.h>
 #include <windowProperties.h>
 #include <texturePool.h>
-#include <fontPool.h>
 #include <orthographicLens.h>
 #include <perspectiveLens.h>
 #include <eventHandler.h>
@@ -86,10 +88,84 @@ PPBase::PPBase( int argc, char *argv[] )
 
         _task_mgr = g_task_mgr;
 
-        _tick_task = new GenericAsyncTask( "ppBase_tick", &tick_task, this );
-        g_task_mgr->add( _tick_task );
+        _reset_prev_transform_task = new GenericAsyncTask( "resetPrevTransform",
+                                                           &reset_prev_transform_task, this );
+        _reset_prev_transform_task->set_sort( -51 );
+        _task_mgr->add( _reset_prev_transform_task );
+
+        _ival_loop_task = new GenericAsyncTask( "ivalLoop", &ival_loop_task, this );
+        _ival_loop_task->set_sort( 20 );
+        _task_mgr->add( _ival_loop_task );
+
+        _coll_loop_task = new GenericAsyncTask( "collLoop", &coll_loop_task, this );
+        _coll_loop_task->set_sort( 30 );
+        _task_mgr->add( _coll_loop_task );
+
+        _audio_loop_task = new GenericAsyncTask( "audioLoop", &audio_loop_task, this );
+        _audio_loop_task->set_sort( 60 );
+        _task_mgr->add( _audio_loop_task );
+
+        _fps_meter = new FrameRateMeter( "frameRateMeter" );
+        set_frame_rate_meter( ConfigVariableBool( "show-frame-rate-meter", false ) );
 
         g_base = this;
+}
+
+AsyncTask::DoneStatus PPBase::reset_prev_transform_task( GenericAsyncTask *task, void *data )
+{
+        PandaNode::reset_all_prev_transform();
+        return AsyncTask::DS_cont;
+}
+
+AsyncTask::DoneStatus PPBase::ival_loop_task( GenericAsyncTask *task, void *data )
+{
+        CIntervalManager::get_global_ptr()->step();
+        return AsyncTask::DS_cont;
+}
+
+AsyncTask::DoneStatus PPBase::coll_loop_task( GenericAsyncTask *task, void *data )
+{
+        PPBase *self = (PPBase *)data;
+
+        double dt = ClockObject::get_global_clock()->get_dt();
+        GlobalParticleManager::particle_mgr.do_particles( dt );
+        GlobalPhysicsManager::physics_mgr.do_physics( dt );
+
+        if ( self->has_window() )
+        {
+                self->_ctrav.traverse( self->_render );
+                self->_shadow_trav.traverse( self->_render );
+                self->update_aspect_ratio();
+        }
+        
+
+        return AsyncTask::DS_cont;
+}
+
+AsyncTask::DoneStatus PPBase::audio_loop_task( GenericAsyncTask *task, void *data )
+{
+        PPBase *self = (PPBase *)data;
+        self->_music_mgr->update();
+        self->_sfx_mgr->update();
+
+        if ( self->_current_music != nullptr )
+        {
+                if ( self->_current_music->status() != AudioSound::PLAYING )
+                {
+                        // Set the current music to nullptr if the current music is not playing.
+                        self->_current_music = nullptr;
+                }
+        }
+
+        return AsyncTask::DS_cont;
+}
+
+void PPBase::set_frame_rate_meter( bool flag )
+{
+        if ( flag && has_window() )
+                _fps_meter->setup_window( _window->get_graphics_window() );
+        else
+                _fps_meter->clear_window();
 }
 
 void PPBase::mount_multifile( const string &mfpath )
@@ -140,6 +216,7 @@ void PPBase::shutdown( int exit_code )
         ppBase_cat.info()
                 << "Exit code: " << exit_code << "\n";
 
+        _fps_meter->clear_window();
         _framework.close_all_windows();
         _framework.close_framework();
         exit( exit_code );
@@ -271,32 +348,6 @@ void PPBase::update_aspect_ratio()
         }
 }
 
-AsyncTask::DoneStatus PPBase::tick_task( GenericAsyncTask *task, void *data )
-{
-        PPBase *self = (PPBase *)data;
-        self->_music_mgr->update();
-        self->_sfx_mgr->update();
-        if ( self->has_window() )
-        {
-                self->_ctrav.traverse( self->_render );
-                self->_shadow_trav.traverse( self->_render );
-                self->update_aspect_ratio();
-        }
-
-        CIntervalManager::get_global_ptr()->step();
-
-        if ( self->_current_music != nullptr )
-        {
-                if ( self->_current_music->status() != AudioSound::PLAYING )
-                {
-                        // Set the current music to nullptr if the current music is not playing.
-                        self->_current_music = nullptr;
-                }
-        } 
-
-        return AsyncTask::DS_cont;
-}
-
 PT( AudioSound ) PPBase::load_music( const string &path )
 {
         return _music_mgr->get_sound( path );
@@ -317,9 +368,12 @@ PT( Texture ) PPBase::load_texture( const string &path )
         return TexturePool::load_texture( path );
 }
 
-PT( TextFont ) PPBase::load_font( const string &path )
+PT( DynamicTextFont ) PPBase::load_font( const string &path, int pixels_per_unit )
 {
-        return FontPool::load_font( path );
+        PT( DynamicTextFont ) font = PPUtils::load_dynamic_font( path );
+        font->set_pixels_per_unit( pixels_per_unit );
+
+        return font;
 }
 
 void PPBase::set_background_color( PN_stdfloat r, PN_stdfloat g, PN_stdfloat b )
@@ -392,6 +446,7 @@ PT( GenericAsyncTask ) PPBase::do_task_later( PN_stdfloat delay, GenericAsyncTas
 
 void PPBase::stop_task( AsyncTask *task )
 {
+        nassertv( task != nullptr );
         _task_mgr->remove( task );
 }
 

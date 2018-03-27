@@ -18,7 +18,7 @@ ConfigVariableBool gw_debug_indicator
 ( "want-avatar-physics-indicator", false );
 
 ConfigVariableBool gw_floor_sphere
-( "want-floor-sphere", true );
+( "want-floor-sphere", false );
 
 ConfigVariableBool gw_early_event_sphere
 ( "early-event-sphere", true );

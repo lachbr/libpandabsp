@@ -109,3 +109,13 @@ PT( CLerpNodePathInterval ) PPUtils::make_nodepath_interval( const string &name,
         return new CLerpNodePathInterval( name, duration, CLerpInterval::BT_no_blend,
                                           false, true, node, NodePath() );
 }
+
+PT( DynamicTextFont ) PPUtils::load_dynamic_font( const Filename &file )
+{
+        PT( DynamicTextFont ) font = new DynamicTextFont( file );
+        font->set_pixels_per_unit( 72 );
+        font->set_minfilter( SamplerState::FT_linear_mipmap_linear );
+        font->set_magfilter( SamplerState::FT_linear );
+
+        return font;
+}

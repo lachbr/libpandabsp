@@ -57,19 +57,19 @@ private:
         DClassDecl( DistributedNode, DistributedObject );
 
         InitTypeStart();
-
-        DCFieldDefStart();
-
-        DCFieldDef( set_x, set_x_field, get_x_field );
-        DCFieldDef( set_y, set_y_field, get_y_field );
-        DCFieldDef( set_z, set_z_field, get_z_field );
-        DCFieldDef( set_h, set_h_field, get_h_field );
-        DCFieldDef( set_p, set_p_field, get_p_field );
-        DCFieldDef( set_r, set_r_field, get_r_field );
-        DCFieldDef( set_parent, set_parent_field, nullptr );
-
-        DCFieldDefEnd();
-
+        {
+                DCFieldDefStart();
+                {
+                        DCFieldDef( set_x, set_x_field, get_x_field );
+                        DCFieldDef( set_y, set_y_field, get_y_field );
+                        DCFieldDef( set_z, set_z_field, get_z_field );
+                        DCFieldDef( set_h, set_h_field, get_h_field );
+                        DCFieldDef( set_p, set_p_field, get_p_field );
+                        DCFieldDef( set_r, set_r_field, get_r_field );
+                        DCFieldDef( set_parent, set_parent_field, nullptr );
+                }
+                DCFieldDefEnd();
+        }
         InitTypeEnd();
 };
 

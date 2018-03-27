@@ -102,8 +102,6 @@ private:
 
         PN_stdfloat _last_suggest_resync;
 
-
-
         PT( GenericAsyncTask ) _smooth_task;
 
         DistributedSmoothNodeBase *_snbase;

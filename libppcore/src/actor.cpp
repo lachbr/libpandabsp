@@ -104,7 +104,8 @@ void Actor::load_actor( const string &model_file,
         // then for each animations specified by the user
         for ( AnimMap::const_iterator anim_map_itr = anim_map->begin(); anim_map_itr != anim_map->end(); ++anim_map_itr )
         {
-                const string &filename = ( *anim_map_itr ).first;
+                string filename = anim_map_itr->first;
+
                 if ( filename != model_file )
                 {
                         // load the animation as a child of the actor
@@ -517,4 +518,32 @@ void Actor::set_play_rate( PN_stdfloat rate, const string &anim_name, const char
                         anim->set_play_rate( rate );
                 }
         }
+}
+
+PN_stdfloat Actor::get_duration( const string &anim_name, int from_frame, int to_frame ) const
+{
+        AnimControl *ctrl = _control.find_anim( anim_name );
+        nassertr( ctrl != nullptr, 0.0 );
+        return ( ( to_frame + 1 ) - from_frame ) / ctrl->get_frame_rate();
+}
+
+PN_stdfloat Actor::get_duration( const string &anim_name ) const
+{
+        AnimControl *ctrl = _control.find_anim( anim_name );
+        nassertr( ctrl != nullptr, 0.0 );
+        return get_duration( anim_name, 0, ctrl->get_num_frames() - 1 );
+}
+
+int Actor::get_num_frames( const string &anim_name ) const
+{
+        AnimControl *ctrl = _control.find_anim( anim_name );
+        nassertr( ctrl != nullptr, 0 );
+        return ctrl->get_num_frames();
+}
+
+PN_stdfloat Actor::get_frame_time( const string &anim_name, int frame ) const
+{
+        int num_frames = get_num_frames( anim_name );
+        PN_stdfloat duration = get_duration( anim_name );
+        return duration * ( (PN_stdfloat)frame / num_frames );
 }

@@ -6,7 +6,7 @@
 #include <configVariableBool.h>
 #include <nodePath.h>
 
-#include "controlsystembase.h"
+#include "walker.h"
 #include "inputstate.h"
 
 class EXPCL_PANDAPLUS ControlManager
@@ -15,9 +15,9 @@ public:
         static ConfigVariableBool _want_wasd;
         ControlManager( bool enable_now = true, bool pass_messages_through = false );
 
-        void add( ControlSystemBase &controls, const string &name = "basic" );
+        void add( BaseWalker &controls, const string &name = "basic" );
 
-        ControlSystemBase &get( const string &name );
+        BaseWalker &get( const string &name );
         void remove( const string &name );
         void use( const string &name, NodePath &avatar );
 
@@ -25,7 +25,7 @@ public:
 
         void cleanup();
 
-        ControlSystemBase::SpeedData get_speeds() const;
+        LVector3 get_speeds() const;
 
         bool get_is_airborne() const;
 
@@ -54,12 +54,12 @@ private:
         bool _pass_messages_through;
         pvector<string> _inputs;
 
-        ControlSystemBase *_current_controls;
+        BaseWalker *_current_controls;
         string _current_controls_name;
 
         bool _wasd_turn;
 
-        pmap<string, ControlSystemBase> _controls;
+        pmap<string, BaseWalker> _controls;
 
         bool _enabled;
 };

@@ -5,7 +5,8 @@
 
 #include <nodePath.h>
 #include <bitMask.h>
-#include <collisionHandlerFloor.h>
+#include <collisionHandlerQueue.h>
+#include <genericAsyncTask.h>
 
 NotifyCategoryDeclNoExport( shadowPlacer );
 
@@ -30,10 +31,14 @@ public:
         void reset_to_origin();
 
 private:
+        static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
+
+private:
         CollisionTraverser *_trav;
         NodePath _shadow_np;
         NodePath _ray_np;
-        PT( CollisionHandlerFloor ) _lifter;
+        PT( CollisionHandlerQueue ) _lifter;
+        PT( GenericAsyncTask ) _update_task;
         BitMask32 _floor_mask;
         bool _is_active;
 };

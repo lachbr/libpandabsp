@@ -5,6 +5,7 @@
 
 #include <genericAsyncTask.h>
 #include <cLerpNodePathInterval.h>
+#include <dynamicTextFont.h>
 
 class EXPCL_PANDAPLUS SerialNumGen
 {
@@ -58,6 +59,8 @@ public:
         static SerialNumGen serial_gen;
         static int serial_num();
         static string unique_name( const string &name );
+
+        static PT( DynamicTextFont ) load_dynamic_font( const Filename &file );
 };
 
 #define TypeDecl(classname, parentname)\

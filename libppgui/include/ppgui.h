@@ -4,7 +4,7 @@
 #include "config_ppgui.h"
 
 #include <pointerTo.h>
-#include <textFont.h>
+#include <dynamicTextFont.h>
 #include <audioSound.h>
 #include <texture.h>
 
@@ -13,7 +13,7 @@ class GuiScheme;
 struct FontDef
 {
         string name;
-        PT( TextFont ) font;
+        PT( DynamicTextFont ) font;
 };
 
 struct SoundDef
@@ -54,12 +54,12 @@ public:
         static pvector<TextureDef> _textures;
 
         static void store_sound( const string &name, PT( AudioSound ) sound );
-        static void store_font( const string &name, PT( TextFont ) font );
+        static void store_font( const string &name, PT( DynamicTextFont ) font );
         static void store_texture( const string &name, PT( Texture ) tex );
 
         static PT( AudioSound ) get_sound( const string &name );
         static PT( Texture ) get_texture( const string &name );
-        static PT( TextFont ) get_font( const string &name );
+        static PT( DynamicTextFont ) get_font( const string &name );
 
 };
 

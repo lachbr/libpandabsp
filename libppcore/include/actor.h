@@ -37,7 +37,7 @@ public:
 
         void load_actor( const string &model_file,
                          const AnimMap *anim_map,
-                         int hierarchy_match_flags );
+                         int hierarchy_match_flags = 0 );
 
         void set_geom_node( const NodePath &geom_np );
         NodePath get_geom_node() const;
@@ -69,6 +69,10 @@ public:
 
         string get_current_anim() const;
         string get_current_anim( const string &subpart = "" );
+        PN_stdfloat get_duration( const string &anim_name, int from_frame, int to_frame ) const;
+        PN_stdfloat get_duration( const string &anim_name ) const;
+        int get_num_frames( const string &anim_name ) const;
+        PN_stdfloat get_frame_time( const string &anim_name, int frame ) const;
 
         void set_play_rate( PN_stdfloat rate, const string &anim, const char *part = nullptr );
 
@@ -82,7 +86,7 @@ private:
         void load_anims( const AnimMap *anim_map,
                          const string &filename,
                          const NodePath &bundle_np,
-                         int hierarchy_match_flags );
+                         int hierarchy_match_flags = 0 );
 
         bool is_stored( const AnimControl *anim, const AnimControlCollection *control );
 
@@ -99,6 +103,12 @@ private:
         PartBundleHandle *_part_bundle_handle;
         PandaNode *_part_model;
         AnimControlCollection _control;
+};
+
+struct ActorDef
+{
+        string model;
+        Actor::AnimMap animations;
 };
 
 #endif // ACTOR_H
