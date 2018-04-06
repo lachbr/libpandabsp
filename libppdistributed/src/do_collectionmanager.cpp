@@ -76,13 +76,28 @@ vector<DistributedObjectBase *> DoCollectionManager::get_all_of_type( TypeHandle
 
         for ( DoMap::iterator itr = _do_id_2_do.begin(); itr != _do_id_2_do.end(); ++itr )
         {
-                if ( itr->second->get_type() == handle )
+                if ( itr->second->is_of_type( handle ) )
                 {
                         result.push_back( itr->second );
                 }
         }
 
         return result;
+}
+
+vector<DistributedObjectBase *> DoCollectionManager::get_all_exact_type( TypeHandle &handle )
+{
+	vector<DistributedObjectBase *> result;
+
+	for ( DoMap::iterator itr = _do_id_2_do.begin(); itr != _do_id_2_do.end(); ++itr )
+	{
+		if ( itr->second->is_exact_type( handle ) )
+		{
+			result.push_back( itr->second );
+		}
+	}
+
+	return result;
 }
 
 void DoCollectionManager::handle_object_location( DatagramIterator &di )

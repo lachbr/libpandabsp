@@ -34,6 +34,9 @@ public:
 
         virtual LVector3 get_velocity() const;
 
+        // Returns only the velocity of the avatar controls, excluding any velocities from physics.
+        LVector3 get_control_velocity() const;
+
         NodePath get_physics_actor() const;
 
 private:

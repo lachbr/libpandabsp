@@ -174,5 +174,10 @@ LVector3 PhysicsWalker::get_velocity() const
 {
         // The velocity is the sum of the velocity applied from actual physics
         // and the velocity of our movement controls.
-        return _actor->get_physics_object()->get_velocity() + _vel;
+        return ( _actor->get_physics_object()->get_velocity() * 0.005 ) + _vel;
+}
+
+LVector3 PhysicsWalker::get_control_velocity() const
+{
+        return _vel;
 }

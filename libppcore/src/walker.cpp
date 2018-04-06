@@ -31,7 +31,8 @@ BaseWalker::BaseWalker( PN_stdfloat gravity, PN_stdfloat standable_ground,
         _ctrav( nullptr ),
         _tick_task( new GenericAsyncTask( "walkerTickTask", tick_task, this ) ),
         _avatar_radius( 0.0 ),
-        _friction( 1.0 ),
+        _static_friction( 1.0 ),
+        _dynamic_friction( 1.0 ),
         _last_speeds( 0 ),
         _pusher( new CollisionHandlerPusher ),
         _event( new CollisionHandlerEvent ),
@@ -84,14 +85,24 @@ BaseWalker::InputData BaseWalker::get_input_data() const
 }
 
 
-void BaseWalker::set_friction( PN_stdfloat friction )
+void BaseWalker::set_static_friction( PN_stdfloat friction )
 {
-        _friction = friction;
+        _static_friction = friction;
 }
 
-PN_stdfloat BaseWalker::get_friction() const
+PN_stdfloat BaseWalker::get_static_friction() const
 {
-        return _friction;
+        return _static_friction;
+}
+
+void BaseWalker::set_dynamic_friction( PN_stdfloat friction )
+{
+        _dynamic_friction = friction;
+}
+
+PN_stdfloat BaseWalker::get_dynamic_friction() const
+{
+        return _dynamic_friction;
 }
 
 void BaseWalker::update_speeds( const InputData &data, bool apply_friction )
@@ -135,10 +146,39 @@ void BaseWalker::update_speeds( const InputData &data, bool apply_friction )
         if ( apply_friction )
         {
                 double dt = g_global_clock->get_dt();
-                double friction = 1 - pow( 1 - get_friction(), dt * 30.0 );
-                _last_speeds.set_x( _speeds.get_x() * friction + _last_speeds.get_x() * ( 1 - friction ) );
-                _last_speeds.set_y( _speeds.get_y() * friction + _last_speeds.get_y() * ( 1 - friction ) );
-                _last_speeds.set_z( _speeds.get_z() * friction + _last_speeds.get_z() * ( 1 - friction ) );
+                double s_friction = 1 - pow( 1 - get_static_friction(), dt * 30.0 );
+                double d_friction = 1 - pow( 1 - get_dynamic_friction(), dt * 30.0 );
+
+                // If the goal speed is less than our last speed, we are trying to slow down.
+                // Thus, apply the dynamic friction.
+                // Else, apply static friction.
+
+                if ( abs(_speeds.get_x()) < abs(_last_speeds.get_x()) )
+                {
+                        _last_speeds.set_x( _speeds.get_x() * d_friction + _last_speeds.get_x() * ( 1 - d_friction ) );
+                }
+                else
+                {
+                        _last_speeds.set_x( _speeds.get_x() * s_friction + _last_speeds.get_x() * ( 1 - s_friction ) );
+                }
+
+                if ( abs(_speeds.get_y()) < abs(_last_speeds.get_y()) )
+                {
+                        _last_speeds.set_y( _speeds.get_y() * d_friction + _last_speeds.get_y() * ( 1 - d_friction ) );
+                }
+                else
+                {
+                        _last_speeds.set_y( _speeds.get_y() * s_friction + _last_speeds.get_y() * ( 1 - s_friction ) );
+                }
+
+                if ( abs(_speeds.get_z()) < abs(_last_speeds.get_z()) )
+                {
+                        _last_speeds.set_z( _speeds.get_z() * d_friction + _last_speeds.get_z() * ( 1 - d_friction ) );
+                }
+                else
+                {
+                        _last_speeds.set_z( _speeds.get_z() * s_friction + _last_speeds.get_z() * ( 1 - s_friction ) );
+                }
 
                 _speeds = _last_speeds;
 

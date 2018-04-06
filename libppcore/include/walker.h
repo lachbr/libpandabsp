@@ -30,8 +30,11 @@ public:
 
         // Sets the friction ratio from 0-1. 1 means full friction (no sliding).
         // The closer the number gets to 0, the more smoothing/sliding occurs.
-        void set_friction( PN_stdfloat friction );
-        PN_stdfloat get_friction() const;
+        void set_static_friction( PN_stdfloat friction );
+        PN_stdfloat get_static_friction() const;
+
+        void set_dynamic_friction( PN_stdfloat friction );
+        PN_stdfloat get_dynamic_friction() const;
 
         virtual void reset();
 
@@ -102,7 +105,8 @@ protected:
         PN_stdfloat _avatar_control_reverse_speed;
         PN_stdfloat _avatar_control_rotate_speed;
 
-        PN_stdfloat _friction;
+        PN_stdfloat _static_friction;
+        PN_stdfloat _dynamic_friction;
         LVector3 _last_speeds;
 
         PN_stdfloat _gravity;

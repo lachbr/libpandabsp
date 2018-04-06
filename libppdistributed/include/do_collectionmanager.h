@@ -28,6 +28,7 @@ public:
         bool has_owner_view_do_id( DOID_TYPE doid ) const;
 
         vector<DistributedObjectBase *> get_all_of_type( TypeHandle &handle );
+	vector<DistributedObjectBase *> get_all_exact_type( TypeHandle &handle );
 
         void handle_object_location( DatagramIterator &di );
 
