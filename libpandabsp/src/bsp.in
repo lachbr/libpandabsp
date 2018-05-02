@@ -1,0 +1,208 @@
+1525269468
+3 3
+3 bsp 4 t5GT 3 bsp 
+19
+20 9 BSPLoader 0 4 39 20 BSPLoader::BSPLoader 0 2 1 2 0
+85
+BSPLoader::BSPLoader(void);
+inline BSPLoader::BSPLoader(BSPLoader const &) = default;
+
+21 4 read 0 4 39 15 BSPLoader::read 0 1 3 0
+43
+bool BSPLoader::read(Filename const &file);
+
+22 9 set_gamma 0 4 39 20 BSPLoader::set_gamma 0 1 4 0
+65
+void BSPLoader::set_gamma(PN_stdfloat gamma, int overbright = 1);
+
+23 7 set_gsg 0 4 39 18 BSPLoader::set_gsg 0 1 5 0
+52
+void BSPLoader::set_gsg(GraphicsStateGuardian *gsg);
+
+24 10 set_camera 0 4 39 21 BSPLoader::set_camera 0 1 6 0
+51
+void BSPLoader::set_camera(NodePath const &camera);
+
+25 10 set_render 0 4 39 21 BSPLoader::set_render 0 1 7 0
+51
+void BSPLoader::set_render(NodePath const &render);
+
+26 19 set_want_visibility 0 4 39 30 BSPLoader::set_want_visibility 0 1 8 0
+47
+void BSPLoader::set_want_visibility(bool flag);
+
+27 16 set_physics_type 0 4 39 27 BSPLoader::set_physics_type 0 1 9 0
+43
+void BSPLoader::set_physics_type(int type);
+
+28 16 get_num_entities 0 4 39 27 BSPLoader::get_num_entities 0 1 10 0
+44
+int BSPLoader::get_num_entities(void) const;
+
+29 16 get_entity_value 0 4 39 27 BSPLoader::get_entity_value 0 1 11 0
+75
+std::string BSPLoader::get_entity_value(int entnum, char const *key) const;
+
+30 22 get_entity_value_float 0 4 39 33 BSPLoader::get_entity_value_float 0 1 12 0
+75
+float BSPLoader::get_entity_value_float(int entnum, char const *key) const;
+
+31 20 get_entity_value_int 0 4 39 31 BSPLoader::get_entity_value_int 0 1 13 0
+71
+int BSPLoader::get_entity_value_int(int entnum, char const *key) const;
+
+32 23 get_entity_value_vector 0 4 39 34 BSPLoader::get_entity_value_vector 0 1 14 0
+79
+LVector3 BSPLoader::get_entity_value_vector(int entnum, char const *key) const;
+
+33 22 get_entity_value_color 0 4 39 33 BSPLoader::get_entity_value_color 0 1 15 0
+95
+LColor BSPLoader::get_entity_value_color(int entnum, char const *key, bool scale = true) const;
+
+34 10 get_entity 0 4 39 21 BSPLoader::get_entity 0 1 16 0
+49
+NodePath BSPLoader::get_entity(int entnum) const;
+
+35 9 get_model 0 4 39 20 BSPLoader::get_model 0 1 17 0
+50
+NodePath BSPLoader::get_model(int modelnum) const;
+
+36 7 cleanup 0 4 39 18 BSPLoader::cleanup 0 1 18 0
+30
+void BSPLoader::cleanup(void);
+
+37 10 get_result 0 4 39 21 BSPLoader::get_result 0 1 19 0
+43
+NodePath BSPLoader::get_result(void) const;
+
+38 10 ~BSPLoader 0 4 39 21 BSPLoader::~BSPLoader 0 0 0
+28
+BSPLoader::~BSPLoader(void);
+
+19
+1 0 0 7 2 41 38 0 0 0 
+2 0 0 7 2 41 38 0 0 1 6 param0 0 42  
+3 0 0 6 3 47 0 0 0 2 4 this 3 41  4 file 1 44  
+4 0 0 4 4 51 0 0 0 3 4 this 3 41  5 gamma 1 48  10 overbright 1 50  
+5 0 0 4 5 51 0 0 0 2 4 this 3 41  3 gsg 1 52  
+6 0 0 4 6 51 0 0 0 2 4 this 3 41  6 camera 1 54  
+7 0 0 4 7 51 0 0 0 2 4 this 3 41  6 render 1 54  
+8 0 0 4 8 51 0 0 0 2 4 this 3 41  4 flag 1 47  
+9 0 0 4 9 51 0 0 0 2 4 this 3 41  4 type 1 50  
+10 0 0 6 10 50 0 0 0 1 4 this 3 42  
+11 0 0 6 11 57 0 0 0 3 4 this 3 42  6 entnum 1 50  3 key 1 57  
+12 0 0 6 12 49 0 0 0 3 4 this 3 42  6 entnum 1 50  3 key 1 57  
+13 0 0 6 13 50 0 0 0 3 4 this 3 42  6 entnum 1 50  3 key 1 57  
+14 0 0 7 14 60 0 0 0 3 4 this 3 42  6 entnum 1 50  3 key 1 57  
+15 0 0 7 15 64 0 0 0 4 4 this 3 42  6 entnum 1 50  3 key 1 57  5 scale 1 47  
+16 0 0 7 16 65 0 0 0 2 4 this 3 42  6 entnum 1 50  
+17 0 0 7 17 65 0 0 0 2 4 this 3 42  8 modelnum 1 50  
+18 0 0 4 18 51 0 0 0 1 4 this 3 41  
+19 0 0 7 19 65 0 0 0 1 4 this 3 42  
+27
+39 9 BSPLoader 0 141313 9 BSPLoader 9 BSPLoader 0 0 0 1 20 38 0 17 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 0 0 0 0 1 40 0
+
+40 11 PhysicsType 0 794624 22 BSPLoader::PhysicsType 22 BSPLoader::PhysicsType 39 0 0 0 0 0 0 0 0 0 5 7 PT_none 18 BSPLoader::PT_none 0
+0 8 PT_panda 19 BSPLoader::PT_panda 0
+1 9 PT_bullet 20 BSPLoader::PT_bullet 0
+2 6 PT_ode 17 BSPLoader::PT_ode 0
+3 8 PT_physx 19 BSPLoader::PT_physx 0
+4 0 0
+
+41 11 BSPLoader * 0 8576 11 BSPLoader * 11 BSPLoader * 0 0 39 0 0 0 0 0 0 0 0 0 0
+
+42 17 BSPLoader const * 0 8576 17 BSPLoader const * 17 BSPLoader const * 0 0 43 0 0 0 0 0 0 0 0 0 0
+
+43 15 BSPLoader const 0 8832 15 BSPLoader const 15 BSPLoader const 0 0 39 0 0 0 0 0 0 0 0 0 0
+
+44 16 Filename const * 0 8576 16 Filename const * 16 Filename const * 0 0 45 0 0 0 0 0 0 0 0 0 0
+
+45 14 Filename const 0 8832 14 Filename const 14 Filename const 0 0 46 0 0 0 0 0 0 0 0 0 0
+
+46 8 Filename 0 2048 8 Filename 8 Filename 0 0 0 0 0 0 0 0 0 0 0 0 550
+/**
+ * The name of a file, such as a texture file or an Egg file.  Stores the full
+ * pathname, and includes functions for extracting out the directory prefix
+ * part and the file extension and stuff.
+ *
+ * A Filename is also aware of the mapping between the Unix-like filename
+ * convention we use internally, and the local OS's specific filename
+ * convention, and it knows how to perform basic OS-specific I/O, like testing
+ * for file existence and searching a searchpath, as well as the best way to
+ * open an fstream for reading or writing.
+ */
+
+47 4 bool 0 8194 4 bool 4 bool 0 4 0 0 0 0 0 0 0 0 0 0 0
+
+48 11 PN_stdfloat 0 2105344 11 PN_stdfloat 11 PN_stdfloat 0 0 49 0 0 0 0 0 0 0 0 0 0
+
+49 5 float 0 8194 5 float 5 float 0 2 0 0 0 0 0 0 0 0 0 0 0
+
+50 3 int 0 8194 3 int 3 int 0 1 0 0 0 0 0 0 0 0 0 0 0
+
+51 4 void 0 8194 4 void 4 void 0 6 0 0 0 0 0 0 0 0 0 0 0
+
+52 23 GraphicsStateGuardian * 0 8576 23 GraphicsStateGuardian * 23 GraphicsStateGuardian * 0 0 53 0 0 0 0 0 0 0 0 0 0
+
+53 21 GraphicsStateGuardian 0 2048 21 GraphicsStateGuardian 21 GraphicsStateGuardian 0 0 0 0 0 0 0 0 0 0 0 0 308
+/**
+ * Encapsulates all the communication with a particular instance of a given
+ * rendering backend.  Tries to guarantee that redundant state-change requests
+ * are not issued (hence "state guardian").
+ *
+ * There will be one of these objects for each different graphics context
+ * active in the system.
+ */
+
+54 16 NodePath const * 0 8576 16 NodePath const * 16 NodePath const * 0 0 55 0 0 0 0 0 0 0 0 0 0
+
+55 14 NodePath const 0 8832 14 NodePath const 14 NodePath const 0 0 56 0 0 0 0 0 0 0 0 0 0
+
+56 8 NodePath 0 2048 8 NodePath 8 NodePath 0 0 0 0 0 0 0 0 0 0 0 0 762
+/**
+ * NodePath is the fundamental system for disambiguating instances, and also
+ * provides a higher-level interface for manipulating the scene graph.
+ *
+ * A NodePath is a list of connected nodes from the root of the graph to any
+ * sub-node.  Each NodePath therefore uniquely describes one instance of a
+ * node.
+ *
+ * NodePaths themselves are lightweight objects that may easily be copied and
+ * passed by value.  Their data is stored as a series of NodePathComponents
+ * that are stored on the nodes.  Holding a NodePath will keep a reference
+ * count to all the nodes in the path.  However, if any node in the path is
+ * removed or reparented (perhaps through a different NodePath), the NodePath
+ * will automatically be updated to reflect the changes.
+ */
+
+57 13 atomic string 0 2 13 atomic string 13 atomic string 0 7 0 0 0 0 0 0 0 0 0 0 0
+
+58 8 LVector3 0 2105344 8 LVector3 8 LVector3 0 0 59 0 0 0 0 0 0 0 0 0 0
+
+59 9 LVector3f 0 2048 9 LVector3f 9 LVector3f 0 0 0 0 0 0 0 0 0 0 0 0 338
+/**
+ * This is a three-component vector distance (as opposed to a three-component
+ * point, which represents a particular point in space).  Some of the methods
+ * are slightly different between LPoint3 and LVector3; in particular,
+ * subtraction of two points yields a vector, while addition of a vector and a
+ * point yields a point.
+ */
+
+60 10 LVector3 * 0 8576 10 LVector3 * 10 LVector3 * 0 0 58 0 0 0 0 0 0 0 0 0 0
+
+61 6 LColor 0 2105344 6 LColor 6 LColor 0 0 62 0 0 0 0 0 0 0 0 0 0
+
+62 7 LColorf 0 2105344 7 LColorf 7 LColorf 0 0 63 0 0 0 0 0 0 0 0 0 0
+
+63 10 LVecBase4f 0 2048 10 LVecBase4f 10 LVecBase4f 0 0 0 0 0 0 0 0 0 0 0 0 77
+/**
+ * This is the base class for all three-component vectors and points.
+ */
+
+64 8 LColor * 0 8576 8 LColor * 8 LColor * 0 0 61 0 0 0 0 0 0 0 0 0 0
+
+65 10 NodePath * 0 8576 10 NodePath * 10 NodePath * 0 0 56 0 0 0 0 0 0 0 0 0 0
+
+0
+0
+0

@@ -13,5 +13,4 @@ void init_libpandabsp()
                 return;
         initialized = true;
 
-
 }
