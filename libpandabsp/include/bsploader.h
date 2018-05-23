@@ -8,8 +8,15 @@
 #include <pnmImage.h>
 #include <nodePath.h>
 #include <genericAsyncTask.h>
+#include <geom.h>
 #include <graphicsStateGuardian.h>
 #include <texture.h>
+#ifdef HAVE_PYTHON
+#include <py_panda.h>
+#endif
+#include "entity.h"
+#include <renderAttrib.h>
+#include <boundingBox.h>
 
 NotifyCategoryDeclNoExport(bspfile);
 
@@ -37,6 +44,73 @@ class EggVertexPool;
 class EggPolygon;
 class Geom;
 class GeomNode;
+class BSPLoader;
+
+class EXPCL_PANDABSP BSPCullAttrib : public RenderAttrib
+{
+private:
+	INLINE BSPCullAttrib();
+
+PUBLISHED:
+	static CPT( RenderAttrib ) make( CPT(GeometricBoundingVolume) geom_bounds, BSPLoader *loader );
+	static CPT( RenderAttrib ) make_default();
+
+	INLINE CPT(GeometricBoundingVolume) get_geom_bounds() const;
+	INLINE BSPLoader *get_loader() const;
+
+PUBLISHED:
+	MAKE_PROPERTY( geom_bounds, get_geom_bounds );
+	MAKE_PROPERTY( loader, get_loader );
+
+public:
+
+	virtual bool has_cull_callback() const;
+	virtual bool cull_callback( CullTraverser *trav, const CullTraverserData &data ) const;
+
+	virtual size_t get_hash_impl() const;
+	virtual int compare_to_impl( const RenderAttrib *other ) const;
+
+private:
+	CPT( GeometricBoundingVolume ) _geom_bounds;
+	BSPLoader *_loader;
+
+PUBLISHED:
+	static int get_class_slot()
+	{
+		return _attrib_slot;
+	}
+	virtual int get_slot() const
+	{
+		return get_class_slot();
+	}
+	MAKE_PROPERTY( class_slot, get_class_slot );
+
+public:
+	static TypeHandle get_class_type()
+	{
+		return _type_handle;
+	}
+	static void init_type()
+	{
+		RenderAttrib::init_type();
+		register_type( _type_handle, "BSPCullAttrib",
+			       RenderAttrib::get_class_type() );
+		_attrib_slot = register_slot( _type_handle, 100, new BSPCullAttrib );
+	}
+	virtual TypeHandle get_type() const
+	{
+		return get_class_type();
+	}
+	virtual TypeHandle force_init_type()
+	{
+		init_type(); return get_class_type();
+	}
+
+private:
+	static TypeHandle _type_handle;
+	static int _attrib_slot;
+
+};
 
 class EXPCL_PANDABSP BSPLoader
 {
@@ -44,13 +118,20 @@ PUBLISHED:
 	BSPLoader();
 
         bool read( const Filename &file );
+	void do_optimizations();
 
 	void set_gamma( PN_stdfloat gamma, int overbright = 1 );
 	void set_gsg( GraphicsStateGuardian *gsg );
         void set_camera( const NodePath &camera );
 	void set_render( const NodePath &render );
 	void set_want_visibility( bool flag );
+	void set_want_lightmaps( bool flag );
 	void set_physics_type( int type );
+	void set_visualize_leafs( bool flag );
+#ifdef HAVE_PYTHON
+	void link_entity_to_class( const string &entname, PyTypeObject *type );
+	PyObject *get_py_entity_by_target_name( const string &targetname ) const;
+#endif
 
 	int get_num_entities() const;
 	string get_entity_value( int entnum, const char *key ) const;
@@ -60,6 +141,9 @@ PUBLISHED:
 	LColor get_entity_value_color( int entnum, const char *key, bool scale = true ) const;
 	NodePath get_entity( int entnum ) const;
 	NodePath get_model( int modelnum ) const;
+
+	int find_leaf( const NodePath &np );
+	int find_leaf( const LPoint3 &pos );
 
 	void cleanup();
 
@@ -75,10 +159,16 @@ PUBLISHED:
 		PT_physx,
 	};
 
+public:
+	pvector<PT( BoundingBox )> get_visible_leaf_bboxs() const;
+
 private:
         void make_faces();
-	void group_models();
 	void load_entities();
+
+#ifdef HAVE_PYTHON
+	void make_pyent( CBaseEntity *cent, PyObject *pyent, const string &classname );
+#endif
 
 	LTexCoord get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert ) const;
 
@@ -91,7 +181,6 @@ private:
 
         PNMImage lightmap_image_from_face( dface_t *face, FaceLightmapData *ld );
 
-        int find_leaf( const LPoint3 &pos );
         bool is_cluster_visible( int curr_cluster, int cluster ) const;
 
         void update();
@@ -100,19 +189,39 @@ private:
 private:
 	NodePath _result;
 	NodePath _brushroot;
+	NodePath _proproot;
         NodePath _camera;
 	NodePath _render;
 	GraphicsStateGuardian *_gsg;
 	bool _has_pvs_data;
 	bool _want_visibility;
+	bool _want_lightmaps;
+	bool _vis_leafs;
 	int _physics_type;
+	pvector<PT( BoundingBox )> _visible_leaf_bboxs;
+	int _curr_leaf_idx;
+	pmap<string, PyTypeObject *> _entity_to_class;
+
+	pvector<pvector<const Geom *>> _leaf_geoms;
 
         pmap<texref_t *, PT( Texture )> _texref_textures;
-        vector<vector<uint8_t>> _leaf_pvs;
+        vector<uint8_t *> _leaf_pvs;
+	pvector<NodePath> _leaf_visnp;
 	pvector<GeomNode *> _face_geomnodes;
-	pvector<NodePath> _entities;
+	pvector<PT( BoundingBox )> _leaf_bboxs;
+#ifdef HAVE_PYTHON
+	pvector<PyObject *> _py_entities;
+	typedef pmap<CBaseEntity *, PyObject *> CEntToPyEnt;
+	CEntToPyEnt _cent_to_pyent;
+#endif
+	pvector<NodePath> _nodepath_entities;
+	pvector<NodePath> _model_roots;
+	pvector<PT( CBaseEntity )> _class_entities;
 	
         PT( GenericAsyncTask ) _update_task;
+
+private:
+	friend class BSPFace;
 };
 
 #endif // BSPLOADER_H

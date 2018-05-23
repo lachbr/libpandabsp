@@ -1,4 +1,6 @@
 #include "config_bsp.h"
+#include "entity.h"
+#include "bsploader.h"
 
 ConfigureDef( config_bsp );
 ConfigureFn( config_bsp )
@@ -12,5 +14,9 @@ void init_libpandabsp()
         if ( initialized )
                 return;
         initialized = true;
+
+	BSPCullAttrib::init_type();
+	CBaseEntity::init_type();
+	CBrushEntity::init_type();
 
 }

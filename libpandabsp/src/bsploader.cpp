@@ -1,5 +1,6 @@
 #include "bsploader.h"
 #include "bspfile.h"
+#include "entity.h"
 
 #include <array>
 #include <bitset>
@@ -25,6 +26,94 @@
 #include <ambientLight.h>
 #include <spotlight.h>
 #include <fog.h>
+#include <lineSegs.h>
+#include <nodePath_ext.h>
+#include <graphicsEngine.h>
+#include <boundingBox.h>
+#include <pStatCollector.h>
+
+PStatCollector bca_collector( "BSP:BSPCullAttrib" );
+
+TypeHandle BSPCullAttrib::_type_handle;
+int BSPCullAttrib::_attrib_slot;
+
+INLINE BSPCullAttrib::BSPCullAttrib() :
+	RenderAttrib(),
+	_geom_bounds( nullptr ),
+	_loader( nullptr )
+{
+}
+
+bool BSPCullAttrib::has_cull_callback() const
+{
+	return true;
+}
+
+bool BSPCullAttrib::cull_callback( CullTraverser *trav, const CullTraverserData &data ) const
+{
+	bca_collector.start();
+
+	// Cull the bounds of the geom against the bboxes of each visible leaf.
+
+	pvector<PT( BoundingBox )> visible_leafs_bboxs = _loader->get_visible_leaf_bboxs();
+
+	for ( size_t i = 0; i < visible_leafs_bboxs.size(); i++ )
+	{
+		PT( BoundingBox ) bbox = visible_leafs_bboxs[i];
+		if ( bbox->contains( _geom_bounds ) != BoundingVolume::IF_no_intersection )
+		{
+			bca_collector.stop();
+			return true;
+		}
+	}
+
+	bca_collector.stop();
+
+	return false;
+}
+
+INLINE CPT(GeometricBoundingVolume) BSPCullAttrib::get_geom_bounds() const
+{
+	return _geom_bounds;
+}
+
+INLINE BSPLoader *BSPCullAttrib::get_loader() const
+{
+	return _loader;
+}
+
+CPT( RenderAttrib ) BSPCullAttrib::make( CPT( GeometricBoundingVolume ) geom_bounds, BSPLoader *loader )
+{
+	BSPCullAttrib *attrib = new BSPCullAttrib;
+	attrib->_geom_bounds = geom_bounds;
+	attrib->_loader = loader;
+	return return_new( attrib );
+}
+
+CPT( RenderAttrib ) BSPCullAttrib::make_default()
+{
+	BSPCullAttrib *attrib = new BSPCullAttrib;
+	return return_new( attrib );
+}
+
+int BSPCullAttrib::compare_to_impl( const RenderAttrib *other ) const
+{
+	const BSPCullAttrib *ta = (const BSPCullAttrib *)other;
+
+	if ( _geom_bounds != ta->_geom_bounds )
+	{
+		return _geom_bounds - ta->_geom_bounds;
+	}
+	return _loader - ta->_loader;
+}
+
+size_t BSPCullAttrib::get_hash_impl() const
+{
+	size_t hash = 0;
+	hash = pointer_hash::add_hash( hash, _geom_bounds );
+	hash = pointer_hash::add_hash( hash, _loader );
+	return hash;
+}
 
 //#define VISUALIZE_PLANE_COLORS
 //#define EXTRACT_LIGHTMAPS
@@ -32,12 +121,36 @@
 #define DEFAULT_GAMMA 1.0
 #define QRAD_GAMMA 0.55
 #define DEFAULT_OVERBRIGHT 1
-#define MAP_SCALE .075
+#define ATTN_FACTOR 0.03
+
+PT( GeomNode ) UTIL_make_cube_outline( const LPoint3 &min, const LPoint3 &max,
+				       const LColor &color, PN_stdfloat thickness )
+{
+	LineSegs lines;
+	lines.set_color( color );
+	lines.set_thickness( thickness );
+	lines.move_to( min );
+	lines.draw_to( LVector3( min.get_x(), min.get_y(), max.get_z() ) );
+	lines.draw_to( LVector3( min.get_x(), max.get_y(), max.get_z() ) );
+	lines.draw_to( LVector3( min.get_x(), max.get_y(), min.get_z() ) );
+	lines.draw_to( min );
+	lines.draw_to( LVector3( max.get_x(), min.get_y(), min.get_z() ) );
+	lines.draw_to( LVector3( max.get_x(), min.get_y(), max.get_z() ) );
+	lines.draw_to( LVector3( min.get_x(), min.get_y(), max.get_z() ) );
+	lines.move_to( LVector3( max.get_x(), min.get_y(), max.get_z() ) );
+	lines.draw_to( max );
+	lines.draw_to( LVector3( min.get_x(), max.get_y(), max.get_z() ) );
+	lines.move_to( max );
+	lines.draw_to( LVector3( max.get_x(), max.get_y(), min.get_z() ) );
+	lines.draw_to( LVector3( min.get_x(), max.get_y(), min.get_z() ) );
+	lines.move_to( LVector3( max.get_x(), max.get_y(), min.get_z() ) );
+	lines.draw_to( LVector3( max.get_x(), min.get_y(), min.get_z() ) );
+	return lines.create();
+}
 
 void GetParamsFromEnt( entity_t *mapent )
 {
 	int num_epairs = sizeof( mapent->epairs ) / sizeof( epair_t );
-	cout << "Number of epairs: " << num_epairs << endl;
 }
 
 double round( double num )
@@ -143,6 +256,11 @@ PNMImage BSPLoader::lightmap_image_from_face( dface_t *face, FaceLightmapData *l
         return img;
 }
 
+int BSPLoader::find_leaf( const NodePath &np )
+{
+	return find_leaf( np.get_pos( _result ) );
+}
+
 int BSPLoader::find_leaf( const LPoint3 &pos )
 {
         int i = 0;
@@ -153,9 +271,9 @@ int BSPLoader::find_leaf( const LPoint3 &pos )
         {
                 const dnode_t *node = &g_dnodes[i];
                 const dplane_t *plane = &g_dplanes[node->planenum];
-                float distance = plane->normal[0] * pos.get_x() +
-                        plane->normal[1] * pos.get_y() +
-                        plane->normal[2] * pos.get_z() - plane->dist;
+		float distance = ( plane->normal[0] * pos.get_x() ) +
+			( plane->normal[1] * pos.get_y() ) +
+			( plane->normal[2] * pos.get_z() ) - plane->dist;
 
                 if ( distance >= 0.0 )
                 {
@@ -168,7 +286,7 @@ int BSPLoader::find_leaf( const LPoint3 &pos )
                         
         }
 
-        return ~i;
+	return -( i + 1 );
 }
 
 LTexCoord BSPLoader::get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert ) const
@@ -251,189 +369,9 @@ void BSPLoader::make_faces()
 {
         bspfile_cat.info()
 		<< "Making faces...\n";
-	for ( int facenum = 0; facenum < g_numfaces; facenum++ )
-	{
-		dface_t *face = &g_dfaces[facenum];
 
-		PT( EggData ) data = new EggData;
-		data->set_bsp_mode( _want_visibility );
-		PT( EggVertexPool ) vpool = new EggVertexPool( "facevpool" );
-		data->add_child( vpool );
-
-		// This face lies on this plane, create it.
-		PT( EggPolygon ) poly = new EggPolygon;
-		data->add_child( poly );
-
-		texinfo_t *texinfo = &g_texinfo[face->texinfo];
-
-		texref_t *texref = &g_dtexrefs[texinfo->texref];
-		contents_t contents = GetTextureContents( texref->name );
-		if ( contents == CONTENTS_SKY )
-		{
-			// We don't render sky brushes.
-			continue;
-		}
-
-		PT( Texture ) tex = try_load_texref( texref );
-		string texture_name = texref->name;
-		transform( texture_name.begin(), texture_name.end(), texture_name.begin(), tolower );
-
-		if ( texture_name.find( "trigger" ) != string::npos )
-		{
-			continue;
-		}
-
-		bool has_lighting = face->lightofs != -1;
-
-		PT( Texture ) lm_tex = new Texture( "lightmap_texture" );
-
-		/* ************* FROM P3RAD ************* */
-
-		FaceLightmapData ld;
-
-		ld.mins[0] = ld.mins[1] = 999999.0;
-		ld.maxs[0] = ld.maxs[1] = -99999.0;
-
-		for ( int i = 0; i < face->numedges; i++ )
-		{
-			int edge_idx = g_dsurfedges[face->firstedge + i];
-			dedge_t *edge;
-			dvertex_t *vert;
-			if ( edge_idx >= 0 )
-			{
-				edge = &g_dedges[edge_idx];
-				vert = &g_dvertexes[edge->v[0]];
-			}
-			else
-			{
-				edge = &g_dedges[-edge_idx];
-				vert = &g_dvertexes[edge->v[1]];
-			}
-
-			LTexCoord uv = get_vertex_uv( texinfo, vert );
-
-			if ( uv.get_x() < ld.mins[0] )
-				ld.mins[0] = uv.get_x();
-			else if ( uv.get_x() > ld.maxs[0] )
-				ld.maxs[0] = uv.get_x();
-
-			if ( uv.get_y() < ld.mins[1] )
-				ld.mins[1] = uv.get_y();
-			else if ( uv.get_y() > ld.maxs[1] )
-				ld.maxs[1] = uv.get_y();
-		}
-
-		ld.texmins[0] = floor( ld.mins[0] / TEXTURE_STEP );
-		ld.texmins[1] = floor( ld.mins[1] / TEXTURE_STEP );
-		ld.texmaxs[0] = ceil( ld.maxs[0] / TEXTURE_STEP );
-		ld.texmaxs[1] = ceil( ld.maxs[1] / TEXTURE_STEP );
-
-		ld.texsize[0] = floor( (double)( ld.texmaxs[0] - ld.texmins[0] ) + 1 );
-		ld.texsize[1] = floor( (double)( ld.texmaxs[1] - ld.texmins[1] ) + 1 );
-
-		ld.midpolys[0] = ( ld.mins[0] + ld.maxs[0] ) / 2.0;
-		ld.midpolys[1] = ( ld.mins[1] + ld.maxs[1] ) / 2.0;
-		ld.midtexs[0] = ld.texsize[0] / 2.0;
-		ld.midtexs[1] = ld.texsize[1] / 2.0;
-
-		if ( has_lighting )
-		{
-			// Generate a lightmap texture from the samples
-			PNMImage lm_img = lightmap_image_from_face( face, &ld );
-#ifdef EXTRACT_LIGHTMAPS
-			stringstream ss;
-			ss << "extractedLightmaps/lightmap_" << face << ".jpg";
-			PNMFileTypeJPG jpg;
-			lm_img.write( Filename( ss.str() ), &jpg );
-#endif
-			lm_tex->load( lm_img );
-			lm_tex->set_magfilter( SamplerState::FT_linear );
-			lm_tex->set_minfilter( SamplerState::FT_linear_mipmap_linear );
-		}
-
-
-		bspfile_cat.info()
-			<< "Face has " << face->numedges << " edges\n";
-
-		int last_edge = face->firstedge + face->numedges;
-		int first_edge = face->firstedge;
-		for ( int j = last_edge - 1; j >= first_edge; j-- )
-		{
-			int surf_edge = g_dsurfedges[j];
-
-			dedge_t *edge;
-			if ( surf_edge >= 0 )
-				edge = &g_dedges[surf_edge];
-			else
-				edge = &g_dedges[-surf_edge];
-
-			if ( surf_edge < 0 )
-			{
-				for ( int k = 0; k < 2; k++ )
-				{
-					PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
-									        face, k, &ld, tex );
-					vpool->add_vertex( v );
-					poly->add_vertex( v );
-				}
-			}
-			else
-			{
-				for ( int k = 1; k >= 0; k-- )
-				{
-					PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
-										face, k, &ld, tex );
-					vpool->add_vertex( v );
-					poly->add_vertex( v );
-				}
-			}
-		}
-
-		data->recompute_polygon_normals();
-		data->recompute_vertex_normals( 90.0 );
-		data->remove_unused_vertices( true );
-		data->remove_invalid_primitives( true );
-
-		PT( EggTexture ) d_tex = new EggTexture( "diffuse_tex", tex != nullptr ? tex->get_filename() : Filename() );
-		d_tex->set_uv_name( "diffuse" );
-		poly->add_texture( d_tex );
-
-		PT( PandaNode ) face_node = load_egg_data( data );
-
-		NodePath face_np = _brushroot.attach_new_node( face_node );
-
-		if ( has_lighting )
-		{
-			PT( TextureStage ) lm_stage = new TextureStage( "lightmap_stage" );
-			lm_stage->set_texcoord_name( "lightmap" );
-			lm_stage->set_mode( TextureStage::M_modulate );
-			face_np.set_texture( lm_stage, lm_tex, 1 );
-		}
-
-                face_np.clear_model_nodes();
-                face_np.flatten_strong();
-		NodePath gnnp = face_np.find( "**/+GeomNode" );
-		if ( !gnnp.is_empty() )
-		{
-			GeomNode *gn = DCAST( GeomNode, gnnp.node() );
-			_face_geomnodes[facenum] = gn;
-		}
-		else
-		{
-			face_np.remove_node();
-		}
-			
-	}
-
-        bspfile_cat.info()
-		<< "Finished making faces.\n";
-}
-
-void BSPLoader::group_models()
-{
 	// In BSP files, models are brushes that have been grouped together to be used as an entity.
 	// We can group all of the face GeomNodes of the model to a root node.
-
 	for ( int modelnum = 0; modelnum < g_nummodels; modelnum++ )
 	{
 		dmodel_t *model = &g_dmodels[modelnum];
@@ -444,25 +382,194 @@ void BSPLoader::group_models()
 		float *flmaxs = model->maxs;
 		LPoint3 origin( florigin[0], florigin[1], florigin[2] );
 		LPoint3 mins( flmins[0], flmins[1], flmins[2] );
-		LPoint3 maxs( flmaxs[0], flmaxs[1], flmaxs[1] );
-		cout << "model mins: " << mins << endl;
-		cout << "model maxs: " << maxs << endl;
-		cout << "model origin: " << origin << endl;
-		
-		
+		LPoint3 maxs( flmaxs[0], flmaxs[1], flmaxs[2] );
+
 		stringstream name;
 		name << "model-" << modelnum;
 		NodePath modelroot = _brushroot.attach_new_node( name.str() );
-		modelroot.set_pos( origin );
+		modelroot.set_pos( ( ( mins + maxs ) / 2.0 ) + origin );
+
 		for ( int facenum = firstface; facenum < firstface + numfaces; facenum++ )
 		{
-			GeomNode *gn = _face_geomnodes[facenum];
-			if ( gn != nullptr )
+			PT( EggData ) data = new EggData;
+			data->set_bsp_mode( false );//_want_visibility );
+			PT( EggVertexPool ) vpool = new EggVertexPool( "facevpool" );
+			data->add_child( vpool );
+
+			dface_t *face = &g_dfaces[facenum];
+
+			PT( EggPolygon ) poly = new EggPolygon;
+			data->add_child( poly );
+
+			texinfo_t *texinfo = &g_texinfo[face->texinfo];
+
+			texref_t *texref = &g_dtexrefs[texinfo->texref];
+			contents_t contents = GetTextureContents( texref->name );
+			if ( contents == CONTENTS_SKY )
 			{
-				NodePath( gn ).wrt_reparent_to( modelroot );
+				// We don't render sky brushes.
+				continue;
+			}
+
+			bool skip = false;
+
+			PT( Texture ) tex = try_load_texref( texref );
+			string texture_name = texref->name;
+			transform( texture_name.begin(), texture_name.end(), texture_name.begin(), tolower );
+
+			if ( texture_name.find( "trigger" ) != string::npos )
+			{
+				continue;
+			}
+
+			bool has_lighting = ( face->lightofs != -1 && _want_lightmaps ) && !skip;
+			bool has_texture = !skip;
+
+			PT( Texture ) lm_tex = new Texture( "lightmap_texture" );
+
+			/* ************* FROM P3RAD ************* */
+
+			FaceLightmapData ld;
+
+			ld.mins[0] = ld.mins[1] = 999999.0;
+			ld.maxs[0] = ld.maxs[1] = -99999.0;
+
+			for ( int i = 0; i < face->numedges; i++ )
+			{
+				int edge_idx = g_dsurfedges[face->firstedge + i];
+				dedge_t *edge;
+				dvertex_t *vert;
+				if ( edge_idx >= 0 )
+				{
+					edge = &g_dedges[edge_idx];
+					vert = &g_dvertexes[edge->v[0]];
+				}
+				else
+				{
+					edge = &g_dedges[-edge_idx];
+					vert = &g_dvertexes[edge->v[1]];
+				}
+
+				LTexCoord uv = get_vertex_uv( texinfo, vert );
+
+				if ( uv.get_x() < ld.mins[0] )
+					ld.mins[0] = uv.get_x();
+				else if ( uv.get_x() > ld.maxs[0] )
+					ld.maxs[0] = uv.get_x();
+
+				if ( uv.get_y() < ld.mins[1] )
+					ld.mins[1] = uv.get_y();
+				else if ( uv.get_y() > ld.maxs[1] )
+					ld.maxs[1] = uv.get_y();
+			}
+
+			ld.texmins[0] = floor( ld.mins[0] / TEXTURE_STEP );
+			ld.texmins[1] = floor( ld.mins[1] / TEXTURE_STEP );
+			ld.texmaxs[0] = ceil( ld.maxs[0] / TEXTURE_STEP );
+			ld.texmaxs[1] = ceil( ld.maxs[1] / TEXTURE_STEP );
+
+			ld.texsize[0] = floor( (double)( ld.texmaxs[0] - ld.texmins[0] ) + 1 );
+			ld.texsize[1] = floor( (double)( ld.texmaxs[1] - ld.texmins[1] ) + 1 );
+
+			ld.midpolys[0] = ( ld.mins[0] + ld.maxs[0] ) / 2.0;
+			ld.midpolys[1] = ( ld.mins[1] + ld.maxs[1] ) / 2.0;
+			ld.midtexs[0] = ld.texsize[0] / 2.0;
+			ld.midtexs[1] = ld.texsize[1] / 2.0;
+
+			if ( has_lighting )
+			{
+				// Generate a lightmap texture from the samples
+				PNMImage lm_img = lightmap_image_from_face( face, &ld );
+#ifdef EXTRACT_LIGHTMAPS
+				stringstream ss;
+				ss << "extractedLightmaps/lightmap_" << face << ".jpg";
+				PNMFileTypeJPG jpg;
+				lm_img.write( Filename( ss.str() ), &jpg );
+#endif
+				lm_tex->load( lm_img );
+				lm_tex->set_magfilter( SamplerState::FT_linear );
+				lm_tex->set_minfilter( SamplerState::FT_linear_mipmap_linear );
+			}
+
+			int last_edge = face->firstedge + face->numedges;
+			int first_edge = face->firstedge;
+			for ( int j = last_edge - 1; j >= first_edge; j-- )
+			{
+				int surf_edge = g_dsurfedges[j];
+
+				dedge_t *edge;
+				if ( surf_edge >= 0 )
+					edge = &g_dedges[surf_edge];
+				else
+					edge = &g_dedges[-surf_edge];
+
+				if ( surf_edge < 0 )
+				{
+					for ( int k = 0; k < 2; k++ )
+					{
+						PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
+										 face, k, &ld, tex );
+						vpool->add_vertex( v );
+						poly->add_vertex( v );
+					}
+				}
+				else
+				{
+					for ( int k = 1; k >= 0; k-- )
+					{
+						PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
+										 face, k, &ld, tex );
+						vpool->add_vertex( v );
+						poly->add_vertex( v );
+					}
+				}
+			}
+
+			data->remove_unused_vertices( true );
+			data->remove_invalid_primitives( true );
+
+			poly->recompute_polygon_normal();
+			LNormald poly_normal = poly->get_normal();
+
+			if ( has_texture )
+			{
+				PT( EggTexture ) d_tex = new EggTexture( "diffuse_tex", tex != nullptr ? tex->get_filename() : Filename() );
+				d_tex->set_uv_name( "diffuse" );
+				d_tex->set_alpha_mode( EggRenderMode::AM_on );
+				poly->add_texture( d_tex );
+			}
+			
+
+			if ( has_lighting )
+			{
+				PT( EggTexture ) l_tex = new EggTexture( "lightmap_tex", Filename() );
+				l_tex->set_uv_name( "lightmap" );
+				l_tex->set_combine_mode( EggTexture::CC_rgb, EggTexture::CM_modulate );
+				l_tex->set_texture_ptr( lm_tex );
+				poly->add_texture( l_tex );
+			}
+
+			if ( poly_normal.almost_equal( LNormald::up(), 0.5 ) )
+			{
+				// A polygon facing upwards could be considered a ground.
+				// Give it the ground bin.
+				poly->set_bin( "ground" );
+				poly->set_draw_order( 18 );
+			}
+
+			NodePath faceroot = _brushroot.attach_new_node( load_egg_data( data ) );
+			faceroot.wrt_reparent_to( modelroot );
+			if ( skip )
+			{
+				faceroot.hide();
 			}
 		}
+
+		_model_roots.push_back( modelroot );
 	}
+
+        bspfile_cat.info()
+		<< "Finished making faces.\n";
 }
 
 LColor color_from_rgb_scalar( vec_t *color )
@@ -491,7 +598,6 @@ LColor color_from_value( const string &value, bool scale = true )
 	b /= 255.0;
 
 	LColor col( r, g, b, 1.0 );
-	cout << col << endl;
 
 	return col;
 
@@ -522,15 +628,40 @@ void BSPLoader::load_entities()
 			// It's a pointlight!!!
 
 			LColor color = color_from_value( ValueForKey( ent, "_light" ) );
+			PN_stdfloat fade = FloatForKey( ent, "_fade" );
 
 			PT( PointLight ) light = new PointLight( "pointLight-" + targetname );
 			light->set_color( color );
+			light->set_attenuation( LVecBase3( 1, 0, fade * ATTN_FACTOR ) );
 			NodePath light_np = _result.attach_new_node( light );
 			light_np.set_pos( origin[0], origin[1], origin[2] );
 
 			_render.set_light( light_np );
 
-			_entities.push_back( light_np );
+			_nodepath_entities.push_back( light_np );
+		}
+		else if ( classname == "light_spot" )
+		{
+			// Spotlight
+			PN_stdfloat cone = FloatForKey( ent, "_cone" );
+			PN_stdfloat cone2 = FloatForKey( ent, "_cone2" );
+			PN_stdfloat pitch = FloatForKey( ent, "pitch" );
+			PN_stdfloat fade = FloatForKey( ent, "_fade" );
+			LColor color = color_from_value( ValueForKey( ent, "_light" ) );
+
+			PT( Spotlight ) light = new Spotlight( "spotlight-" + targetname );
+			light->set_color( color );
+			//light->set_attenuation( LVecBase3( 1, 0, fade * ATTN_FACTOR ) );
+			light->get_lens()->set_fov( cone2 * 1.3 );
+			NodePath light_np = _result.attach_new_node( light );
+			// Changing the scale of a spotlight breaks it.
+			light_np.set_pos( origin[0], origin[1], origin[2] );
+			light_np.set_hpr( angles[1] - 90, angles[0] + pitch, angles[2] );
+			light_np.set_scale( _render, 1.0 );
+
+			_render.set_light( light_np );
+
+			_nodepath_entities.push_back( light_np );
 		}
 		else if ( classname == "light_environment" )
 		{
@@ -544,7 +675,7 @@ void BSPLoader::load_entities()
 			sun->set_color( sun_color );
 			NodePath sun_np = group.attach_new_node( sun );
 			sun_np.set_pos( origin[0], origin[1], origin[2] );
-			sun_np.set_hpr( angles[1], angles[0], angles[2] );
+			sun_np.set_hpr( angles[1] - 90, angles[0], angles[2] );
 
 			PT( AmbientLight ) amb = new AmbientLight( "ambientLight-" + targetname );
 			amb->set_color( amb_color );
@@ -553,7 +684,7 @@ void BSPLoader::load_entities()
 			_render.set_light( amb_np );
 			_render.set_light( sun_np );
 			
-			_entities.push_back( group );
+			_nodepath_entities.push_back( group );
 		}
 		else if ( classname == "prop_static" )
 		{
@@ -562,8 +693,9 @@ void BSPLoader::load_entities()
 			vec_t scale[3];
 			GetVectorForKey( ent, "scale", scale );
 			int phys_type = IntForKey( ent, "physics" );
+			bool two_sided = (bool)IntForKey( ent, "twosided" );
 
-			NodePath prop_np = _result.attach_new_node( loader->load_sync( Filename( mdl_path ) ) );
+			NodePath prop_np = _proproot.attach_new_node( loader->load_sync( Filename( mdl_path ) ) );
 			if ( prop_np.is_empty() )
 			{
 				bspfile_cat.warning()
@@ -574,9 +706,10 @@ void BSPLoader::load_entities()
 				bspfile_cat.info()
 					<< "Loaded static prop " << mdl_path << "...\n";
 				prop_np.set_pos( origin[0], origin[1], origin[2] );
-				prop_np.set_hpr( angles[1], angles[0], angles[2] );
-				prop_np.set_scale( scale[0] / MAP_SCALE, scale[1] / MAP_SCALE, scale[2] / MAP_SCALE );
-				_entities.push_back( prop_np );
+				prop_np.set_hpr( angles[1] - 90, angles[0], angles[2] );
+				prop_np.set_scale( scale[0] * PANDA_TO_HAMMER, scale[1] * PANDA_TO_HAMMER, scale[2] * PANDA_TO_HAMMER );
+				prop_np.set_two_sided( two_sided, 1 );
+				_nodepath_entities.push_back( prop_np );
 			}
 		}
 		else if ( classname == "env_fog" )
@@ -589,27 +722,65 @@ void BSPLoader::load_entities()
 			fog->set_color( fog_color );
 			NodePath fognp = _render.attach_new_node( fog );
 			_render.set_fog( fog );
-			_entities.push_back( fognp );
+			_nodepath_entities.push_back( fognp );
 		}
-		else if ( classname == "func_door" )
+		else if ( !strncmp( classname.c_str(), "func_", 5 ) )
 		{
-			// A sliding door
+			// Brush entites begin with func_, handle those accordingly.
 			string model = ValueForKey( ent, "model" );
 			if ( model[0] == '*' )
 			{
 				// Brush model
 				int modelnum = atoi( model.substr( 1 ).c_str() );
 				NodePath modelroot = get_model( modelnum );
-				cout << "For func_door: " << endl;
-				modelroot.ls();
+
+				PT( CBrushEntity ) entity = new CBrushEntity;
+				entity->set_data( entnum, ent, this, modelnum, &g_dmodels[modelnum], modelroot );
+				_class_entities.push_back( ( PT( CBaseEntity ) )entity );
+
+#ifdef HAVE_PYTHON
+				PyObject *py_ent = DTool_CreatePyInstance<CBrushEntity>( entity, true );
+				make_pyent( entity, py_ent, classname );
+
+#endif
 			}
+		}
+		else
+		{
+			// We don't know what this entity is exactly, maybe they linked it to a python class.
+			// It didn't start with func_, so we can assume it's just a point entity.
+			PT( CPointEntity ) entity = new CPointEntity;
+			entity->set_data( entnum, ent, this );
+			_class_entities.push_back( ( PT( CBaseEntity ) )entity );
+			
+#ifdef HAVE_PYTHON
+			PyObject *py_ent = DTool_CreatePyInstance<CPointEntity>( entity, true );
+			make_pyent( entity, py_ent, classname );
+#endif
 		}
 	}
 }
 
+#ifdef HAVE_PYTHON
+void BSPLoader::make_pyent( CBaseEntity *cent, PyObject *py_ent, const string &classname )
+{
+	if ( _entity_to_class.find( classname ) != _entity_to_class.end() )
+	{
+		// A python class was linked to this entity!
+		PyObject *obj = PyObject_CallObject( (PyObject *)_entity_to_class[classname], NULL );
+		if ( obj == nullptr )
+			PyErr_PrintEx( 1 );
+		PyObject_SetAttrString( obj, "cEntity", py_ent );
+		PyObject_CallMethod( obj, "load", NULL );
+		_py_entities.push_back( obj );
+		_cent_to_pyent[cent] = obj;
+	}
+}
+#endif
+
 bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
 {
-	if ( ( curr_cluster < 0 || cluster < 0 ) || curr_cluster == cluster )
+	if ( curr_cluster == cluster )
 	{
 		return true;
 	}
@@ -620,16 +791,23 @@ bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
 
 	// 1 means that the specified leaf is visible from the current leaf
 	// 0 means it's not
-	return ( ( _leaf_pvs[curr_cluster][cluster >> 3] & ( 1 << ( cluster & 7 ) ) ) != 0 );
+	int dat = _leaf_pvs[curr_cluster][( cluster - 1 ) >> 3] & ( 1 << ( ( cluster - 1 ) & 7 ) );
+	return dat != 0;
+}
+
+pvector<PT( BoundingBox )> BSPLoader::get_visible_leaf_bboxs() const
+{
+	return _visible_leaf_bboxs;
 }
 
 void BSPLoader::update()
 {
         // Update visibility
 
+	/*
 	bitset<MAX_MAP_FACES> already_visible;
 
-	int curr_leaf_idx = find_leaf( _camera.get_pos( _result ) );
+	int curr_leaf_idx = find_leaf( _camera.get_pos( _render ) );
 
         for ( int i = g_numleafs - 1; i >= 0; i-- )
         {
@@ -648,16 +826,55 @@ void BSPLoader::update()
 				continue;
 			}
 			already_visible.set( face );
-			GeomNode *gn = _face_geomnodes[face];
-			if ( gn != nullptr )
+			const BSPFace *facegeom = _face_geoms[face];
+			if ( facegeom != nullptr )
 			{
-				bspfile_cat.info()
-					<< "Rendering geomNode " << gn << "\n";
-				gn->bsp_flag_for_render();
+				_gsg->get_engine()->flag_geom( facegeom );
 			}
-				
+			else
+			{
+				cout << ":bsploader(warning): facegeom for facenum " << face << " is nullptr" << endl;
+			}
 		}
         }
+	*/
+
+	int curr_leaf_idx = find_leaf( _camera.get_pos( _result ) );
+	if ( curr_leaf_idx != _curr_leaf_idx )
+	{
+		_curr_leaf_idx = curr_leaf_idx;
+		_visible_leaf_bboxs.clear();
+
+		if ( _vis_leafs )
+		{
+			_leaf_visnp[curr_leaf_idx].set_color_scale( LColor( 0, 1, 0, 1 ), 1 );
+		}
+
+		for ( int i = 1; i < g_dmodels[0].visleafs + 1; i++ )
+		{
+			if ( i == curr_leaf_idx )
+			{
+				continue;
+			}
+			const dleaf_t *leaf = &g_dleafs[i];
+			if ( is_cluster_visible( curr_leaf_idx, i ) )
+			{
+				if ( _vis_leafs )
+				{
+					_leaf_visnp[i].set_color_scale( LColor( 0, 0, 1, 1 ), 1 );
+				}
+				_visible_leaf_bboxs.push_back( _leaf_bboxs[i] );
+			}
+			else
+			{
+				if ( _vis_leafs )
+				{
+					_leaf_visnp[i].set_color_scale( LColor( 1, 0, 0, 1 ), 1 );
+				}
+			}
+		}
+	}
+	
 }
 
 AsyncTask::DoneStatus BSPLoader::update_task( GenericAsyncTask *task, void *data )
@@ -694,10 +911,13 @@ bool BSPLoader::read( const Filename &file )
 		return false;
 	}
 
-
 	dtexdata_init();
 
-	_result = NodePath( new RigidBodyCombiner( "maproot" ) );
+	_result = NodePath( "maproot" );
+	// Scale down the entire loaded level as a conversion from Hammer units to Panda units.
+	// Hammer units are tiny compared to panda.
+	_result.set_scale( HAMMER_TO_PANDA );
+	_proproot = _result.attach_new_node( "proproot" );
 	_brushroot = _result.attach_new_node( "brushroot" );
 	_brushroot.set_light_off( 1 );
 	_brushroot.set_material_off( 1 );
@@ -705,13 +925,9 @@ bool BSPLoader::read( const Filename &file )
 	_has_pvs_data = false;
 
 	//_entities.reserve( MAX_MAP_ENTITIES );
-	//_face_geoms.resize( MAX_MAP_FACES );
 	_face_geomnodes.resize( MAX_MAP_FACES );
 	_leaf_pvs.resize( MAX_MAP_LEAFS );
-	for ( size_t i = 0; i < _leaf_pvs.size(); i++ )
-	{
-		_leaf_pvs[i].resize( ( MAX_MAP_LEAFS + 7 ) / 8 );
-	}
+	_leaf_bboxs.resize( MAX_MAP_LEAFS );
 
 	bspfile_cat.info()
 		<< "Reading " << file.get_fullpath() << "...\n";
@@ -729,42 +945,140 @@ bool BSPLoader::read( const Filename &file )
 	ParseEntities();
 
 	// Decompress the per leaf visibility data.
-	for ( int i = 0; i < g_numleafs; i++ )
+	for ( int i = 0; i < g_dmodels[0].visleafs + 1; i++ )
 	{
 		dleaf_t *leaf = &g_dleafs[i];
+
+		uint8_t *pvs = new uint8_t[( MAX_MAP_LEAFS + 7 ) / 8];
+		memset( pvs, 0, ( g_dmodels[0].visleafs + 7 ) / 8 );
+
 		if ( leaf->visofs != -1 )
 		{
-			DecompressVis( &g_dvisdata[leaf->visofs], _leaf_pvs[i].data(), _leaf_pvs[i].size() );
+			DecompressVis( &g_dvisdata[leaf->visofs], pvs, ( MAX_MAP_LEAFS + 7 ) / 8 );
 			_has_pvs_data = true;
 		}
+
+		_leaf_pvs[i] = pvs;
+
+		PT( BoundingBox ) bbox = new BoundingBox(
+			LVector3( leaf->mins[0], leaf->mins[1], leaf->mins[2] ),
+			LVector3( leaf->maxs[0], leaf->maxs[1], leaf->maxs[2] )
+		);
+
+		_leaf_bboxs[i] = bbox;
 	}
 
 	make_faces();
-	group_models();
 	load_entities();
+
+	if ( _vis_leafs )
+	{
+		Randomizer random;
+		// Make a cube outline of the bounds for each leaf so we can visualize them.
+		for ( int leafnum = 0; leafnum < g_dmodels[0].visleafs + 1; leafnum++ )
+		{
+			dleaf_t *leaf = &g_dleafs[leafnum];
+			LPoint3 mins( leaf->mins[0], leaf->mins[1], leaf->mins[2] );
+			LPoint3 maxs( leaf->maxs[0], leaf->maxs[1], leaf->maxs[2] );
+			NodePath leafvis = _result.attach_new_node( UTIL_make_cube_outline( mins, maxs, LColor( 1, 1, 1, 1 ), 2 ) );
+			_leaf_visnp.push_back( leafvis );
+		}
+	}
 
 	_update_task = new GenericAsyncTask( file.get_basename_wo_extension() + "-updateTask", update_task, this );
 	AsyncTaskManager::get_global_ptr()->add( _update_task );
 
-	_result.clear_model_nodes();
-	_result.flatten_medium();
-	_result.set_scale( MAP_SCALE );
-
-	DCAST( RigidBodyCombiner, _result.node() )->collect();
+	//NodePathCollection brushfacenpc = _brushroot.find_all_matches( "**/+GeomNode" );
+	//for ( int i = 0; i < brushfacenpc.get_num_paths(); i++ )
+	//{
+	//	DCAST( GeomNode, brushfacenpc.get_path( i ).node() )->set_bsp_mode( _want_visibility );
+	//}
 
 	return true;
 }
 
+void BSPLoader::do_optimizations()
+{
+	// Do some house keeping
+
+	
+	for ( size_t i = 0; i < _model_roots.size(); i++ )
+	{
+		NodePath mdlroot = _model_roots[i];
+		if ( i == 0 )
+		{
+			// We can do some hard flattening on model 0, which is just all of the
+			// static brushes that aren't tied to entities.
+			mdlroot.clear_model_nodes();
+			mdlroot.flatten_strong();
+		}
+		//else
+		//{
+		//	// For non zero models, the origin matters, so we will only flatten the children.
+		//	NodePathCollection children = mdlroot.get_children();
+		//	for ( int j = 0; j < children.get_num_paths(); j++ )
+		//	{
+		//		children.get_path( j ).clear_model_nodes();
+		//		children.get_path( j ).flatten_strong();
+		//	}
+		//}
+	}
+	
+
+	// We can flatten the props since they just sit there.
+	_proproot.clear_model_nodes();
+	_proproot.flatten_medium();
+
+	_result.premunge_scene( _gsg );
+	_result.prepare_scene( _gsg );
+
+	if ( !_want_visibility )
+	{
+		return;
+	}
+
+	NodePathCollection gn_npc = _brushroot.find_all_matches( "**/+GeomNode" );
+	for ( int i = 0; i < gn_npc.get_num_paths(); i++ )
+	{
+		NodePath gnnp = gn_npc.get_path( i );
+		PT( GeomNode ) gn = DCAST( GeomNode, gnnp.node() );
+		for ( int j = 0; j < gn->get_num_geoms(); j++ )
+		{
+			const Geom *geom = gn->get_geom( j );
+			CPT( GeometricBoundingVolume ) geom_bounds =
+				DCAST( GeometricBoundingVolume, geom->get_bounds() );
+			
+			CPT( RenderAttrib ) bca = BSPCullAttrib::make( geom_bounds, this );
+			CPT( RenderState ) old_state = gn->get_geom_state( j );
+			CPT( RenderState ) new_state = old_state;
+			if ( new_state->has_attrib( BSPCullAttrib::get_class_slot() ) )
+			{
+				new_state = new_state->remove_attrib( BSPCullAttrib::get_class_slot() );
+			}
+			new_state = new_state->add_attrib( bca, 1 );
+
+			gn->set_geom_state( j, new_state );
+		}
+	}
+}
+
 void BSPLoader::cleanup()
 {
-	if (!_result.is_empty())
-		_result.remove_node();
+	for ( size_t i = 0; i < _model_roots.size(); i++ )
+	{
+		if (!_model_roots[i].is_empty() )
+			_model_roots[i].remove_node();
+	}
+	_model_roots.clear();
+	
 
 	if ( g_dlightdata != nullptr )
 		dtexdata_free();
 
 	_leaf_pvs.clear();
 	_face_geomnodes.clear();
+	_leaf_bboxs.clear();
+	_visible_leaf_bboxs.clear();
 
 	if ( _update_task != nullptr )
 	{
@@ -774,11 +1088,24 @@ void BSPLoader::cleanup()
 
 	_has_pvs_data = false;
 
-	for ( size_t i = 0; i < _entities.size(); i++ )
+	for ( size_t i = 0; i < _nodepath_entities.size(); i++ )
 	{
-		_entities[i].remove_node();
+		_nodepath_entities[i].remove_node();
 	}
-	_entities.clear();
+	_nodepath_entities.clear();
+
+#ifdef HAVE_PYTHON
+	for ( size_t i = 0; i < _py_entities.size(); i++ )
+	{
+		PyObject_CallMethod( _py_entities[i], "cleanup", NULL );
+	}
+	_py_entities.clear();
+#endif
+	_class_entities.clear();
+
+	
+	if ( !_result.is_empty() )
+		_result.remove_node();
 }
 
 BSPLoader::BSPLoader() :
@@ -786,7 +1113,10 @@ BSPLoader::BSPLoader() :
 	_gsg( nullptr ),
 	_has_pvs_data( false ),
 	_want_visibility( true ),
-	_physics_type( PT_panda )
+	_physics_type( PT_panda ),
+	_vis_leafs( false ),
+	_want_lightmaps( true ),
+	_curr_leaf_idx( -1 )
 {
 	set_gamma( DEFAULT_GAMMA, DEFAULT_OVERBRIGHT );
 }
@@ -814,6 +1144,21 @@ void BSPLoader::set_gamma( PN_stdfloat gamma, int overbright )
 void BSPLoader::set_gsg( GraphicsStateGuardian *gsg )
 {
 	_gsg = gsg;
+}
+
+void BSPLoader::set_visualize_leafs( bool flag )
+{
+	_vis_leafs = flag;
+}
+
+void BSPLoader::set_want_lightmaps( bool flag )
+{
+	_want_lightmaps = flag;
+}
+
+void BSPLoader::link_entity_to_class( const string &entname, PyTypeObject *type )
+{
+	_entity_to_class[entname] = type;
 }
 
 NodePath BSPLoader::get_result() const
@@ -863,7 +1208,7 @@ LColor BSPLoader::get_entity_value_color( int entnum, const char *key, bool scal
 
 NodePath BSPLoader::get_entity( int entnum ) const
 {
-	return _entities[entnum];
+	return _nodepath_entities[entnum];
 }
 
 NodePath BSPLoader::get_model( int modelnum ) const
@@ -872,6 +1217,23 @@ NodePath BSPLoader::get_model( int modelnum ) const
 	search << "**/model-" << modelnum;
 	return _brushroot.find( search.str() );
 }
+
+#ifdef HAVE_PYTHON
+PyObject *BSPLoader::get_py_entity_by_target_name( const string &targetname ) const
+{
+	for ( CEntToPyEnt::const_iterator itr = _cent_to_pyent.begin(); itr != _cent_to_pyent.end(); ++itr )
+	{
+		CBaseEntity *cent = itr->first;
+		PyObject *pyent = itr->second;
+		if ( ValueForKey( &g_entities[cent->get_entnum()], "targetname" ) == targetname )
+		{
+			return pyent;
+		}
+	}
+
+	return nullptr;
+}
+#endif
 
 void BSPLoader::set_physics_type( int type )
 {
