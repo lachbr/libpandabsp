@@ -52,7 +52,11 @@ private:
 	INLINE BSPCullAttrib();
 
 PUBLISHED:
+	// Used for applying the attrib to a single static geom.
 	static CPT( RenderAttrib ) make( CPT(GeometricBoundingVolume) geom_bounds, BSPLoader *loader );
+	// Used for applying the attrib to an entire node.
+	static CPT( RenderAttrib ) make( BSPLoader *loader );
+
 	static CPT( RenderAttrib ) make_default();
 
 	INLINE CPT(GeometricBoundingVolume) get_geom_bounds() const;
@@ -73,6 +77,7 @@ public:
 private:
 	CPT( GeometricBoundingVolume ) _geom_bounds;
 	BSPLoader *_loader;
+	bool _on_geom;
 
 PUBLISHED:
 	static int get_class_slot()
@@ -141,6 +146,8 @@ PUBLISHED:
 	LColor get_entity_value_color( int entnum, const char *key, bool scale = true ) const;
 	NodePath get_entity( int entnum ) const;
 	NodePath get_model( int modelnum ) const;
+
+	void cull_node_path_against_leafs( NodePath &np );
 
 	int find_leaf( const NodePath &np );
 	int find_leaf( const LPoint3 &pos );

@@ -40,7 +40,8 @@ int BSPCullAttrib::_attrib_slot;
 INLINE BSPCullAttrib::BSPCullAttrib() :
 	RenderAttrib(),
 	_geom_bounds( nullptr ),
-	_loader( nullptr )
+	_loader( nullptr ),
+	_on_geom( false )
 {
 }
 
@@ -53,14 +54,21 @@ bool BSPCullAttrib::cull_callback( CullTraverser *trav, const CullTraverserData 
 {
 	bca_collector.start();
 
-	// Cull the bounds of the geom against the bboxes of each visible leaf.
+	// Cull the bounds of the geom/node against the bboxes of each visible leaf.
 
 	pvector<PT( BoundingBox )> visible_leafs_bboxs = _loader->get_visible_leaf_bboxs();
+
+	CPT( GeometricBoundingVolume ) bounds = nullptr;
+	if ( _on_geom )
+		bounds = _geom_bounds;
+	else
+		bounds = DCAST( GeometricBoundingVolume, data.node()->get_bounds() );
+
 
 	for ( size_t i = 0; i < visible_leafs_bboxs.size(); i++ )
 	{
 		PT( BoundingBox ) bbox = visible_leafs_bboxs[i];
-		if ( bbox->contains( _geom_bounds ) != BoundingVolume::IF_no_intersection )
+		if ( bbox->contains( bounds ) != BoundingVolume::IF_no_intersection )
 		{
 			bca_collector.stop();
 			return true;
@@ -87,6 +95,15 @@ CPT( RenderAttrib ) BSPCullAttrib::make( CPT( GeometricBoundingVolume ) geom_bou
 	BSPCullAttrib *attrib = new BSPCullAttrib;
 	attrib->_geom_bounds = geom_bounds;
 	attrib->_loader = loader;
+	attrib->_on_geom = true;
+	return return_new( attrib );
+}
+
+CPT( RenderAttrib ) BSPCullAttrib::make( BSPLoader *loader )
+{
+	BSPCullAttrib *attrib = new BSPCullAttrib;
+	attrib->_loader = loader;
+	attrib->_on_geom = false;
 	return return_new( attrib );
 }
 
@@ -104,6 +121,10 @@ int BSPCullAttrib::compare_to_impl( const RenderAttrib *other ) const
 	{
 		return _geom_bounds - ta->_geom_bounds;
 	}
+	else if ( _on_geom != ta->_on_geom )
+	{
+		return _on_geom - ta->_on_geom;
+	}
 	return _loader - ta->_loader;
 }
 
@@ -112,6 +133,7 @@ size_t BSPCullAttrib::get_hash_impl() const
 	size_t hash = 0;
 	hash = pointer_hash::add_hash( hash, _geom_bounds );
 	hash = pointer_hash::add_hash( hash, _loader );
+	hash = int_hash::add_hash( hash, _on_geom );
 	return hash;
 }
 
@@ -254,6 +276,11 @@ PNMImage BSPLoader::lightmap_image_from_face( dface_t *face, FaceLightmapData *l
 	}
 
         return img;
+}
+
+void BSPLoader::cull_node_path_against_leafs( NodePath &np )
+{
+	np.set_attrib( BSPCullAttrib::make( this ), 1 );
 }
 
 int BSPLoader::find_leaf( const NodePath &np )
@@ -1059,6 +1086,12 @@ void BSPLoader::do_optimizations()
 
 			gn->set_geom_state( j, new_state );
 		}
+	}
+
+	NodePathCollection props = _proproot.get_children();
+	for ( int i = 0; i < props.get_num_paths(); i++ )
+	{
+		cull_node_path_against_leafs( props.get_path( i ) );
 	}
 }
 
