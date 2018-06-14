@@ -41,13 +41,14 @@ INLINE BSPCullAttrib::BSPCullAttrib() :
 	RenderAttrib(),
 	_geom_bounds( nullptr ),
 	_loader( nullptr ),
-	_on_geom( false )
+	_on_geom( false ),
+	_part_of_result( false )
 {
 }
 
 bool BSPCullAttrib::has_cull_callback() const
 {
-	return true;
+	return _loader != nullptr ? _loader->_want_visibility : false;
 }
 
 bool BSPCullAttrib::cull_callback( CullTraverser *trav, const CullTraverserData &data ) const
@@ -56,14 +57,13 @@ bool BSPCullAttrib::cull_callback( CullTraverser *trav, const CullTraverserData 
 
 	// Cull the bounds of the geom/node against the bboxes of each visible leaf.
 
-	pvector<PT( BoundingBox )> visible_leafs_bboxs = _loader->get_visible_leaf_bboxs();
+	pvector<PT( BoundingBox )> visible_leafs_bboxs = _loader->get_visible_leaf_bboxs( !_part_of_result );
 
 	CPT( GeometricBoundingVolume ) bounds = nullptr;
 	if ( _on_geom )
 		bounds = _geom_bounds;
 	else
 		bounds = DCAST( GeometricBoundingVolume, data.node()->get_bounds() );
-
 
 	for ( size_t i = 0; i < visible_leafs_bboxs.size(); i++ )
 	{
@@ -90,20 +90,28 @@ INLINE BSPLoader *BSPCullAttrib::get_loader() const
 	return _loader;
 }
 
-CPT( RenderAttrib ) BSPCullAttrib::make( CPT( GeometricBoundingVolume ) geom_bounds, BSPLoader *loader )
+INLINE string BSPCullAttrib::get_material() const
+{
+	return _material;
+}
+
+CPT( RenderAttrib ) BSPCullAttrib::make( CPT( GeometricBoundingVolume ) geom_bounds, const string &face_material, BSPLoader *loader )
 {
 	BSPCullAttrib *attrib = new BSPCullAttrib;
 	attrib->_geom_bounds = geom_bounds;
 	attrib->_loader = loader;
 	attrib->_on_geom = true;
+	attrib->_part_of_result = true;
+	attrib->_material = face_material;
 	return return_new( attrib );
 }
 
-CPT( RenderAttrib ) BSPCullAttrib::make( BSPLoader *loader )
+CPT( RenderAttrib ) BSPCullAttrib::make( BSPLoader *loader, bool part_of_result )
 {
 	BSPCullAttrib *attrib = new BSPCullAttrib;
 	attrib->_loader = loader;
 	attrib->_on_geom = false;
+	attrib->_part_of_result = part_of_result;
 	return return_new( attrib );
 }
 
@@ -125,6 +133,14 @@ int BSPCullAttrib::compare_to_impl( const RenderAttrib *other ) const
 	{
 		return _on_geom - ta->_on_geom;
 	}
+	else if ( _part_of_result != ta->_part_of_result )
+	{
+		return _part_of_result - ta->_part_of_result;
+	}
+	else if ( _material != ta->_material )
+	{
+		return _material.compare( ta->_material );
+	}
 	return _loader - ta->_loader;
 }
 
@@ -134,6 +150,8 @@ size_t BSPCullAttrib::get_hash_impl() const
 	hash = pointer_hash::add_hash( hash, _geom_bounds );
 	hash = pointer_hash::add_hash( hash, _loader );
 	hash = int_hash::add_hash( hash, _on_geom );
+	hash = int_hash::add_hash( hash, _part_of_result );
+	hash = string_hash::add_hash( hash, _material );
 	return hash;
 }
 
@@ -240,7 +258,9 @@ PNMImage BSPLoader::lightmap_image_from_face( dface_t *face, FaceLightmapData *l
 
 	if ( num_luxels <= 0 )
 	{
-		return PNMImage( 16, 16 );
+		PNMImage img( 16, 16 );
+		img.fill( 1.0 );
+		return img;
 	}
 
         PNMImage img( width, height );
@@ -278,9 +298,9 @@ PNMImage BSPLoader::lightmap_image_from_face( dface_t *face, FaceLightmapData *l
         return img;
 }
 
-void BSPLoader::cull_node_path_against_leafs( NodePath &np )
+void BSPLoader::cull_node_path_against_leafs( NodePath &np, bool part_of_result )
 {
-	np.set_attrib( BSPCullAttrib::make( this ), 1 );
+	np.set_attrib( BSPCullAttrib::make( this, part_of_result ), 1 );
 }
 
 int BSPLoader::find_leaf( const NodePath &np )
@@ -442,6 +462,12 @@ void BSPLoader::make_faces()
 
 			PT( Texture ) tex = try_load_texref( texref );
 			string texture_name = texref->name;
+			string material = "default";
+			if ( _materials.find( texture_name ) != _materials.end() )
+			{
+				material = _materials[texture_name];
+			}
+			cout << material << endl;
 			transform( texture_name.begin(), texture_name.end(), texture_name.begin(), tolower );
 
 			if ( texture_name.find( "trigger" ) != string::npos )
@@ -586,6 +612,26 @@ void BSPLoader::make_faces()
 
 			NodePath faceroot = _brushroot.attach_new_node( load_egg_data( data ) );
 			faceroot.wrt_reparent_to( modelroot );
+
+			NodePathCollection gn_npc = faceroot.find_all_matches( "**/+GeomNode" );
+			for ( int i = 0; i < gn_npc.get_num_paths(); i++ )
+			{
+				NodePath gnnp = gn_npc.get_path( i );
+				PT( GeomNode ) gn = DCAST( GeomNode, gnnp.node() );
+				for ( int j = 0; j < gn->get_num_geoms(); j++ )
+				{
+					const Geom *geom = gn->get_geom( j );
+					CPT( GeometricBoundingVolume ) geom_bounds =
+						DCAST( GeometricBoundingVolume, geom->get_bounds() );
+
+					CPT( RenderAttrib ) bca = BSPCullAttrib::make( geom_bounds, material, this );
+					CPT( RenderState ) old_state = gn->get_geom_state( j );
+					CPT( RenderState ) new_state = old_state->add_attrib( bca, 1 );
+
+					gn->set_geom_state( j, new_state );
+				}
+			}
+
 			if ( skip )
 			{
 				faceroot.hide();
@@ -822,8 +868,10 @@ bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
 	return dat != 0;
 }
 
-pvector<PT( BoundingBox )> BSPLoader::get_visible_leaf_bboxs() const
+pvector<PT( BoundingBox )> BSPLoader::get_visible_leaf_bboxs( bool render ) const
 {
+	if ( render )
+		return _visible_leaf_render_bboxes;
 	return _visible_leaf_bboxs;
 }
 
@@ -871,6 +919,7 @@ void BSPLoader::update()
 	{
 		_curr_leaf_idx = curr_leaf_idx;
 		_visible_leaf_bboxs.clear();
+		_visible_leaf_render_bboxes.clear();
 
 		if ( _vis_leafs )
 		{
@@ -891,6 +940,7 @@ void BSPLoader::update()
 					_leaf_visnp[i].set_color_scale( LColor( 0, 0, 1, 1 ), 1 );
 				}
 				_visible_leaf_bboxs.push_back( _leaf_bboxs[i] );
+				_visible_leaf_render_bboxes.push_back( _leaf_render_bboxes[i] );
 			}
 			else
 			{
@@ -913,6 +963,50 @@ AsyncTask::DoneStatus BSPLoader::update_task( GenericAsyncTask *task, void *data
 	}
 
         return AsyncTask::DS_cont;
+}
+
+void BSPLoader::read_materials_file()
+{
+	if ( !_materials_file.exists() )
+	{
+		return;
+	}
+
+	VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
+	string data = vfs->read_file( _materials_file, true );
+
+	string texname = "";
+	string material = "";
+	bool in_texname = true;
+
+	for ( size_t i = 0; i < data.length(); i++ )
+	{
+		char c = data[i];
+		if ( in_texname )
+		{
+			if ( c != ' ' && c != '\t' )
+				texname += c;
+			else
+			{
+				in_texname = false;
+			}
+		}
+		else
+		{
+			if ( c == '\n' || i == data.length() - 1 )
+			{
+				cout << "Texture `" << texname << "` is Material `" << material << "`" << endl;
+				_materials[texname] = material;
+				texname = "";
+				material = "";
+				in_texname = true;
+			}
+			else if ( c != '\r' )
+			{
+				material += c;
+			}
+		}
+	}
 }
 
 bool BSPLoader::read( const Filename &file )
@@ -940,6 +1034,8 @@ bool BSPLoader::read( const Filename &file )
 
 	dtexdata_init();
 
+	read_materials_file();
+
 	_result = NodePath( "maproot" );
 	// Scale down the entire loaded level as a conversion from Hammer units to Panda units.
 	// Hammer units are tiny compared to panda.
@@ -955,6 +1051,7 @@ bool BSPLoader::read( const Filename &file )
 	_face_geomnodes.resize( MAX_MAP_FACES );
 	_leaf_pvs.resize( MAX_MAP_LEAFS );
 	_leaf_bboxs.resize( MAX_MAP_LEAFS );
+	_leaf_render_bboxes.resize( MAX_MAP_LEAFS );
 
 	bspfile_cat.info()
 		<< "Reading " << file.get_fullpath() << "...\n";
@@ -991,7 +1088,12 @@ bool BSPLoader::read( const Filename &file )
 			LVector3( leaf->mins[0], leaf->mins[1], leaf->mins[2] ),
 			LVector3( leaf->maxs[0], leaf->maxs[1], leaf->maxs[2] )
 		);
-
+		// Also create a scaled down bbox of this leaf which would be the size of nodes relative to render.
+		PT( BoundingBox ) render_bbox = new BoundingBox(
+			LVector3( leaf->mins[0] / 16.0, leaf->mins[1] / 16.0, leaf->mins[2] / 16.0 ),
+			LVector3( leaf->maxs[0] / 16.0, leaf->maxs[1] / 16.0, leaf->maxs[2] / 16.0 )
+		);
+		_leaf_render_bboxes[i] = render_bbox;
 		_leaf_bboxs[i] = bbox;
 	}
 
@@ -1075,14 +1177,11 @@ void BSPLoader::do_optimizations()
 			CPT( GeometricBoundingVolume ) geom_bounds =
 				DCAST( GeometricBoundingVolume, geom->get_bounds() );
 			
-			CPT( RenderAttrib ) bca = BSPCullAttrib::make( geom_bounds, this );
+			
 			CPT( RenderState ) old_state = gn->get_geom_state( j );
-			CPT( RenderState ) new_state = old_state;
-			if ( new_state->has_attrib( BSPCullAttrib::get_class_slot() ) )
-			{
-				new_state = new_state->remove_attrib( BSPCullAttrib::get_class_slot() );
-			}
-			new_state = new_state->add_attrib( bca, 1 );
+			CPT( BSPCullAttrib ) old_attrib = DCAST( BSPCullAttrib, old_state->get_attrib( BSPCullAttrib::get_class_slot() ) );
+			CPT( RenderAttrib ) bca = BSPCullAttrib::make( geom_bounds, old_attrib->get_material(), this );
+			CPT( RenderState ) new_state = old_state->add_attrib( bca, 1 );
 
 			gn->set_geom_state( j, new_state );
 		}
@@ -1091,8 +1190,13 @@ void BSPLoader::do_optimizations()
 	NodePathCollection props = _proproot.get_children();
 	for ( int i = 0; i < props.get_num_paths(); i++ )
 	{
-		cull_node_path_against_leafs( props.get_path( i ) );
+		cull_node_path_against_leafs( props.get_path( i ), true );
 	}
+}
+
+void BSPLoader::set_materials_file( const Filename &file )
+{
+	_materials_file = file;
 }
 
 void BSPLoader::cleanup()
@@ -1104,14 +1208,17 @@ void BSPLoader::cleanup()
 	}
 	_model_roots.clear();
 	
+	_materials.clear();
 
 	if ( g_dlightdata != nullptr )
 		dtexdata_free();
 
 	_leaf_pvs.clear();
 	_face_geomnodes.clear();
+	_leaf_render_bboxes.clear();
 	_leaf_bboxs.clear();
 	_visible_leaf_bboxs.clear();
+	_visible_leaf_render_bboxes.clear();
 
 	if ( _update_task != nullptr )
 	{

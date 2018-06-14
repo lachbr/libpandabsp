@@ -1,267 +1,277 @@
-1527260950
+1527779567
 3 3
 3 bsp 4 t5GT 3 bsp 
-49
-51 11 CBaseEntity 0 4 100 24 CBaseEntity::CBaseEntity 0 2 1 2 0
+51
+53 11 CBaseEntity 0 4 104 24 CBaseEntity::CBaseEntity 0 2 1 2 0
 95
 CBaseEntity::CBaseEntity(void);
 inline CBaseEntity::CBaseEntity(CBaseEntity const &) = default;
 
-52 10 get_entnum 0 4 100 23 CBaseEntity::get_entnum 0 1 3 0
+54 10 get_entnum 0 4 104 23 CBaseEntity::get_entnum 0 1 3 0
 40
 int CBaseEntity::get_entnum(void) const;
 
-53 10 get_loader 0 4 100 23 CBaseEntity::get_loader 0 1 4 0
+55 10 get_loader 0 4 104 23 CBaseEntity::get_loader 0 1 4 0
 47
 BSPLoader *CBaseEntity::get_loader(void) const;
 
-54 14 get_class_type 0 4 100 27 CBaseEntity::get_class_type 0 1 5 0
+56 14 get_class_type 0 4 104 27 CBaseEntity::get_class_type 0 1 5 0
 52
 static TypeHandle CBaseEntity::get_class_type(void);
 
-55 12 ~CBaseEntity 0 4 100 25 CBaseEntity::~CBaseEntity 0 0 0
+57 12 ~CBaseEntity 0 4 104 25 CBaseEntity::~CBaseEntity 0 0 0
 32
 CBaseEntity::~CBaseEntity(void);
 
-56 12 CPointEntity 0 4 102 26 CPointEntity::CPointEntity 0 2 6 7 0
+58 12 CPointEntity 0 4 106 26 CPointEntity::CPointEntity 0 2 6 7 0
 100
 CPointEntity::CPointEntity(void);
 inline CPointEntity::CPointEntity(CPointEntity const &) = default;
 
-57 10 get_origin 0 4 102 24 CPointEntity::get_origin 0 1 8 0
+59 10 get_origin 0 4 106 24 CPointEntity::get_origin 0 1 8 0
 45
 LPoint3 CPointEntity::get_origin(void) const;
 
-58 10 get_angles 0 4 102 24 CPointEntity::get_angles 0 1 9 0
+60 10 get_angles 0 4 106 24 CPointEntity::get_angles 0 1 9 0
 46
 LVector3 CPointEntity::get_angles(void) const;
 
-59 14 get_class_type 0 4 102 28 CPointEntity::get_class_type 0 1 10 0
+61 14 get_class_type 0 4 106 28 CPointEntity::get_class_type 0 1 10 0
 53
 static TypeHandle CPointEntity::get_class_type(void);
 
-60 13 ~CPointEntity 0 4 102 27 CPointEntity::~CPointEntity 0 0 0
+62 13 ~CPointEntity 0 4 106 27 CPointEntity::~CPointEntity 0 0 0
 34
 CPointEntity::~CPointEntity(void);
 
-61 12 CBrushEntity 0 4 103 26 CBrushEntity::CBrushEntity 0 2 11 12 0
+63 12 CBrushEntity 0 4 107 26 CBrushEntity::CBrushEntity 0 2 11 12 0
 100
 CBrushEntity::CBrushEntity(void);
 inline CBrushEntity::CBrushEntity(CBrushEntity const &) = default;
 
-62 12 get_modelnum 0 4 103 26 CBrushEntity::get_modelnum 0 1 13 0
+64 12 get_modelnum 0 4 107 26 CBrushEntity::get_modelnum 0 1 13 0
 43
 int CBrushEntity::get_modelnum(void) const;
 
-63 12 get_model_np 0 4 103 26 CBrushEntity::get_model_np 0 1 14 0
+65 12 get_model_np 0 4 107 26 CBrushEntity::get_model_np 0 1 14 0
 48
 NodePath CBrushEntity::get_model_np(void) const;
 
-64 16 get_model_bounds 0 4 103 30 CBrushEntity::get_model_bounds 0 1 15 0
+66 16 get_model_bounds 0 4 107 30 CBrushEntity::get_model_bounds 0 1 15 0
 66
 void CBrushEntity::get_model_bounds(LPoint3 &mins, LPoint3 &maxs);
 
-65 14 get_class_type 0 4 103 28 CBrushEntity::get_class_type 0 1 16 0
+67 14 get_class_type 0 4 107 28 CBrushEntity::get_class_type 0 1 16 0
 53
 static TypeHandle CBrushEntity::get_class_type(void);
 
-66 13 ~CBrushEntity 0 4 103 27 CBrushEntity::~CBrushEntity 0 0 0
+68 13 ~CBrushEntity 0 4 107 27 CBrushEntity::~CBrushEntity 0 0 0
 34
 CBrushEntity::~CBrushEntity(void);
 
-67 4 make 0 4 104 19 BSPCullAttrib::make 0 2 17 18 108
+69 4 make 0 4 108 19 BSPCullAttrib::make 0 2 17 18 108
 // Used for applying the attrib to a single static geom.
 
 // Used for applying the attrib to an entire node.
-210
-static ConstPointerTo< RenderAttrib > BSPCullAttrib::make(ConstPointerTo< GeometricBoundingVolume > geom_bounds, BSPLoader *loader);
-static ConstPointerTo< RenderAttrib > BSPCullAttrib::make(BSPLoader *loader);
+273
+static ConstPointerTo< RenderAttrib > BSPCullAttrib::make(ConstPointerTo< GeometricBoundingVolume > geom_bounds, std::string const &face_material, BSPLoader *loader);
+static ConstPointerTo< RenderAttrib > BSPCullAttrib::make(BSPLoader *loader, bool part_of_result = false);
 
-68 12 make_default 0 4 104 27 BSPCullAttrib::make_default 0 1 19 0
+70 12 make_default 0 4 108 27 BSPCullAttrib::make_default 0 1 19 0
 72
 static ConstPointerTo< RenderAttrib > BSPCullAttrib::make_default(void);
 
-69 15 get_geom_bounds 0 4 104 30 BSPCullAttrib::get_geom_bounds 0 1 20 0
+71 15 get_geom_bounds 0 4 108 30 BSPCullAttrib::get_geom_bounds 0 1 20 0
 92
 inline ConstPointerTo< GeometricBoundingVolume > BSPCullAttrib::get_geom_bounds(void) const;
 
-70 10 get_loader 0 4 104 25 BSPCullAttrib::get_loader 0 1 21 0
+72 10 get_loader 0 4 108 25 BSPCullAttrib::get_loader 0 1 21 0
 56
 inline BSPLoader *BSPCullAttrib::get_loader(void) const;
 
-71 9 BSPLoader 0 4 108 20 BSPLoader::BSPLoader 0 2 24 25 0
+73 12 get_material 0 4 108 27 BSPCullAttrib::get_material 0 1 22 0
+59
+inline std::string BSPCullAttrib::get_material(void) const;
+
+74 9 BSPLoader 0 4 112 20 BSPLoader::BSPLoader 0 2 25 26 0
 85
 BSPLoader::BSPLoader(void);
 inline BSPLoader::BSPLoader(BSPLoader const &) = default;
 
-72 4 read 0 4 108 15 BSPLoader::read 0 1 26 0
+75 4 read 0 4 112 15 BSPLoader::read 0 1 27 0
 43
 bool BSPLoader::read(Filename const &file);
 
-73 16 do_optimizations 0 4 108 27 BSPLoader::do_optimizations 0 1 27 0
+76 16 do_optimizations 0 4 112 27 BSPLoader::do_optimizations 0 1 28 0
 39
 void BSPLoader::do_optimizations(void);
 
-74 9 set_gamma 0 4 108 20 BSPLoader::set_gamma 0 1 28 0
+77 9 set_gamma 0 4 112 20 BSPLoader::set_gamma 0 1 29 0
 65
 void BSPLoader::set_gamma(PN_stdfloat gamma, int overbright = 1);
 
-75 7 set_gsg 0 4 108 18 BSPLoader::set_gsg 0 1 29 0
+78 7 set_gsg 0 4 112 18 BSPLoader::set_gsg 0 1 30 0
 52
 void BSPLoader::set_gsg(GraphicsStateGuardian *gsg);
 
-76 10 set_camera 0 4 108 21 BSPLoader::set_camera 0 1 30 0
+79 10 set_camera 0 4 112 21 BSPLoader::set_camera 0 1 31 0
 51
 void BSPLoader::set_camera(NodePath const &camera);
 
-77 10 set_render 0 4 108 21 BSPLoader::set_render 0 1 31 0
+80 10 set_render 0 4 112 21 BSPLoader::set_render 0 1 32 0
 51
 void BSPLoader::set_render(NodePath const &render);
 
-78 19 set_want_visibility 0 4 108 30 BSPLoader::set_want_visibility 0 1 32 0
+81 19 set_want_visibility 0 4 112 30 BSPLoader::set_want_visibility 0 1 33 0
 47
 void BSPLoader::set_want_visibility(bool flag);
 
-79 18 set_want_lightmaps 0 4 108 29 BSPLoader::set_want_lightmaps 0 1 33 0
+82 18 set_want_lightmaps 0 4 112 29 BSPLoader::set_want_lightmaps 0 1 34 0
 46
 void BSPLoader::set_want_lightmaps(bool flag);
 
-80 16 set_physics_type 0 4 108 27 BSPLoader::set_physics_type 0 1 34 0
+83 16 set_physics_type 0 4 112 27 BSPLoader::set_physics_type 0 1 35 0
 43
 void BSPLoader::set_physics_type(int type);
 
-81 19 set_visualize_leafs 0 4 108 30 BSPLoader::set_visualize_leafs 0 1 35 0
+84 19 set_visualize_leafs 0 4 112 30 BSPLoader::set_visualize_leafs 0 1 36 0
 47
 void BSPLoader::set_visualize_leafs(bool flag);
 
-82 20 link_entity_to_class 0 4 108 31 BSPLoader::link_entity_to_class 0 1 36 0
+85 18 set_materials_file 0 4 112 29 BSPLoader::set_materials_file 0 1 37 0
+57
+void BSPLoader::set_materials_file(Filename const &file);
+
+86 20 link_entity_to_class 0 4 112 31 BSPLoader::link_entity_to_class 0 1 38 0
 85
 void BSPLoader::link_entity_to_class(std::string const &entname, PyTypeObject *type);
 
-83 28 get_py_entity_by_target_name 0 4 108 39 BSPLoader::get_py_entity_by_target_name 0 1 37 0
+87 28 get_py_entity_by_target_name 0 4 112 39 BSPLoader::get_py_entity_by_target_name 0 1 39 0
 87
 PyObject *BSPLoader::get_py_entity_by_target_name(std::string const &targetname) const;
 
-84 16 get_num_entities 0 4 108 27 BSPLoader::get_num_entities 0 1 38 0
+88 16 get_num_entities 0 4 112 27 BSPLoader::get_num_entities 0 1 40 0
 44
 int BSPLoader::get_num_entities(void) const;
 
-85 16 get_entity_value 0 4 108 27 BSPLoader::get_entity_value 0 1 39 0
+89 16 get_entity_value 0 4 112 27 BSPLoader::get_entity_value 0 1 41 0
 75
 std::string BSPLoader::get_entity_value(int entnum, char const *key) const;
 
-86 22 get_entity_value_float 0 4 108 33 BSPLoader::get_entity_value_float 0 1 40 0
+90 22 get_entity_value_float 0 4 112 33 BSPLoader::get_entity_value_float 0 1 42 0
 75
 float BSPLoader::get_entity_value_float(int entnum, char const *key) const;
 
-87 20 get_entity_value_int 0 4 108 31 BSPLoader::get_entity_value_int 0 1 41 0
+91 20 get_entity_value_int 0 4 112 31 BSPLoader::get_entity_value_int 0 1 43 0
 71
 int BSPLoader::get_entity_value_int(int entnum, char const *key) const;
 
-88 23 get_entity_value_vector 0 4 108 34 BSPLoader::get_entity_value_vector 0 1 42 0
+92 23 get_entity_value_vector 0 4 112 34 BSPLoader::get_entity_value_vector 0 1 44 0
 79
 LVector3 BSPLoader::get_entity_value_vector(int entnum, char const *key) const;
 
-89 22 get_entity_value_color 0 4 108 33 BSPLoader::get_entity_value_color 0 1 43 0
+93 22 get_entity_value_color 0 4 112 33 BSPLoader::get_entity_value_color 0 1 45 0
 95
 LColor BSPLoader::get_entity_value_color(int entnum, char const *key, bool scale = true) const;
 
-90 10 get_entity 0 4 108 21 BSPLoader::get_entity 0 1 44 0
+94 10 get_entity 0 4 112 21 BSPLoader::get_entity 0 1 46 0
 49
 NodePath BSPLoader::get_entity(int entnum) const;
 
-91 9 get_model 0 4 108 20 BSPLoader::get_model 0 1 45 0
+95 9 get_model 0 4 112 20 BSPLoader::get_model 0 1 47 0
 50
 NodePath BSPLoader::get_model(int modelnum) const;
 
-92 28 cull_node_path_against_leafs 0 4 108 39 BSPLoader::cull_node_path_against_leafs 0 1 46 0
-59
-void BSPLoader::cull_node_path_against_leafs(NodePath &np);
+96 28 cull_node_path_against_leafs 0 4 112 39 BSPLoader::cull_node_path_against_leafs 0 1 48 0
+88
+void BSPLoader::cull_node_path_against_leafs(NodePath &np, bool part_of_result = false);
 
-93 9 find_leaf 0 4 108 20 BSPLoader::find_leaf 0 2 47 48 0
+97 9 find_leaf 0 4 112 20 BSPLoader::find_leaf 0 2 49 50 0
 91
 int BSPLoader::find_leaf(NodePath const &np);
 int BSPLoader::find_leaf(LPoint3 const &pos);
 
-94 7 cleanup 0 4 108 18 BSPLoader::cleanup 0 1 49 0
+98 7 cleanup 0 4 112 18 BSPLoader::cleanup 0 1 51 0
 30
 void BSPLoader::cleanup(void);
 
-95 10 get_result 0 4 108 21 BSPLoader::get_result 0 1 50 0
+99 10 get_result 0 4 112 21 BSPLoader::get_result 0 1 52 0
 43
 NodePath BSPLoader::get_result(void) const;
 
-96 10 ~BSPLoader 0 4 108 21 BSPLoader::~BSPLoader 0 0 0
+100 10 ~BSPLoader 0 4 112 21 BSPLoader::~BSPLoader 0 0 0
 28
 BSPLoader::~BSPLoader(void);
 
-97 14 get_class_slot 0 4 104 29 BSPCullAttrib::get_class_slot 0 1 22 0
+101 14 get_class_slot 0 4 108 29 BSPCullAttrib::get_class_slot 0 1 23 0
 47
 static int BSPCullAttrib::get_class_slot(void);
 
-98 14 get_class_type 0 4 104 29 BSPCullAttrib::get_class_type 0 1 23 0
+102 14 get_class_type 0 4 108 29 BSPCullAttrib::get_class_type 0 1 24 0
 54
 static TypeHandle BSPCullAttrib::get_class_type(void);
 
-99 14 ~BSPCullAttrib 0 4 104 29 BSPCullAttrib::~BSPCullAttrib 0 0 0
+103 14 ~BSPCullAttrib 0 4 108 29 BSPCullAttrib::~BSPCullAttrib 0 0 0
 36
 BSPCullAttrib::~BSPCullAttrib(void);
 
-50
-1 0 0 7 3 111 55 0 0 0 
-2 0 0 7 3 111 55 0 0 1 6 param0 0 112  
-3 0 0 6 4 110 0 0 0 1 4 this 3 112  
-4 0 0 6 5 107 0 0 0 1 4 this 3 112  
-5 0 0 7 6 115 0 0 0 0 
-6 0 0 7 9 116 60 0 0 0 
-7 0 0 7 9 116 60 0 0 1 6 param0 0 117  
-8 0 0 7 10 121 0 0 0 1 4 this 3 117  
-9 0 0 7 11 124 0 0 0 1 4 this 3 117  
-10 0 0 7 12 115 0 0 0 0 
-11 0 0 7 15 125 66 0 0 0 
-12 0 0 7 15 125 66 0 0 1 6 param0 0 126  
-13 0 0 6 16 110 0 0 0 1 4 this 3 126  
-14 0 0 7 17 129 0 0 0 1 4 this 3 126  
-15 0 0 4 18 130 0 0 0 3 4 this 3 125  4 mins 1 121  4 maxs 1 121  
-16 0 0 7 19 115 0 0 0 0 
-17 0 0 7 23 132 0 0 50 // Used for applying the attrib to an entire node. 1 6 loader 1 107  
-18 0 0 7 23 132 0 0 56 // Used for applying the attrib to a single static geom. 2 11 geom_bounds 1 133  6 loader 1 107  
-19 0 0 7 24 132 0 0 0 0 
-20 0 0 7 25 133 0 0 0 1 4 this 3 136  
-21 0 0 6 26 107 0 0 0 1 4 this 3 136  
-22 0 0 6 59 110 0 0 0 0 
-23 0 0 7 62 115 0 0 0 0 
-24 0 0 7 32 107 96 0 0 0 
-25 0 0 7 32 107 96 0 0 1 6 param0 0 138  
-26 0 0 6 33 143 0 0 0 2 4 this 3 107  4 file 1 140  
-27 0 0 4 34 130 0 0 0 1 4 this 3 107  
-28 0 0 4 35 130 0 0 0 3 4 this 3 107  5 gamma 1 144  10 overbright 1 110  
-29 0 0 4 36 130 0 0 0 2 4 this 3 107  3 gsg 1 146  
-30 0 0 4 37 130 0 0 0 2 4 this 3 107  6 camera 1 148  
-31 0 0 4 38 130 0 0 0 2 4 this 3 107  6 render 1 148  
-32 0 0 4 39 130 0 0 0 2 4 this 3 107  4 flag 1 143  
-33 0 0 4 40 130 0 0 0 2 4 this 3 107  4 flag 1 143  
-34 0 0 4 41 130 0 0 0 2 4 this 3 107  4 type 1 110  
-35 0 0 4 42 130 0 0 0 2 4 this 3 107  4 flag 1 143  
-36 0 0 4 43 130 0 0 0 3 4 this 3 107  7 entname 1 150  4 type 1 151  
-37 0 0 6 44 154 0 0 0 2 4 this 3 138  10 targetname 1 150  
-38 0 0 6 45 110 0 0 0 1 4 this 3 138  
-39 0 0 6 46 150 0 0 0 3 4 this 3 138  6 entnum 1 110  3 key 1 150  
-40 0 0 6 47 145 0 0 0 3 4 this 3 138  6 entnum 1 110  3 key 1 150  
-41 0 0 6 48 110 0 0 0 3 4 this 3 138  6 entnum 1 110  3 key 1 150  
-42 0 0 7 49 124 0 0 0 3 4 this 3 138  6 entnum 1 110  3 key 1 150  
-43 0 0 7 50 160 0 0 0 4 4 this 3 138  6 entnum 1 110  3 key 1 150  5 scale 1 143  
-44 0 0 7 51 129 0 0 0 2 4 this 3 138  6 entnum 1 110  
-45 0 0 7 52 129 0 0 0 2 4 this 3 138  8 modelnum 1 110  
-46 0 0 4 53 130 0 0 0 2 4 this 3 107  2 np 1 129  
-47 0 0 6 54 110 0 0 0 2 4 this 3 107  3 pos 1 161  
-48 0 0 6 54 110 0 0 0 2 4 this 3 107  2 np 1 148  
-49 0 0 4 55 130 0 0 0 1 4 this 3 107  
-50 0 0 7 56 129 0 0 0 1 4 this 3 138  
+52
+1 0 0 7 3 115 57 0 0 0 
+2 0 0 7 3 115 57 0 0 1 6 param0 0 116  
+3 0 0 6 4 114 0 0 0 1 4 this 3 116  
+4 0 0 6 5 111 0 0 0 1 4 this 3 116  
+5 0 0 7 6 119 0 0 0 0 
+6 0 0 7 9 120 62 0 0 0 
+7 0 0 7 9 120 62 0 0 1 6 param0 0 121  
+8 0 0 7 10 125 0 0 0 1 4 this 3 121  
+9 0 0 7 11 128 0 0 0 1 4 this 3 121  
+10 0 0 7 12 119 0 0 0 0 
+11 0 0 7 15 129 68 0 0 0 
+12 0 0 7 15 129 68 0 0 1 6 param0 0 130  
+13 0 0 6 16 114 0 0 0 1 4 this 3 130  
+14 0 0 7 17 133 0 0 0 1 4 this 3 130  
+15 0 0 4 18 134 0 0 0 3 4 this 3 129  4 mins 1 125  4 maxs 1 125  
+16 0 0 7 19 119 0 0 0 0 
+17 0 0 7 23 137 0 0 50 // Used for applying the attrib to an entire node. 2 6 loader 1 111  14 part_of_result 1 136  
+18 0 0 7 23 137 0 0 56 // Used for applying the attrib to a single static geom. 3 11 geom_bounds 1 138  13 face_material 1 141  6 loader 1 111  
+19 0 0 7 24 137 0 0 0 0 
+20 0 0 7 25 138 0 0 0 1 4 this 3 142  
+21 0 0 6 26 111 0 0 0 1 4 this 3 142  
+22 0 0 6 27 141 0 0 0 1 4 this 3 142  
+23 0 0 6 61 114 0 0 0 0 
+24 0 0 7 64 119 0 0 0 0 
+25 0 0 7 33 111 100 0 0 0 
+26 0 0 7 33 111 100 0 0 1 6 param0 0 144  
+27 0 0 6 34 136 0 0 0 2 4 this 3 111  4 file 1 146  
+28 0 0 4 35 134 0 0 0 1 4 this 3 111  
+29 0 0 4 36 134 0 0 0 3 4 this 3 111  5 gamma 1 149  10 overbright 1 114  
+30 0 0 4 37 134 0 0 0 2 4 this 3 111  3 gsg 1 151  
+31 0 0 4 38 134 0 0 0 2 4 this 3 111  6 camera 1 153  
+32 0 0 4 39 134 0 0 0 2 4 this 3 111  6 render 1 153  
+33 0 0 4 40 134 0 0 0 2 4 this 3 111  4 flag 1 136  
+34 0 0 4 41 134 0 0 0 2 4 this 3 111  4 flag 1 136  
+35 0 0 4 42 134 0 0 0 2 4 this 3 111  4 type 1 114  
+36 0 0 4 43 134 0 0 0 2 4 this 3 111  4 flag 1 136  
+37 0 0 4 44 134 0 0 0 2 4 this 3 111  4 file 1 146  
+38 0 0 4 45 134 0 0 0 3 4 this 3 111  7 entname 1 141  4 type 1 155  
+39 0 0 6 46 158 0 0 0 2 4 this 3 144  10 targetname 1 141  
+40 0 0 6 47 114 0 0 0 1 4 this 3 144  
+41 0 0 6 48 141 0 0 0 3 4 this 3 144  6 entnum 1 114  3 key 1 141  
+42 0 0 6 49 150 0 0 0 3 4 this 3 144  6 entnum 1 114  3 key 1 141  
+43 0 0 6 50 114 0 0 0 3 4 this 3 144  6 entnum 1 114  3 key 1 141  
+44 0 0 7 51 128 0 0 0 3 4 this 3 144  6 entnum 1 114  3 key 1 141  
+45 0 0 7 52 164 0 0 0 4 4 this 3 144  6 entnum 1 114  3 key 1 141  5 scale 1 136  
+46 0 0 7 53 133 0 0 0 2 4 this 3 144  6 entnum 1 114  
+47 0 0 7 54 133 0 0 0 2 4 this 3 144  8 modelnum 1 114  
+48 0 0 4 55 134 0 0 0 3 4 this 3 111  2 np 1 133  14 part_of_result 1 136  
+49 0 0 6 56 114 0 0 0 2 4 this 3 111  3 pos 1 165  
+50 0 0 6 56 114 0 0 0 2 4 this 3 111  2 np 1 153  
+51 0 0 4 57 134 0 0 0 1 4 this 3 111  
+52 0 0 7 58 133 0 0 0 1 4 this 3 144  
 63
-100 11 CBaseEntity 0 141313 11 CBaseEntity 11 CBaseEntity 0 0 0 1 51 55 0 3 52 53 54 0 0 1 0 101 0 0 0 0 0
+104 11 CBaseEntity 0 141313 11 CBaseEntity 11 CBaseEntity 0 0 0 1 53 57 0 3 54 55 56 0 0 1 0 105 0 0 0 0 0
 
-101 19 TypedReferenceCount 0 2048 19 TypedReferenceCount 19 TypedReferenceCount 0 0 0 0 0 0 0 0 0 0 0 0 410
+105 19 TypedReferenceCount 0 2048 19 TypedReferenceCount 19 TypedReferenceCount 0 0 0 0 0 0 0 0 0 0 0 0 410
 /**
  * A base class for things which need to inherit from both TypedObject and
  * from ReferenceCount.  It's convenient to define this intermediate base
@@ -272,13 +282,13 @@ BSPCullAttrib::~BSPCullAttrib(void);
  * See also TypedObject for detailed instructions.
  */
 
-102 12 CPointEntity 0 141313 12 CPointEntity 12 CPointEntity 0 0 0 1 56 60 0 3 57 58 59 0 0 1 0 100 0 0 0 0 0
+106 12 CPointEntity 0 141313 12 CPointEntity 12 CPointEntity 0 0 0 1 58 62 0 3 59 60 61 0 0 1 0 104 0 0 0 0 0
 
-103 12 CBrushEntity 0 141313 12 CBrushEntity 12 CBrushEntity 0 0 0 1 61 66 0 4 62 63 64 65 0 0 1 0 100 0 0 0 0 0
+107 12 CBrushEntity 0 141313 12 CBrushEntity 12 CBrushEntity 0 0 0 1 63 68 0 4 64 65 66 67 0 0 1 0 104 0 0 0 0 0
 
-104 13 BSPCullAttrib 0 141313 13 BSPCullAttrib 13 BSPCullAttrib 0 0 0 0 99 3 163 164 165 6 67 68 69 70 97 98 0 0 1 0 105 0 0 0 0 0
+108 13 BSPCullAttrib 0 141313 13 BSPCullAttrib 13 BSPCullAttrib 0 0 0 0 103 3 167 168 169 7 69 70 71 72 73 101 102 0 0 1 0 109 0 0 0 0 0
 
-105 12 RenderAttrib 0 2048 12 RenderAttrib 12 RenderAttrib 0 0 0 0 0 0 0 0 0 0 0 0 1074
+109 12 RenderAttrib 0 2048 12 RenderAttrib 12 RenderAttrib 0 0 0 0 0 0 0 0 0 0 0 0 1074
 /**
  * This is the base class for a number of render attributes (other than
  * transform) that may be set on scene graph nodes to control the appearance
@@ -299,28 +309,28 @@ BSPCullAttrib::~BSPCullAttrib(void);
  * if you wish to change its properties; instead, create a new one.
  */
 
-106 41 ConstPointerTo< GeometricBoundingVolume > 0 2048 41 ConstPointerTo< GeometricBoundingVolume > 41 ConstPointerTo< GeometricBoundingVolume > 0 0 0 0 0 0 0 0 0 0 0 0 0
+110 41 ConstPointerTo< GeometricBoundingVolume > 0 2048 41 ConstPointerTo< GeometricBoundingVolume > 41 ConstPointerTo< GeometricBoundingVolume > 0 0 0 0 0 0 0 0 0 0 0 0 0
 
-107 11 BSPLoader * 0 8576 11 BSPLoader * 11 BSPLoader * 0 0 108 0 0 0 0 0 0 0 0 0 0
+111 11 BSPLoader * 0 8576 11 BSPLoader * 11 BSPLoader * 0 0 112 0 0 0 0 0 0 0 0 0 0
 
-108 9 BSPLoader 0 141313 9 BSPLoader 9 BSPLoader 0 0 0 1 71 96 0 24 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 0 0 0 0 1 109 0
+112 9 BSPLoader 0 141313 9 BSPLoader 9 BSPLoader 0 0 0 1 74 100 0 25 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 0 0 0 0 1 113 0
 
-109 11 PhysicsType 0 794624 22 BSPLoader::PhysicsType 22 BSPLoader::PhysicsType 108 0 0 0 0 0 0 0 0 0 5 7 PT_none 18 BSPLoader::PT_none 0
+113 11 PhysicsType 0 794624 22 BSPLoader::PhysicsType 22 BSPLoader::PhysicsType 112 0 0 0 0 0 0 0 0 0 5 7 PT_none 18 BSPLoader::PT_none 0
 0 8 PT_panda 19 BSPLoader::PT_panda 0
 1 9 PT_bullet 20 BSPLoader::PT_bullet 0
 2 6 PT_ode 17 BSPLoader::PT_ode 0
 3 8 PT_physx 19 BSPLoader::PT_physx 0
 4 0 0
 
-110 3 int 0 8194 3 int 3 int 0 1 0 0 0 0 0 0 0 0 0 0 0
+114 3 int 0 8194 3 int 3 int 0 1 0 0 0 0 0 0 0 0 0 0 0
 
-111 13 CBaseEntity * 0 8576 13 CBaseEntity * 13 CBaseEntity * 0 0 100 0 0 0 0 0 0 0 0 0 0
+115 13 CBaseEntity * 0 8576 13 CBaseEntity * 13 CBaseEntity * 0 0 104 0 0 0 0 0 0 0 0 0 0
 
-112 19 CBaseEntity const * 0 8576 19 CBaseEntity const * 19 CBaseEntity const * 0 0 113 0 0 0 0 0 0 0 0 0 0
+116 19 CBaseEntity const * 0 8576 19 CBaseEntity const * 19 CBaseEntity const * 0 0 117 0 0 0 0 0 0 0 0 0 0
 
-113 17 CBaseEntity const 0 8832 17 CBaseEntity const 17 CBaseEntity const 0 0 100 0 0 0 0 0 0 0 0 0 0
+117 17 CBaseEntity const 0 8832 17 CBaseEntity const 17 CBaseEntity const 0 0 104 0 0 0 0 0 0 0 0 0 0
 
-114 10 TypeHandle 0 16779264 10 TypeHandle 10 TypeHandle 0 0 0 0 0 0 0 0 0 0 0 0 732
+118 10 TypeHandle 0 16779264 10 TypeHandle 10 TypeHandle 0 0 0 0 0 0 0 0 0 0 0 0 732
 /**
  * TypeHandle is the identifier used to differentiate C++ class types.  Any
  * C++ classes that inherit from some base class, and must be differentiated
@@ -335,17 +345,17 @@ BSPCullAttrib::~BSPCullAttrib(void);
  * retrieved for run-time display.
  */
 
-115 12 TypeHandle * 0 8576 12 TypeHandle * 12 TypeHandle * 0 0 114 0 0 0 0 0 0 0 0 0 0
+119 12 TypeHandle * 0 8576 12 TypeHandle * 12 TypeHandle * 0 0 118 0 0 0 0 0 0 0 0 0 0
 
-116 14 CPointEntity * 0 8576 14 CPointEntity * 14 CPointEntity * 0 0 102 0 0 0 0 0 0 0 0 0 0
+120 14 CPointEntity * 0 8576 14 CPointEntity * 14 CPointEntity * 0 0 106 0 0 0 0 0 0 0 0 0 0
 
-117 20 CPointEntity const * 0 8576 20 CPointEntity const * 20 CPointEntity const * 0 0 118 0 0 0 0 0 0 0 0 0 0
+121 20 CPointEntity const * 0 8576 20 CPointEntity const * 20 CPointEntity const * 0 0 122 0 0 0 0 0 0 0 0 0 0
 
-118 18 CPointEntity const 0 8832 18 CPointEntity const 18 CPointEntity const 0 0 102 0 0 0 0 0 0 0 0 0 0
+122 18 CPointEntity const 0 8832 18 CPointEntity const 18 CPointEntity const 0 0 106 0 0 0 0 0 0 0 0 0 0
 
-119 7 LPoint3 0 2105344 7 LPoint3 7 LPoint3 0 0 120 0 0 0 0 0 0 0 0 0 0
+123 7 LPoint3 0 2105344 7 LPoint3 7 LPoint3 0 0 124 0 0 0 0 0 0 0 0 0 0
 
-120 8 LPoint3f 0 2048 8 LPoint3f 8 LPoint3f 0 0 0 0 0 0 0 0 0 0 0 0 337
+124 8 LPoint3f 0 2048 8 LPoint3f 8 LPoint3f 0 0 0 0 0 0 0 0 0 0 0 0 337
 /**
  * This is a three-component point in space (as opposed to a three-component
  * vector, which represents a direction and a distance).  Some of the methods
@@ -354,11 +364,11 @@ BSPCullAttrib::~BSPCullAttrib(void);
  * point yields a point.
  */
 
-121 9 LPoint3 * 0 8576 9 LPoint3 * 9 LPoint3 * 0 0 119 0 0 0 0 0 0 0 0 0 0
+125 9 LPoint3 * 0 8576 9 LPoint3 * 9 LPoint3 * 0 0 123 0 0 0 0 0 0 0 0 0 0
 
-122 8 LVector3 0 2105344 8 LVector3 8 LVector3 0 0 123 0 0 0 0 0 0 0 0 0 0
+126 8 LVector3 0 2105344 8 LVector3 8 LVector3 0 0 127 0 0 0 0 0 0 0 0 0 0
 
-123 9 LVector3f 0 2048 9 LVector3f 9 LVector3f 0 0 0 0 0 0 0 0 0 0 0 0 338
+127 9 LVector3f 0 2048 9 LVector3f 9 LVector3f 0 0 0 0 0 0 0 0 0 0 0 0 338
 /**
  * This is a three-component vector distance (as opposed to a three-component
  * point, which represents a particular point in space).  Some of the methods
@@ -367,15 +377,15 @@ BSPCullAttrib::~BSPCullAttrib(void);
  * point yields a point.
  */
 
-124 10 LVector3 * 0 8576 10 LVector3 * 10 LVector3 * 0 0 122 0 0 0 0 0 0 0 0 0 0
+128 10 LVector3 * 0 8576 10 LVector3 * 10 LVector3 * 0 0 126 0 0 0 0 0 0 0 0 0 0
 
-125 14 CBrushEntity * 0 8576 14 CBrushEntity * 14 CBrushEntity * 0 0 103 0 0 0 0 0 0 0 0 0 0
+129 14 CBrushEntity * 0 8576 14 CBrushEntity * 14 CBrushEntity * 0 0 107 0 0 0 0 0 0 0 0 0 0
 
-126 20 CBrushEntity const * 0 8576 20 CBrushEntity const * 20 CBrushEntity const * 0 0 127 0 0 0 0 0 0 0 0 0 0
+130 20 CBrushEntity const * 0 8576 20 CBrushEntity const * 20 CBrushEntity const * 0 0 131 0 0 0 0 0 0 0 0 0 0
 
-127 18 CBrushEntity const 0 8832 18 CBrushEntity const 18 CBrushEntity const 0 0 103 0 0 0 0 0 0 0 0 0 0
+131 18 CBrushEntity const 0 8832 18 CBrushEntity const 18 CBrushEntity const 0 0 107 0 0 0 0 0 0 0 0 0 0
 
-128 8 NodePath 0 2048 8 NodePath 8 NodePath 0 0 0 0 0 0 0 0 0 0 0 0 762
+132 8 NodePath 0 2048 8 NodePath 8 NodePath 0 0 0 0 0 0 0 0 0 0 0 0 762
 /**
  * NodePath is the fundamental system for disambiguating instances, and also
  * provides a higher-level interface for manipulating the scene graph.
@@ -392,38 +402,42 @@ BSPCullAttrib::~BSPCullAttrib(void);
  * will automatically be updated to reflect the changes.
  */
 
-129 10 NodePath * 0 8576 10 NodePath * 10 NodePath * 0 0 128 0 0 0 0 0 0 0 0 0 0
+133 10 NodePath * 0 8576 10 NodePath * 10 NodePath * 0 0 132 0 0 0 0 0 0 0 0 0 0
 
-130 4 void 0 8194 4 void 4 void 0 6 0 0 0 0 0 0 0 0 0 0 0
+134 4 void 0 8194 4 void 4 void 0 6 0 0 0 0 0 0 0 0 0 0 0
 
-131 18 RenderAttrib const 0 8832 18 RenderAttrib const 18 RenderAttrib const 0 0 105 0 0 0 0 0 0 0 0 0 0
+135 18 RenderAttrib const 0 8832 18 RenderAttrib const 18 RenderAttrib const 0 0 109 0 0 0 0 0 0 0 0 0 0
 
-132 20 RenderAttrib const * 0 8576 20 RenderAttrib const * 20 RenderAttrib const * 0 0 131 0 0 0 0 0 0 0 0 0 0
+136 4 bool 0 8194 4 bool 4 bool 0 4 0 0 0 0 0 0 0 0 0 0 0
 
-133 31 GeometricBoundingVolume const * 0 8576 31 GeometricBoundingVolume const * 31 GeometricBoundingVolume const * 0 0 134 0 0 0 0 0 0 0 0 0 0
+137 20 RenderAttrib const * 0 8576 20 RenderAttrib const * 20 RenderAttrib const * 0 0 135 0 0 0 0 0 0 0 0 0 0
 
-134 29 GeometricBoundingVolume const 0 8832 29 GeometricBoundingVolume const 29 GeometricBoundingVolume const 0 0 135 0 0 0 0 0 0 0 0 0 0
+138 31 GeometricBoundingVolume const * 0 8576 31 GeometricBoundingVolume const * 31 GeometricBoundingVolume const * 0 0 139 0 0 0 0 0 0 0 0 0 0
 
-135 23 GeometricBoundingVolume 0 2048 23 GeometricBoundingVolume 23 GeometricBoundingVolume 0 0 0 0 0 0 0 0 0 0 0 0 167
+139 29 GeometricBoundingVolume const 0 8832 29 GeometricBoundingVolume const 29 GeometricBoundingVolume const 0 0 140 0 0 0 0 0 0 0 0 0 0
+
+140 23 GeometricBoundingVolume 0 2048 23 GeometricBoundingVolume 23 GeometricBoundingVolume 0 0 0 0 0 0 0 0 0 0 0 0 167
 /**
  * This is another abstract class, for a general class of bounding volumes
  * that actually enclose points in 3-d space, such as BSP's and bounding
  * spheres.
  */
 
-136 21 BSPCullAttrib const * 0 8576 21 BSPCullAttrib const * 21 BSPCullAttrib const * 0 0 137 0 0 0 0 0 0 0 0 0 0
+141 13 atomic string 0 2 13 atomic string 13 atomic string 0 7 0 0 0 0 0 0 0 0 0 0 0
 
-137 19 BSPCullAttrib const 0 8832 19 BSPCullAttrib const 19 BSPCullAttrib const 0 0 104 0 0 0 0 0 0 0 0 0 0
+142 21 BSPCullAttrib const * 0 8576 21 BSPCullAttrib const * 21 BSPCullAttrib const * 0 0 143 0 0 0 0 0 0 0 0 0 0
 
-138 17 BSPLoader const * 0 8576 17 BSPLoader const * 17 BSPLoader const * 0 0 139 0 0 0 0 0 0 0 0 0 0
+143 19 BSPCullAttrib const 0 8832 19 BSPCullAttrib const 19 BSPCullAttrib const 0 0 108 0 0 0 0 0 0 0 0 0 0
 
-139 15 BSPLoader const 0 8832 15 BSPLoader const 15 BSPLoader const 0 0 108 0 0 0 0 0 0 0 0 0 0
+144 17 BSPLoader const * 0 8576 17 BSPLoader const * 17 BSPLoader const * 0 0 145 0 0 0 0 0 0 0 0 0 0
 
-140 16 Filename const * 0 8576 16 Filename const * 16 Filename const * 0 0 141 0 0 0 0 0 0 0 0 0 0
+145 15 BSPLoader const 0 8832 15 BSPLoader const 15 BSPLoader const 0 0 112 0 0 0 0 0 0 0 0 0 0
 
-141 14 Filename const 0 8832 14 Filename const 14 Filename const 0 0 142 0 0 0 0 0 0 0 0 0 0
+146 16 Filename const * 0 8576 16 Filename const * 16 Filename const * 0 0 147 0 0 0 0 0 0 0 0 0 0
 
-142 8 Filename 0 2048 8 Filename 8 Filename 0 0 0 0 0 0 0 0 0 0 0 0 550
+147 14 Filename const 0 8832 14 Filename const 14 Filename const 0 0 148 0 0 0 0 0 0 0 0 0 0
+
+148 8 Filename 0 2048 8 Filename 8 Filename 0 0 0 0 0 0 0 0 0 0 0 0 550
 /**
  * The name of a file, such as a texture file or an Egg file.  Stores the full
  * pathname, and includes functions for extracting out the directory prefix
@@ -436,15 +450,13 @@ BSPCullAttrib::~BSPCullAttrib(void);
  * open an fstream for reading or writing.
  */
 
-143 4 bool 0 8194 4 bool 4 bool 0 4 0 0 0 0 0 0 0 0 0 0 0
+149 11 PN_stdfloat 0 2105344 11 PN_stdfloat 11 PN_stdfloat 0 0 150 0 0 0 0 0 0 0 0 0 0
 
-144 11 PN_stdfloat 0 2105344 11 PN_stdfloat 11 PN_stdfloat 0 0 145 0 0 0 0 0 0 0 0 0 0
+150 5 float 0 8194 5 float 5 float 0 2 0 0 0 0 0 0 0 0 0 0 0
 
-145 5 float 0 8194 5 float 5 float 0 2 0 0 0 0 0 0 0 0 0 0 0
+151 23 GraphicsStateGuardian * 0 8576 23 GraphicsStateGuardian * 23 GraphicsStateGuardian * 0 0 152 0 0 0 0 0 0 0 0 0 0
 
-146 23 GraphicsStateGuardian * 0 8576 23 GraphicsStateGuardian * 23 GraphicsStateGuardian * 0 0 147 0 0 0 0 0 0 0 0 0 0
-
-147 21 GraphicsStateGuardian 0 2048 21 GraphicsStateGuardian 21 GraphicsStateGuardian 0 0 0 0 0 0 0 0 0 0 0 0 308
+152 21 GraphicsStateGuardian 0 2048 21 GraphicsStateGuardian 21 GraphicsStateGuardian 0 0 0 0 0 0 0 0 0 0 0 0 308
 /**
  * Encapsulates all the communication with a particular instance of a given
  * rendering backend.  Tries to guarantee that redundant state-change requests
@@ -454,45 +466,43 @@ BSPCullAttrib::~BSPCullAttrib(void);
  * active in the system.
  */
 
-148 16 NodePath const * 0 8576 16 NodePath const * 16 NodePath const * 0 0 149 0 0 0 0 0 0 0 0 0 0
+153 16 NodePath const * 0 8576 16 NodePath const * 16 NodePath const * 0 0 154 0 0 0 0 0 0 0 0 0 0
 
-149 14 NodePath const 0 8832 14 NodePath const 14 NodePath const 0 0 128 0 0 0 0 0 0 0 0 0 0
+154 14 NodePath const 0 8832 14 NodePath const 14 NodePath const 0 0 132 0 0 0 0 0 0 0 0 0 0
 
-150 13 atomic string 0 2 13 atomic string 13 atomic string 0 7 0 0 0 0 0 0 0 0 0 0 0
+155 14 PyTypeObject * 0 8576 14 PyTypeObject * 14 PyTypeObject * 0 0 156 0 0 0 0 0 0 0 0 0 0
 
-151 14 PyTypeObject * 0 8576 14 PyTypeObject * 14 PyTypeObject * 0 0 152 0 0 0 0 0 0 0 0 0 0
+156 12 PyTypeObject 0 2105344 12 PyTypeObject 12 PyTypeObject 0 0 157 0 0 0 0 0 0 0 0 0 0
 
-152 12 PyTypeObject 0 2105344 12 PyTypeObject 12 PyTypeObject 0 0 153 0 0 0 0 0 0 0 0 0 0
+157 11 _typeobject 0 1024 11 _typeobject 11 _typeobject 0 0 0 0 0 0 0 0 0 0 0 0 0
 
-153 11 _typeobject 0 1024 11 _typeobject 11 _typeobject 0 0 0 0 0 0 0 0 0 0 0 0 0
+158 10 PyObject * 0 8576 10 PyObject * 10 PyObject * 0 0 159 0 0 0 0 0 0 0 0 0 0
 
-154 10 PyObject * 0 8576 10 PyObject * 10 PyObject * 0 0 155 0 0 0 0 0 0 0 0 0 0
+159 8 PyObject 0 2105344 8 PyObject 8 PyObject 0 0 160 0 0 0 0 0 0 0 0 0 0
 
-155 8 PyObject 0 2105344 8 PyObject 8 PyObject 0 0 156 0 0 0 0 0 0 0 0 0 0
+160 7 _object 0 1024 7 _object 7 _object 0 0 0 0 0 0 0 0 0 0 0 0 0
 
-156 7 _object 0 1024 7 _object 7 _object 0 0 0 0 0 0 0 0 0 0 0 0 0
+161 6 LColor 0 2105344 6 LColor 6 LColor 0 0 162 0 0 0 0 0 0 0 0 0 0
 
-157 6 LColor 0 2105344 6 LColor 6 LColor 0 0 158 0 0 0 0 0 0 0 0 0 0
+162 7 LColorf 0 2105344 7 LColorf 7 LColorf 0 0 163 0 0 0 0 0 0 0 0 0 0
 
-158 7 LColorf 0 2105344 7 LColorf 7 LColorf 0 0 159 0 0 0 0 0 0 0 0 0 0
-
-159 10 LVecBase4f 0 2048 10 LVecBase4f 10 LVecBase4f 0 0 0 0 0 0 0 0 0 0 0 0 77
+163 10 LVecBase4f 0 2048 10 LVecBase4f 10 LVecBase4f 0 0 0 0 0 0 0 0 0 0 0 0 77
 /**
  * This is the base class for all three-component vectors and points.
  */
 
-160 8 LColor * 0 8576 8 LColor * 8 LColor * 0 0 157 0 0 0 0 0 0 0 0 0 0
+164 8 LColor * 0 8576 8 LColor * 8 LColor * 0 0 161 0 0 0 0 0 0 0 0 0 0
 
-161 15 LPoint3 const * 0 8576 15 LPoint3 const * 15 LPoint3 const * 0 0 162 0 0 0 0 0 0 0 0 0 0
+165 15 LPoint3 const * 0 8576 15 LPoint3 const * 15 LPoint3 const * 0 0 166 0 0 0 0 0 0 0 0 0 0
 
-162 13 LPoint3 const 0 8832 13 LPoint3 const 13 LPoint3 const 0 0 119 0 0 0 0 0 0 0 0 0 0
+166 13 LPoint3 const 0 8832 13 LPoint3 const 13 LPoint3 const 0 0 123 0 0 0 0 0 0 0 0 0 0
 
 0
 3
-163 11 geom_bounds 0 2 0 69 0 0 0 0 0 0 0 26 BSPCullAttrib::geom_bounds 0
+167 11 geom_bounds 0 2 0 71 0 0 0 0 0 0 0 26 BSPCullAttrib::geom_bounds 0
 
-164 6 loader 0 2 0 70 0 0 0 0 0 0 0 21 BSPCullAttrib::loader 0
+168 6 loader 0 2 0 72 0 0 0 0 0 0 0 21 BSPCullAttrib::loader 0
 
-165 10 class_slot 0 2 0 97 0 0 0 0 0 0 0 25 BSPCullAttrib::class_slot 0
+169 10 class_slot 0 2 0 101 0 0 0 0 0 0 0 25 BSPCullAttrib::class_slot 0
 
 0

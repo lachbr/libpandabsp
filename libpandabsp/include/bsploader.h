@@ -53,14 +53,15 @@ private:
 
 PUBLISHED:
 	// Used for applying the attrib to a single static geom.
-	static CPT( RenderAttrib ) make( CPT(GeometricBoundingVolume) geom_bounds, BSPLoader *loader );
+	static CPT( RenderAttrib ) make( CPT(GeometricBoundingVolume) geom_bounds, const string &face_material, BSPLoader *loader );
 	// Used for applying the attrib to an entire node.
-	static CPT( RenderAttrib ) make( BSPLoader *loader );
+	static CPT( RenderAttrib ) make( BSPLoader *loader, bool part_of_result = false );
 
 	static CPT( RenderAttrib ) make_default();
 
 	INLINE CPT(GeometricBoundingVolume) get_geom_bounds() const;
 	INLINE BSPLoader *get_loader() const;
+	INLINE string get_material() const;
 
 PUBLISHED:
 	MAKE_PROPERTY( geom_bounds, get_geom_bounds );
@@ -78,6 +79,8 @@ private:
 	CPT( GeometricBoundingVolume ) _geom_bounds;
 	BSPLoader *_loader;
 	bool _on_geom;
+	bool _part_of_result;
+	string _material;
 
 PUBLISHED:
 	static int get_class_slot()
@@ -133,6 +136,7 @@ PUBLISHED:
 	void set_want_lightmaps( bool flag );
 	void set_physics_type( int type );
 	void set_visualize_leafs( bool flag );
+	void set_materials_file( const Filename &file );
 #ifdef HAVE_PYTHON
 	void link_entity_to_class( const string &entname, PyTypeObject *type );
 	PyObject *get_py_entity_by_target_name( const string &targetname ) const;
@@ -147,7 +151,7 @@ PUBLISHED:
 	NodePath get_entity( int entnum ) const;
 	NodePath get_model( int modelnum ) const;
 
-	void cull_node_path_against_leafs( NodePath &np );
+	void cull_node_path_against_leafs( NodePath &np, bool part_of_result = false );
 
 	int find_leaf( const NodePath &np );
 	int find_leaf( const LPoint3 &pos );
@@ -167,11 +171,13 @@ PUBLISHED:
 	};
 
 public:
-	pvector<PT( BoundingBox )> get_visible_leaf_bboxs() const;
+	pvector<PT( BoundingBox )> get_visible_leaf_bboxs( bool render = false ) const;
 
 private:
         void make_faces();
 	void load_entities();
+
+	void read_materials_file();
 
 #ifdef HAVE_PYTHON
 	void make_pyent( CBaseEntity *cent, PyObject *pyent, const string &classname );
@@ -199,6 +205,9 @@ private:
 	NodePath _proproot;
         NodePath _camera;
 	NodePath _render;
+	Filename _materials_file;
+	typedef pmap<string, string> Tex2Mat;
+	Tex2Mat _materials;
 	GraphicsStateGuardian *_gsg;
 	bool _has_pvs_data;
 	bool _want_visibility;
@@ -206,6 +215,7 @@ private:
 	bool _vis_leafs;
 	int _physics_type;
 	pvector<PT( BoundingBox )> _visible_leaf_bboxs;
+	pvector<PT( BoundingBox )> _visible_leaf_render_bboxes;
 	int _curr_leaf_idx;
 	pmap<string, PyTypeObject *> _entity_to_class;
 
@@ -216,6 +226,7 @@ private:
 	pvector<NodePath> _leaf_visnp;
 	pvector<GeomNode *> _face_geomnodes;
 	pvector<PT( BoundingBox )> _leaf_bboxs;
+	pvector<PT( BoundingBox )> _leaf_render_bboxes;
 #ifdef HAVE_PYTHON
 	pvector<PyObject *> _py_entities;
 	typedef pmap<CBaseEntity *, PyObject *> CEntToPyEnt;
@@ -227,8 +238,7 @@ private:
 	
         PT( GenericAsyncTask ) _update_task;
 
-private:
-	friend class BSPFace;
+	friend class BSPCullAttrib;
 };
 
 #endif // BSPLOADER_H
