@@ -15,7 +15,8 @@ void init_libpandabsp()
                 return;
         initialized = true;
 
-	BSPCullAttrib::init_type();
+        BSPGeomNode::init_type();
+	BSPFaceAttrib::init_type();
 	CBaseEntity::init_type();
 	CBrushEntity::init_type();
 

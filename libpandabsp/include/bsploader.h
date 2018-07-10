@@ -46,40 +46,63 @@ class Geom;
 class GeomNode;
 class BSPLoader;
 
-class EXPCL_PANDABSP BSPCullAttrib : public RenderAttrib
+/*
+ * All this class does is override GeomNode's add_for_draw to cull the Geoms
+ * against the visible leaf AABBs.
+ */
+class EXPCL_PANDABSP BSPGeomNode : public GeomNode
+{
+PUBLISHED:
+        explicit BSPGeomNode( const string &name );
+public:
+        virtual PandaNode *make_copy();
+        virtual PandaNode *combine_with( PandaNode *other );
+        virtual void add_for_draw( CullTraverser *trav, CullTraverserData &data );
+
+public:
+        static TypeHandle get_class_type()
+        {
+                return _type_handle;
+        }
+        static void init_type()
+        {
+                GeomNode::init_type();
+                register_type( _type_handle, "BSPGeomNode",
+                               GeomNode::get_class_type() );
+        }
+        virtual TypeHandle get_type() const
+        {
+                return get_class_type();
+        }
+        virtual TypeHandle force_init_type() { init_type(); return get_class_type(); }
+
+private:
+        static TypeHandle _type_handle;
+};
+
+/*
+ * An attribute applied to each face Geom from a BSP file.
+ * All it does right now is indicate the material of the face.
+ */
+class EXPCL_PANDABSP BSPFaceAttrib : public RenderAttrib
 {
 private:
-	INLINE BSPCullAttrib();
+	INLINE BSPFaceAttrib();
 
 PUBLISHED:
-	// Used for applying the attrib to a single static geom.
-	static CPT( RenderAttrib ) make( CPT(GeometricBoundingVolume) geom_bounds, const string &face_material, BSPLoader *loader );
-	// Used for applying the attrib to an entire node.
-	static CPT( RenderAttrib ) make( BSPLoader *loader, bool part_of_result = false );
-
+	static CPT( RenderAttrib ) make( const string &face_material );
 	static CPT( RenderAttrib ) make_default();
 
-	INLINE CPT(GeometricBoundingVolume) get_geom_bounds() const;
-	INLINE BSPLoader *get_loader() const;
 	INLINE string get_material() const;
-
-PUBLISHED:
-	MAKE_PROPERTY( geom_bounds, get_geom_bounds );
-	MAKE_PROPERTY( loader, get_loader );
 
 public:
 
 	virtual bool has_cull_callback() const;
-	virtual bool cull_callback( CullTraverser *trav, const CullTraverserData &data ) const;
 
 	virtual size_t get_hash_impl() const;
 	virtual int compare_to_impl( const RenderAttrib *other ) const;
 
 private:
-	CPT( GeometricBoundingVolume ) _geom_bounds;
-	BSPLoader *_loader;
-	bool _on_geom;
-	bool _part_of_result;
 	string _material;
 
 PUBLISHED:
@@ -101,9 +124,9 @@ public:
 	static void init_type()
 	{
 		RenderAttrib::init_type();
-		register_type( _type_handle, "BSPCullAttrib",
+		register_type( _type_handle, "BSPFaceAttrib",
 			       RenderAttrib::get_class_type() );
-		_attrib_slot = register_slot( _type_handle, 100, new BSPCullAttrib );
+		_attrib_slot = register_slot( _type_handle, 100, new BSPFaceAttrib );
 	}
 	virtual TypeHandle get_type() const
 	{
@@ -160,6 +183,8 @@ PUBLISHED:
 
         NodePath get_result() const;
 
+        static BSPLoader *get_global_ptr();
+
 PUBLISHED:
 	enum PhysicsType
 	{
@@ -198,6 +223,8 @@ private:
 
         void update();
         static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
+
+        void swap_geom_nodes( const NodePath &root );
 
 private:
 	NodePath _result;
@@ -238,7 +265,10 @@ private:
 	
         PT( GenericAsyncTask ) _update_task;
 
-	friend class BSPCullAttrib;
+	friend class BSPFaceAttrib;
+        friend class BSPGeomNode;
+
+        static BSPLoader *_global_ptr;
 };
 
 #endif // BSPLOADER_H

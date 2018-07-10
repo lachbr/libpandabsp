@@ -32,10 +32,10 @@ extern "C" void initbsp();
 static struct PyModuleDef py_bsp_module = {
   PyModuleDef_HEAD_INIT,
   "bsp",
-  NULL,
+  nullptr,
   -1,
-  NULL,
-  NULL, NULL, NULL, NULL
+  nullptr,
+  nullptr, nullptr, nullptr, nullptr
 };
 
 PyObject *PyInit_bsp() {
@@ -43,10 +43,10 @@ PyObject *PyInit_bsp() {
   Dtool_bsp_RegisterTypes();
   Dtool_bsp_ResolveExternals();
 
-  LibraryDef *defs[] = {&bsp_moddef, NULL};
+  LibraryDef *defs[] = {&bsp_moddef, nullptr};
 
   PyObject *module = Dtool_PyModuleInitHelper(defs, &py_bsp_module);
-  if (module != NULL) {
+  if (module != nullptr) {
     Dtool_bsp_BuildInstants(module);
   }
   return module;
@@ -64,10 +64,10 @@ void initbsp() {
   Dtool_bsp_RegisterTypes();
   Dtool_bsp_ResolveExternals();
 
-  LibraryDef *defs[] = {&bsp_moddef, NULL};
+  LibraryDef *defs[] = {&bsp_moddef, nullptr};
 
   PyObject *module = Dtool_PyModuleInitHelper(defs, "bsp");
-  if (module != NULL) {
+  if (module != nullptr) {
     Dtool_bsp_BuildInstants(module);
   }
 }
@@ -75,7 +75,7 @@ void initbsp() {
 #ifndef NDEBUG
 PyObject *PyInit_bsp() {
   PyErr_SetString(PyExc_ImportError, "bsp was compiled for Python " PY_VERSION ", which is incompatible with Python 3");
-  return (PyObject *)NULL;
+  return nullptr;
 }
 #endif
 #endif
