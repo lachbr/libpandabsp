@@ -37,6 +37,7 @@
 #include <transformState.h>
 #include <cullHandler.h>
 #include <modelRoot.h>
+#include <lightReMutexHolder.h>
 
 static PT( TextureStage ) diffuse_stage = new TextureStage( "diffuse" );
 static PT( TextureStage ) lightmap_stage = new TextureStage( "lightmap" );
@@ -69,16 +70,17 @@ PandaNode *BSPGeomNode::combine_with( PandaNode *other )
 
 void BSPGeomNode::add_for_draw( CullTraverser *trav, CullTraverserData &data )
 {
-        trav->_geom_nodes_pcollector.add_level( 1 );
-
         BSPLoader *loader = BSPLoader::get_global_ptr();
+        LightReMutexHolder holder( loader->_leaf_aabb_lock );
+
+        trav->_geom_nodes_pcollector.add_level( 1 );
 
         // Get all the Geoms, with no decalling.
         Geoms geoms = get_geoms( trav->get_current_thread() );
         int num_geoms = geoms.get_num_geoms();
         CPT( TransformState ) internal_transform = data.get_internal_transform( trav );
 
-        pvector<PT( BoundingBox )> visible_leaf_aabbs = loader->get_visible_leaf_bboxs();
+        pvector<BoundingBox *> visible_leaf_aabbs = loader->get_visible_leaf_bboxs();
         size_t num_aabbs = visible_leaf_aabbs.size();
 
         for ( int i = 0; i < num_geoms; i++ )
@@ -243,11 +245,6 @@ PT( GeomNode ) UTIL_make_cube_outline( const LPoint3 &min, const LPoint3 &max,
 void GetParamsFromEnt( entity_t *mapent )
 {
         int num_epairs = sizeof( mapent->epairs ) / sizeof( epair_t );
-}
-
-double round( double num )
-{
-        return floor( num + 0.5 );
 }
 
 NotifyCategoryDef( bspfile, "" );
@@ -924,8 +921,10 @@ bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
         return dat != 0;
 }
 
-pvector<PT( BoundingBox )> BSPLoader::get_visible_leaf_bboxs( bool render ) const
+INLINE pvector<BoundingBox *> BSPLoader::get_visible_leaf_bboxs( bool render ) const
 {
+        LightReMutexHolder holder( _leaf_aabb_lock );
+
         if ( render )
                 return _visible_leaf_render_bboxes;
         return _visible_leaf_bboxs;
@@ -935,40 +934,7 @@ void BSPLoader::update()
 {
         // Update visibility
 
-        /*
-        bitset<MAX_MAP_FACES> already_visible;
-
-        int curr_leaf_idx = find_leaf( _camera.get_pos( _render ) );
-
-        for ( int i = g_numleafs - 1; i >= 0; i-- )
-        {
-        const dleaf_t *leaf = &g_dleafs[i];
-        if ( !is_cluster_visible( curr_leaf_idx, i ) )
-        {
-        continue;
-        }
-
-        int face_count = leaf->nummarksurfaces;
-        while( face_count-- )
-        {
-        int face = g_dmarksurfaces[leaf->firstmarksurface + face_count];
-        if ( already_visible.test( face ) )
-        {
-        continue;
-        }
-        already_visible.set( face );
-        const BSPFace *facegeom = _face_geoms[face];
-        if ( facegeom != nullptr )
-        {
-        _gsg->get_engine()->flag_geom( facegeom );
-        }
-        else
-        {
-        cout << ":bsploader(warning): facegeom for facenum " << face << " is nullptr" << endl;
-        }
-        }
-        }
-        */
+        LightReMutexHolder holder( _leaf_aabb_lock );
 
         int curr_leaf_idx = find_leaf( _camera.get_pos( _result ) );
         if ( curr_leaf_idx != _curr_leaf_idx )
@@ -1107,11 +1073,7 @@ bool BSPLoader::read( const Filename &file )
         _brushroot.set_shader_off( 1 );
         _has_pvs_data = false;
 
-        //_entities.reserve( MAX_MAP_ENTITIES );
-        _face_geomnodes.resize( MAX_MAP_FACES );
         _leaf_pvs.resize( MAX_MAP_LEAFS );
-        _leaf_bboxs.resize( MAX_MAP_LEAFS );
-        _leaf_render_bboxes.resize( MAX_MAP_LEAFS );
 
         bspfile_cat.info()
                 << "Reading " << file.get_fullpath() << "...\n";
@@ -1128,6 +1090,9 @@ bool BSPLoader::read( const Filename &file )
 
         ParseEntities();
 
+        _leaf_aabb_lock.acquire();
+        _leaf_bboxs.resize( MAX_MAP_LEAFS );
+        _leaf_render_bboxes.resize( MAX_MAP_LEAFS );
         // Decompress the per leaf visibility data.
         for ( int i = 0; i < g_dmodels[0].visleafs + 1; i++ )
         {
@@ -1156,6 +1121,7 @@ bool BSPLoader::read( const Filename &file )
                 _leaf_render_bboxes[i] = render_bbox;
                 _leaf_bboxs[i] = bbox;
         }
+        _leaf_aabb_lock.release();
 
         make_faces();
         load_entities();
@@ -1249,6 +1215,8 @@ void BSPLoader::set_materials_file( const Filename &file )
 
 void BSPLoader::cleanup()
 {
+        LightReMutexHolder holder( _leaf_aabb_lock );
+
         for ( size_t i = 0; i < _model_roots.size(); i++ )
         {
                 if ( !_model_roots[i].is_empty() )
@@ -1262,11 +1230,13 @@ void BSPLoader::cleanup()
                 dtexdata_free();
 
         _leaf_pvs.clear();
-        _face_geomnodes.clear();
+
+        _leaf_aabb_lock.acquire();
         _leaf_render_bboxes.clear();
         _leaf_bboxs.clear();
         _visible_leaf_bboxs.clear();
         _visible_leaf_render_bboxes.clear();
+        _leaf_aabb_lock.release();
 
         if ( _update_task != nullptr )
         {
@@ -1304,7 +1274,8 @@ BSPLoader::BSPLoader() :
         _physics_type( PT_panda ),
         _vis_leafs( false ),
         _want_lightmaps( true ),
-        _curr_leaf_idx( -1 )
+        _curr_leaf_idx( -1 ),
+        _leaf_aabb_lock( "leafAABBMutex" )
 {
         diffuse_stage->set_texcoord_name( "diffuse" );
         lightmap_stage->set_mode( TextureStage::M_modulate );

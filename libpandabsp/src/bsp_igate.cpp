@@ -23,6 +23,7 @@
 #include <genericAsyncTask.h>
 #include <geom.h>
 #include <graphicsStateGuardian.h>
+#include <lightReMutex.h>
 #include <lvector3.h>
 #include <nodePath.h>
 #include <pnmImage.h>
@@ -132,6 +133,13 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_ReferenceCount;
 extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
 #endif
+// Namable
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_Namable;
+#else
+extern struct Dtool_PyTypedObject Dtool_Namable;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
+#endif
 // LVector3f
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_LVector3f;
@@ -144,19 +152,6 @@ inline static LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerc
 extern struct Dtool_PyTypedObject Dtool_LVector3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
 extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
-#endif
-// LVecBase4f
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_LVecBase4f;
-inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
-  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
-extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
 #endif
 // LPoint3f
 #ifndef LINK_ALL_STATIC
@@ -171,6 +166,26 @@ extern struct Dtool_PyTypedObject Dtool_LPoint3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
 extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
 #endif
+// LVecBase4f
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_LVecBase4f;
+inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
+  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
+extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
+#endif
+// TypedReferenceCount
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_TypedReferenceCount;
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
+#endif
 // TypedWritable
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_TypedWritable;
@@ -184,20 +199,6 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_TypedWritableReferenceCount;
 #else
 extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
-#endif
-// TypedReferenceCount
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_TypedReferenceCount;
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
-#endif
-// Namable
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_Namable;
-#else
-extern struct Dtool_PyTypedObject Dtool_Namable;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
 #endif
 // RenderAttrib
 #ifndef LINK_ALL_STATIC
@@ -2190,7 +2191,6 @@ static const char *Dtool_BSPLoader_get_global_ptr_63_comment = nullptr;
 /**
  * Python function wrapper for:
  * BSPLoader::BSPLoader(void)
- * inline BSPLoader::BSPLoader(BSPLoader const &) = default
  */
 static int Dtool_Init_BSPLoader(PyObject *self, PyObject *args, PyObject *kwds) {
   if (kwds != nullptr && PyDict_Size(kwds) > 0) {
@@ -2202,54 +2202,32 @@ static int Dtool_Init_BSPLoader(PyObject *self, PyObject *args, PyObject *kwds) 
     return -1;
 #endif
   }
-  int parameter_count = (int)PyTuple_Size(args);
-  switch (parameter_count) {
-  case 0:
-    {
-      // 1-BSPLoader::BSPLoader(void)
-      BSPLoader *return_value = new BSPLoader();
-      if (return_value == nullptr) {
-        PyErr_NoMemory();
-        return -1;
-      }
-      if (Dtool_CheckErrorOccurred()) {
-        delete return_value;
-        return -1;
-      }
-      return DTool_PyInit_Finalize(self, (void *)return_value, &Dtool_BSPLoader, true, false);
-    }
-    break;
-  case 1:
-    {
-      PyObject *arg = PyTuple_GET_ITEM(args, 0);
-      // 1-inline BSPLoader::BSPLoader(BSPLoader const &) = default
-      BSPLoader const *arg_this = (BSPLoader *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_BSPLoader, 0, "BSPLoader.BSPLoader", true, true);
-      if (arg_this != nullptr) {
-        BSPLoader *return_value = new BSPLoader(*arg_this);
-        if (return_value == nullptr) {
-          PyErr_NoMemory();
-          return -1;
-        }
-        if (Dtool_CheckErrorOccurred()) {
-          delete return_value;
-          return -1;
-        }
-        return DTool_PyInit_Finalize(self, (void *)return_value, &Dtool_BSPLoader, true, false);
-      }
-    }
-    break;
-#ifndef NDEBUG
-  default:
+  if (!Dtool_CheckNoArgs(args)) {
+    const int parameter_count = (int)PyTuple_GET_SIZE(args);
+#ifdef NDEBUG
+    Dtool_Raise_TypeError("function takes no arguments");
+    return -1;
+#else
     PyErr_Format(PyExc_TypeError,
-                 "BSPLoader() takes 0 or 1 arguments (%d given)",
+                 "BSPLoader() takes no arguments (%d given)",
                  parameter_count);
     return -1;
 #endif
   }
+  // 1-BSPLoader::BSPLoader(void)
+  BSPLoader *return_value = new BSPLoader();
+  if (return_value == nullptr) {
+    PyErr_NoMemory();
+    return -1;
+  }
+  if (Dtool_CheckErrorOccurred()) {
+    delete return_value;
+    return -1;
+  }
+  return DTool_PyInit_Finalize(self, (void *)return_value, &Dtool_BSPLoader, true, false);
   if (!_PyErr_OCCURRED()) {
     Dtool_Raise_BadArgumentsError(
-      "BSPLoader()\n"
-      "BSPLoader(const BSPLoader param0)\n");
+      "BSPLoader()\n");
   }
   return -1;
 }
@@ -3017,7 +2995,7 @@ struct Dtool_PyTypedObject Dtool_BSPGeomNode = {
 #ifdef NDEBUG
     0,
 #else
-    "/*\n"
+    "/**\n"
     " * All this class does is override GeomNode's add_for_draw to cull the Geoms\n"
     " * against the visible leaf AABBs.\n"
     " */",
@@ -3226,7 +3204,7 @@ struct Dtool_PyTypedObject Dtool_BSPFaceAttrib = {
 #ifdef NDEBUG
     0,
 #else
-    "/*\n"
+    "/**\n"
     " * An attribute applied to each face Geom from a BSP file.\n"
     " * All it does right now is indicate the material of the face.\n"
     " */",
@@ -3348,8 +3326,6 @@ static PyMethodDef Dtool_Methods_BSPLoader[] = {
   {"getResult", &Dtool_BSPLoader_get_result_62, METH_NOARGS, (const char *)Dtool_BSPLoader_get_result_62_comment},
   {"get_global_ptr", &Dtool_BSPLoader_get_global_ptr_63, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPLoader_get_global_ptr_63_comment},
   {"getGlobalPtr", &Dtool_BSPLoader_get_global_ptr_63, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPLoader_get_global_ptr_63_comment},
-  {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
-  {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -3437,7 +3413,13 @@ struct Dtool_PyTypedObject Dtool_BSPLoader = {
     nullptr,
     nullptr, // tp_as_buffer
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_CHECKTYPES,
-    nullptr, // tp_doc
+#ifdef NDEBUG
+    0,
+#else
+    "/**\n"
+    " * Loads and handles the operations of PBSP files.\n"
+    " */",
+#endif
     nullptr, // tp_traverse
     nullptr, // tp_clear
     nullptr, // tp_richcompare
@@ -3539,13 +3521,13 @@ void Dtool_bsp_ResolveExternals() {
   Dtool_Ptr_Filename = LookupRuntimeTypedClass(Filename::get_class_type());
   Dtool_Ptr_TypedObject = LookupRuntimeTypedClass(TypedObject::get_class_type());
   Dtool_Ptr_ReferenceCount = LookupRuntimeTypedClass(ReferenceCount::get_class_type());
+  Dtool_Ptr_Namable = LookupRuntimeTypedClass(Namable::get_class_type());
   Dtool_Ptr_LVector3f = LookupRuntimeTypedClass(LVector3f::get_class_type());
-  Dtool_Ptr_LVecBase4f = LookupRuntimeTypedClass(LVecBase4f::get_class_type());
   Dtool_Ptr_LPoint3f = LookupRuntimeTypedClass(LPoint3f::get_class_type());
+  Dtool_Ptr_LVecBase4f = LookupRuntimeTypedClass(LVecBase4f::get_class_type());
+  Dtool_Ptr_TypedReferenceCount = LookupRuntimeTypedClass(TypedReferenceCount::get_class_type());
   Dtool_Ptr_TypedWritable = LookupRuntimeTypedClass(TypedWritable::get_class_type());
   Dtool_Ptr_TypedWritableReferenceCount = LookupRuntimeTypedClass(TypedWritableReferenceCount::get_class_type());
-  Dtool_Ptr_TypedReferenceCount = LookupRuntimeTypedClass(TypedReferenceCount::get_class_type());
-  Dtool_Ptr_Namable = LookupRuntimeTypedClass(Namable::get_class_type());
   Dtool_Ptr_RenderAttrib = LookupRuntimeTypedClass(RenderAttrib::get_class_type());
   Dtool_Ptr_PandaNode = LookupRuntimeTypedClass(PandaNode::get_class_type());
   Dtool_Ptr_NodePath = LookupRuntimeTypedClass(NodePath::get_class_type());
@@ -3584,7 +3566,7 @@ static PyMethodDef python_simple_funcs[] = {
 
 struct LibraryDef bsp_moddef = {python_simple_funcs};
 static InterrogateModuleDef _in_module_def = {
-  1531241710,  /* file_identifier */
+  1531319443,  /* file_identifier */
   "bsp",  /* library_name */
   "t5GT",  /* library_hash_name */
   "bsp",  /* module_name */
@@ -3594,7 +3576,7 @@ static InterrogateModuleDef _in_module_def = {
   nullptr,  /* fptrs */
   0,  /* num_fptrs */
   1,  /* first_index */
-  172  /* next_index */
+  171  /* next_index */
 };
 
 Configure(_in_configure_bsp);

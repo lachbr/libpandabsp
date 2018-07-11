@@ -17,6 +17,7 @@
 #include "entity.h"
 #include <renderAttrib.h>
 #include <boundingBox.h>
+#include <lightReMutex.h>
 
 NotifyCategoryDeclNoExport(bspfile);
 
@@ -46,7 +47,7 @@ class Geom;
 class GeomNode;
 class BSPLoader;
 
-/*
+/**
  * All this class does is override GeomNode's add_for_draw to cull the Geoms
  * against the visible leaf AABBs.
  */
@@ -80,7 +81,7 @@ private:
         static TypeHandle _type_handle;
 };
 
-/*
+/**
  * An attribute applied to each face Geom from a BSP file.
  * All it does right now is indicate the material of the face.
  */
@@ -143,6 +144,9 @@ private:
 
 };
 
+/**
+ * Loads and handles the operations of PBSP files.
+ */
 class EXPCL_PANDABSP BSPLoader
 {
 PUBLISHED:
@@ -160,6 +164,7 @@ PUBLISHED:
 	void set_physics_type( int type );
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
+
 #ifdef HAVE_PYTHON
 	void link_entity_to_class( const string &entname, PyTypeObject *type );
 	PyObject *get_py_entity_by_target_name( const string &targetname ) const;
@@ -196,7 +201,7 @@ PUBLISHED:
 	};
 
 public:
-	pvector<PT( BoundingBox )> get_visible_leaf_bboxs( bool render = false ) const;
+	INLINE pvector<BoundingBox *> get_visible_leaf_bboxs( bool render = false ) const;
 
 private:
         void make_faces();
@@ -241,17 +246,14 @@ private:
 	bool _want_lightmaps;
 	bool _vis_leafs;
 	int _physics_type;
-	pvector<PT( BoundingBox )> _visible_leaf_bboxs;
-	pvector<PT( BoundingBox )> _visible_leaf_render_bboxes;
+	pvector<BoundingBox *> _visible_leaf_bboxs;
+	pvector<BoundingBox *> _visible_leaf_render_bboxes;
 	int _curr_leaf_idx;
 	pmap<string, PyTypeObject *> _entity_to_class;
-
-	pvector<pvector<const Geom *>> _leaf_geoms;
 
         pmap<texref_t *, PT( Texture )> _texref_textures;
         vector<uint8_t *> _leaf_pvs;
 	pvector<NodePath> _leaf_visnp;
-	pvector<GeomNode *> _face_geomnodes;
 	pvector<PT( BoundingBox )> _leaf_bboxs;
 	pvector<PT( BoundingBox )> _leaf_render_bboxes;
 #ifdef HAVE_PYTHON
@@ -269,6 +271,11 @@ private:
         friend class BSPGeomNode;
 
         static BSPLoader *_global_ptr;
+
+        // While BSPLoader updates the visible leaf AABBs on the App thread,
+        // BSPGeomNode needs to access them from the Cull thread.
+        // So we'll use a mutex.
+        LightReMutex _leaf_aabb_lock;
 };
 
 #endif // BSPLOADER_H
