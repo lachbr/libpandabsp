@@ -19,5 +19,5 @@ void init_libpandabsp()
 	BSPFaceAttrib::init_type();
 	CBaseEntity::init_type();
 	CBrushEntity::init_type();
-
+        CBoundsEntity::init_type();
 }

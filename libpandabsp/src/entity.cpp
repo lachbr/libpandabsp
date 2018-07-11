@@ -4,6 +4,7 @@
 TypeHandle CBaseEntity::_type_handle;
 TypeHandle CPointEntity::_type_handle;
 TypeHandle CBrushEntity::_type_handle;
+TypeHandle CBoundsEntity::_type_handle;
 
 ///////////////////////////////////// CBaseEntity //////////////////////////////////////////
 
@@ -53,6 +54,34 @@ LVector3 CPointEntity::get_angles() const
 	vec3_t angles;
 	GetVectorForKey( _ent, "angles", angles );
 	return LVector3( angles[1] - 90, angles[0], angles[2] );
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////// CBoundsEntity /////////////////////////////////////////
+
+CBoundsEntity::CBoundsEntity() :
+        CBaseEntity(),
+        _mdl( nullptr ),
+        _bounds( nullptr )
+{
+}
+
+INLINE bool CBoundsEntity::is_inside( const LPoint3 &pos ) const
+{
+        return _bounds->contains( pos ) != BoundingVolume::IF_no_intersection;
+}
+
+BoundingBox *CBoundsEntity::get_bounds() const
+{
+        return _bounds;
+}
+
+void CBoundsEntity::set_data( int entnum, entity_t *ent, BSPLoader *loader, dmodel_t *mdl )
+{
+        CBaseEntity::set_data( entnum, ent, loader );
+        _mdl = mdl;
+        _bounds = new BoundingBox( LPoint3( mdl->mins[0] / PANDA_TO_HAMMER, mdl->mins[1] / PANDA_TO_HAMMER, mdl->mins[2] / PANDA_TO_HAMMER ),
+                                   LPoint3( mdl->maxs[0] / PANDA_TO_HAMMER, mdl->maxs[1] / PANDA_TO_HAMMER, mdl->maxs[2] / PANDA_TO_HAMMER ) );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

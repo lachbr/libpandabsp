@@ -69,6 +69,39 @@ private:
 	static TypeHandle _type_handle;
 };
 
+/**
+ * A flavor of a brush entity (but doesn't inherit from CBrushEntity) which uses the brush only to describe
+ * the bounds. Useful for triggers or water, because we don't actually care about the brush's geometry.
+ */
+class EXPCL_PANDABSP CBoundsEntity : public CBaseEntity
+{
+PUBLISHED:
+        CBoundsEntity();
+
+        BoundingBox *get_bounds() const;
+        INLINE bool is_inside( const LPoint3 &pos ) const;
+
+public:
+        void set_data( int entnum, entity_t *t, BSPLoader *loader, dmodel_t *mdl );
+
+private:
+        PT( BoundingBox ) _bounds;
+        dmodel_t *_mdl;
+
+public:
+        static TypeHandle get_class_type()
+        {
+                return _type_handle;
+        }
+        static void init_type()
+        {
+                register_type( _type_handle, "CBoundsEntity", CBaseEntity::get_class_type() );
+        }
+
+private:
+        static TypeHandle _type_handle;
+};
+
 class EXPCL_PANDABSP CBrushEntity : public CBaseEntity
 {
 PUBLISHED:

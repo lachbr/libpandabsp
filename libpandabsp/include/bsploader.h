@@ -209,6 +209,8 @@ private:
 
 	void read_materials_file();
 
+        void remove_model( int modelnum );
+
 #ifdef HAVE_PYTHON
 	void make_pyent( CBaseEntity *cent, PyObject *pyent, const string &classname );
 #endif

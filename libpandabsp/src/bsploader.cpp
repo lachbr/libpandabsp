@@ -39,9 +39,6 @@
 #include <modelRoot.h>
 #include <lightReMutexHolder.h>
 
-static PT( TextureStage ) diffuse_stage = new TextureStage( "diffuse" );
-static PT( TextureStage ) lightmap_stage = new TextureStage( "lightmap" );
-
 TypeHandle BSPGeomNode::_type_handle;
 
 BSPGeomNode::BSPGeomNode( const string &name ) :
@@ -487,6 +484,12 @@ void BSPLoader::make_faces()
                 NodePath modelroot = _brushroot.attach_new_node( name.str() );
                 modelroot.set_pos( ( ( mins + maxs ) / 2.0 ) + origin );
 
+                PT( TextureStage ) diffuse_stage = new TextureStage( "diffuse_stage" );
+                diffuse_stage->set_texcoord_name( "diffuse" );
+                PT( TextureStage ) lightmap_stage = new TextureStage( "lightmap_stage" );
+                lightmap_stage->set_texcoord_name( "lightmap" );
+                lightmap_stage->set_mode( TextureStage::M_modulate );
+
                 for ( int facenum = firstface; facenum < firstface + numfaces; facenum++ )
                 {
                         PT( EggData ) data = new EggData;
@@ -517,18 +520,11 @@ void BSPLoader::make_faces()
                         {
                                 material = _materials[texture_name];
                         }
-                        cout << material << endl;
                         transform( texture_name.begin(), texture_name.end(), texture_name.begin(), tolower );
-
-                        if ( texture_name.find( "trigger" ) != string::npos )
-                        {
-                                continue;
-                        }
 
                         bool has_lighting = ( face->lightofs != -1 && _want_lightmaps ) && !skip;
                         bool has_texture = !skip;
 
-                        cout << has_lighting << endl;
 
                         PT( Texture ) lm_tex = new Texture( "lightmap_texture" );
 
@@ -721,6 +717,16 @@ LColor color_from_value( const string &value, bool scale = true )
         //return LColor( r, g, b, 1.0 );
 }
 
+static int extract_modelnum( entity_t *ent )
+{
+        string model = ValueForKey( ent, "model" );
+        if ( model[0] == '*' )
+        {
+                return atoi( model.substr( 1 ).c_str() );
+        }
+        return -1;
+}
+
 void BSPLoader::load_entities()
 {
         Loader *loader = Loader::get_global_ptr();
@@ -841,14 +847,35 @@ void BSPLoader::load_entities()
                         _render.set_fog( fog );
                         _nodepath_entities.push_back( fognp );
                 }
+                else if ( !strncmp( classname.c_str(), "trigger_", 8 ) ||
+                          !strncmp( classname.c_str(), "func_water", 10 ) )
+                {
+                        // This is a bounds entity. We do not actually care about the geometry,
+                        // but the mins and maxs of the model. We will use that to create
+                        // a BoundingBox to check if the avatar is inside of it.
+                        int modelnum = extract_modelnum( ent );
+                        if ( modelnum != -1 )
+                        {
+                                remove_model( modelnum );
+
+                                dmodel_t *mdl = &g_dmodels[modelnum];
+
+                                PT( CBoundsEntity ) entity = new CBoundsEntity;
+                                entity->set_data( entnum, ent, this, mdl );
+                                _class_entities.push_back( ( PT( CBoundsEntity ) )entity );
+#ifdef HAVE_PYTHON
+                                PyObject *py_ent = DTool_CreatePyInstance<CBoundsEntity>( entity, true );
+                                make_pyent( entity, py_ent, classname );
+#endif
+                        }
+                }
                 else if ( !strncmp( classname.c_str(), "func_", 5 ) )
                 {
                         // Brush entites begin with func_, handle those accordingly.
-                        string model = ValueForKey( ent, "model" );
-                        if ( model[0] == '*' )
+                        int modelnum = extract_modelnum( ent );
+                        if ( modelnum != -1 )
                         {
                                 // Brush model
-                                int modelnum = atoi( model.substr( 1 ).c_str() );
                                 NodePath modelroot = get_model( modelnum );
                                 if ( !strncmp( classname.c_str(), "func_wall", 9 ) ||
                                      !strncmp( classname.c_str(), "func_detail", 11 ) )
@@ -903,6 +930,16 @@ void BSPLoader::make_pyent( CBaseEntity *cent, PyObject *py_ent, const string &c
         }
 }
 #endif
+
+void BSPLoader::remove_model( int modelnum )
+{
+        NodePath modelroot = get_model( modelnum );
+        if ( !modelroot.is_empty() )
+        {
+                _model_roots.erase( find( _model_roots.begin(), _model_roots.end(), modelroot ) );
+                modelroot.remove_node();
+        }
+}
 
 bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
 {
@@ -1173,6 +1210,7 @@ void BSPLoader::do_optimizations()
                 {
                 	// For non zero models, the origin matters, so we will only flatten the children.
                 	NodePathCollection mdlroots = mdlroot.find_all_matches("**/+ModelRoot");
+                        mdlroot.flatten_strong();
                         //DCAST( ModelRoot, mdlroot.node() )->set_preserve_transform( ModelRoot::PT_local );
                 	for ( int j = 0; j < mdlroots.get_num_paths(); j++ )
                 	{
@@ -1184,7 +1222,7 @@ void BSPLoader::do_optimizations()
                                 np.remove_node();
                                 gnp.flatten_strong();
                 	}
-                        mdlroot.flatten_strong();
+                        
                 }
         }
 
@@ -1277,9 +1315,6 @@ BSPLoader::BSPLoader() :
         _curr_leaf_idx( -1 ),
         _leaf_aabb_lock( "leafAABBMutex" )
 {
-        diffuse_stage->set_texcoord_name( "diffuse" );
-        lightmap_stage->set_mode( TextureStage::M_modulate );
-        lightmap_stage->set_texcoord_name( "lightmap" );
         set_gamma( DEFAULT_GAMMA, DEFAULT_OVERBRIGHT );
 }
 
@@ -1424,6 +1459,7 @@ void BSPLoader::swap_geom_nodes( const NodePath &root )
                 PT( BSPGeomNode ) bsp_gn = new BSPGeomNode( gn->get_name() );
                 bsp_gn->set_preserved( false );
                 NodePath bspnp( bsp_gn );
+                bspnp.set_state( np.get_state() );
                 bspnp.reparent_to( np.get_parent() );
                 bspnp.set_transform( np.get_transform() );
                 bsp_gn->add_geoms_from( gn );
