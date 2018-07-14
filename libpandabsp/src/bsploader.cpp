@@ -348,7 +348,7 @@ PNMImage BSPLoader::lightmap_image_from_face( dface_t *face, FaceLightmapData *l
 
 void BSPLoader::cull_node_path_against_leafs( NodePath &np, bool part_of_result )
 {
-        //np.set_attrib( BSPFaceAttrib::make( this, part_of_result ), 1 );
+        swap_geom_nodes( np );
 }
 
 int BSPLoader::find_leaf( const NodePath &np )
@@ -1253,8 +1253,6 @@ void BSPLoader::set_materials_file( const Filename &file )
 
 void BSPLoader::cleanup()
 {
-        LightReMutexHolder holder( _leaf_aabb_lock );
-
         for ( size_t i = 0; i < _model_roots.size(); i++ )
         {
                 if ( !_model_roots[i].is_empty() )
@@ -1293,7 +1291,7 @@ void BSPLoader::cleanup()
 #ifdef HAVE_PYTHON
         for ( size_t i = 0; i < _py_entities.size(); i++ )
         {
-                PyObject_CallMethod( _py_entities[i], "cleanup", NULL );
+                PyObject_CallMethod( _py_entities[i], "unload", NULL );
         }
         _py_entities.clear();
 #endif
