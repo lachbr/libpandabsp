@@ -215,7 +215,7 @@ private:
 	void make_pyent( CBaseEntity *cent, PyObject *pyent, const string &classname );
 #endif
 
-	LTexCoord get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert ) const;
+	LTexCoord get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool lightmap = false ) const;
 
         PT( Texture ) try_load_texref( texref_t *tref );
         

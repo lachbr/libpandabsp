@@ -81,6 +81,8 @@ PUBLISHED:
         BoundingBox *get_bounds() const;
         INLINE bool is_inside( const LPoint3 &pos ) const;
 
+        void fillin_bounds( LPoint3 &mins, LPoint3 &maxs );
+
 public:
         void set_data( int entnum, entity_t *t, BSPLoader *loader, dmodel_t *mdl );
 

@@ -300,8 +300,8 @@ BSPLoader *BSPLoader::_global_ptr = nullptr;
 
 PNMImage BSPLoader::lightmap_image_from_face( dface_t *face, FaceLightmapData *ld )
 {
-        int width = ld->texsize[0];
-        int height = ld->texsize[1];
+        int width = face->lightmap_size[0] + 1;
+        int height = face->lightmap_size[1] + 1;
         int num_luxels = width * height;
 
         if ( num_luxels <= 0 )
@@ -384,16 +384,30 @@ int BSPLoader::find_leaf( const LPoint3 &pos )
         return -( i + 1 );
 }
 
-LTexCoord BSPLoader::get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert ) const
+LTexCoord BSPLoader::get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool lightmap ) const
 {
         float *vpos = vert->point;
         LVector3 vert_pos( vpos[0], vpos[1], vpos[2] );
 
-        LVector3 s_vec( texinfo->vecs[0][0], texinfo->vecs[0][1], texinfo->vecs[0][2] );
-        float s_dist = texinfo->vecs[0][3];
+        LVector3 s_vec, t_vec;
+        float s_dist, t_dist;
+        if ( !lightmap )
+        {
+                s_vec = LVector3( texinfo->vecs[0][0], texinfo->vecs[0][1], texinfo->vecs[0][2] );
+                s_dist = texinfo->vecs[0][3];
 
-        LVector3 t_vec( texinfo->vecs[1][0], texinfo->vecs[1][1], texinfo->vecs[1][2] );
-        float t_dist = texinfo->vecs[1][3];
+                t_vec = LVector3( texinfo->vecs[1][0], texinfo->vecs[1][1], texinfo->vecs[1][2] );
+                t_dist = texinfo->vecs[1][3];
+        }
+        else
+        {
+                s_vec = LVector3( texinfo->lightmap_vecs[0][0], texinfo->lightmap_vecs[0][1], texinfo->lightmap_vecs[0][2] );
+                s_dist = texinfo->lightmap_vecs[0][3];
+
+                t_vec = LVector3( texinfo->lightmap_vecs[1][0], texinfo->lightmap_vecs[1][1], texinfo->lightmap_vecs[1][2] );
+                t_dist = texinfo->lightmap_vecs[1][3];
+        }
+        
 
         return LTexCoord( s_vec.dot( vert_pos ) + s_dist, t_vec.dot( vert_pos ) + t_dist );
 }
@@ -419,9 +433,10 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
 
         // Texture and lightmap coordinates
         LTexCoord uv = get_vertex_uv( texinfo, vert );
+        LTexCoord luv = get_vertex_uv( texinfo, vert, true );
         LTexCoordd df_uv( uv.get_x() / df_width, -uv.get_y() / df_height );
-        LTexCoordd lm_uv( ( ld->midtexs[0] + ( uv.get_x() - ld->midpolys[0] ) / TEXTURE_STEP ) / ld->texsize[0],
-                          -( ld->midtexs[1] + ( uv.get_y() - ld->midpolys[1] ) / TEXTURE_STEP ) / ld->texsize[1] );
+        LTexCoordd lm_uv( ( ld->midtexs[0] + ( luv.get_x() - ld->midpolys[0] ) ) / ld->texsize[0],
+                          -( ld->midtexs[1] + ( luv.get_y() - ld->midpolys[1] ) ) / ld->texsize[1] );
 
         v->set_uv( "diffuse", df_uv );
         v->set_uv( "lightmap", lm_uv );
@@ -436,25 +451,32 @@ PT( Texture ) BSPLoader::try_load_texref( texref_t *tref )
                 return _texref_textures[tref];
         }
 
-        vector_string extensions;
-        extensions.push_back( ".jpg" );
-        extensions.push_back( ".png" );
-        extensions.push_back( ".bmp" );
-        extensions.push_back( ".tif" );
-
         string name = tref->name;
 
-        for ( size_t i = 0; i < extensions.size(); i++ )
+	PT( Texture ) tex = nullptr;
+
+	size_t ext_idx = name.find_last_of( "." );
+	string basename = name.substr( 0, ext_idx );
+	string alpha_file = basename + "_a.rgb";
+        Filename alpha_filename = Filename::from_os_specific( alpha_file );
+	if ( VirtualFileSystem::get_global_ptr()->exists( alpha_filename ) )
+	{
+		// A corresponding alpha file exists for this texture, load that up as well.
+		cout << "Found corresponding alpha file " << alpha_filename.get_fullpath() << " for texture " << name << endl;
+		tex = TexturePool::load_texture( name, alpha_filename );
+	}
+	else
+	{
+		// Just load the texture.
+		tex = TexturePool::load_texture( name );
+	}
+
+        if ( tex != nullptr )
         {
-                string ext = extensions[i];
-                PT( Texture ) tex = TexturePool::load_texture( name + ext );
-                if ( tex != nullptr )
-                {
-                        bspfile_cat.info()
-                                << "Loaded texref " << tref->name << "\n";
-                        _texref_textures[tref] = tex;
-                        return tex;
-                }
+                bspfile_cat.info()
+                        << "Loaded texref " << tref->name << "\n";
+                _texref_textures[tref] = tex;
+                return tex;
         }
 
         return nullptr;
@@ -551,7 +573,7 @@ void BSPLoader::make_faces()
                                         vert = &g_dvertexes[edge->v[1]];
                                 }
 
-                                LTexCoord uv = get_vertex_uv( texinfo, vert );
+                                LTexCoord uv = get_vertex_uv( texinfo, vert, true );
 
                                 if ( uv.get_x() < ld.mins[0] )
                                         ld.mins[0] = uv.get_x();
@@ -564,10 +586,10 @@ void BSPLoader::make_faces()
                                         ld.maxs[1] = uv.get_y();
                         }
 
-                        ld.texmins[0] = floor( ld.mins[0] / TEXTURE_STEP );
-                        ld.texmins[1] = floor( ld.mins[1] / TEXTURE_STEP );
-                        ld.texmaxs[0] = ceil( ld.maxs[0] / TEXTURE_STEP );
-                        ld.texmaxs[1] = ceil( ld.maxs[1] / TEXTURE_STEP );
+                        ld.texmins[0] = floor( ld.mins[0] );
+                        ld.texmins[1] = floor( ld.mins[1] );
+                        ld.texmaxs[0] = ceil( ld.maxs[0] );
+                        ld.texmaxs[1] = ceil( ld.maxs[1] );
 
                         ld.texsize[0] = floor( (double)( ld.texmaxs[0] - ld.texmins[0] ) + 1 );
                         ld.texsize[1] = floor( (double)( ld.texmaxs[1] - ld.texmins[1] ) + 1 );
@@ -583,7 +605,7 @@ void BSPLoader::make_faces()
                                 PNMImage lm_img = lightmap_image_from_face( face, &ld );
 #ifdef EXTRACT_LIGHTMAPS
                                 stringstream ss;
-                                ss << "extractedLightmaps/lightmap_" << face << ".jpg";
+                                ss << "extractedLightmaps/lightmap_" << facenum << ".jpg";
                                 PNMFileTypeJPG jpg;
                                 lm_img.write( Filename( ss.str() ), &jpg );
 #endif
@@ -644,7 +666,7 @@ void BSPLoader::make_faces()
 
                         if ( has_texture )
                         {
-                                faceroot.set_texture( diffuse_stage, TexturePool::load_texture( tex->get_filename() ) );
+                                faceroot.set_texture( diffuse_stage, tex );
                         }
 
                         if ( has_lighting )
@@ -653,6 +675,12 @@ void BSPLoader::make_faces()
                         }
 
                         faceroot.wrt_reparent_to( modelroot );
+                        if ( Texture::has_alpha( tex->get_format() ) )
+                        {
+                                bspfile_cat.info()
+                                        << "Texture " << tex->get_name() << " has transparency\n";
+                                faceroot.set_transparency( TransparencyAttrib::M_dual, 1 );
+                        }
 
                         NodePathCollection gn_npc = faceroot.find_all_matches( "**/+GeomNode" );
                         for ( int i = 0; i < gn_npc.get_num_paths(); i++ )
@@ -818,8 +846,9 @@ void BSPLoader::load_entities()
                         int phys_type = IntForKey( ent, "physics" );
                         bool two_sided = (bool)IntForKey( ent, "twosided" );
 
-                        NodePath prop_np = _proproot.attach_new_node( loader->load_sync( Filename( mdl_path ) ) );
-                        if ( prop_np.is_empty() )
+                        PT( PandaNode ) propnode = loader->load_sync( Filename( mdl_path ) );
+                        NodePath prop_np;
+                        if ( propnode == nullptr )
                         {
                                 bspfile_cat.warning()
                                         << "Could not load static prop " << mdl_path << "!\n";
@@ -828,6 +857,7 @@ void BSPLoader::load_entities()
                         {
                                 bspfile_cat.info()
                                         << "Loaded static prop " << mdl_path << "...\n";
+                                prop_np = _proproot.attach_new_node( propnode );
                                 prop_np.set_pos( origin[0], origin[1], origin[2] );
                                 prop_np.set_hpr( angles[1] - 90, angles[0], angles[2] );
                                 prop_np.set_scale( scale[0] * PANDA_TO_HAMMER, scale[1] * PANDA_TO_HAMMER, scale[2] * PANDA_TO_HAMMER );
@@ -1030,12 +1060,12 @@ AsyncTask::DoneStatus BSPLoader::update_task( GenericAsyncTask *task, void *data
 
 void BSPLoader::read_materials_file()
 {
-        if ( !_materials_file.exists() )
+        VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
+
+        if ( !vfs->exists( _materials_file ) )
         {
                 return;
         }
-
-        VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
         string data = vfs->read_file( _materials_file, true );
 
         string texname = "";
@@ -1112,11 +1142,11 @@ bool BSPLoader::read( const Filename &file )
 
         _leaf_pvs.resize( MAX_MAP_LEAFS );
 
+        VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
+
         bspfile_cat.info()
                 << "Reading " << file.get_fullpath() << "...\n";
-        nassertr( file.exists(), false );
-
-        VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
+        nassertr( vfs->exists( file ), false );
 
         string data;
         nassertr( vfs->read_file( file, data, true ), false );

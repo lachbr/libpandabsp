@@ -76,6 +76,12 @@ BoundingBox *CBoundsEntity::get_bounds() const
         return _bounds;
 }
 
+void CBoundsEntity::fillin_bounds( LPoint3 &mins, LPoint3 &maxs )
+{
+        mins.set( _mdl->mins[0], _mdl->mins[1], _mdl->mins[2] );
+        maxs.set( _mdl->maxs[0], _mdl->maxs[1], _mdl->maxs[2] );
+}
+
 void CBoundsEntity::set_data( int entnum, entity_t *ent, BSPLoader *loader, dmodel_t *mdl )
 {
         CBaseEntity::set_data( entnum, ent, loader );
