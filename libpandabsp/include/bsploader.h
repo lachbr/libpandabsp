@@ -211,6 +211,9 @@ private:
 
         void remove_model( int modelnum );
 
+        INLINE LRGBColor color_shift_pixel( colorrgbexp32_t *sample );
+        INLINE PN_stdfloat gamma_encode( PN_stdfloat linear );
+
 #ifdef HAVE_PYTHON
 	void make_pyent( CBaseEntity *cent, PyObject *pyent, const string &classname );
 #endif
@@ -240,6 +243,7 @@ private:
         NodePath _camera;
 	NodePath _render;
 	Filename _materials_file;
+        PN_stdfloat _gamma;
 	typedef pmap<string, string> Tex2Mat;
 	Tex2Mat _materials;
 	GraphicsStateGuardian *_gsg;

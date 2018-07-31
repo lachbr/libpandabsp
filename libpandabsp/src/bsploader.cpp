@@ -1,6 +1,7 @@
 #include "bsploader.h"
 #include "bspfile.h"
 #include "entity.h"
+#include "mathlib.h"
 
 #include <array>
 #include <bitset>
@@ -209,8 +210,8 @@ size_t BSPFaceAttrib::get_hash_impl() const
 //#define VISUALIZE_PLANE_COLORS
 //#define EXTRACT_LIGHTMAPS
 
-#define DEFAULT_GAMMA 1.0
-#define QRAD_GAMMA 0.55
+#define DEFAULT_GAMMA 2.2
+#define QRAD_GAMMA 1.8
 #define DEFAULT_OVERBRIGHT 1
 #define ATTN_FACTOR 0.03
 
@@ -288,11 +289,25 @@ double linear_to_vert_light( double c )
         return lineartovertex[idx];
 }
 
-LRGBColor color_shift_pixel( unsigned char *sample )
+INLINE PN_stdfloat BSPLoader::gamma_encode( PN_stdfloat linear )
 {
-        return LRGBColor( linear_to_vert_light( sample[0] / 255.0 ),
-                          linear_to_vert_light( sample[1] / 255.0 ),
-                          linear_to_vert_light( sample[2] / 255.0 ) );
+        return pow( linear, 1.0 / _gamma );
+}
+
+INLINE LRGBColor BSPLoader::color_shift_pixel( colorrgbexp32_t *colsample )
+{
+        //return LRGBColor( sample[0] / 255.0, sample[1] / 255.0, sample[2] / 255.0 );
+
+        //return LRGBColor( linear_to_vert_light( sample[0] / 255.0 ),
+        //                  linear_to_vert_light( sample[1] / 255.0 ),
+        //                  linear_to_vert_light( sample[2] / 255.0 ) );
+
+        LVector3 sample( 0 );
+        ColorRGBExp32ToVector( *colsample, sample );
+
+        return LRGBColor( gamma_encode( sample[0] / 255.0 ),
+                          gamma_encode( sample[1] / 255.0 ),
+                          gamma_encode( sample[2] / 255.0 ) );
 }
 
 BSPLoader *BSPLoader::_global_ptr = nullptr;
@@ -306,6 +321,8 @@ PNMImage BSPLoader::lightmap_image_from_face( dface_t *face, FaceLightmapData *l
 
         if ( num_luxels <= 0 )
         {
+                bspfile_cat.warning()
+                        << "Face has 0 size lightmap, will appear fullbright" << std::endl;
                 PNMImage img( 16, 16 );
                 img.fill( 1.0 );
                 return img;
@@ -331,8 +348,8 @@ PNMImage BSPLoader::lightmap_image_from_face( dface_t *face, FaceLightmapData *l
                                 }
 
                                 // From p3rad
-                                int sample_idx = face->lightofs + lightstyle * num_luxels * 3 + luxel * 3;
-                                unsigned char *sample = &g_dlightdata[sample_idx];
+                                int sample_idx = face->lightofs + lightstyle * num_luxels + luxel;
+                                colorrgbexp32_t *sample = &g_dlightdata[sample_idx];
 
                                 luxel_col.componentwise_mult( color_shift_pixel( sample ) );
 
@@ -1292,9 +1309,6 @@ void BSPLoader::cleanup()
 
         _materials.clear();
 
-        if ( g_dlightdata != nullptr )
-                dtexdata_free();
-
         _leaf_pvs.clear();
 
         _leaf_aabb_lock.acquire();
@@ -1341,9 +1355,10 @@ BSPLoader::BSPLoader() :
         _vis_leafs( false ),
         _want_lightmaps( true ),
         _curr_leaf_idx( -1 ),
-        _leaf_aabb_lock( "leafAABBMutex" )
+        _leaf_aabb_lock( "leafAABBMutex" ),
+        _gamma( DEFAULT_GAMMA )
 {
-        set_gamma( DEFAULT_GAMMA, DEFAULT_OVERBRIGHT );
+        //set_gamma( DEFAULT_GAMMA, DEFAULT_OVERBRIGHT );
 }
 
 void BSPLoader::set_camera( const NodePath &camera )
@@ -1363,7 +1378,8 @@ void BSPLoader::set_want_visibility( bool flag )
 
 void BSPLoader::set_gamma( PN_stdfloat gamma, int overbright )
 {
-        build_gamma_table( gamma, overbright );
+        //build_gamma_table( gamma, overbright );
+        _gamma = gamma;
 }
 
 void BSPLoader::set_gsg( GraphicsStateGuardian *gsg )
