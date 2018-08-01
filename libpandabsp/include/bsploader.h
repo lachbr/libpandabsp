@@ -206,6 +206,7 @@ public:
 private:
         void make_faces();
 	void load_entities();
+        void load_static_props();
 
 	void read_materials_file();
 

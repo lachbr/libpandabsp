@@ -39,6 +39,8 @@
 #include <cullHandler.h>
 #include <modelRoot.h>
 #include <lightReMutexHolder.h>
+#include <geomVertexData.h>
+#include <geomVertexRewriter.h>
 
 TypeHandle BSPGeomNode::_type_handle;
 
@@ -479,7 +481,9 @@ PT( Texture ) BSPLoader::try_load_texref( texref_t *tref )
 	if ( VirtualFileSystem::get_global_ptr()->exists( alpha_filename ) )
 	{
 		// A corresponding alpha file exists for this texture, load that up as well.
-		cout << "Found corresponding alpha file " << alpha_filename.get_fullpath() << " for texture " << name << endl;
+                bspfile_cat.info()
+                        << "Found corresponding alpha file " << alpha_filename.get_fullpath()
+                        << " for texture " << name << "\n";
 		tex = TexturePool::load_texture( name, alpha_filename );
 	}
 	else
@@ -696,7 +700,7 @@ void BSPLoader::make_faces()
                         {
                                 bspfile_cat.info()
                                         << "Texture " << tex->get_name() << " has transparency\n";
-                                faceroot.set_transparency( TransparencyAttrib::M_dual, 1 );
+                                faceroot.set_transparency( TransparencyAttrib::M_multisample, 1 );
                         }
 
                         NodePathCollection gn_npc = faceroot.find_all_matches( "**/+GeomNode" );
@@ -770,6 +774,191 @@ static int extract_modelnum( entity_t *ent )
                 return atoi( model.substr( 1 ).c_str() );
         }
         return -1;
+}
+
+void BuildGeomNodes_r( PandaNode *node, pvector<PT( GeomNode )> &list )
+{
+        if ( node->is_of_type( GeomNode::get_class_type() ) )
+        {
+                list.push_back( DCAST( GeomNode, node ) );
+        }
+
+        for ( int i = 0; i < node->get_num_children(); i++ )
+        {
+                BuildGeomNodes_r( node->get_child( i ), list );
+        }
+}
+
+pvector<PT( GeomNode )> BuildGeomNodes( const NodePath &root )
+{
+        pvector<PT( GeomNode )> list;
+
+        BuildGeomNodes_r( root.node(), list );
+
+        return list;
+}
+
+struct VDataDef
+{
+        CPT( GeomVertexData ) vdata;
+        CPT( Geom ) geom;
+};
+
+struct GNWG_result
+{
+        PT( GeomNode ) geomnode;
+        int geomidx;
+};
+
+INLINE GNWG_result get_geomnode_with_geom( const NodePath &root, CPT( Geom ) geom )
+{
+        GNWG_result result;
+        result.geomnode = nullptr;
+
+        NodePathCollection npc = root.find_all_matches( "**/+GeomNode" );
+        for ( int i = 0; i < npc.get_num_paths(); i++ )
+        {
+                PT( GeomNode ) gn = DCAST( GeomNode, npc.get_path( i ).node() );
+                for ( int j = 0; j < gn->get_num_geoms(); j++ )
+                {
+                        CPT( Geom ) g = gn->get_geom( j );
+                        if ( geom == g )
+                        {
+                                result.geomnode = gn;
+                                result.geomidx = j;
+                        }
+                }
+        }
+
+        return result;
+}
+
+void BSPLoader::load_static_props()
+{
+        for ( size_t propnum = 0; propnum < g_dstaticprops.size(); propnum++ )
+        {
+                dstaticprop_t *prop = &g_dstaticprops[propnum];
+
+                PT( PandaNode ) proproot = Loader::get_global_ptr()->load_sync( prop->name );
+                if ( proproot == nullptr )
+                {
+                        bspfile_cat.warning()
+                                << "Could not load static prop " << prop->name << "\n";
+                        continue;
+                }
+
+                NodePath propnp( proproot );
+                LPoint3 pos;
+                VectorCopy( prop->pos, pos );
+                LVector3 hpr;
+                VectorCopy( prop->hpr, hpr );
+                LVector3 scale;
+                VectorCopy( prop->scale, scale );
+                propnp.set_pos( pos );
+                propnp.set_hpr( hpr[1] - 90, hpr[0], hpr[2] );
+                propnp.set_scale( scale * 16 );
+                propnp.reparent_to( _proproot );
+                propnp.clear_model_nodes();
+                propnp.flatten_light();
+
+                if ( prop->first_vertex_data != -1 )
+                {
+                        // prop has pre computed per vertex lighting
+                        pvector<VDataDef> vdatadefs;
+
+                        // this is actually the most annoying code in the world,
+                        // since panda3d makes geoms and all its data const pointers
+
+                        // build a list of unique GeomVertexDatas with a list of each Geom that shares it.
+                        // it better be in the same order as the dstaticprop vertex datas
+                        pvector<PT( GeomNode )> geomnodes = BuildGeomNodes( propnp );
+                        for ( size_t i = 0; i < geomnodes.size(); i++ )
+                        {
+                                PT( GeomNode ) gn = geomnodes[i];
+                                for ( int j = 0; j < gn->get_num_geoms(); j++ )
+                                {
+                                        CPT( Geom ) geom = gn->get_geom( j );
+                                        CPT( GeomVertexData ) vdata = geom->get_vertex_data();
+
+                                        VDataDef def;
+                                        def.vdata = vdata;
+                                        def.geom = geom;
+                                        vdatadefs.push_back( def );
+                                }
+                        }
+
+                        // check for a mismatch
+                        if ( vdatadefs.size() != prop->num_vertex_datas )
+                        {
+                                bspfile_cat.warning()
+                                        << "Static prop " << prop->name << " vertex data count mismatch. "
+                                        << "Will appear fullbright. "
+                                        << "Has the model been changed since last map compile?\n";
+                                bspfile_cat.warning()
+                                        << "Loaded model has " << vdatadefs.size() << " unique vertex datas,\n"
+                                        << "dstaticprop has " << prop->num_vertex_datas << "\n";
+                                continue;
+                        }
+
+                        // now modulate the vertex colors to apply the lighting
+                        for ( int i = 0; i < prop->num_vertex_datas; i++ )
+                        {
+                                dstaticpropvertexdata_t *dvdata = &g_dstaticpropvertexdatas[prop->first_vertex_data + i];
+                                VDataDef *def = &vdatadefs[i];
+
+                                PT( GeomVertexData ) mod_vdata = new GeomVertexData( *def->vdata );
+                                if ( !mod_vdata->has_column( InternalName::get_color() ) )
+                                {
+                                        PT( GeomVertexFormat ) format = new GeomVertexFormat( *mod_vdata->get_format() );
+                                        PT( GeomVertexArrayFormat ) array = format->modify_array( 0 );
+                                        array->add_column( InternalName::get_color(), 4, GeomEnums::NT_uint8, GeomEnums::C_color );
+                                        format->set_array( 0, array );
+                                        mod_vdata->set_format( GeomVertexFormat::register_format( format ) );
+                                }
+                                GeomVertexRewriter color_mod( mod_vdata, InternalName::get_color() );
+
+                                if ( dvdata->num_lighting_samples != mod_vdata->get_num_rows() )
+                                {
+                                        bspfile_cat.warning()
+                                                << "For static prop " << prop->name << ":\n"
+                                                << "number of lighting samples does not match number of vertices in vdata\n"
+                                                << "number of lighting samples: " << dvdata->num_lighting_samples << "\n"
+                                                << "number of vertices: " << mod_vdata->get_num_rows() << "\n";
+                                        continue;
+                                }
+
+                                for ( int j = 0; j < dvdata->num_lighting_samples; j++ )
+                                {
+                                        colorrgbexp32_t *sample = &g_staticproplighting[dvdata->first_lighting_sample + j];
+                                        LRGBColor vtx_rgb = color_shift_pixel( sample );
+                                        LColorf vtx_color( vtx_rgb[0], vtx_rgb[1], vtx_rgb[2], 1.0 );
+
+                                        // get the current vertex color and multiply it by our lighting sample
+                                        color_mod.set_row( j );
+                                        LColorf curr_color( color_mod.get_data4f() );
+                                        color_mod.set_row( j );
+                                        curr_color.componentwise_mult( vtx_color );
+                                        // now apply it to the modified vertex data
+                                        color_mod.set_data4f( curr_color );
+                                }
+
+                                // apply the modified vertex data to each geom that shares this vertex data
+                                CPT( Geom ) geom = def->geom;
+                                GNWG_result res = get_geomnode_with_geom( propnp, geom );
+                                PT( Geom ) mod_geom = res.geomnode->modify_geom( res.geomidx );
+                                mod_geom->set_vertex_data( mod_vdata );
+                                res.geomnode->set_geom( res.geomidx, mod_geom );
+                        }
+
+                        // since this prop has static lighting applied to the vertices
+                        // ignore any shaders, dynamic lights, or materials.
+                        // also make sure the vertex colors are rendered.
+                        propnp.set_shader_off( 1 );
+                        propnp.set_light_off( 1 );
+                        propnp.set_material_off( 1 );
+                        propnp.set_attrib( ColorAttrib::make_vertex(), 2 );
+                }
+        }
 }
 
 void BSPLoader::load_entities()
@@ -853,34 +1042,6 @@ void BSPLoader::load_entities()
                         _render.set_light( sun_np );
 
                         _nodepath_entities.push_back( group );
-                }
-                else if ( classname == "prop_static" )
-                {
-                        // A static prop
-                        string mdl_path = ValueForKey( ent, "modelpath" );
-                        vec_t scale[3];
-                        GetVectorForKey( ent, "scale", scale );
-                        int phys_type = IntForKey( ent, "physics" );
-                        bool two_sided = (bool)IntForKey( ent, "twosided" );
-
-                        PT( PandaNode ) propnode = loader->load_sync( Filename( mdl_path ) );
-                        NodePath prop_np;
-                        if ( propnode == nullptr )
-                        {
-                                bspfile_cat.warning()
-                                        << "Could not load static prop " << mdl_path << "!\n";
-                        }
-                        else
-                        {
-                                bspfile_cat.info()
-                                        << "Loaded static prop " << mdl_path << "...\n";
-                                prop_np = _proproot.attach_new_node( propnode );
-                                prop_np.set_pos( origin[0], origin[1], origin[2] );
-                                prop_np.set_hpr( angles[1] - 90, angles[0], angles[2] );
-                                prop_np.set_scale( scale[0] * PANDA_TO_HAMMER, scale[1] * PANDA_TO_HAMMER, scale[2] * PANDA_TO_HAMMER );
-                                prop_np.set_two_sided( two_sided, 1 );
-                                _nodepath_entities.push_back( prop_np );
-                        }
                 }
                 else if ( classname == "env_fog" )
                 {
@@ -1209,6 +1370,7 @@ bool BSPLoader::read( const Filename &file )
 
         make_faces();
         load_entities();
+        load_static_props();
 
         if ( _vis_leafs )
         {
@@ -1228,12 +1390,6 @@ bool BSPLoader::read( const Filename &file )
 
         _update_task = new GenericAsyncTask( file.get_basename_wo_extension() + "-updateTask", update_task, this );
         AsyncTaskManager::get_global_ptr()->add( _update_task );
-
-        //NodePathCollection brushfacenpc = _brushroot.find_all_matches( "**/+GeomNode" );
-        //for ( int i = 0; i < brushfacenpc.get_num_paths(); i++ )
-        //{
-        //	DCAST( GeomNode, brushfacenpc.get_path( i ).node() )->set_bsp_mode( _want_visibility );
-        //}
 
         return true;
 }
