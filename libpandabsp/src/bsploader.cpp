@@ -1,4 +1,5 @@
 #include "bsploader.h"
+
 #include "bspfile.h"
 #include "entity.h"
 #include "mathlib.h"
@@ -11,6 +12,7 @@
 #include <eggData.h>
 #include <eggPolygon.h>
 #include <eggVertexUV.h>
+#include <eggWriter.h>
 #include <geomNode.h>
 #include <load_egg_file.h>
 #include <loader.h>
@@ -41,6 +43,7 @@
 #include <lightReMutexHolder.h>
 #include <geomVertexData.h>
 #include <geomVertexRewriter.h>
+#include <sceneGraphReducer.h>
 
 TypeHandle BSPGeomNode::_type_handle;
 
@@ -249,126 +252,11 @@ PT( GeomNode ) UTIL_make_cube_outline( const LPoint3 &min, const LPoint3 &max,
 
 void GetParamsFromEnt( entity_t *mapent )
 {
-        int num_epairs = sizeof( mapent->epairs ) / sizeof( epair_t );
 }
 
 NotifyCategoryDef( bspfile, "" );
 
-static float lineartovertex[4096];
-
-static void build_gamma_table( float gamma, int overbright )
-{
-        float f;
-        float overbright_factor = 1.0;
-        if ( overbright == 2 )
-        {
-                overbright_factor = 0.5;
-        }
-        else if ( overbright == 4 )
-        {
-                overbright_factor = 0.25;
-        }
-
-        for ( int i = 0; i < 4096; i++ )
-        {
-                f = pow( i / 1024.0, 1.0 / gamma );
-                lineartovertex[i] = f * overbright_factor;
-                if ( lineartovertex[i] > 1 )
-                {
-                        lineartovertex[i] = 1.0;
-                }
-
-        }
-}
-
-double linear_to_vert_light( double c )
-{
-        int idx = (int)( c * 1024.0 + 0.5 );
-        if ( idx > 4095 )
-        {
-                idx = 4095;
-        }
-        else if ( idx < 0 )
-        {
-                idx = 0;
-        }
-
-        return lineartovertex[idx];
-}
-
-INLINE PN_stdfloat BSPLoader::gamma_encode( PN_stdfloat linear )
-{
-        return pow( linear, 1.0 / _gamma );
-}
-
-INLINE LRGBColor BSPLoader::color_shift_pixel( colorrgbexp32_t *colsample )
-{
-        //return LRGBColor( sample[0] / 255.0, sample[1] / 255.0, sample[2] / 255.0 );
-
-        //return LRGBColor( linear_to_vert_light( sample[0] / 255.0 ),
-        //                  linear_to_vert_light( sample[1] / 255.0 ),
-        //                  linear_to_vert_light( sample[2] / 255.0 ) );
-
-        LVector3 sample( 0 );
-        ColorRGBExp32ToVector( *colsample, sample );
-
-        return LRGBColor( gamma_encode( sample[0] / 255.0 ),
-                          gamma_encode( sample[1] / 255.0 ),
-                          gamma_encode( sample[2] / 255.0 ) );
-}
-
 BSPLoader *BSPLoader::_global_ptr = nullptr;
-
-
-PNMImage BSPLoader::lightmap_image_from_face( dface_t *face, FaceLightmapData *ld )
-{
-        int width = face->lightmap_size[0] + 1;
-        int height = face->lightmap_size[1] + 1;
-        int num_luxels = width * height;
-
-        if ( num_luxels <= 0 )
-        {
-                bspfile_cat.warning()
-                        << "Face has 0 size lightmap, will appear fullbright" << std::endl;
-                PNMImage img( 16, 16 );
-                img.fill( 1.0 );
-                return img;
-        }
-
-        PNMImage img( width, height );
-
-        int luxel = 0;
-
-        for ( int y = 0; y < height; y++ )
-        {
-                for ( int x = 0; x < width; x++ )
-                {
-                        LRGBColor luxel_col( 1, 1, 1 );
-
-                        // To get the final pixel color, multiply all of the individual lightstyle samples together.
-                        for ( int lightstyle = 0; lightstyle < 4; lightstyle++ )
-                        {
-                                if ( face->styles[lightstyle] == 0xFF )
-                                {
-                                        // Doesn't have this lightstyle.
-                                        continue;
-                                }
-
-                                // From p3rad
-                                int sample_idx = face->lightofs + lightstyle * num_luxels + luxel;
-                                colorrgbexp32_t *sample = &g_dlightdata[sample_idx];
-
-                                luxel_col.componentwise_mult( color_shift_pixel( sample ) );
-
-                        }
-
-                        img.set_xel( x, y, luxel_col );
-                        luxel++;
-                }
-        }
-
-        return img;
-}
 
 void BSPLoader::cull_node_path_against_leafs( NodePath &np, bool part_of_result )
 {
@@ -405,7 +293,7 @@ int BSPLoader::find_leaf( const LPoint3 &pos )
 
         }
 
-        return -( i + 1 );
+        return ~i;
 }
 
 LTexCoord BSPLoader::get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool lightmap ) const
@@ -459,8 +347,32 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
         LTexCoord uv = get_vertex_uv( texinfo, vert );
         LTexCoord luv = get_vertex_uv( texinfo, vert, true );
         LTexCoordd df_uv( uv.get_x() / df_width, -uv.get_y() / df_height );
-        LTexCoordd lm_uv( ( ld->midtexs[0] + ( luv.get_x() - ld->midpolys[0] ) ) / ld->texsize[0],
-                          -( ld->midtexs[1] + ( luv.get_y() - ld->midpolys[1] ) ) / ld->texsize[1] );
+        LTexCoordd lm_uv( 0, 0 );
+
+        if ( ld->faceentry != nullptr )
+        {
+                // This face has an entry in a lightmap palette.
+                // Transform the UVs.
+
+                double midtexs[2];
+                midtexs[0] = ld->faceentry->flipped ? ld->midtexs[1] : ld->midtexs[0];
+                midtexs[1] = ld->faceentry->flipped ? ld->midtexs[0] : ld->midtexs[1];
+                double midpolys[2];
+                midpolys[0] = ld->faceentry->flipped ? ld->midpolys[1] : ld->midpolys[0];
+                midpolys[1] = ld->faceentry->flipped ? ld->midpolys[0] : ld->midpolys[1];
+                double dluv[2];
+                dluv[0] = ld->faceentry->flipped ? luv[1] : luv[0];
+                dluv[1] = ld->faceentry->flipped ? luv[0] : luv[1];
+                int texsize[2];
+                texsize[0] = ld->faceentry->flipped ? face->lightmap_size[1] : face->lightmap_size[0];
+                texsize[1] = ld->faceentry->flipped ? face->lightmap_size[0] : face->lightmap_size[1];
+
+                lm_uv.set( ( midtexs[0] + ld->faceentry->xshift + ( dluv[0] - midpolys[0] ) ),
+                          ( midtexs[1] + ld->faceentry->yshift + ( dluv[1] - midpolys[1] ) ) );
+
+                lm_uv[0] /= ld->faceentry->palette_size[0];
+                lm_uv[1] /= -ld->faceentry->palette_size[1];
+        }
 
         v->set_uv( "diffuse", df_uv );
         v->set_uv( "lightmap", lm_uv );
@@ -532,12 +444,6 @@ void BSPLoader::make_faces()
                 NodePath modelroot = _brushroot.attach_new_node( name.str() );
                 modelroot.set_pos( ( ( mins + maxs ) / 2.0 ) + origin );
 
-                PT( TextureStage ) diffuse_stage = new TextureStage( "diffuse_stage" );
-                diffuse_stage->set_texcoord_name( "diffuse" );
-                PT( TextureStage ) lightmap_stage = new TextureStage( "lightmap_stage" );
-                lightmap_stage->set_texcoord_name( "lightmap" );
-                lightmap_stage->set_mode( TextureStage::M_modulate );
-
                 for ( int facenum = firstface; facenum < firstface + numfaces; facenum++ )
                 {
                         PT( EggData ) data = new EggData;
@@ -574,7 +480,7 @@ void BSPLoader::make_faces()
                         bool has_texture = !skip;
 
 
-                        PT( Texture ) lm_tex = new Texture( "lightmap_texture" );
+                        LightmapPaletteDirectory::LightmapFacePaletteEntry *lmfaceentry = _lightmap_dir.face_index[facenum];
 
                         /* ************* FROM P3RAD ************* */
 
@@ -625,20 +531,7 @@ void BSPLoader::make_faces()
                         ld.midtexs[0] = ld.texsize[0] / 2.0;
                         ld.midtexs[1] = ld.texsize[1] / 2.0;
 
-                        if ( has_lighting )
-                        {
-                                // Generate a lightmap texture from the samples
-                                PNMImage lm_img = lightmap_image_from_face( face, &ld );
-#ifdef EXTRACT_LIGHTMAPS
-                                stringstream ss;
-                                ss << "extractedLightmaps/lightmap_" << facenum << ".jpg";
-                                PNMFileTypeJPG jpg;
-                                lm_img.write( Filename( ss.str() ), &jpg );
-#endif
-                                lm_tex->load( lm_img );
-                                lm_tex->set_magfilter( SamplerState::FT_linear );
-                                lm_tex->set_minfilter( SamplerState::FT_linear_mipmap_linear );
-                        }
+                        ld.faceentry = lmfaceentry;
 
                         int last_edge = face->firstedge + face->numedges;
                         int first_edge = face->firstedge;
@@ -692,12 +585,12 @@ void BSPLoader::make_faces()
 
                         if ( has_texture )
                         {
-                                faceroot.set_texture( diffuse_stage, tex );
+                                faceroot.set_texture( _diffuse_stage, tex );
                         }
 
                         if ( has_lighting )
                         {
-                                faceroot.set_texture( lightmap_stage, lm_tex );
+                                faceroot.set_texture( _lightmap_stage, lmfaceentry->palette->palette_tex );
                         }
 
                         faceroot.wrt_reparent_to( modelroot );
@@ -767,8 +660,6 @@ LColor color_from_value( const string &value, bool scale = true )
         LColor col( r, g, b, 1.0 );
 
         return col;
-
-        //return LColor( r, g, b, 1.0 );
 }
 
 static int extract_modelnum( entity_t *ent )
@@ -935,7 +826,7 @@ void BSPLoader::load_static_props()
                                 for ( int j = 0; j < dvdata->num_lighting_samples; j++ )
                                 {
                                         colorrgbexp32_t *sample = &g_staticproplighting[dvdata->first_lighting_sample + j];
-                                        LRGBColor vtx_rgb = color_shift_pixel( sample );
+                                        LRGBColor vtx_rgb = color_shift_pixel( sample, _gamma );
                                         LColorf vtx_color( vtx_rgb[0], vtx_rgb[1], vtx_rgb[2], 1.0 );
 
                                         // get the current vertex color and multiply it by our lighting sample
@@ -1154,7 +1045,7 @@ void BSPLoader::remove_model( int modelnum )
         }
 }
 
-bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
+INLINE bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
 {
         if ( curr_cluster == cluster )
         {
@@ -1373,6 +1264,9 @@ bool BSPLoader::read( const Filename &file )
         }
         _leaf_aabb_lock.release();
 
+        LightmapPalettizer lmp( this );
+        _lightmap_dir = lmp.palettize_lightmaps();
+
         make_faces();
         load_entities();
         load_static_props();
@@ -1384,8 +1278,8 @@ bool BSPLoader::read( const Filename &file )
                 for ( int leafnum = 0; leafnum < g_dmodels[0].visleafs + 1; leafnum++ )
                 {
                         dleaf_t *leaf = &g_dleafs[leafnum];
-                        LPoint3 mins( leaf->mins[0], leaf->mins[1], leaf->mins[2] );
-                        LPoint3 maxs( leaf->maxs[0], leaf->maxs[1], leaf->maxs[2] );
+                        LPoint3 mins( leaf->mins[0] - LEAF_NUDGE, leaf->mins[1] - LEAF_NUDGE, leaf->mins[2] - LEAF_NUDGE );
+                        LPoint3 maxs( leaf->maxs[0] + LEAF_NUDGE, leaf->maxs[1] + LEAF_NUDGE, leaf->maxs[2] + LEAF_NUDGE );
                         NodePath leafvis = _result.attach_new_node( UTIL_make_cube_outline( mins, maxs, LColor( 1, 1, 1, 1 ), 2 ) );
                         _leaf_visnp.push_back( leafvis );
                 }
@@ -1399,10 +1293,20 @@ bool BSPLoader::read( const Filename &file )
         return true;
 }
 
+INLINE static void flatten_node( const NodePath &node )
+{
+        // Mimic a flatten strong operation, but do not attempt to combine
+        // Geoms, as each face needs to be it's own Geom for effective leaf
+        // culling.
+
+        SceneGraphReducer gr;
+        gr.apply_attribs( node.node() );
+        gr.flatten( node.node(), ~0 );
+}
+
 void BSPLoader::do_optimizations()
 {
         // Do some house keeping
-
 
         for ( size_t i = 0; i < _model_roots.size(); i++ )
         {
@@ -1412,13 +1316,13 @@ void BSPLoader::do_optimizations()
                         // We can do some hard flattening on model 0, which is just all of the
                         // static brushes that aren't tied to entities.
                         mdlroot.clear_model_nodes();
-                        mdlroot.flatten_strong();
+                        flatten_node( mdlroot );
                 }
                 else
                 {
                 	// For non zero models, the origin matters, so we will only flatten the children.
                 	NodePathCollection mdlroots = mdlroot.find_all_matches("**/+ModelRoot");
-                        mdlroot.flatten_strong();
+                        flatten_node( mdlroot );
                         //DCAST( ModelRoot, mdlroot.node() )->set_preserve_transform( ModelRoot::PT_local );
                 	for ( int j = 0; j < mdlroots.get_num_paths(); j++ )
                 	{
@@ -1428,7 +1332,7 @@ void BSPLoader::do_optimizations()
                                 gnp.set_transform( np.get_transform() );
                                 gnp.reparent_to( mdlroot );
                                 np.remove_node();
-                                gnp.flatten_strong();
+                                flatten_node( gnp );
                 	}
                         
                 }
@@ -1502,6 +1406,9 @@ void BSPLoader::cleanup()
 #endif
         _class_entities.clear();
 
+        _lightmap_dir.face_index.clear();
+        _lightmap_dir.face_entries.clear();
+        _lightmap_dir.entries.clear();
 
         if ( !_result.is_empty() )
                 _result.remove_node();
@@ -1517,9 +1424,13 @@ BSPLoader::BSPLoader() :
         _want_lightmaps( true ),
         _curr_leaf_idx( -1 ),
         _leaf_aabb_lock( "leafAABBMutex" ),
-        _gamma( DEFAULT_GAMMA )
+        _gamma( DEFAULT_GAMMA ),
+        _diffuse_stage( new TextureStage( "diffuse_stage" ) ),
+        _lightmap_stage( new TextureStage( "lightmap_stage" ) )
 {
-        //set_gamma( DEFAULT_GAMMA, DEFAULT_OVERBRIGHT );
+        _diffuse_stage->set_texcoord_name( "diffuse" );
+        _lightmap_stage->set_texcoord_name( "lightmap" );
+        _lightmap_stage->set_mode( TextureStage::M_modulate );
 }
 
 void BSPLoader::set_camera( const NodePath &camera )
@@ -1539,8 +1450,12 @@ void BSPLoader::set_want_visibility( bool flag )
 
 void BSPLoader::set_gamma( PN_stdfloat gamma, int overbright )
 {
-        //build_gamma_table( gamma, overbright );
         _gamma = gamma;
+}
+
+INLINE PN_stdfloat BSPLoader::get_gamma() const
+{
+        return _gamma;
 }
 
 void BSPLoader::set_gsg( GraphicsStateGuardian *gsg )

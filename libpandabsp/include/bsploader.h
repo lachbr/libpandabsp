@@ -19,6 +19,8 @@
 #include <boundingBox.h>
 #include <lightReMutex.h>
 
+#include "lightmap_palettes.h"
+
 NotifyCategoryDeclNoExport(bspfile);
 
 struct FaceLightmapData
@@ -27,6 +29,12 @@ struct FaceLightmapData
 	int texmins[2], texmaxs[2];
 	int texsize[2];
 	double midpolys[2], midtexs[2];
+        LightmapPaletteDirectory::LightmapFacePaletteEntry *faceentry;
+
+        FaceLightmapData() :
+                faceentry( nullptr )
+        {
+        }
 };
 
 struct texinfo_s;
@@ -156,6 +164,7 @@ PUBLISHED:
 	void do_optimizations();
 
 	void set_gamma( PN_stdfloat gamma, int overbright = 1 );
+        INLINE PN_stdfloat get_gamma() const;
 	void set_gsg( GraphicsStateGuardian *gsg );
         void set_camera( const NodePath &camera );
 	void set_render( const NodePath &render );
@@ -212,9 +221,6 @@ private:
 
         void remove_model( int modelnum );
 
-        INLINE LRGBColor color_shift_pixel( colorrgbexp32_t *sample );
-        INLINE PN_stdfloat gamma_encode( PN_stdfloat linear );
-
 #ifdef HAVE_PYTHON
 	void make_pyent( CBaseEntity *cent, PyObject *pyent, const string &classname );
 #endif
@@ -228,9 +234,7 @@ private:
                                      dedge_t *edge, texinfo_t *texinfo,
                                      dface_t *face, int k, FaceLightmapData *ld, Texture *tex );
 
-        PNMImage lightmap_image_from_face( dface_t *face, FaceLightmapData *ld );
-
-        bool is_cluster_visible( int curr_cluster, int cluster ) const;
+        INLINE bool is_cluster_visible( int curr_cluster, int cluster ) const;
 
         void update();
         static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
@@ -258,6 +262,9 @@ private:
 	int _curr_leaf_idx;
 	pmap<string, PyTypeObject *> _entity_to_class;
 
+        PT( TextureStage ) _diffuse_stage;
+        PT( TextureStage ) _lightmap_stage;
+
         pmap<texref_t *, PT( Texture )> _texref_textures;
         vector<uint8_t *> _leaf_pvs;
 	pvector<NodePath> _leaf_visnp;
@@ -271,6 +278,7 @@ private:
 	pvector<NodePath> _nodepath_entities;
 	pvector<NodePath> _model_roots;
 	pvector<PT( CBaseEntity )> _class_entities;
+        LightmapPaletteDirectory _lightmap_dir;
 	
         PT( GenericAsyncTask ) _update_task;
 
