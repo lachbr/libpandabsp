@@ -217,6 +217,11 @@ size_t BSPFaceAttrib::get_hash_impl() const
 #define DEFAULT_OVERBRIGHT 1
 #define ATTN_FACTOR 0.03
 
+// Due to some imprecision, we will expand the leaf AABBs just a tiny bit
+// as a compensation. 1.0 seems like a lot, but it is defined in Hammer space
+// where 1 Hammer unit is 0.0625 Panda units.
+#define LEAF_NUDGE 1.0
+
 PT( GeomNode ) UTIL_make_cube_outline( const LPoint3 &min, const LPoint3 &max,
                                        const LColor &color, PN_stdfloat thickness )
 {
@@ -1355,13 +1360,13 @@ bool BSPLoader::read( const Filename &file )
                 _leaf_pvs[i] = pvs;
 
                 PT( BoundingBox ) bbox = new BoundingBox(
-                        LVector3( leaf->mins[0], leaf->mins[1], leaf->mins[2] ),
-                        LVector3( leaf->maxs[0], leaf->maxs[1], leaf->maxs[2] )
+                        LVector3( leaf->mins[0] - LEAF_NUDGE, leaf->mins[1] - LEAF_NUDGE, leaf->mins[2] - LEAF_NUDGE ),
+                        LVector3( leaf->maxs[0] + LEAF_NUDGE, leaf->maxs[1] + LEAF_NUDGE, leaf->maxs[2] + LEAF_NUDGE )
                 );
                 // Also create a scaled down bbox of this leaf which would be the size of nodes relative to render.
                 PT( BoundingBox ) render_bbox = new BoundingBox(
-                        LVector3( leaf->mins[0] / 16.0, leaf->mins[1] / 16.0, leaf->mins[2] / 16.0 ),
-                        LVector3( leaf->maxs[0] / 16.0, leaf->maxs[1] / 16.0, leaf->maxs[2] / 16.0 )
+                        LVector3( (leaf->mins[0] - LEAF_NUDGE) / 16.0, (leaf->mins[1] - LEAF_NUDGE) / 16.0, (leaf->mins[2] - LEAF_NUDGE) / 16.0 ),
+                        LVector3( (leaf->maxs[0] + LEAF_NUDGE) / 16.0, (leaf->maxs[1] + LEAF_NUDGE) / 16.0, (leaf->maxs[2] + LEAF_NUDGE) / 16.0 )
                 );
                 _leaf_render_bboxes[i] = render_bbox;
                 _leaf_bboxs[i] = bbox;
