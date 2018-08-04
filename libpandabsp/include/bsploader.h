@@ -20,6 +20,7 @@
 #include <lightReMutex.h>
 
 #include "lightmap_palettes.h"
+#include "ambient_probes.h"
 
 NotifyCategoryDeclNoExport(bspfile);
 
@@ -174,6 +175,8 @@ PUBLISHED:
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
 
+        void add_node_for_ambient_probes( const NodePath &node );
+
 #ifdef HAVE_PYTHON
 	void link_entity_to_class( const string &entname, PyTypeObject *type );
 	PyObject *get_py_entity_by_target_name( const string &targetname ) const;
@@ -279,11 +282,13 @@ private:
 	pvector<NodePath> _model_roots;
 	pvector<PT( CBaseEntity )> _class_entities;
         LightmapPaletteDirectory _lightmap_dir;
+        AmbientProbeManager _amb_probe_mgr;
 	
         PT( GenericAsyncTask ) _update_task;
 
 	friend class BSPFaceAttrib;
         friend class BSPGeomNode;
+        friend class AmbientProbeManager;
 
         static BSPLoader *_global_ptr;
 

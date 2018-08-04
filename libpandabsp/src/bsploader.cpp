@@ -1119,6 +1119,8 @@ void BSPLoader::update()
                 }
         }
 
+        // Update ambient probes
+        _amb_probe_mgr.update();
 }
 
 AsyncTask::DoneStatus BSPLoader::update_task( GenericAsyncTask *task, void *data )
@@ -1287,10 +1289,17 @@ bool BSPLoader::read( const Filename &file )
 
         swap_geom_nodes( _brushroot );
 
+        _amb_probe_mgr.process_ambient_probes();
+
         _update_task = new GenericAsyncTask( file.get_basename_wo_extension() + "-updateTask", update_task, this );
         AsyncTaskManager::get_global_ptr()->add( _update_task );
 
         return true;
+}
+
+void BSPLoader::add_node_for_ambient_probes( const NodePath &node )
+{
+        _amb_probe_mgr.add_node( node );
 }
 
 INLINE static void flatten_node( const NodePath &node )
@@ -1426,7 +1435,8 @@ BSPLoader::BSPLoader() :
         _leaf_aabb_lock( "leafAABBMutex" ),
         _gamma( DEFAULT_GAMMA ),
         _diffuse_stage( new TextureStage( "diffuse_stage" ) ),
-        _lightmap_stage( new TextureStage( "lightmap_stage" ) )
+        _lightmap_stage( new TextureStage( "lightmap_stage" ) ),
+        _amb_probe_mgr( this )
 {
         _diffuse_stage->set_texcoord_name( "diffuse" );
         _lightmap_stage->set_texcoord_name( "lightmap" );

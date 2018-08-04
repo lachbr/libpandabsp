@@ -55,7 +55,7 @@ struct Palette
         }
 };
 
-NotifyCategoryDeclNoExport( lightmapPalettizer );
+NotifyCategoryDeclNoExport(lightmapPalettizer);
 
 INLINE PN_stdfloat gamma_encode( PN_stdfloat linear, PN_stdfloat gamma )
 {
