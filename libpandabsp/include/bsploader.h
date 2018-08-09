@@ -57,40 +57,6 @@ class GeomNode;
 class BSPLoader;
 
 /**
- * All this class does is override GeomNode's add_for_draw to cull the Geoms
- * against the visible leaf AABBs.
- */
-class EXPCL_PANDABSP BSPGeomNode : public GeomNode
-{
-PUBLISHED:
-        explicit BSPGeomNode( const string &name );
-public:
-        virtual PandaNode *make_copy();
-        virtual PandaNode *combine_with( PandaNode *other );
-        virtual void add_for_draw( CullTraverser *trav, CullTraverserData &data );
-
-public:
-        static TypeHandle get_class_type()
-        {
-                return _type_handle;
-        }
-        static void init_type()
-        {
-                GeomNode::init_type();
-                register_type( _type_handle, "BSPGeomNode",
-                               GeomNode::get_class_type() );
-        }
-        virtual TypeHandle get_type() const
-        {
-                return get_class_type();
-        }
-        virtual TypeHandle force_init_type() { init_type(); return get_class_type(); }
-
-private:
-        static TypeHandle _type_handle;
-};
-
-/**
  * An attribute applied to each face Geom from a BSP file.
  * All it does right now is indicate the material of the face.
  */
@@ -191,10 +157,15 @@ PUBLISHED:
 	NodePath get_entity( int entnum ) const;
 	NodePath get_model( int modelnum ) const;
 
-	void cull_node_path_against_leafs( NodePath &np, bool part_of_result = false );
-
 	int find_leaf( const NodePath &np );
 	int find_leaf( const LPoint3 &pos );
+
+        INLINE bool pvs_bounds_test( const GeometricBoundingVolume *bounds );
+        INLINE CPT( GeometricBoundingVolume ) make_net_bounds( const TransformState *net_transform,
+                                                               const GeometricBoundingVolume *original );
+
+        INLINE bool has_active_level() const;
+        INLINE bool has_visibility() const;
 
 	void cleanup();
 
@@ -213,7 +184,7 @@ PUBLISHED:
 	};
 
 public:
-	INLINE pvector<BoundingBox *> get_visible_leaf_bboxs( bool render = false ) const;
+	INLINE pvector<BoundingBox *> get_visible_leaf_bboxs() const;
 
 private:
         void make_faces();
@@ -242,12 +213,8 @@ private:
         void update();
         static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
 
-        void swap_geom_nodes( const NodePath &root );
-
 private:
 	NodePath _result;
-	NodePath _brushroot;
-	NodePath _proproot;
         NodePath _camera;
 	NodePath _render;
 	Filename _materials_file;
@@ -259,9 +226,9 @@ private:
 	bool _want_visibility;
 	bool _want_lightmaps;
 	bool _vis_leafs;
+        bool _active_level;
 	int _physics_type;
 	pvector<BoundingBox *> _visible_leaf_bboxs;
-	pvector<BoundingBox *> _visible_leaf_render_bboxes;
 	int _curr_leaf_idx;
 	pmap<string, PyTypeObject *> _entity_to_class;
 
@@ -272,7 +239,6 @@ private:
         vector<uint8_t *> _leaf_pvs;
 	pvector<NodePath> _leaf_visnp;
 	pvector<PT( BoundingBox )> _leaf_bboxs;
-	pvector<PT( BoundingBox )> _leaf_render_bboxes;
 #ifdef HAVE_PYTHON
 	pvector<PyObject *> _py_entities;
 	typedef pmap<CBaseEntity *, PyObject *> CEntToPyEnt;
@@ -289,6 +255,7 @@ private:
 	friend class BSPFaceAttrib;
         friend class BSPGeomNode;
         friend class AmbientProbeManager;
+        friend class BSPCullTraverser;
 
         static BSPLoader *_global_ptr;
 
@@ -297,5 +264,7 @@ private:
         // So we'll use a mutex.
         LightReMutex _leaf_aabb_lock;
 };
+
+extern LColor color_from_value( const std::string &value, bool scale = true );
 
 #endif // BSPLOADER_H

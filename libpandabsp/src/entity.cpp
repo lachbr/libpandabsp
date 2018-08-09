@@ -46,7 +46,7 @@ LPoint3 CPointEntity::get_origin() const
 {
 	vec3_t pos;
 	GetVectorForKey( _ent, "origin", pos );
-	return LPoint3( pos[0], pos[1], pos[2] );
+	return LPoint3( pos[0] / 16.0, pos[1] / 16.0, pos[2] / 16.0 );
 }
 
 LVector3 CPointEntity::get_angles() const
@@ -78,16 +78,16 @@ BoundingBox *CBoundsEntity::get_bounds() const
 
 void CBoundsEntity::fillin_bounds( LPoint3 &mins, LPoint3 &maxs )
 {
-        mins.set( _mdl->mins[0], _mdl->mins[1], _mdl->mins[2] );
-        maxs.set( _mdl->maxs[0], _mdl->maxs[1], _mdl->maxs[2] );
+        mins.set( _mdl->mins[0] / 16.0, _mdl->mins[1] / 16.0, _mdl->mins[2] / 16.0 );
+        maxs.set( _mdl->maxs[0] / 16.0, _mdl->maxs[1] / 16.0, _mdl->maxs[2] / 16.0 );
 }
 
 void CBoundsEntity::set_data( int entnum, entity_t *ent, BSPLoader *loader, dmodel_t *mdl )
 {
         CBaseEntity::set_data( entnum, ent, loader );
         _mdl = mdl;
-        _bounds = new BoundingBox( LPoint3( mdl->mins[0] / PANDA_TO_HAMMER, mdl->mins[1] / PANDA_TO_HAMMER, mdl->mins[2] / PANDA_TO_HAMMER ),
-                                   LPoint3( mdl->maxs[0] / PANDA_TO_HAMMER, mdl->maxs[1] / PANDA_TO_HAMMER, mdl->maxs[2] / PANDA_TO_HAMMER ) );
+        _bounds = new BoundingBox( LPoint3( mdl->mins[0] / 16.0, mdl->mins[1] / 16.0, mdl->mins[2] / 16.0 ),
+                                   LPoint3( mdl->maxs[0] / 16.0, mdl->maxs[1] / 16.0, mdl->maxs[2] / 16.0 ) );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,6 +124,6 @@ int CBrushEntity::get_modelnum() const
 
 void CBrushEntity::get_model_bounds( LPoint3 &mins, LPoint3 &maxs )
 {
-	mins.set( _mdl->mins[0], _mdl->mins[1], _mdl->mins[2] );
-	maxs.set( _mdl->maxs[0], _mdl->maxs[1], _mdl->maxs[2] );
+	mins.set( _mdl->mins[0] / 16.0, _mdl->mins[1] / 16.0, _mdl->mins[2] / 16.0 );
+	maxs.set( _mdl->maxs[0] / 16.0, _mdl->maxs[1] / 16.0, _mdl->maxs[2] / 16.0 );
 }

@@ -1,6 +1,7 @@
 #include "config_bsp.h"
 #include "entity.h"
 #include "bsploader.h"
+#include "bsp_render.h"
 
 ConfigureDef( config_bsp );
 ConfigureFn( config_bsp )
@@ -15,9 +16,13 @@ void init_libpandabsp()
                 return;
         initialized = true;
 
-        BSPGeomNode::init_type();
 	BSPFaceAttrib::init_type();
 	CBaseEntity::init_type();
 	CBrushEntity::init_type();
         CBoundsEntity::init_type();
+        BSPRender::init_type();
+        BSPCullTraverser::init_type();
+        BSPRoot::init_type();
+        BSPProp::init_type();
+        BSPModel::init_type();
 }

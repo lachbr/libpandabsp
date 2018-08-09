@@ -1,5 +1,6 @@
 #include "bsploader.h"
 
+#include "bsp_render.h"
 #include "bspfile.h"
 #include "entity.h"
 #include "mathlib.h"
@@ -44,124 +45,17 @@
 #include <geomVertexData.h>
 #include <geomVertexRewriter.h>
 #include <sceneGraphReducer.h>
+#include <characterJointEffect.h>
 
-TypeHandle BSPGeomNode::_type_handle;
-
-BSPGeomNode::BSPGeomNode( const string &name ) :
-        GeomNode( name )
+INLINE static void flatten_node( const NodePath &node )
 {
-}
+        // Mimic a flatten strong operation, but do not attempt to combine
+        // Geoms, as each face needs to be it's own Geom for effective leaf
+        // culling.
 
-PandaNode *BSPGeomNode::make_copy()
-{
-        return new BSPGeomNode( *this );
-}
-
-PandaNode *BSPGeomNode::combine_with( PandaNode *other )
-{
-        if ( is_exact_type( get_class_type() ) &&
-             other->is_exact_type( get_class_type() ) )
-        {
-                // Two BSPGeomNodes can combine by moving Geoms from one to the other.
-                BSPGeomNode *gother = DCAST( BSPGeomNode, other );
-                add_geoms_from( gother );
-                return this;
-        }
-
-        return PandaNode::combine_with( other );
-}
-
-void BSPGeomNode::add_for_draw( CullTraverser *trav, CullTraverserData &data )
-{
-        BSPLoader *loader = BSPLoader::get_global_ptr();
-        LightReMutexHolder holder( loader->_leaf_aabb_lock );
-
-        trav->_geom_nodes_pcollector.add_level( 1 );
-
-        // Get all the Geoms, with no decalling.
-        Geoms geoms = get_geoms( trav->get_current_thread() );
-        int num_geoms = geoms.get_num_geoms();
-        CPT( TransformState ) internal_transform = data.get_internal_transform( trav );
-
-        pvector<BoundingBox *> visible_leaf_aabbs = loader->get_visible_leaf_bboxs();
-        size_t num_aabbs = visible_leaf_aabbs.size();
-
-        for ( int i = 0; i < num_geoms; i++ )
-        {
-                CPT( Geom ) geom = geoms.get_geom( i );
-                if ( geom->is_empty() )
-                {
-                        continue;
-                }
-
-                CPT( RenderState ) state = data._state->compose( geoms.get_geom_state( i ) );
-                if ( state->has_cull_callback() && !state->cull_callback( trav, data ) )
-                {
-                        // Cull.
-                        continue;
-                }
-
-                // Cull the individual Geom against the view frustum/leaf AABBs/cull planes.
-                CPT( BoundingVolume ) geom_volume = geom->get_bounds();
-                const GeometricBoundingVolume *geom_gbv =
-                        DCAST( GeometricBoundingVolume, geom_volume );
-
-                // Cull the Geom bounding volume against the view frustum andor the cull
-                // planes.  Don't bother unless we've got more than one Geom, since
-                // otherwise the bounding volume of the GeomNode is (probably) the same as
-                // that of the one Geom, and we've already culled against that.
-                if ( num_geoms > 1 )
-                {
-                        if ( data._view_frustum != nullptr )
-                        {
-                                int result = data._view_frustum->contains( geom_gbv );
-                                if ( result == BoundingVolume::IF_no_intersection )
-                                {
-                                        // Cull this Geom.
-                                        continue;
-                                }
-                        }
-                        if ( !data._cull_planes->is_empty() )
-                        {
-                                // Also cull the Geom against the cull planes.
-                                int result;
-                                data._cull_planes->do_cull( result, state, geom_gbv );
-                                if ( result == BoundingVolume::IF_no_intersection )
-                                {
-                                        // Cull.
-                                        continue;
-                                }
-                        }
-                }
-
-                if ( loader->_want_visibility )
-                {
-                        // Now, cull the individual Geom against the visible leaf AABBs.
-                        // This is for BSP culling.
-                        bool intersecting_any = false;
-                        for ( size_t j = 0; j < num_aabbs; j++ )
-                        {
-                                BoundingBox *aabb = visible_leaf_aabbs[j];
-                                if ( aabb->contains( geom_gbv ) != BoundingVolume::IF_no_intersection )
-                                {
-                                        intersecting_any = true;
-                                        break;
-                                }
-                        }
-
-                        if ( !intersecting_any )
-                        {
-                                // The Geom did not intersect any visible leaf AABBs.
-                                // Cull.
-                                continue;
-                        }
-                }
-
-                CullableObject *object =
-                        new CullableObject( std::move( geom ), std::move( state ), internal_transform );
-                trav->get_cull_handler()->record_object( object, trav );
-                trav->_geoms_pcollector.add_level( 1 );
-        }
+        SceneGraphReducer gr;
+        gr.apply_attribs( node.node() );
+        gr.flatten( node.node(), ~0 );
 }
 
 PStatCollector bfa_collector( "BSP:BSPFaceAttrib" );
@@ -258,11 +152,6 @@ NotifyCategoryDef( bspfile, "" );
 
 BSPLoader *BSPLoader::_global_ptr = nullptr;
 
-void BSPLoader::cull_node_path_against_leafs( NodePath &np, bool part_of_result )
-{
-        swap_geom_nodes( np );
-}
-
 int BSPLoader::find_leaf( const NodePath &np )
 {
         return find_leaf( np.get_pos( _result ) );
@@ -280,7 +169,7 @@ int BSPLoader::find_leaf( const LPoint3 &pos )
                 const dplane_t *plane = &g_dplanes[node->planenum];
                 float distance = ( plane->normal[0] * pos.get_x() ) +
                         ( plane->normal[1] * pos.get_y() ) +
-                        ( plane->normal[2] * pos.get_z() ) - plane->dist;
+                        ( plane->normal[2] * pos.get_z() ) - ( plane->dist / PANDA_TO_HAMMER );
 
                 if ( distance >= 0.0 )
                 {
@@ -441,7 +330,9 @@ void BSPLoader::make_faces()
 
                 stringstream name;
                 name << "model-" << modelnum;
-                NodePath modelroot = _brushroot.attach_new_node( name.str() );
+                PT( BSPModel ) bspmdl = new BSPModel( name.str() );
+                NodePath modelroot = _result.attach_new_node( bspmdl );
+                //bspmdl->set_preserve_transform( ModelNode::PT_local );
                 modelroot.set_pos( ( ( mins + maxs ) / 2.0 ) + origin );
 
                 for ( int facenum = firstface; facenum < firstface + numfaces; facenum++ )
@@ -581,7 +472,7 @@ void BSPLoader::make_faces()
                                 poly->set_draw_order( 18 );
                         }
 
-                        NodePath faceroot = _brushroot.attach_new_node( load_egg_data( data ) );
+                        NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
 
                         if ( has_texture )
                         {
@@ -641,7 +532,7 @@ LColor color_from_rgb_scalar( vec_t *color )
                        1.0 );
 }
 
-LColor color_from_value( const string &value, bool scale = true )
+LColor color_from_value( const string &value, bool scale )
 {
         double r, g, b, s;
         sscanf( value.c_str(), "%lf %lf %lf %lf", &r, &g, &b, &s );
@@ -729,12 +620,25 @@ INLINE GNWG_result get_geomnode_with_geom( const NodePath &root, CPT( Geom ) geo
         return result;
 }
 
+static void clear_model_nodes_below( const NodePath &top )
+{
+        NodePathCollection npc = top.find_all_matches( "**/+ModelNode" );
+        for ( int i = 0; i < npc.get_num_paths(); i++ )
+        {
+                npc[i].clear_effects();
+                DCAST( ModelNode, npc[i].node() )->set_preserve_transform( ModelNode::PT_drop_node );
+        }
+}
+
 void BSPLoader::load_static_props()
 {
         for ( size_t propnum = 0; propnum < g_dstaticprops.size(); propnum++ )
         {
                 dstaticprop_t *prop = &g_dstaticprops[propnum];
 
+                PT( BSPProp ) propnode = new BSPProp( prop->name );
+                propnode->set_preserve_transform( ModelNode::PT_local );
+                NodePath propnp = _result.attach_new_node( propnode );
                 PT( PandaNode ) proproot = Loader::get_global_ptr()->load_sync( prop->name );
                 if ( proproot == nullptr )
                 {
@@ -743,19 +647,19 @@ void BSPLoader::load_static_props()
                         continue;
                 }
 
-                NodePath propnp( proproot );
+                NodePath propmdl( proproot );
                 LPoint3 pos;
                 VectorCopy( prop->pos, pos );
                 LVector3 hpr;
                 VectorCopy( prop->hpr, hpr );
                 LVector3 scale;
                 VectorCopy( prop->scale, scale );
-                propnp.set_pos( pos );
+                propnp.set_pos( pos / 16.0 );
                 propnp.set_hpr( hpr[1] - 90, hpr[0], hpr[2] );
-                propnp.set_scale( scale * 16 );
-                propnp.reparent_to( _proproot );
-                propnp.clear_model_nodes();
-                propnp.flatten_light();
+                propnp.set_scale( scale );
+                propmdl.reparent_to( propnp );
+                propmdl.clear_model_nodes();
+                propmdl.flatten_light();
 
                 if ( prop->first_vertex_data != -1 )
                 {
@@ -767,7 +671,7 @@ void BSPLoader::load_static_props()
 
                         // build a list of unique GeomVertexDatas with a list of each Geom that shares it.
                         // it better be in the same order as the dstaticprop vertex datas
-                        pvector<PT( GeomNode )> geomnodes = BuildGeomNodes( propnp );
+                        pvector<PT( GeomNode )> geomnodes = BuildGeomNodes( propmdl );
                         for ( size_t i = 0; i < geomnodes.size(); i++ )
                         {
                                 PT( GeomNode ) gn = geomnodes[i];
@@ -840,7 +744,7 @@ void BSPLoader::load_static_props()
 
                                 // apply the modified vertex data to each geom that shares this vertex data
                                 CPT( Geom ) geom = def->geom;
-                                GNWG_result res = get_geomnode_with_geom( propnp, geom );
+                                GNWG_result res = get_geomnode_with_geom( propmdl, geom );
                                 PT( Geom ) mod_geom = res.geomnode->modify_geom( res.geomidx );
                                 mod_geom->set_vertex_data( mod_vdata );
                                 res.geomnode->set_geom( res.geomidx, mod_geom );
@@ -849,10 +753,10 @@ void BSPLoader::load_static_props()
                         // since this prop has static lighting applied to the vertices
                         // ignore any shaders, dynamic lights, or materials.
                         // also make sure the vertex colors are rendered.
-                        propnp.set_shader_off( 1 );
-                        propnp.set_light_off( 1 );
-                        propnp.set_material_off( 1 );
-                        propnp.set_attrib( ColorAttrib::make_vertex(), 2 );
+                        propmdl.set_shader_off( 1 );
+                        propmdl.set_light_off( 1 );
+                        propmdl.set_material_off( 1 );
+                        propmdl.set_attrib( ColorAttrib::make_vertex(), 2 );
                 }
         }
 }
@@ -876,70 +780,7 @@ void BSPLoader::load_entities()
 
                 string targetname = ValueForKey( ent, "targetname" );
 
-                if ( classname == "light" )
-                {
-                        // It's a pointlight!!!
-
-                        LColor color = color_from_value( ValueForKey( ent, "_light" ) );
-                        PN_stdfloat fade = FloatForKey( ent, "_fade" );
-
-                        PT( PointLight ) light = new PointLight( "pointLight-" + targetname );
-                        light->set_color( color );
-                        light->set_attenuation( LVecBase3( 1, 0, fade * ATTN_FACTOR ) );
-                        NodePath light_np = _result.attach_new_node( light );
-                        light_np.set_pos( origin[0], origin[1], origin[2] );
-
-                        _render.set_light( light_np );
-
-                        _nodepath_entities.push_back( light_np );
-                }
-                else if ( classname == "light_spot" )
-                {
-                        // Spotlight
-                        PN_stdfloat cone = FloatForKey( ent, "_cone" );
-                        PN_stdfloat cone2 = FloatForKey( ent, "_cone2" );
-                        PN_stdfloat pitch = FloatForKey( ent, "pitch" );
-                        PN_stdfloat fade = FloatForKey( ent, "_fade" );
-                        LColor color = color_from_value( ValueForKey( ent, "_light" ) );
-
-                        PT( Spotlight ) light = new Spotlight( "spotlight-" + targetname );
-                        light->set_color( color );
-                        //light->set_attenuation( LVecBase3( 1, 0, fade * ATTN_FACTOR ) );
-                        light->get_lens()->set_fov( cone2 * 1.3 );
-                        NodePath light_np = _result.attach_new_node( light );
-                        // Changing the scale of a spotlight breaks it.
-                        light_np.set_pos( origin[0], origin[1], origin[2] );
-                        light_np.set_hpr( angles[1] - 90, angles[0] + pitch, angles[2] );
-                        light_np.set_scale( _render, 1.0 );
-
-                        _render.set_light( light_np );
-
-                        _nodepath_entities.push_back( light_np );
-                }
-                else if ( classname == "light_environment" )
-                {
-                        // Directional light + ambient light
-                        LColor sun_color = color_from_value( ValueForKey( ent, "_light" ), false );
-                        LColor amb_color = color_from_value( ValueForKey( ent, "_diffuse_light" ) );
-
-                        NodePath group = _result.attach_new_node( "light_environment-group" );
-
-                        PT( DirectionalLight ) sun = new DirectionalLight( "directionalLight-" + targetname );
-                        sun->set_color( sun_color );
-                        NodePath sun_np = group.attach_new_node( sun );
-                        sun_np.set_pos( origin[0], origin[1], origin[2] );
-                        sun_np.set_hpr( angles[1] - 90, angles[0], angles[2] );
-
-                        PT( AmbientLight ) amb = new AmbientLight( "ambientLight-" + targetname );
-                        amb->set_color( amb_color );
-                        NodePath amb_np = group.attach_new_node( amb );
-
-                        _render.set_light( amb_np );
-                        _render.set_light( sun_np );
-
-                        _nodepath_entities.push_back( group );
-                }
-                else if ( classname == "env_fog" )
+                if ( classname == "env_fog" )
                 {
                         // Fog
                         PN_stdfloat density = FloatForKey( ent, "fogdensity" );
@@ -988,6 +829,13 @@ void BSPLoader::load_entities()
                                         // they are just hints to the compiler. we can treat
                                         // them as regular brushes part of worldspawn.
                                         modelroot.wrt_reparent_to( get_model( 0 ) );
+                                        flatten_node( modelroot );
+                                        NodePathCollection npc = modelroot.get_children();
+                                        for ( int n = 0; n < npc.get_num_paths(); n++ )
+                                        {
+                                                npc[n].wrt_reparent_to( get_model( 0 ) );
+                                        }
+                                        remove_model( modelnum );
                                         continue;
                                 }
 
@@ -1062,12 +910,10 @@ INLINE bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
         return dat != 0;
 }
 
-INLINE pvector<BoundingBox *> BSPLoader::get_visible_leaf_bboxs( bool render ) const
+INLINE pvector<BoundingBox *> BSPLoader::get_visible_leaf_bboxs() const
 {
         LightReMutexHolder holder( _leaf_aabb_lock );
 
-        if ( render )
-                return _visible_leaf_render_bboxes;
         return _visible_leaf_bboxs;
 }
 
@@ -1077,16 +923,14 @@ void BSPLoader::update()
 
         LightReMutexHolder holder( _leaf_aabb_lock );
 
-        int curr_leaf_idx = find_leaf( _camera.get_pos( _result ) );
+        int curr_leaf_idx = find_leaf( _camera.get_pos( _render ) );
         if ( curr_leaf_idx != _curr_leaf_idx )
         {
                 _curr_leaf_idx = curr_leaf_idx;
                 _visible_leaf_bboxs.clear();
-                _visible_leaf_render_bboxes.clear();
 
                 // Add ourselves to the visible list.
                 _visible_leaf_bboxs.push_back( _leaf_bboxs[curr_leaf_idx] );
-                _visible_leaf_render_bboxes.push_back( _leaf_render_bboxes[curr_leaf_idx] );
 
                 if ( _vis_leafs )
                 {
@@ -1107,7 +951,6 @@ void BSPLoader::update()
                                         _leaf_visnp[i].set_color_scale( LColor( 0, 0, 1, 1 ), 1 );
                                 }
                                 _visible_leaf_bboxs.push_back( _leaf_bboxs[i] );
-                                _visible_leaf_render_bboxes.push_back( _leaf_render_bboxes[i] );
                         }
                         else
                         {
@@ -1118,9 +961,6 @@ void BSPLoader::update()
                         }
                 }
         }
-
-        // Update ambient probes
-        _amb_probe_mgr.update();
 }
 
 AsyncTask::DoneStatus BSPLoader::update_task( GenericAsyncTask *task, void *data )
@@ -1205,15 +1045,11 @@ bool BSPLoader::read( const Filename &file )
 
         read_materials_file();
 
-        _result = NodePath( "maproot" );
+        PT( BSPRoot ) root = new BSPRoot( "maproot" );
+        _result = NodePath( root );
         // Scale down the entire loaded level as a conversion from Hammer units to Panda units.
         // Hammer units are tiny compared to panda.
         _result.set_scale( HAMMER_TO_PANDA );
-        _proproot = _result.attach_new_node( "proproot" );
-        _brushroot = _result.attach_new_node( "brushroot" );
-        _brushroot.set_light_off( 1 );
-        _brushroot.set_material_off( 1 );
-        _brushroot.set_shader_off( 1 );
         _has_pvs_data = false;
 
         _leaf_pvs.resize( MAX_MAP_LEAFS );
@@ -1235,7 +1071,6 @@ bool BSPLoader::read( const Filename &file )
 
         _leaf_aabb_lock.acquire();
         _leaf_bboxs.resize( MAX_MAP_LEAFS );
-        _leaf_render_bboxes.resize( MAX_MAP_LEAFS );
         // Decompress the per leaf visibility data.
         for ( int i = 0; i < g_dmodels[0].visleafs + 1; i++ )
         {
@@ -1253,15 +1088,9 @@ bool BSPLoader::read( const Filename &file )
                 _leaf_pvs[i] = pvs;
 
                 PT( BoundingBox ) bbox = new BoundingBox(
-                        LVector3( leaf->mins[0] - LEAF_NUDGE, leaf->mins[1] - LEAF_NUDGE, leaf->mins[2] - LEAF_NUDGE ),
-                        LVector3( leaf->maxs[0] + LEAF_NUDGE, leaf->maxs[1] + LEAF_NUDGE, leaf->maxs[2] + LEAF_NUDGE )
+                        LVector3( ( leaf->mins[0] - LEAF_NUDGE ) / 16.0, ( leaf->mins[1] - LEAF_NUDGE ) / 16.0, ( leaf->mins[2] - LEAF_NUDGE ) / 16.0 ),
+                        LVector3( ( leaf->maxs[0] + LEAF_NUDGE ) / 16.0, ( leaf->maxs[1] + LEAF_NUDGE ) / 16.0, ( leaf->maxs[2] + LEAF_NUDGE ) / 16.0 )
                 );
-                // Also create a scaled down bbox of this leaf which would be the size of nodes relative to render.
-                PT( BoundingBox ) render_bbox = new BoundingBox(
-                        LVector3( (leaf->mins[0] - LEAF_NUDGE) / 16.0, (leaf->mins[1] - LEAF_NUDGE) / 16.0, (leaf->mins[2] - LEAF_NUDGE) / 16.0 ),
-                        LVector3( (leaf->maxs[0] + LEAF_NUDGE) / 16.0, (leaf->maxs[1] + LEAF_NUDGE) / 16.0, (leaf->maxs[2] + LEAF_NUDGE) / 16.0 )
-                );
-                _leaf_render_bboxes[i] = render_bbox;
                 _leaf_bboxs[i] = bbox;
         }
         _leaf_aabb_lock.release();
@@ -1270,6 +1099,9 @@ bool BSPLoader::read( const Filename &file )
         _lightmap_dir = lmp.palettize_lightmaps();
 
         make_faces();
+        SceneGraphReducer gr;
+        gr.apply_attribs( _result.node() );
+
         load_entities();
         load_static_props();
 
@@ -1280,19 +1112,21 @@ bool BSPLoader::read( const Filename &file )
                 for ( int leafnum = 0; leafnum < g_dmodels[0].visleafs + 1; leafnum++ )
                 {
                         dleaf_t *leaf = &g_dleafs[leafnum];
-                        LPoint3 mins( leaf->mins[0] - LEAF_NUDGE, leaf->mins[1] - LEAF_NUDGE, leaf->mins[2] - LEAF_NUDGE );
-                        LPoint3 maxs( leaf->maxs[0] + LEAF_NUDGE, leaf->maxs[1] + LEAF_NUDGE, leaf->maxs[2] + LEAF_NUDGE );
+                        LPoint3 mins( ( leaf->mins[0] - LEAF_NUDGE ) / 16.0, ( leaf->mins[1] - LEAF_NUDGE ) / 16.0, ( leaf->mins[2] - LEAF_NUDGE ) / 16.0 );
+                        LPoint3 maxs( ( leaf->maxs[0] + LEAF_NUDGE ) / 16.0, ( leaf->maxs[1] + LEAF_NUDGE ) / 16.0, ( leaf->maxs[2] + LEAF_NUDGE ) / 16.0 );
                         NodePath leafvis = _result.attach_new_node( UTIL_make_cube_outline( mins, maxs, LColor( 1, 1, 1, 1 ), 2 ) );
+                        leafvis.clear_model_nodes();
+                        leafvis.flatten_strong();
                         _leaf_visnp.push_back( leafvis );
                 }
         }
-
-        swap_geom_nodes( _brushroot );
 
         _amb_probe_mgr.process_ambient_probes();
 
         _update_task = new GenericAsyncTask( file.get_basename_wo_extension() + "-updateTask", update_task, this );
         AsyncTaskManager::get_global_ptr()->add( _update_task );
+
+        _active_level = true;
 
         return true;
 }
@@ -1302,17 +1136,6 @@ void BSPLoader::add_node_for_ambient_probes( const NodePath &node )
         _amb_probe_mgr.add_node( node );
 }
 
-INLINE static void flatten_node( const NodePath &node )
-{
-        // Mimic a flatten strong operation, but do not attempt to combine
-        // Geoms, as each face needs to be it's own Geom for effective leaf
-        // culling.
-
-        SceneGraphReducer gr;
-        gr.apply_attribs( node.node() );
-        gr.flatten( node.node(), ~0 );
-}
-
 void BSPLoader::do_optimizations()
 {
         // Do some house keeping
@@ -1320,51 +1143,47 @@ void BSPLoader::do_optimizations()
         for ( size_t i = 0; i < _model_roots.size(); i++ )
         {
                 NodePath mdlroot = _model_roots[i];
+                BSPModel *mdlnode = DCAST( BSPModel, mdlroot.node() );
                 if ( i == 0 )
                 {
                         // We can do some hard flattening on model 0, which is just all of the
                         // static brushes that aren't tied to entities.
-                        mdlroot.clear_model_nodes();
+                        clear_model_nodes_below( mdlroot );
                         flatten_node( mdlroot );
                 }
                 else
                 {
                 	// For non zero models, the origin matters, so we will only flatten the children.
-                	NodePathCollection mdlroots = mdlroot.find_all_matches("**/+ModelRoot");
-                        flatten_node( mdlroot );
-                        //DCAST( ModelRoot, mdlroot.node() )->set_preserve_transform( ModelRoot::PT_local );
+                        mdlnode->set_preserve_transform( ModelNode::PT_local );
+                	NodePathCollection mdlroots = mdlroot.find_all_matches("**/+ModelNode");
+                        
                 	for ( int j = 0; j < mdlroots.get_num_paths(); j++ )
                 	{
-                                // Apply my transform to the BSPGeomNode
+                                // Apply my transform to the GeomNode
                                 NodePath np = mdlroots.get_path( j );
-                                NodePath gnp = np.find( "**/+BSPGeomNode" );
+                                NodePath gnp = np.find( "**/+GeomNode" );
                                 gnp.set_transform( np.get_transform() );
                                 gnp.reparent_to( mdlroot );
                                 np.remove_node();
                                 flatten_node( gnp );
                 	}
+                        flatten_node( mdlroot );
                         
                 }
         }
 
 
         // We can flatten the props since they just sit there.
-        _proproot.clear_model_nodes();
-        _proproot.flatten_medium();
+        NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
+        for ( int i = 0; i < npc.get_num_paths(); i++ )
+        {
+                DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
+                clear_model_nodes_below( npc[i] );
+                npc[i].flatten_strong();
+        }
 
         _result.premunge_scene( _gsg );
         _result.prepare_scene( _gsg );
-
-        if ( !_want_visibility )
-        {
-                return;
-        }
-
-        NodePathCollection props = _proproot.get_children();
-        for ( int i = 0; i < props.get_num_paths(); i++ )
-        {
-                cull_node_path_against_leafs( props.get_path( i ), true );
-        }
 }
 
 void BSPLoader::set_materials_file( const Filename &file )
@@ -1386,10 +1205,8 @@ void BSPLoader::cleanup()
         _leaf_pvs.clear();
 
         _leaf_aabb_lock.acquire();
-        _leaf_render_bboxes.clear();
         _leaf_bboxs.clear();
         _visible_leaf_bboxs.clear();
-        _visible_leaf_render_bboxes.clear();
         _leaf_aabb_lock.release();
 
         if ( _update_task != nullptr )
@@ -1421,6 +1238,8 @@ void BSPLoader::cleanup()
 
         if ( !_result.is_empty() )
                 _result.remove_node();
+
+        _active_level = false;
 }
 
 BSPLoader::BSPLoader() :
@@ -1436,11 +1255,26 @@ BSPLoader::BSPLoader() :
         _gamma( DEFAULT_GAMMA ),
         _diffuse_stage( new TextureStage( "diffuse_stage" ) ),
         _lightmap_stage( new TextureStage( "lightmap_stage" ) ),
-        _amb_probe_mgr( this )
+        _amb_probe_mgr( this ),
+        _active_level( false )
 {
         _diffuse_stage->set_texcoord_name( "diffuse" );
         _lightmap_stage->set_texcoord_name( "lightmap" );
         _lightmap_stage->set_mode( TextureStage::M_modulate );
+}
+
+INLINE bool BSPLoader::has_active_level() const
+{
+        return _active_level;
+}
+
+/**
+ * Returns true if there is an active BSP level loaded
+ * with a PVS and visibility has been toggled on.
+ */
+INLINE bool BSPLoader::has_visibility() const
+{
+        return _active_level && _want_visibility && _has_pvs_data;
 }
 
 void BSPLoader::set_camera( const NodePath &camera )
@@ -1542,7 +1376,7 @@ NodePath BSPLoader::get_model( int modelnum ) const
 {
         stringstream search;
         search << "**/model-" << modelnum;
-        return _brushroot.find( search.str() );
+        return _result.find( search.str() );
 }
 
 #ifdef HAVE_PYTHON
@@ -1575,27 +1409,37 @@ BSPLoader *BSPLoader::get_global_ptr()
 }
 
 /**
- * Swaps all GeomNodes underneath this NodePath with BSPGeomNodes to effectively cull the Geoms
- * against the leaf bounding boxes.
+ * Checks if the specified bounding volume intersects any
+ * of the potentially visible leaf bounding boxes.
  */
-void BSPLoader::swap_geom_nodes( const NodePath &root )
+INLINE bool BSPLoader::pvs_bounds_test( const GeometricBoundingVolume *bounds )
 {
-        NodePathCollection npc = root.find_all_matches( "**/+GeomNode" );
-        for ( int i = 0; i < npc.get_num_paths(); i++ )
-        {
-                NodePath np = npc.get_path( i );
-                PT( GeomNode ) gn = DCAST( GeomNode, np.node() );
-                
-                PT( BSPGeomNode ) bsp_gn = new BSPGeomNode( gn->get_name() );
-                bsp_gn->set_preserved( false );
-                NodePath bspnp( bsp_gn );
-                bspnp.set_state( np.get_state() );
-                bspnp.reparent_to( np.get_parent() );
-                bspnp.set_transform( np.get_transform() );
-                bsp_gn->add_geoms_from( gn );
-                bsp_gn->steal_children( gn );
+        LightReMutexHolder holder( _leaf_aabb_lock );
 
-                // Should be good enough.
-                np.remove_node();
+        size_t num_aabbs = _visible_leaf_bboxs.size();
+        for ( size_t i = 0; i < num_aabbs; i++ )
+        {
+                if ( _visible_leaf_bboxs[i]->contains( bounds ) != BoundingVolume::IF_no_intersection )
+                {
+                        // Bounds intersected one of the potentially visible leafs.
+                        return true;
+                }
         }
+
+        // No intersections.
+        return false;
+}
+
+INLINE CPT( GeometricBoundingVolume ) BSPLoader::make_net_bounds( const TransformState *net_transform,
+                                                                  const GeometricBoundingVolume *original )
+{
+        if ( net_transform->is_identity() )
+        {
+                return original;
+        }
+
+        PT( GeometricBoundingVolume ) gbv = DCAST(
+                GeometricBoundingVolume, original->make_copy() );
+        gbv->xform( net_transform->get_mat() );
+        return gbv;
 }
