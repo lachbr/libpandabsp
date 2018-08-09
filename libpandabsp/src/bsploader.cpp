@@ -1050,6 +1050,7 @@ bool BSPLoader::read( const Filename &file )
         // Scale down the entire loaded level as a conversion from Hammer units to Panda units.
         // Hammer units are tiny compared to panda.
         _result.set_scale( HAMMER_TO_PANDA );
+        _result.set_shader_off( 1 );
         _has_pvs_data = false;
 
         _leaf_pvs.resize( MAX_MAP_LEAFS );

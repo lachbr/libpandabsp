@@ -136,11 +136,15 @@ void AmbientProbeManager::process_ambient_probes()
                              light->type == LIGHTTYPE_POINT )
                         {
                                 float fade = FloatForKey( ent, "_fade" );
-                                light->atten = LVector4( 1.0, 0.0, fade * 0.03, 1.0 );
+                                light->atten = LVector4( 1.0, 0.0, fade * 0.025, 1.0 );
                                 if ( light->type == LIGHTTYPE_SPOT )
                                 {
                                         float cone = FloatForKey( ent, "_cone2" );
                                         light->atten[3] = cone;
+                                }
+                                else if ( light->type == LIGHTTYPE_POINT )
+                                {
+                                        light->atten[0] = fade / 16.0;
                                 }
                         }
 
@@ -263,10 +267,6 @@ void AmbientProbeManager::update_node( PandaNode *node )
 #endif
 
                 size_t numlights = locallights.size();
-                std::cout << "For node ";
-                node->output( std::cout );
-                std::cout << ":\n";
-                std::cout << "\tnumlights: " << numlights << std::endl;
                 PTA_int pta_numlights = PTA_int::empty_array( 1 );
                 pta_numlights.set_element( 0, numlights < 2 ? numlights : 2 );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "num_locallights", pta_numlights ) ) );
@@ -282,8 +282,6 @@ void AmbientProbeManager::update_node( PandaNode *node )
                         shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".color", light->color ) ) );
                         shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".direction", light->direction ) ) );
                         shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".atten", light->atten ) ) );
-
-                        std::cout << "\tlightcolor: " << light->color << "\n\tlighttype: " << light->type << "\n\tlightpos: " << light->pos << std::endl;
                 }
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "locallight_type", lighttypes ) ) );
 
