@@ -58,7 +58,8 @@ class BSPLoader;
 
 /**
  * An attribute applied to each face Geom from a BSP file.
- * All it does right now is indicate the material of the face.
+ * All it does right now is indicate the material of the face
+ * and if it's a wall or a floor (depending on the face normal).
  */
 class EXPCL_PANDABSP BSPFaceAttrib : public RenderAttrib
 {
@@ -66,13 +67,19 @@ private:
 	INLINE BSPFaceAttrib();
 
 PUBLISHED:
-	static CPT( RenderAttrib ) make( const string &face_material );
+        enum
+        {
+                FACETYPE_WALL,
+                FACETYPE_FLOOR,
+        };
+
+	static CPT( RenderAttrib ) make( const string &face_material, int face_type );
 	static CPT( RenderAttrib ) make_default();
 
 	INLINE string get_material() const;
+        INLINE int get_face_type() const;
 
 public:
-
 	virtual bool has_cull_callback() const;
 
 	virtual size_t get_hash_impl() const;
@@ -80,6 +87,7 @@ public:
 
 private:
 	string _material;
+        int _face_type;
 
 PUBLISHED:
 	static int get_class_slot()
@@ -141,7 +149,7 @@ PUBLISHED:
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
 
-        void add_node_for_ambient_probes( const NodePath &node );
+        void update_dynamic_node( const NodePath &node );
 
 #ifdef HAVE_PYTHON
 	void link_entity_to_class( const string &entname, PyTypeObject *type );
@@ -157,8 +165,9 @@ PUBLISHED:
 	NodePath get_entity( int entnum ) const;
 	NodePath get_model( int modelnum ) const;
 
-	int find_leaf( const NodePath &np );
-	int find_leaf( const LPoint3 &pos );
+	INLINE int find_leaf( const NodePath &np );
+	INLINE int find_leaf( const LPoint3 &pos );
+        INLINE int find_node( const LPoint3 &pos );
 
         INLINE bool pvs_bounds_test( const GeometricBoundingVolume *bounds );
         INLINE CPT( GeometricBoundingVolume ) make_net_bounds( const TransformState *net_transform,
@@ -256,6 +265,7 @@ private:
         friend class BSPGeomNode;
         friend class AmbientProbeManager;
         friend class BSPCullTraverser;
+        friend class BSPRender;
 
         static BSPLoader *_global_ptr;
 

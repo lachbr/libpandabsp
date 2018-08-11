@@ -6,7 +6,19 @@
 #include <cullHandler.h>
 #include <characterJointEffect.h>
 
-//#define PVSTEST_ACCURATE
+TypeHandle IgnorePVSAttrib::_type_handle;
+int IgnorePVSAttrib::_attrib_slot;
+
+INLINE IgnorePVSAttrib::IgnorePVSAttrib() :
+        RenderAttrib()
+{
+}
+
+CPT( RenderAttrib ) IgnorePVSAttrib::make()
+{
+        IgnorePVSAttrib *attr = new IgnorePVSAttrib;
+        return return_new( attr );
+}
 
 TypeDef( BSPCullTraverser );
 
@@ -24,18 +36,19 @@ bool BSPCullTraverser::is_in_view( CullTraverserData &data )
                 return false;
         }
 
+        if ( data._state->has_attrib( IgnorePVSAttrib::get_class_slot() ) )
+        {
+                // Don't test this node against PVS.
+                return true;
+        }
+
         // View frustum test passed.
         // Now test against PVS (AABBs of all potentially visible leafs).
 
-#ifdef PVSTEST_ACCURATE
-                LPoint3 mins, maxs;
-                data.get_node_path().calc_tight_bounds( mins, maxs );
-                PT( BoundingBox ) bbox = new BoundingBox( mins, maxs );
-#else
         CPT( GeometricBoundingVolume ) bbox = loader->make_net_bounds(
                 data.get_net_transform( this ),
                 data.node()->get_bounds()->as_geometric_bounding_volume() );
-#endif
+
         bool ret = loader->pvs_bounds_test( bbox );
         return ret;
 }
@@ -99,15 +112,18 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                                 }
                         }
 
-                        CPT( GeometricBoundingVolume ) net_geom_volume =
-                                loader->make_net_bounds( net_transform, geom_gbv );
-                                
-                        // Test geom bounds against visible leaf bounding boxes.
-                        if ( !loader->pvs_bounds_test( net_geom_volume ) )
+                        if ( !state->has_attrib( IgnorePVSAttrib::get_class_slot() ) )
                         {
-                                // Didn't intersect any, cull.
-                                continue;
-                        }
+                                CPT( GeometricBoundingVolume ) net_geom_volume =
+                                        loader->make_net_bounds( net_transform, geom_gbv );
+
+                                // Test geom bounds against visible leaf bounding boxes.
+                                if ( !loader->pvs_bounds_test( net_geom_volume ) )
+                                {
+                                        // Didn't intersect any, cull.
+                                        continue;
+                                }
+                        }                        
                 }
 
                 CullableObject *object =
@@ -138,28 +154,32 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                 }
 
                 // Check for a decal effect.
+                // Check for a decal effect.
                 const RenderEffects *node_effects = node_reader->get_effects();
                 if ( node_effects->has_decal() )
                 {
                         // If we *are* implementing decals with DepthOffsetAttribs, apply it
                         // now, so that each child of this node gets offset by a tiny amount.
                         data._state = data._state->compose( get_depth_offset_state() );
-#ifndef NDEBUG
-                        // This is just a sanity check message.
-                        if ( !node->is_geom_node() )
-                        {
-                                pgraph_cat.error()
-                                        << "DecalEffect applied to " << *node << ", not a GeomNode.\n";
-                        }
-#endif
                 }
 
                 // Update the node's ambient probe stuff:
                 // For a node to be influenced by dynamic lights and ambient cubes
                 // it must be a ModelNode with non-identity local transform and no
                 // CharacterJointEffect (meaning it's not an exposed joint).
-                if ( node->is_of_type( ModelNode::get_class_type() ) &&
-                     !node->get_transform()->is_identity() &&
+
+                // Check if this node was given set_shader_off()
+                bool disabled = false;
+                CPT( ShaderAttrib ) shattr = DCAST( ShaderAttrib, data._state->get_attrib_def( ShaderAttrib::get_class_slot() ) );
+                if ( ( shattr->has_shader() && shattr->get_shader() == nullptr && !shattr->auto_shader() ) )
+                {
+                        // Shaders are disabled, don't update with ambient probes.
+                        disabled = true;
+                }
+
+                if ( !disabled                                          &&
+                     node->is_of_type( ModelNode::get_class_type() )    &&
+                     !node->get_transform()->is_identity()              &&
                      !node->has_effect( CharacterJointEffect::get_class_type() ) )
                 {
                         BSPLoader::get_global_ptr()->_amb_probe_mgr.update_node( node );
@@ -226,6 +246,8 @@ bool BSPRender::cull_callback( CullTraverser *trav, CullTraverserData &data )
                 bsp_trav.local_object();
                 bsp_trav.traverse_below( data );
                 bsp_trav.end_traverse();
+
+                loader->_amb_probe_mgr.consider_garbage_collect();
 
                 // No need for CullTraverser to go further down this node,
                 // the BSPCullTraverser has already handled it.

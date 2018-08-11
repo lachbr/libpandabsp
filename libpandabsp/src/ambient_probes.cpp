@@ -2,16 +2,102 @@
 #include "bsploader.h"
 #include "bspfile.h"
 #include "mathlib.h"
+#include "bsptools.h"
+#include "winding.h"
 
 #include <shader.h>
 #include <loader.h>
 #include <textNode.h>
+#include <pStatCollector.h>
+#include <clockObject.h>
+
+static PStatCollector findsky_collector( "AmbientProbes:FindLight/Sky" );
+static PStatCollector updatenode_collector( "AmbientProbes:UpdateNodes" );
 
 using std::cos;
 using std::sin;
 
 #define CHANGED_EPSILON 0.1
+#define GARBAGECOLLECT_TIME 10.0
 //#define VISUALIZE_AMBPROBES
+
+INLINE bool point_in_winding( const Winding& w, const dplane_t& plane, const vec_t* const point, vec_t epsilon = 0.0 )
+{
+        int				numpoints;
+        int				x;
+        vec3_t			delta;
+        vec3_t			normal;
+        vec_t			dist;
+
+        numpoints = w.m_NumPoints;
+
+        for ( x = 0; x < numpoints; x++ )
+        {
+                VectorSubtract( w.m_Points[( x + 1 ) % numpoints], w.m_Points[x], delta );
+                CrossProduct( delta, plane.normal, normal );
+                dist = DotProduct( point, normal ) - DotProduct( w.m_Points[x], normal );
+
+                if ( dist < 0.0
+                     && ( epsilon == 0.0 || dist * dist > epsilon * epsilon * DotProduct( normal, normal ) ) )
+                {
+                        return false;
+                }
+        }
+
+        return true;
+}
+
+INLINE bool test_point_against_surface( const LVector3 &point, dface_t *face )
+{
+        Winding winding( *face );
+
+        dplane_t plane;
+        winding.getPlane( plane );
+
+        vec3_t vpoint;
+        vpoint[0] = point[0];
+        vpoint[1] = point[1];
+        vpoint[2] = point[2];
+        return point_in_winding( winding, plane, vpoint );
+}
+
+class LightFinder : public BaseBSPEnumerator
+{
+public:
+        virtual bool enumerate_leaf( int node_id, const Ray &ray, float start, float end, int context )
+        {
+                return true;
+        }
+
+        virtual bool find_intersection( const Ray &ray )
+        {
+                return !enumerate_nodes_along_ray( ray, this, 0 );
+        }
+
+        virtual bool enumerate_node( int node_id, const Ray &ray, float f, int context )
+        {
+                LVector3 pt;
+                VectorMA( ray.start, f, ray.delta, pt );
+
+                dnode_t *node = &g_dnodes[node_id];
+
+                for ( int i = 0; i < node->numfaces; i++ )
+                {
+                        dface_t *face = &g_dfaces[node->firstface + i];
+
+                        texinfo_t *tex = &g_texinfo[face->texinfo];
+                        if ( !( tex->flags & TEX_SPECIAL ) )
+                        {
+                                if ( test_point_against_surface( pt, face ) )
+                                {
+                                        return false;
+                                }
+                        }
+                }
+
+                return true;
+        }
+};
 
 CPT( ShaderAttrib ) AmbientProbeManager::_identity_shattr = nullptr;
 CPT( Shader ) AmbientProbeManager::_shader = nullptr;
@@ -64,9 +150,9 @@ CPT( ShaderAttrib ) AmbientProbeManager::get_identity_shattr()
 
 INLINE LVector3 angles_to_vector( const vec3_t &angles )
 {
-        return LVector3( cos( angles[0] ) * cos( angles[1] ),
-                         sin( angles[0] ) * cos( angles[1] ),
-                         sin( angles[1] ) );
+        return LVector3( cos( deg_2_rad(angles[0]) ) * cos( deg_2_rad(angles[1]) ),
+                         sin( deg_2_rad(angles[0]) ) * cos( deg_2_rad(angles[1]) ),
+                         sin( deg_2_rad(angles[1]) ) );
 }
 
 INLINE int lighttype_from_classname( const char *classname )
@@ -125,26 +211,45 @@ void AmbientProbeManager::process_ambient_probes()
                         {
                                 vec3_t angles;
                                 GetVectorForKey( ent, "angles", angles );
-                                float temp = angles[0];
-                                angles[0] = angles[1] - 90;
-                                angles[1] = temp;
+                                float pitch = FloatForKey( ent, "pitch" );
+                                float temp = angles[1];
+                                if ( !pitch )
+                                {
+                                        pitch = angles[0];
+                                }
+                                angles[1] = pitch;
+                                angles[0] = temp;
                                 VectorCopy( angles_to_vector( angles ), light->direction );
-                                light->direction[3] = 1.0;
+                                light->direction[3] = 0.0;
                         }
 
                         if ( light->type == LIGHTTYPE_SPOT ||
                              light->type == LIGHTTYPE_POINT )
                         {
                                 float fade = FloatForKey( ent, "_fade" );
-                                light->atten = LVector4( 1.0, 0.0, fade * 0.025, 1.0 );
+                                light->atten = LVector4( fade / 16.0, 0, 0, 0 );
                                 if ( light->type == LIGHTTYPE_SPOT )
                                 {
-                                        float cone = FloatForKey( ent, "_cone2" );
-                                        light->atten[3] = cone;
-                                }
-                                else if ( light->type == LIGHTTYPE_POINT )
-                                {
-                                        light->atten[0] = fade / 16.0;
+                                        float stopdot = FloatForKey( ent, "_cone" );
+                                        if ( !stopdot )
+                                        {
+                                                stopdot = 10;
+                                        }
+                                        float stopdot2 = FloatForKey( ent, "_cone2" );
+                                        if ( !stopdot2 )
+                                        {
+                                                stopdot2 = stopdot;
+                                        }
+                                        if ( stopdot2 < stopdot )
+                                        {
+                                                stopdot2 = stopdot;
+                                        }
+
+                                        stopdot = (float)std::cos( stopdot / 180 * Q_PI );
+                                        stopdot2 = (float)std::cos( stopdot2 / 180 * Q_PI );
+
+                                        light->atten[1] = stopdot;
+                                        light->atten[2] = stopdot2;
                                 }
                         }
 
@@ -208,8 +313,68 @@ void AmbientProbeManager::process_ambient_probes()
         }
 }
 
+INLINE bool AmbientProbeManager::is_sky_visible( const LPoint3 &point )
+{
+        if ( _sunlight == nullptr )
+        {
+                return false;
+        }
+
+        findsky_collector.start();
+
+        LPoint3 start( ( point + LPoint3( 0, 0, 0.05 ) ) * 16 );
+        LPoint3 end = start - ( _sunlight->direction.get_xyz() * 10000 );
+        Ray ray( start, end, LPoint3::zero(), LPoint3::zero() );
+        LightFinder finder;
+        bool ret = !finder.find_intersection( ray );
+
+        findsky_collector.stop();
+
+        return ret;
+}
+
+INLINE bool AmbientProbeManager::is_light_visible( const LPoint3 &point, const light_t *light )
+{
+        findsky_collector.start();
+
+        Ray ray( ( point + LPoint3( 0, 0, 0.05 ) ) * 16, light->pos * 16, LPoint3::zero(), LPoint3::zero() );
+        LightFinder finder;
+        bool ret = !finder.find_intersection( ray );
+
+        findsky_collector.stop();
+
+        return ret;
+}
+
+INLINE void AmbientProbeManager::garbage_collect_cache()
+{
+        for ( auto itr = _pos_cache.cbegin(); itr != _pos_cache.cend(); )
+        {
+                if ( itr->first.was_deleted() )
+                {
+                        _pos_cache.erase( itr++ );
+                }
+                else
+                {
+                        itr++;
+                }
+        }
+}
+
+void AmbientProbeManager::consider_garbage_collect()
+{
+        double now = ClockObject::get_global_clock()->get_frame_time();
+        if ( now - _last_garbage_collect_time >= GARBAGECOLLECT_TIME )
+        {
+                garbage_collect_cache();
+                _last_garbage_collect_time = now;
+        }
+}
+
 void AmbientProbeManager::update_node( PandaNode *node )
 {
+        updatenode_collector.start();
+
         CPT( ShaderAttrib ) shattr = nullptr;
         bool new_instance = false;
         if ( !node->has_attrib( ShaderAttrib::get_class_type() ) )
@@ -222,13 +387,19 @@ void AmbientProbeManager::update_node( PandaNode *node )
                 shattr = DCAST( ShaderAttrib, node->get_attrib( ShaderAttrib::get_class_type() ) );
         }
 
+        NodePath np( node );
+
         // Is it even necessary to update anything?
-        CPT( TransformState ) curr_trans = node->get_transform();
-        CPT( TransformState ) prev_trans = node->get_prev_transform();
-        LVector3 pos_delta = curr_trans->get_pos() - prev_trans->get_pos();
-        if ( pos_delta.length() >= CHANGED_EPSILON || new_instance || true )
+        CPT( TransformState ) curr_trans = np.get_net_transform();
+        if ( new_instance )
         {
-                LPoint3 curr_net = NodePath( node ).get_net_transform()->get_pos();
+                _pos_cache[node] = curr_trans;
+        }
+        CPT( TransformState ) prev_trans = _pos_cache[node];
+        LVector3 pos_delta = curr_trans->get_pos() - prev_trans->get_pos();
+        if ( pos_delta.length() >= CHANGED_EPSILON || new_instance )
+        {
+                LPoint3 curr_net = curr_trans->get_pos();
                 int leaf_id = _loader->find_leaf( curr_net );
 
                 // Update ambient cube
@@ -257,49 +428,49 @@ void AmbientProbeManager::update_node( PandaNode *node )
                         return ( a->pos - curr_net ).length() < ( b->pos - curr_net ).length();
                 } );
 
-#if 0
+                int sky_idx = -1;
                 if ( is_sky_visible( curr_net ) )
                 {
                         // If we hit the sky from current position, sunlight takes
                         // precedence over all other local light sources.
                         locallights.insert( locallights.begin(), _sunlight );
+                        sky_idx = 0;
                 }
-#endif
 
                 size_t numlights = locallights.size();
-                PTA_int pta_numlights = PTA_int::empty_array( 1 );
-                pta_numlights.set_element( 0, numlights < 2 ? numlights : 2 );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "num_locallights", pta_numlights ) ) );
                 PTA_int lighttypes = PTA_int::empty_array( 2 );
-                for ( size_t i = 0; i < numlights && i < 2; i++ )
+                int lights_updated = 0;
+                for ( size_t i = 0; i < numlights && lights_updated < 2; i++ )
                 {
                         light_t *light = locallights[i];
-                        lighttypes.set_element( i, light->type );
+                        if ( i != sky_idx && !is_light_visible( curr_net, light ) )
+                        {
+                                // The light is occluded, don't add it.
+                                continue;
+                        }
+                        lighttypes.set_element( lights_updated, light->type );
                         stringstream ss;
-                        ss << "locallight[" << i << "]";
+                        ss << "locallight[" << lights_updated << "]";
                         std::string lightname = ss.str();
                         shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".pos", light->pos ) ) );
                         shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".color", light->color ) ) );
                         shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".direction", light->direction ) ) );
                         shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".atten", light->atten ) ) );
+                        lights_updated++;
                 }
+                PTA_int pta_numlights = PTA_int::empty_array( 1 );
+                pta_numlights.set_element( 0, lights_updated );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "num_locallights", pta_numlights ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "locallight_type", lighttypes ) ) );
 
                 // Apply the modified shader attrib.
                 node->set_attrib( shattr );
+
+                // Cache the last position.
+                _pos_cache[node] = curr_trans;
         }
-}
 
-void AmbientProbeManager::add_node( const NodePath &node )
-{
-        WeakNodePath *wnp = new WeakNodePath( node );
-        _objects.push_back( wnp );
-        _object_pos_cache[wnp] = LPoint3( 0 );
-
-        PT( Shader ) shader = Shader::load( Shader::SL_GLSL, Filename( "phase_14/models/shaders/bsp_dynamic_v.glsl" ),
-                                            Filename( "phase_14/models/shaders/bsp_dynamic_f.glsl" ) );
-        wnp->get_node_path().set_shader( shader );
-        wnp->get_node_path().set_shader_input( "ambient_cube", PTA_LVecBase3::empty_array( 6 ) );
+        updatenode_collector.stop();
 }
 
 INLINE ambientprobe_t *AmbientProbeManager::find_closest_sample( int leaf_id, const LPoint3 &pos )

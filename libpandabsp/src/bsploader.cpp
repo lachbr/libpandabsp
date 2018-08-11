@@ -78,10 +78,16 @@ INLINE string BSPFaceAttrib::get_material() const
         return _material;
 }
 
-CPT( RenderAttrib ) BSPFaceAttrib::make( const string &face_material )
+INLINE int BSPFaceAttrib::get_face_type() const
+{
+        return _face_type;
+}
+
+CPT( RenderAttrib ) BSPFaceAttrib::make( const string &face_material, int face_type )
 {
         BSPFaceAttrib *attrib = new BSPFaceAttrib;
         attrib->_material = face_material;
+        attrib->_face_type = face_type;
         return return_new( attrib );
 }
 
@@ -89,12 +95,18 @@ CPT( RenderAttrib ) BSPFaceAttrib::make_default()
 {
         BSPFaceAttrib *attrib = new BSPFaceAttrib;
         attrib->_material = "default";
+        attrib->_face_type = FACETYPE_WALL;
         return return_new( attrib );
 }
 
 int BSPFaceAttrib::compare_to_impl( const RenderAttrib *other ) const
 {
         const BSPFaceAttrib *ta = (const BSPFaceAttrib *)other;
+
+        if ( _face_type != ta->_face_type )
+        {
+                return _face_type - ta->_face_type;
+        }
 
         return _material.compare( ta->_material );
 }
@@ -103,6 +115,7 @@ size_t BSPFaceAttrib::get_hash_impl() const
 {
         size_t hash = 0;
         hash = string_hash::add_hash( hash, _material );
+        hash = int_hash::add_hash( hash, _face_type );
         return hash;
 }
 
@@ -152,12 +165,12 @@ NotifyCategoryDef( bspfile, "" );
 
 BSPLoader *BSPLoader::_global_ptr = nullptr;
 
-int BSPLoader::find_leaf( const NodePath &np )
+INLINE int BSPLoader::find_leaf( const NodePath &np )
 {
         return find_leaf( np.get_pos( _result ) );
 }
 
-int BSPLoader::find_leaf( const LPoint3 &pos )
+INLINE int BSPLoader::find_leaf( const LPoint3 &pos )
 {
         int i = 0;
 
@@ -183,6 +196,40 @@ int BSPLoader::find_leaf( const LPoint3 &pos )
         }
 
         return ~i;
+}
+
+INLINE int BSPLoader::find_node( const LPoint3 &pos )
+{
+        int i = 0;
+
+        while ( true )
+        {
+                const dnode_t *node = &g_dnodes[i];
+                const dplane_t *plane = &g_dplanes[node->planenum];
+                float distance = ( plane->normal[0] * pos.get_x() ) +
+                        ( plane->normal[1] * pos.get_y() ) +
+                        ( plane->normal[2] * pos.get_z() ) - plane->dist ;
+
+                int child;
+                if ( distance >= 0.0 )
+                {
+                        child = node->children[0];
+                }
+                else
+                {
+                        child = node->children[1];
+                }
+
+                if ( child < 0 )
+                {
+                        // In a leaf. Return the node.
+                        return i;
+                }
+
+                i = child;
+        }
+
+        return i;
 }
 
 LTexCoord BSPLoader::get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool lightmap ) const
@@ -463,6 +510,7 @@ void BSPLoader::make_faces()
 
                         poly->recompute_polygon_normal();
                         LNormald poly_normal = poly->get_normal();
+                        int face_type = BSPFaceAttrib::FACETYPE_WALL;
 
                         if ( poly_normal.almost_equal( LNormald::up(), 0.5 ) )
                         {
@@ -470,6 +518,7 @@ void BSPLoader::make_faces()
                                 // Give it the ground bin.
                                 poly->set_bin( "ground" );
                                 poly->set_draw_order( 18 );
+                                face_type = BSPFaceAttrib::FACETYPE_FLOOR;
                         }
 
                         NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
@@ -501,7 +550,7 @@ void BSPLoader::make_faces()
                                 {
                                         PT( Geom ) geom = gn->modify_geom( j );
                                         geom->set_bounds_type( BoundingVolume::BT_box );
-                                        CPT( RenderAttrib ) bca = BSPFaceAttrib::make( material );
+                                        CPT( RenderAttrib ) bca = BSPFaceAttrib::make( material, face_type );
                                         CPT( RenderState ) old_state = gn->get_geom_state( j );
                                         CPT( RenderState ) new_state = old_state->add_attrib( bca, 1 );
 
@@ -1132,9 +1181,12 @@ bool BSPLoader::read( const Filename &file )
         return true;
 }
 
-void BSPLoader::add_node_for_ambient_probes( const NodePath &node )
+void BSPLoader::update_dynamic_node( const NodePath &node )
 {
-        _amb_probe_mgr.add_node( node );
+        if ( _active_level )
+        {
+                _amb_probe_mgr.update_node( node.node() );
+        }
 }
 
 void BSPLoader::do_optimizations()
