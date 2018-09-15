@@ -25,6 +25,7 @@ public:
         static vector<Object> _global_base_objects;
         static vector<Object> _global_all_objects;
 
+        Parser();
         Parser( TokenVec &tokens );
         static bool has_property( Object &obj, const string &key );
         static string get_property_value( Object &obj, const string &key );

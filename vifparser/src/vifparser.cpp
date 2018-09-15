@@ -351,6 +351,11 @@ Object Parser::walk_obj()
         return node;
 }
 
+Parser::Parser()
+{
+        _current_index = 0;
+}
+
 Parser::Parser( TokenVec &tokens )
 {
         _tokens = tokens;
