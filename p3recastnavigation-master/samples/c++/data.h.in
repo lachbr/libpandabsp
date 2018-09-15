@@ -1,0 +1,13 @@
+/**
+ * \file data.h
+ *
+ * \date 2016-04-15
+ * \author consultit
+ */
+
+#ifndef DATA_H_
+#define DATA_H_
+
+static string dataDir("@sampledatadir@");
+
+#endif /* DATA_H_ */

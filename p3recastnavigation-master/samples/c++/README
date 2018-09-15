@@ -1,0 +1,23 @@
+Running the sample
+******************
+The C++ sample code shows the use of the p3recastnavigation module.
+The C++ samples uses the autotools build system, so could be surely
+built on GNU/Linux using these commands within the "c++" folder:
+
+  autoreconf -i -v -W no-all
+  ./configure
+  make
+  
+and executed with:
+
+  ./basic (or ./test1, or ./test2)
+  
+However all the code should also compile successfully on other 
+platforms (after suitably creating/modifying the "data.h" file that 
+defines the global string variable "dataDir", i.e. the path to models' 
+data).
+
+NOTE: it should pointed out that the programming style and structure of 
+the sample programs' code is not really favored by the author, but it 
+is solely intended to test and to show the functionality exposed by the 
+p3recastnavigation module.
