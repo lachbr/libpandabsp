@@ -11,6 +11,8 @@
 #include <pStatCollector.h>
 #include <clockObject.h>
 
+#include "bsp_trace.h"
+
 static PStatCollector findsky_collector( "AmbientProbes:FindLight/Sky" );
 static PStatCollector updatenode_collector( "AmbientProbes:UpdateNodes" );
 
@@ -21,94 +23,18 @@ using std::sin;
 #define GARBAGECOLLECT_TIME 10.0
 //#define VISUALIZE_AMBPROBES
 
-INLINE bool point_in_winding( const Winding& w, const dplane_t& plane, const vec_t* const point, vec_t epsilon = 0.0 )
-{
-        int				numpoints;
-        int				x;
-        vec3_t			delta;
-        vec3_t			normal;
-        vec_t			dist;
-
-        numpoints = w.m_NumPoints;
-
-        for ( x = 0; x < numpoints; x++ )
-        {
-                VectorSubtract( w.m_Points[( x + 1 ) % numpoints], w.m_Points[x], delta );
-                CrossProduct( delta, plane.normal, normal );
-                dist = DotProduct( point, normal ) - DotProduct( w.m_Points[x], normal );
-
-                if ( dist < 0.0
-                     && ( epsilon == 0.0 || dist * dist > epsilon * epsilon * DotProduct( normal, normal ) ) )
-                {
-                        return false;
-                }
-        }
-
-        return true;
-}
-
-INLINE bool test_point_against_surface( const LVector3 &point, dface_t *face )
-{
-        Winding winding( *face );
-
-        dplane_t plane;
-        winding.getPlane( plane );
-
-        vec3_t vpoint;
-        vpoint[0] = point[0];
-        vpoint[1] = point[1];
-        vpoint[2] = point[2];
-        return point_in_winding( winding, plane, vpoint );
-}
-
-class LightFinder : public BaseBSPEnumerator
-{
-public:
-        virtual bool enumerate_leaf( int node_id, const Ray &ray, float start, float end, int context )
-        {
-                return true;
-        }
-
-        virtual bool find_intersection( const Ray &ray )
-        {
-                return !enumerate_nodes_along_ray( ray, this, 0 );
-        }
-
-        virtual bool enumerate_node( int node_id, const Ray &ray, float f, int context )
-        {
-                LVector3 pt;
-                VectorMA( ray.start, f, ray.delta, pt );
-
-                dnode_t *node = &g_dnodes[node_id];
-
-                for ( int i = 0; i < node->numfaces; i++ )
-                {
-                        dface_t *face = &g_dfaces[node->firstface + i];
-
-                        texinfo_t *tex = &g_texinfo[face->texinfo];
-                        if ( !( tex->flags & TEX_SPECIAL ) )
-                        {
-                                if ( test_point_against_surface( pt, face ) )
-                                {
-                                        return false;
-                                }
-                        }
-                }
-
-                return true;
-        }
-};
-
 CPT( ShaderAttrib ) AmbientProbeManager::_identity_shattr = nullptr;
 CPT( Shader ) AmbientProbeManager::_shader = nullptr;
 
 AmbientProbeManager::AmbientProbeManager() :
-        _loader( nullptr )
+        _loader( nullptr ),
+        _sunlight( nullptr )
 {
 }
 
 AmbientProbeManager::AmbientProbeManager( BSPLoader *loader ) :
-        _loader( loader )
+        _loader( loader ),
+        _sunlight( nullptr )
 {
 }
 
@@ -185,13 +111,13 @@ void AmbientProbeManager::process_ambient_probes()
 #endif
 
         _light_pvs.clear();
-        _light_pvs.resize( g_dmodels[0].visleafs + 1 );
+        _light_pvs.resize( _loader->_bspdata->dmodels[0].visleafs + 1 );
         _all_lights.clear();
 
         // Build light data structures
-        for ( int entnum = 0; entnum < g_numentities; entnum++ )
+        for ( int entnum = 0; entnum < _loader->_bspdata->numentities; entnum++ )
         {
-                entity_t *ent = g_entities + entnum;
+                entity_t *ent = _loader->_bspdata->entities + entnum;
                 const char *classname = ValueForKey( ent, "classname" );
                 if ( !strncmp( classname, "light", 5 ) )
                 {
@@ -265,7 +191,7 @@ void AmbientProbeManager::process_ambient_probes()
         for ( size_t lightnum = 0; lightnum < _all_lights.size(); lightnum++ )
         {
                 light_t *light = _all_lights[lightnum];
-                for ( int leafnum = 0; leafnum < g_dmodels[0].visleafs + 1; leafnum++ )
+                for ( int leafnum = 0; leafnum < _loader->_bspdata->dmodels[0].visleafs + 1; leafnum++ )
                 {
                         if ( light->type != LIGHTTYPE_SUN &&
                              _loader->is_cluster_visible(light->leaf, leafnum) )
@@ -275,14 +201,14 @@ void AmbientProbeManager::process_ambient_probes()
                 }
         }
 
-        for ( size_t i = 0; i < g_leafambientindex.size(); i++ )
+        for ( size_t i = 0; i < _loader->_bspdata->leafambientindex.size(); i++ )
         {
-                dleafambientindex_t *ambidx = &g_leafambientindex[i];
-                dleaf_t *leaf = g_dleafs + i;
+                dleafambientindex_t *ambidx = &_loader->_bspdata->leafambientindex[i];
+                dleaf_t *leaf = _loader->_bspdata->dleafs + i;
                 _probes[i] = pvector<ambientprobe_t>();
                 for ( int j = 0; j < ambidx->num_ambient_samples; j++ )
                 {
-                        dleafambientlighting_t *light = &g_leafambientlighting[ambidx->first_ambient_sample + j];
+                        dleafambientlighting_t *light = &_loader->_bspdata->leafambientlighting[ambidx->first_ambient_sample + j];
                         ambientprobe_t probe;
                         probe.leaf = i;
                         probe.pos = LPoint3( RemapValClamped( light->x, 0, 255, leaf->mins[0], leaf->maxs[0] ),
@@ -325,7 +251,7 @@ INLINE bool AmbientProbeManager::is_sky_visible( const LPoint3 &point )
         LPoint3 start( ( point + LPoint3( 0, 0, 0.05 ) ) * 16 );
         LPoint3 end = start - ( _sunlight->direction.get_xyz() * 10000 );
         Ray ray( start, end, LPoint3::zero(), LPoint3::zero() );
-        LightFinder finder;
+        FaceFinder finder( _loader->_bspdata );
         bool ret = !finder.find_intersection( ray );
 
         findsky_collector.stop();
@@ -338,7 +264,7 @@ INLINE bool AmbientProbeManager::is_light_visible( const LPoint3 &point, const l
         findsky_collector.start();
 
         Ray ray( ( point + LPoint3( 0, 0, 0.05 ) ) * 16, light->pos * 16, LPoint3::zero(), LPoint3::zero() );
-        LightFinder finder;
+        FaceFinder finder( _loader->_bspdata );
         bool ret = !finder.find_intersection( ray );
 
         findsky_collector.stop();
@@ -371,8 +297,13 @@ void AmbientProbeManager::consider_garbage_collect()
         }
 }
 
-void AmbientProbeManager::update_node( PandaNode *node )
+void AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) curr_trans )
 {
+        if ( !node || !curr_trans )
+        {
+                return;
+        }
+        
         updatenode_collector.start();
 
         CPT( ShaderAttrib ) shattr = nullptr;
@@ -387,16 +318,17 @@ void AmbientProbeManager::update_node( PandaNode *node )
                 shattr = DCAST( ShaderAttrib, node->get_attrib( ShaderAttrib::get_class_type() ) );
         }
 
-        NodePath np( node );
-
         // Is it even necessary to update anything?
-        CPT( TransformState ) curr_trans = np.get_net_transform();
         if ( new_instance )
         {
                 _pos_cache[node] = curr_trans;
         }
         CPT( TransformState ) prev_trans = _pos_cache[node];
-        LVector3 pos_delta = curr_trans->get_pos() - prev_trans->get_pos();
+        LVector3 pos_delta( 0 );
+        if ( prev_trans != nullptr )
+        {
+                pos_delta = curr_trans->get_pos() - prev_trans->get_pos();
+        }
         if ( pos_delta.length() >= CHANGED_EPSILON || new_instance )
         {
                 LPoint3 curr_net = curr_trans->get_pos();

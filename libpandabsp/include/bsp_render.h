@@ -7,32 +7,14 @@
 #include <modelNode.h>
 #include <cullTraverser.h>
 
-#define TypeDecl(classname, parentname)\
-private:\
-    static TypeHandle _type_handle;\
-public:\
-  static TypeHandle get_class_type() {\
-    return _type_handle;\
-  }\
-  static void init_type() {\
-    parentname::init_type();\
-    register_type(_type_handle, #classname,\
-                  parentname::get_class_type());\
-  }\
-  virtual TypeHandle get_type() const {\
-    return classname::get_class_type();\
-  }\
-  virtual TypeHandle force_init_type() { init_type(); return get_class_type(); }
-
-#define TypeDef(classname)\
-TypeHandle classname::_type_handle;
+class BSPLoader;
 
 class BSPCullTraverser : public CullTraverser
 {
         TypeDecl( BSPCullTraverser, CullTraverser );
 
 PUBLISHED:
-        BSPCullTraverser( CullTraverser *trav );
+        BSPCullTraverser( CullTraverser *trav, BSPLoader *loader );
 
         virtual void traverse_below( CullTraverserData &data );
 
@@ -42,6 +24,9 @@ protected:
 private:
         INLINE void add_geomnode_for_draw( GeomNode *node, CullTraverserData &data );
         static CPT( RenderState ) get_depth_offset_state();
+
+private:
+        BSPLoader *_loader;
 };
 
 /**
@@ -100,10 +85,13 @@ class BSPRender : public PandaNode
         TypeDecl( BSPRender, PandaNode );
 
 PUBLISHED:
-        BSPRender( const std::string &name );
+        BSPRender( const std::string &name, BSPLoader *loader );
 
 public:
         virtual bool cull_callback( CullTraverser *trav, CullTraverserData &data );
+
+private:
+        BSPLoader * _loader;
 };
 
 class BSPRoot : public PandaNode

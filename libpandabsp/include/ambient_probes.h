@@ -43,7 +43,7 @@ public:
 
         void process_ambient_probes();
 
-        void update_node( PandaNode *node );
+        void update_node( PandaNode *node, CPT( TransformState ) net_ts );
 
         static CPT( ShaderAttrib ) get_identity_shattr();
         static CPT( Shader ) get_shader();

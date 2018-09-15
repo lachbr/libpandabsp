@@ -21,6 +21,7 @@
 
 #include "lightmap_palettes.h"
 #include "ambient_probes.h"
+#include "vifparser.h"
 
 NotifyCategoryDeclNoExport(bspfile);
 
@@ -48,6 +49,7 @@ typedef dvertex_s dvertex_t;
 typedef texref_s texref_t;
 typedef dface_s dface_t;
 typedef dedge_s dedge_t;
+struct bspdata_t;
 
 class EggVertex;
 class EggVertexPool;
@@ -149,11 +151,25 @@ PUBLISHED:
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
 
+        INLINE int extract_modelnum( int entnum );
+        INLINE void get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs );
+
+#ifdef HAVE_PYTHON
+        void set_server_entity_dispatcher( PyObject *dispatcher );
+        void link_server_entity_to_class( const string &name, PyTypeObject *type );
+#endif
+
+        void set_ai( bool ai );
+        INLINE bool is_ai() const;
+
         void update_dynamic_node( const NodePath &node );
+
+        bool trace_line( const LPoint3 &start, const LPoint3 &end );
 
 #ifdef HAVE_PYTHON
 	void link_entity_to_class( const string &entname, PyTypeObject *type );
 	PyObject *get_py_entity_by_target_name( const string &targetname ) const;
+        void get_entity_keyvalues( PyObject *list, const int entnum );
 #endif
 
 	int get_num_entities() const;
@@ -165,9 +181,12 @@ PUBLISHED:
 	NodePath get_entity( int entnum ) const;
 	NodePath get_model( int modelnum ) const;
 
+        INLINE CBaseEntity *get_c_entity( const int entnum ) const;
+
 	INLINE int find_leaf( const NodePath &np );
 	INLINE int find_leaf( const LPoint3 &pos );
         INLINE int find_node( const LPoint3 &pos );
+        INLINE bool is_cluster_visible( int curr_cluster, int cluster ) const;
 
         INLINE bool pvs_bounds_test( const GeometricBoundingVolume *bounds );
         INLINE CPT( GeometricBoundingVolume ) make_net_bounds( const TransformState *net_transform,
@@ -194,9 +213,11 @@ PUBLISHED:
 
 public:
 	INLINE pvector<BoundingBox *> get_visible_leaf_bboxs() const;
+        INLINE bspdata_t *get_bspdata() const;
 
 private:
         void make_faces();
+        void make_faces_ai();
 	void load_entities();
         void load_static_props();
 
@@ -216,13 +237,13 @@ private:
         PT( EggVertex ) make_vertex( EggVertexPool *vpool, EggPolygon *poly,
                                      dedge_t *edge, texinfo_t *texinfo,
                                      dface_t *face, int k, FaceLightmapData *ld, Texture *tex );
-
-        INLINE bool is_cluster_visible( int curr_cluster, int cluster ) const;
+        PT( EggVertex ) make_vertex_ai( EggVertexPool *vpool, EggPolygon *poly, dedge_t *edge, int k );
 
         void update();
         static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
 
 private:
+        bspdata_t *_bspdata;
 	NodePath _result;
         NodePath _camera;
 	NodePath _render;
@@ -236,15 +257,30 @@ private:
 	bool _want_lightmaps;
 	bool _vis_leafs;
         bool _active_level;
+        bool _ai;
 	int _physics_type;
 	pvector<BoundingBox *> _visible_leaf_bboxs;
 	int _curr_leaf_idx;
+
+        // for purely client-sided, non networked entities
+        //
+        // utilized only by the client
 	pmap<string, PyTypeObject *> _entity_to_class;
+
+        // entity name to distributed object class
+        // createServerEntity is called on the dispatcher object
+        // to generate the networked entity
+        //
+        // utilized only by the AI
+        PyObject *_sv_ent_dispatch;
+        pmap<string, PyTypeObject *> _svent_to_class;
 
         PT( TextureStage ) _diffuse_stage;
         PT( TextureStage ) _lightmap_stage;
+        PT( TextureStage ) _envmap_stage;
 
         pmap<texref_t *, PT( Texture )> _texref_textures;
+        pmap<texref_t *, Parser> _texref_materials;
         vector<uint8_t *> _leaf_pvs;
 	pvector<NodePath> _leaf_visnp;
 	pvector<PT( BoundingBox )> _leaf_bboxs;
@@ -255,6 +291,7 @@ private:
 #endif
 	pvector<NodePath> _nodepath_entities;
 	pvector<NodePath> _model_roots;
+        pmap<NodePath, LPoint3> _model_origins;
 	pvector<PT( CBaseEntity )> _class_entities;
         LightmapPaletteDirectory _lightmap_dir;
         AmbientProbeManager _amb_probe_mgr;

@@ -12,6 +12,11 @@ NotifyCategoryDef( lightmapPalettizer, "" );
 // Max size per palette before making a new one.
 static const int max_palette = 1024;
 
+// Currently we pack every single lightmap into one texture,
+// no matter how big. The way to split the lightmap palettes
+// is verrry slow atm.
+//#define LMPALETTE_SPLIT
+
 LightmapPalettizer::LightmapPalettizer( const BSPLoader *loader ) :
         _loader( loader )
 {
@@ -53,7 +58,7 @@ INLINE PNMImage lightmap_img_for_face( const BSPLoader *loader, const dface_t *f
 
                                 // From p3rad
                                 int sample_idx = face->lightofs + lightstyle * num_luxels + luxel;
-                                colorrgbexp32_t *sample = &g_dlightdata[sample_idx];
+                                colorrgbexp32_t *sample = &loader->get_bspdata()->dlightdata[sample_idx];
 
                                 luxel_col.componentwise_mult( color_shift_pixel( sample, loader->get_gamma() ) );
 
@@ -77,9 +82,9 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
         result_vec.push_back( pal );
 
         // First step, build sources.
-        for ( int facenum = 0; facenum < g_numfaces; facenum++ )
+        for ( int facenum = 0; facenum < _loader->get_bspdata()->numfaces; facenum++ )
         {
-                dface_t *face = g_dfaces + facenum;
+                dface_t *face = _loader->get_bspdata()->dfaces + facenum;
                 if ( face->lightofs == -1 )
                 {
                         // Face does not have a lightmap.
@@ -94,8 +99,9 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
 
         for ( size_t i = 0; i < _sources.size(); i++ )
         {
-                dface_t *face = g_dfaces + _sources[i].facenum;
+                dface_t *face = _loader->get_bspdata()->dfaces + _sources[i].facenum;
 
+#ifdef LMPALETTE_SPLIT
                 bool any_fit = false;
                 // See if this lightmap can fit in any palette.
                 for ( size_t j = 0; j < result_vec.size(); j++ )
@@ -120,8 +126,12 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
                         newpal.sources.push_back( &_sources[i] );
                         result_vec.push_back( newpal );
                 }
-
+#else
+                result_vec[0].packer->addNewTexture( face->lightmap_size[0] + 1, face->lightmap_size[1] + 1 );
+                result_vec[0].sources.push_back( &_sources[i] );
+#endif
         }
+
 
         // We've found a palette for each lightmap to fit in. Now we need to create the palette and remember
         // the offset into the palette for each face's lightmap.

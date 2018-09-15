@@ -1,10 +1,10 @@
 #include "entity.h"
 #include "bsploader.h"
 
-TypeHandle CBaseEntity::_type_handle;
-TypeHandle CPointEntity::_type_handle;
-TypeHandle CBrushEntity::_type_handle;
-TypeHandle CBoundsEntity::_type_handle;
+TypeDef( CBaseEntity );
+TypeDef( CPointEntity );
+TypeDef( CBrushEntity );
+TypeDef( CBoundsEntity );
 
 ///////////////////////////////////// CBaseEntity //////////////////////////////////////////
 

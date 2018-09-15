@@ -1,9 +1,12 @@
 #include "bsploader.h"
 
+#include "bsp_trace.h"
+
 #include "bsp_render.h"
 #include "bspfile.h"
 #include "entity.h"
 #include "mathlib.h"
+#include "viftokenizer.h"
 
 #include <array>
 #include <bitset>
@@ -132,6 +135,16 @@ size_t BSPFaceAttrib::get_hash_impl() const
 // where 1 Hammer unit is 0.0625 Panda units.
 #define LEAF_NUDGE 1.0
 
+static int extract_modelnum_s( entity_t *ent )
+{
+        string model = ValueForKey( ent, "model" );
+        if ( model[0] == '*' )
+        {
+                return atoi( model.substr( 1 ).c_str() );
+        }
+        return -1;
+}
+
 PT( GeomNode ) UTIL_make_cube_outline( const LPoint3 &min, const LPoint3 &max,
                                        const LColor &color, PN_stdfloat thickness )
 {
@@ -178,8 +191,8 @@ INLINE int BSPLoader::find_leaf( const LPoint3 &pos )
         // position.
         while ( i >= 0 )
         {
-                const dnode_t *node = &g_dnodes[i];
-                const dplane_t *plane = &g_dplanes[node->planenum];
+                const dnode_t *node = &_bspdata->dnodes[i];
+                const dplane_t *plane = &_bspdata->dplanes[node->planenum];
                 float distance = ( plane->normal[0] * pos.get_x() ) +
                         ( plane->normal[1] * pos.get_y() ) +
                         ( plane->normal[2] * pos.get_z() ) - ( plane->dist / PANDA_TO_HAMMER );
@@ -204,8 +217,8 @@ INLINE int BSPLoader::find_node( const LPoint3 &pos )
 
         while ( true )
         {
-                const dnode_t *node = &g_dnodes[i];
-                const dplane_t *plane = &g_dplanes[node->planenum];
+                const dnode_t *node = &_bspdata->dnodes[i];
+                const dplane_t *plane = &_bspdata->dplanes[node->planenum];
                 float distance = ( plane->normal[0] * pos.get_x() ) +
                         ( plane->normal[1] * pos.get_y() ) +
                         ( plane->normal[2] * pos.get_z() ) - plane->dist ;
@@ -260,12 +273,21 @@ LTexCoord BSPLoader::get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool li
         return LTexCoord( s_vec.dot( vert_pos ) + s_dist, t_vec.dot( vert_pos ) + t_dist );
 }
 
+PT( EggVertex ) BSPLoader::make_vertex_ai( EggVertexPool *vpool, EggPolygon *poly, dedge_t *edge, int k )
+{
+        dvertex_t *vert = &_bspdata->dvertexes[edge->v[k]];
+        float *vpos = vert->point;
+        PT( EggVertex ) v = new EggVertex;
+        v->set_pos( LPoint3d( vpos[0], vpos[1], vpos[2] ) );
+        return v;
+}
+
 PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
                                         dedge_t *edge, texinfo_t *texinfo,
                                         dface_t *face, int k, FaceLightmapData *ld,
                                         Texture *tex )
 {
-        dvertex_t *vert = &g_dvertexes[edge->v[k]];
+        dvertex_t *vert = &_bspdata->dvertexes[edge->v[k]];
         float *vpos = vert->point;
         PT( EggVertex ) v = new EggVertex;
         v->set_pos( LPoint3d( vpos[0], vpos[1], vpos[2] ) );
@@ -345,6 +367,19 @@ PT( Texture ) BSPLoader::try_load_texref( texref_t *tref )
 		tex = TexturePool::load_texture( name );
 	}
 
+        // Now check for a material file.
+        Filename mat_filename = Filename::from_os_specific( basename + ".mat" );
+        if ( VirtualFileSystem::get_global_ptr()->exists( mat_filename ) )
+        {
+                string mat_data = VirtualFileSystem::get_global_ptr()->read_file( mat_filename, true );
+
+                TokenVec toks = tokenizer( mat_data );
+                Parser p( toks );
+                _texref_materials[tref] = p;
+                bspfile_cat.info()
+                        << "Found material file for texref " << tref->name << "\n";
+        }
+
         if ( tex != nullptr )
         {
                 bspfile_cat.info()
@@ -356,6 +391,181 @@ PT( Texture ) BSPLoader::try_load_texref( texref_t *tref )
         return nullptr;
 }
 
+/**
+ * Generates the least amount of data possible for geometry on the AI side.
+ * Used for generating the navmesh. We don't need to make the faces in the same
+ * manner as the client, since all we need are the triangle data.
+ */
+void BSPLoader::make_faces_ai()
+{
+        bspfile_cat.info()
+                << "Making faces for AI...\n";
+
+        PT( EggData ) data = new EggData;
+        PT( EggVertexPool ) vpool = new EggVertexPool( "facevpool" );
+        data->add_child( vpool );
+
+        for ( int entnum = 0; entnum < _bspdata->numentities; entnum++ )
+        {
+                entity_t *ent = _bspdata->entities + entnum;
+                const char *classname = ValueForKey( ent, "classname" );
+
+                if ( entnum != 0 &&
+                     strncmp( classname, "func_wall", 9 ) &&
+                     strncmp( classname, "func_detail", 11 ) &&
+                     strncmp( classname, "func_illusionary", 16 ) )
+                {
+                        continue;
+                }
+
+                int modelnum = entnum == 0 ? 0 : extract_modelnum_s( ent );
+                if ( modelnum == -1 )
+                {
+                        continue;
+                }
+
+                dmodel_t *mdl = _bspdata->dmodels + modelnum;
+
+                for ( int facenum = mdl->firstface; facenum < mdl->firstface + mdl->numfaces; facenum++ )
+                {
+                        PT( EggPolygon ) poly = new EggPolygon;
+                        data->add_child( poly );
+                        dface_t *face = _bspdata->dfaces + facenum;
+                        texinfo_t *texinfo = &_bspdata->texinfo[face->texinfo];
+                        texref_t *texref = &_bspdata->dtexrefs[texinfo->texref];
+                        contents_t contents = GetTextureContents( texref->name );
+                        if ( contents == CONTENTS_NULL )
+                        {
+                                continue;
+                        }
+
+                        int last_edge = face->firstedge + face->numedges;
+                        int first_edge = face->firstedge;
+                        for ( int j = last_edge - 1; j >= first_edge; j-- )
+                        {
+                                int surf_edge = _bspdata->dsurfedges[j];
+
+                                dedge_t *edge;
+                                if ( surf_edge >= 0 )
+                                        edge = &_bspdata->dedges[surf_edge];
+                                else
+                                        edge = &_bspdata->dedges[-surf_edge];
+
+                                if ( surf_edge < 0 )
+                                {
+                                        for ( int k = 0; k < 2; k++ )
+                                        {
+                                                PT( EggVertex ) v = make_vertex_ai( vpool, poly, edge, k );
+                                                vpool->add_vertex( v );
+                                                poly->add_vertex( v );
+                                        }
+                                }
+                                else
+                                {
+                                        for ( int k = 1; k >= 0; k-- )
+                                        {
+                                                PT( EggVertex ) v = make_vertex_ai( vpool, poly, edge, k );
+                                                vpool->add_vertex( v );
+                                                poly->add_vertex( v );
+                                        }
+                                }
+                        }
+                }
+                
+        }
+
+        data->remove_unused_vertices( true );
+        data->remove_invalid_primitives( true );
+
+        _result.attach_new_node( load_egg_data( data ) );
+        _result.set_scale( 1 / 16.0 );
+        _result.clear_model_nodes();
+        flatten_node( _result );
+}
+
+static pvector<string> make_bface_shaders( bool lightmap, bool envmap, float envmap_shininess )
+{
+        pvector<string> result;
+
+        stringstream vshader;
+        vshader << "#version 430\n";
+        vshader << "in vec4 p3d_Vertex;\n";
+        vshader << "in vec2 p3d_MultiTexCoord0;\n";
+        if ( lightmap )
+        {
+                vshader << "in vec2 p3d_MultiTexCoord1;\n";
+        }
+        vshader << "uniform mat4 p3d_ModelViewProjectionMatrix;\n";
+        if ( envmap )
+        {
+                vshader << "uniform mat4 p3d_ModelViewMatrix;\n";
+                vshader << "uniform mat4 p3d_ViewMatrixInverse;\n";
+                vshader << "in vec3 p3d_Normal;\n";
+                vshader << "uniform mat4 tpose_view_to_model;\n";
+                //vshader << "out vec3 refl_vec;\n";
+                vshader << "out vec2 envmap_coords;\n";
+        }
+        vshader << "out vec2 diff_texcoord;\n";
+        if ( lightmap )
+        {
+                vshader << "out vec2 lm_texcoord;\n";
+        }
+        vshader << "void main() {\n";
+        vshader << "\t diff_texcoord = p3d_MultiTexCoord0;\n";
+        if ( lightmap )
+        {
+                vshader << "\t lm_texcoord = p3d_MultiTexCoord1;\n";
+        }
+        vshader << "\t gl_Position = p3d_ModelViewProjectionMatrix * p3d_Vertex;\n";
+        if ( envmap )
+        {
+                vshader << "vec4 eye_normal;\neye_normal.xyz = normalize(mat3(tpose_view_to_model) * p3d_Normal);\n"
+                        "eye_normal.w = 0.0;\n";
+                vshader << "vec3 eye_pos = vec3(p3d_ModelViewMatrix * p3d_Vertex);\n";
+                vshader << "\t vec3 eye_vec = normalize(eye_pos);\n";
+                //vshader << "\t refl_vec = reflect(eye_vec, eye_normal.xyz);\n";
+                //vshader << "\t refl_vec = vec3(p3d_ViewMatrixInverse * vec4(refl_vec, 0.0));\n";
+                vshader << "\t vec3 r = reflect(eye_vec, eye_normal.xyz);\n";
+                vshader << "\t r = vec3(p3d_ViewMatrixInverse * vec4(r, 0.0));\n";
+                vshader << "\t float m = 2.0 * sqrt(pow(r.x, 2.0) + pow(r.y, 2.0) + pow(r.z + 1.0, 2.0));\n";
+                vshader << "\t envmap_coords = r.xy / m + 0.5;\n";
+        }
+        vshader << "}\n";
+
+        stringstream pshader;
+        pshader << "#version 430\n";
+        pshader << "uniform sampler2D p3d_Texture0;\n";
+        pshader << "in vec2 diff_texcoord;\n";
+        if ( lightmap )
+        {
+                pshader << "uniform sampler2D p3d_Texture1;\n";
+                pshader << "in vec2 lm_texcoord;\n";
+        }
+        if ( envmap )
+        {
+                pshader << "uniform sampler2D envmap_texture;\n";
+                //pshader << "in vec3 refl_vec;\n";
+                pshader << "in vec2 envmap_coords;\n";
+        }
+        pshader << "out vec4 frag_color;\n";
+        pshader << "void main() {\n";
+        pshader << "\t frag_color = texture2D(p3d_Texture0, diff_texcoord);\n";
+        if ( envmap )
+        {
+                pshader << "\t frag_color += (texture2D(envmap_texture, envmap_coords) * " << envmap_shininess << ");\n";
+        }
+        if ( lightmap )
+        {
+                pshader << "\t frag_color *= texture2D(p3d_Texture1, lm_texcoord);\n";
+        }
+        pshader << "}\n";
+
+        result.push_back( vshader.str() );
+        result.push_back( pshader.str() );
+
+        return result;
+}
+
 void BSPLoader::make_faces()
 {
         bspfile_cat.info()
@@ -363,9 +573,9 @@ void BSPLoader::make_faces()
 
         // In BSP files, models are brushes that have been grouped together to be used as an entity.
         // We can group all of the face GeomNodes of the model to a root node.
-        for ( int modelnum = 0; modelnum < g_nummodels; modelnum++ )
+        for ( int modelnum = 0; modelnum < _bspdata->nummodels; modelnum++ )
         {
-                dmodel_t *model = &g_dmodels[modelnum];
+                dmodel_t *model = &_bspdata->dmodels[modelnum];
                 int firstface = model->firstface;
                 int numfaces = model->numfaces;
                 float *florigin = model->origin;
@@ -379,8 +589,8 @@ void BSPLoader::make_faces()
                 name << "model-" << modelnum;
                 PT( BSPModel ) bspmdl = new BSPModel( name.str() );
                 NodePath modelroot = _result.attach_new_node( bspmdl );
-                //bspmdl->set_preserve_transform( ModelNode::PT_local );
-                modelroot.set_pos( ( ( mins + maxs ) / 2.0 ) + origin );
+
+                _model_origins[modelroot] = ( ( ( mins + maxs ) / 2.0 ) + origin ) / 16.0;
 
                 for ( int facenum = firstface; facenum < firstface + numfaces; facenum++ )
                 {
@@ -388,14 +598,14 @@ void BSPLoader::make_faces()
                         PT( EggVertexPool ) vpool = new EggVertexPool( "facevpool" );
                         data->add_child( vpool );
 
-                        dface_t *face = &g_dfaces[facenum];
+                        dface_t *face = &_bspdata->dfaces[facenum];
 
                         PT( EggPolygon ) poly = new EggPolygon;
                         data->add_child( poly );
 
-                        texinfo_t *texinfo = &g_texinfo[face->texinfo];
+                        texinfo_t *texinfo = &_bspdata->texinfo[face->texinfo];
 
-                        texref_t *texref = &g_dtexrefs[texinfo->texref];
+                        texref_t *texref = &_bspdata->dtexrefs[texinfo->texref];
                         contents_t contents = GetTextureContents( texref->name );
                         if ( contents == CONTENTS_SKY )
                         {
@@ -405,16 +615,48 @@ void BSPLoader::make_faces()
 
                         bool skip = false;
 
+                        string envmap = "phase_14/maps/envmap001a.png";
+                        float envmap_shininess = -1;
+                        bool mat_lightmapped = true;
+
                         PT( Texture ) tex = try_load_texref( texref );
                         string texture_name = texref->name;
                         string material = "default";
-                        if ( _materials.find( texture_name ) != _materials.end() )
+                        if ( _texref_materials.find( texref ) != _texref_materials.end() )
                         {
-                                material = _materials[texture_name];
+                                bspfile_cat.info()
+                                        << "Material properties for " << texref->name << ":\n";
+                                Parser *p = &_texref_materials[texref];
+                                Object obj = p->_base_objects[0];
+                                vector<Property> props = p->get_properties( obj );
+                                for ( size_t i = 0; i < props.size(); i++ )
+                                {
+                                        Property *prop = &props[i];
+                                        if ( prop->name == "$surfaceprop" )
+                                        {
+                                                material = prop->value;
+                                        }
+                                        else if ( prop->name == "$envmap" )
+                                        {
+                                                envmap = prop->value;
+                                        }
+                                        else if ( prop->name == "$envmap_shininess" )
+                                        {
+                                                envmap_shininess = atof( prop->value.c_str() );
+                                        }
+                                        else if ( prop->name == "$lightmapped" )
+                                        {
+                                                mat_lightmapped = (bool)atoi( prop->value.c_str() );
+                                        }
+                                        
+                                        bspfile_cat.info()
+                                                << "\t" << prop->name << "\t:\t" << prop->value << "\n";
+                                }
+
                         }
                         transform( texture_name.begin(), texture_name.end(), texture_name.begin(), tolower );
 
-                        bool has_lighting = ( face->lightofs != -1 && _want_lightmaps ) && !skip;
+                        bool has_lighting = ( face->lightofs != -1 && _want_lightmaps ) && !skip && mat_lightmapped;
                         bool has_texture = !skip;
 
 
@@ -429,18 +671,18 @@ void BSPLoader::make_faces()
 
                         for ( int i = 0; i < face->numedges; i++ )
                         {
-                                int edge_idx = g_dsurfedges[face->firstedge + i];
+                                int edge_idx = _bspdata->dsurfedges[face->firstedge + i];
                                 dedge_t *edge;
                                 dvertex_t *vert;
                                 if ( edge_idx >= 0 )
                                 {
-                                        edge = &g_dedges[edge_idx];
-                                        vert = &g_dvertexes[edge->v[0]];
+                                        edge = &_bspdata->dedges[edge_idx];
+                                        vert = &_bspdata->dvertexes[edge->v[0]];
                                 }
                                 else
                                 {
-                                        edge = &g_dedges[-edge_idx];
-                                        vert = &g_dvertexes[edge->v[1]];
+                                        edge = &_bspdata->dedges[-edge_idx];
+                                        vert = &_bspdata->dvertexes[edge->v[1]];
                                 }
 
                                 LTexCoord uv = get_vertex_uv( texinfo, vert, true );
@@ -475,13 +717,13 @@ void BSPLoader::make_faces()
                         int first_edge = face->firstedge;
                         for ( int j = last_edge - 1; j >= first_edge; j-- )
                         {
-                                int surf_edge = g_dsurfedges[j];
+                                int surf_edge = _bspdata->dsurfedges[j];
 
                                 dedge_t *edge;
                                 if ( surf_edge >= 0 )
-                                        edge = &g_dedges[surf_edge];
+                                        edge = &_bspdata->dedges[surf_edge];
                                 else
-                                        edge = &g_dedges[-surf_edge];
+                                        edge = &_bspdata->dedges[-surf_edge];
 
                                 if ( surf_edge < 0 )
                                 {
@@ -521,6 +763,8 @@ void BSPLoader::make_faces()
                                 face_type = BSPFaceAttrib::FACETYPE_FLOOR;
                         }
 
+                        data->recompute_vertex_normals( 90.0 );
+
                         NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
 
                         if ( has_texture )
@@ -536,9 +780,17 @@ void BSPLoader::make_faces()
                         faceroot.wrt_reparent_to( modelroot );
                         if ( Texture::has_alpha( tex->get_format() ) )
                         {
-                                bspfile_cat.info()
-                                        << "Texture " << tex->get_name() << " has transparency\n";
                                 faceroot.set_transparency( TransparencyAttrib::M_multisample, 1 );
+                        }
+
+                        pvector<string> shaders = make_bface_shaders( has_lighting, envmap_shininess > 0.0, envmap_shininess );
+                        faceroot.set_shader( Shader::make( Shader::SL_GLSL, shaders[0], shaders[1] ), 1 );
+                        if ( envmap_shininess > 0.0 )
+                        {
+                                PT( Texture ) etex = TexturePool::load_texture( envmap );
+                                etex->set_wrap_u( SamplerState::WM_repeat );
+                                etex->set_wrap_v( SamplerState::WM_repeat );
+                                faceroot.set_shader_input( "envmap_texture", etex );
                         }
 
                         NodePathCollection gn_npc = faceroot.find_all_matches( "**/+GeomNode" );
@@ -602,14 +854,18 @@ LColor color_from_value( const string &value, bool scale )
         return col;
 }
 
-static int extract_modelnum( entity_t *ent )
+INLINE int BSPLoader::extract_modelnum( int entnum )
 {
-        string model = ValueForKey( ent, "model" );
-        if ( model[0] == '*' )
-        {
-                return atoi( model.substr( 1 ).c_str() );
-        }
-        return -1;
+        return extract_modelnum_s( _bspdata->entities + entnum );
+}
+
+INLINE void BSPLoader::get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs )
+{
+        dmodel_t *mdl = _bspdata->dmodels + modelnum;
+        VectorCopy( mdl->mins, mins );
+        VectorCopy( mdl->maxs, maxs );
+        mins /= 16.0;
+        maxs /= 16.0;
 }
 
 void BuildGeomNodes_r( PandaNode *node, pvector<PT( GeomNode )> &list )
@@ -674,6 +930,10 @@ static void clear_model_nodes_below( const NodePath &top )
         NodePathCollection npc = top.find_all_matches( "**/+ModelNode" );
         for ( int i = 0; i < npc.get_num_paths(); i++ )
         {
+                if ( npc[i] == top )
+                {
+                        continue;
+                }
                 npc[i].clear_effects();
                 DCAST( ModelNode, npc[i].node() )->set_preserve_transform( ModelNode::PT_drop_node );
         }
@@ -681,9 +941,9 @@ static void clear_model_nodes_below( const NodePath &top )
 
 void BSPLoader::load_static_props()
 {
-        for ( size_t propnum = 0; propnum < g_dstaticprops.size(); propnum++ )
+        for ( size_t propnum = 0; propnum < _bspdata->dstaticprops.size(); propnum++ )
         {
-                dstaticprop_t *prop = &g_dstaticprops[propnum];
+                dstaticprop_t *prop = &_bspdata->dstaticprops[propnum];
 
                 PT( BSPProp ) propnode = new BSPProp( prop->name );
                 propnode->set_preserve_transform( ModelNode::PT_local );
@@ -709,6 +969,14 @@ void BSPLoader::load_static_props()
                 propmdl.reparent_to( propnp );
                 propmdl.clear_model_nodes();
                 propmdl.flatten_light();
+
+                entity_t *lightsrc = nullptr;
+                LColor lightsrc_col;
+                if ( prop->lightsrc != -1 )
+                {
+                        lightsrc = _bspdata->entities + prop->lightsrc;
+                        lightsrc_col = color_from_value( ValueForKey( lightsrc, "_light" ) );
+                }
 
                 if ( prop->first_vertex_data != -1 )
                 {
@@ -752,7 +1020,7 @@ void BSPLoader::load_static_props()
                         // now modulate the vertex colors to apply the lighting
                         for ( int i = 0; i < prop->num_vertex_datas; i++ )
                         {
-                                dstaticpropvertexdata_t *dvdata = &g_dstaticpropvertexdatas[prop->first_vertex_data + i];
+                                dstaticpropvertexdata_t *dvdata = &_bspdata->dstaticpropvertexdatas[prop->first_vertex_data + i];
                                 VDataDef *def = &vdatadefs[i];
 
                                 PT( GeomVertexData ) mod_vdata = new GeomVertexData( *def->vdata );
@@ -778,7 +1046,7 @@ void BSPLoader::load_static_props()
 
                                 for ( int j = 0; j < dvdata->num_lighting_samples; j++ )
                                 {
-                                        colorrgbexp32_t *sample = &g_staticproplighting[dvdata->first_lighting_sample + j];
+                                        colorrgbexp32_t *sample = &_bspdata->staticproplighting[dvdata->first_lighting_sample + j];
                                         LRGBColor vtx_rgb = color_shift_pixel( sample, _gamma );
                                         LColorf vtx_color( vtx_rgb[0], vtx_rgb[1], vtx_rgb[2], 1.0 );
 
@@ -795,6 +1063,18 @@ void BSPLoader::load_static_props()
                                 CPT( Geom ) geom = def->geom;
                                 GNWG_result res = get_geomnode_with_geom( propmdl, geom );
                                 PT( Geom ) mod_geom = res.geomnode->modify_geom( res.geomidx );
+
+                                if ( lightsrc != nullptr && res.geomnode->get_name() == "__lightsource__" )
+                                {
+                                        bspfile_cat.info()
+                                                << "Applying color " << lightsrc_col << " to vertices on __lightsource__\n";
+                                        for ( int j = 0; j < mod_vdata->get_num_rows(); j++ )
+                                        {
+                                                color_mod.set_row( j );
+                                                color_mod.set_data4f( lightsrc_col );
+                                        }
+                                }
+
                                 mod_geom->set_vertex_data( mod_vdata );
                                 res.geomnode->set_geom( res.geomidx, mod_geom );
                         }
@@ -814,9 +1094,9 @@ void BSPLoader::load_entities()
 {
         Loader *loader = Loader::get_global_ptr();
 
-        for ( int entnum = 0; entnum < g_numentities; entnum++ )
+        for ( int entnum = 0; entnum < _bspdata->numentities; entnum++ )
         {
-                entity_t *ent = &g_entities[entnum];
+                entity_t *ent = &_bspdata->entities[entnum];
 
                 string classname = ValueForKey( ent, "classname" );
                 string id = ValueForKey( ent, "id" );
@@ -829,93 +1109,144 @@ void BSPLoader::load_entities()
 
                 string targetname = ValueForKey( ent, "targetname" );
 
-                if ( classname == "env_fog" )
+                if ( !_ai )
                 {
-                        // Fog
-                        PN_stdfloat density = FloatForKey( ent, "fogdensity" );
-                        LColor fog_color = color_from_value( ValueForKey( ent, "fogcolor" ) );
-                        PT( Fog ) fog = new Fog( "env_fog" );
-                        fog->set_exp_density( density );
-                        fog->set_color( fog_color );
-                        NodePath fognp = _render.attach_new_node( fog );
-                        _render.set_fog( fog );
-                        _nodepath_entities.push_back( fognp );
-                }
-                else if ( !strncmp( classname.c_str(), "trigger_", 8 ) ||
-                          !strncmp( classname.c_str(), "func_water", 10 ) )
-                {
-                        // This is a bounds entity. We do not actually care about the geometry,
-                        // but the mins and maxs of the model. We will use that to create
-                        // a BoundingBox to check if the avatar is inside of it.
-                        int modelnum = extract_modelnum( ent );
-                        if ( modelnum != -1 )
+                        if ( classname == "env_fog" )
                         {
-                                remove_model( modelnum );
-
-                                dmodel_t *mdl = &g_dmodels[modelnum];
-
-                                PT( CBoundsEntity ) entity = new CBoundsEntity;
-                                entity->set_data( entnum, ent, this, mdl );
-                                _class_entities.push_back( ( PT( CBoundsEntity ) )entity );
-#ifdef HAVE_PYTHON
-                                PyObject *py_ent = DTool_CreatePyInstance<CBoundsEntity>( entity, true );
-                                make_pyent( entity, py_ent, classname );
-#endif
+                                // Fog
+                                PN_stdfloat density = FloatForKey( ent, "fogdensity" );
+                                LColor fog_color = color_from_value( ValueForKey( ent, "fogcolor" ) );
+                                PT( Fog ) fog = new Fog( "env_fog" );
+                                fog->set_exp_density( density );
+                                fog->set_color( fog_color );
+                                NodePath fognp = _render.attach_new_node( fog );
+                                _render.set_fog( fog );
+                                _nodepath_entities.push_back( fognp );
                         }
-                }
-                else if ( !strncmp( classname.c_str(), "func_", 5 ) )
-                {
-                        // Brush entites begin with func_, handle those accordingly.
-                        int modelnum = extract_modelnum( ent );
-                        if ( modelnum != -1 )
+                        else if ( !strncmp( classname.c_str(), "trigger_", 8 ) ||
+                                  !strncmp( classname.c_str(), "func_water", 10 ) )
                         {
-                                // Brush model
-                                NodePath modelroot = get_model( modelnum );
-                                if ( !strncmp( classname.c_str(), "func_wall", 9 ) ||
-                                     !strncmp( classname.c_str(), "func_detail", 11 ) )
+                                // This is a bounds entity. We do not actually care about the geometry,
+                                // but the mins and maxs of the model. We will use that to create
+                                // a BoundingBox to check if the avatar is inside of it.
+                                int modelnum = extract_modelnum_s( ent );
+                                if ( modelnum != -1 )
                                 {
-                                        // func_walls and func_details aren't really entities,
-                                        // they are just hints to the compiler. we can treat
-                                        // them as regular brushes part of worldspawn.
-                                        modelroot.wrt_reparent_to( get_model( 0 ) );
-                                        flatten_node( modelroot );
-                                        NodePathCollection npc = modelroot.get_children();
-                                        for ( int n = 0; n < npc.get_num_paths(); n++ )
-                                        {
-                                                npc[n].wrt_reparent_to( get_model( 0 ) );
-                                        }
                                         remove_model( modelnum );
-                                        continue;
-                                }
 
-                                PT( CBrushEntity ) entity = new CBrushEntity;
-                                entity->set_data( entnum, ent, this, modelnum, &g_dmodels[modelnum], modelroot );
-                                _class_entities.push_back( ( PT( CBaseEntity ) )entity );
+                                        dmodel_t *mdl = &_bspdata->dmodels[modelnum];
+
+                                        PT( CBoundsEntity ) entity = new CBoundsEntity;
+                                        entity->set_data( entnum, ent, this, mdl );
+                                        _class_entities.push_back( entity );
+                                        std::cout << "Adding trigger or water to class entities" << std::endl;
+#ifdef HAVE_PYTHON
+                                        PyObject *py_ent = DTool_CreatePyInstance<CBoundsEntity>( entity, true );
+                                        make_pyent( entity, py_ent, classname );
+#endif
+                                }
+                        }
+                        else if ( !strncmp( classname.c_str(), "func_", 5 ) )
+                        {
+                                // Brush entites begin with func_, handle those accordingly.
+                                int modelnum = extract_modelnum_s( ent );
+                                if ( modelnum != -1 )
+                                {
+                                        // Brush model
+                                        NodePath modelroot = get_model( modelnum );
+                                        // render all faces of brush model in a single batch
+                                        clear_model_nodes_below( modelroot );
+                                        modelroot.flatten_strong();
+
+                                        if ( !strncmp( classname.c_str(), "func_wall", 9 ) ||
+                                             !strncmp( classname.c_str(), "func_detail", 11 ) ||
+                                             !strncmp( classname.c_str(), "func_illusionary", 17 ) )
+                                        {
+                                                // func_walls and func_details aren't really entities,
+                                                // they are just hints to the compiler. we can treat
+                                                // them as regular brushes part of worldspawn.
+                                                modelroot.wrt_reparent_to( get_model( 0 ) );
+                                                flatten_node( modelroot );
+                                                NodePathCollection npc = modelroot.get_children();
+                                                for ( int n = 0; n < npc.get_num_paths(); n++ )
+                                                {
+                                                        npc[n].wrt_reparent_to( get_model( 0 ) );
+                                                }
+                                                remove_model( modelnum );
+                                                continue;
+                                        }
+
+                                        PT( CBrushEntity ) entity = new CBrushEntity;
+                                        entity->set_data( entnum, ent, this, modelnum, &_bspdata->dmodels[modelnum], modelroot );
+                                        _class_entities.push_back( entity );
 
 #ifdef HAVE_PYTHON
-                                PyObject *py_ent = DTool_CreatePyInstance<CBrushEntity>( entity, true );
-                                make_pyent( entity, py_ent, classname );
+                                        PyObject *py_ent = DTool_CreatePyInstance<CBrushEntity>( entity, true );
+                                        make_pyent( entity, py_ent, classname );
 
+#endif
+                                }
+                        }
+                        else
+                        {
+                                // We don't know what this entity is exactly, maybe they linked it to a python class.
+                                // It didn't start with func_, so we can assume it's just a point entity.
+                                PT( CPointEntity ) entity = new CPointEntity;
+                                entity->set_data( entnum, ent, this );
+                                _class_entities.push_back( entity );
+
+#ifdef HAVE_PYTHON
+                                PyObject *py_ent = DTool_CreatePyInstance<CPointEntity>( entity, true );
+                                make_pyent( entity, py_ent, classname );
 #endif
                         }
                 }
                 else
                 {
-                        // We don't know what this entity is exactly, maybe they linked it to a python class.
-                        // It didn't start with func_, so we can assume it's just a point entity.
-                        PT( CPointEntity ) entity = new CPointEntity;
-                        entity->set_data( entnum, ent, this );
-                        _class_entities.push_back( ( PT( CBaseEntity ) )entity );
-
 #ifdef HAVE_PYTHON
-                        PyObject *py_ent = DTool_CreatePyInstance<CPointEntity>( entity, true );
-                        make_pyent( entity, py_ent, classname );
+                        if ( _svent_to_class.find( classname ) != _svent_to_class.end() )
+                        {
+                                if ( _sv_ent_dispatch != nullptr )
+                                {
+                                        PyObject *ret = PyObject_CallMethod( _sv_ent_dispatch, "createServerEntity", "Oi", _svent_to_class[classname], entnum );
+                                        if ( !ret )
+                                        {
+                                                PyErr_Print();
+                                        }
+                                        else
+                                        {
+                                                PT( CPointEntity ) entity = new CPointEntity;
+                                                entity->set_data( entnum, ent, this );
+                                                _class_entities.push_back( entity );
+                                                Py_INCREF( ret );
+                                                _py_entities.push_back( ret );
+                                                _cent_to_pyent[entity] = ret;
+                                        }
+                                }
+                        }
 #endif
                 }
+                
+        }
+
+        // Now load all of the entities at the application level.
+        for ( size_t i = 0; i < _py_entities.size(); i++ )
+        {
+                PyObject_CallMethod( _py_entities[i], "load", NULL );
         }
 }
 
 #ifdef HAVE_PYTHON
+void BSPLoader::set_server_entity_dispatcher( PyObject *dispatch )
+{
+        _sv_ent_dispatch = dispatch;
+}
+
+void BSPLoader::link_server_entity_to_class( const string &name, PyTypeObject *type )
+{
+        _svent_to_class[name] = type;
+}
+
 void BSPLoader::make_pyent( CBaseEntity *cent, PyObject *py_ent, const string &classname )
 {
         if ( _entity_to_class.find( classname ) != _entity_to_class.end() )
@@ -924,8 +1255,10 @@ void BSPLoader::make_pyent( CBaseEntity *cent, PyObject *py_ent, const string &c
                 PyObject *obj = PyObject_CallObject( (PyObject *)_entity_to_class[classname], NULL );
                 if ( obj == nullptr )
                         PyErr_PrintEx( 1 );
+                Py_INCREF( obj );
                 PyObject_SetAttrString( obj, "cEntity", py_ent );
-                PyObject_CallMethod( obj, "load", NULL );
+                // Don't call load just yet, we need to have all of the entities created first, because some
+                // entities rely on others.
                 _py_entities.push_back( obj );
                 _cent_to_pyent[cent] = obj;
         }
@@ -938,6 +1271,7 @@ void BSPLoader::remove_model( int modelnum )
         if ( !modelroot.is_empty() )
         {
                 _model_roots.erase( find( _model_roots.begin(), _model_roots.end(), modelroot ) );
+                _model_origins.erase( modelroot );
                 modelroot.remove_node();
         }
 }
@@ -986,13 +1320,13 @@ void BSPLoader::update()
                         _leaf_visnp[curr_leaf_idx].set_color_scale( LColor( 0, 1, 0, 1 ), 1 );
                 }
 
-                for ( int i = 1; i < g_dmodels[0].visleafs + 1; i++ )
+                for ( int i = 1; i < _bspdata->dmodels[0].visleafs + 1; i++ )
                 {
                         if ( i == curr_leaf_idx )
                         {
                                 continue;
                         }
-                        const dleaf_t *leaf = &g_dleafs[i];
+                        const dleaf_t *leaf = &_bspdata->dleafs[i];
                         if ( is_cluster_visible( curr_leaf_idx, i ) )
                         {
                                 if ( _vis_leafs )
@@ -1071,35 +1405,43 @@ bool BSPLoader::read( const Filename &file )
 {
         cleanup();
 
-        if ( _gsg == nullptr )
+        if ( !_ai )
         {
-                bspfile_cat.error()
-                        << "Cannot load BSP file: no GraphicsStateGuardian was specified\n";
-                return false;
-        }
-        if ( _camera.is_empty() && _want_visibility )
-        {
-                bspfile_cat.error()
-                        << "Cannot load BSP file: visibility requested but no Camera NodePath specified\n";
-                return false;
-        }
-        if ( _render.is_empty() )
-        {
-                bspfile_cat.error()
-                        << "Cannot load BSP file: no render NodePath specified\n";
-                return false;
+                if ( _gsg == nullptr )
+                {
+                        bspfile_cat.error()
+                                << "Cannot load BSP file: no GraphicsStateGuardian was specified\n";
+                        return false;
+                }
+                if ( _camera.is_empty() && _want_visibility )
+                {
+                        bspfile_cat.error()
+                                << "Cannot load BSP file: visibility requested but no Camera NodePath specified\n";
+                        return false;
+                }
+                if ( _render.is_empty() )
+                {
+                        bspfile_cat.error()
+                                << "Cannot load BSP file: no render NodePath specified\n";
+                        return false;
+                }
         }
 
         dtexdata_init();
 
-        read_materials_file();
-
         PT( BSPRoot ) root = new BSPRoot( "maproot" );
         _result = NodePath( root );
-        // Scale down the entire loaded level as a conversion from Hammer units to Panda units.
-        // Hammer units are tiny compared to panda.
-        _result.set_scale( HAMMER_TO_PANDA );
-        _result.set_shader_off( 1 );
+
+        if ( !_ai )
+        {
+                read_materials_file();
+
+                // Scale down the entire loaded level as a conversion from Hammer units to Panda units.
+                // Hammer units are tiny compared to panda.
+                _result.set_scale( HAMMER_TO_PANDA );
+                _result.set_shader_off( 1 );
+        }
+        
         _has_pvs_data = false;
 
         _leaf_pvs.resize( MAX_MAP_LEAFS );
@@ -1115,23 +1457,23 @@ bool BSPLoader::read( const Filename &file )
         int length = data.length();
         char *buffer = new char[length + 1];
         memcpy( buffer, data.c_str(), length );
-        LoadBSPImage( (dheader_t *)buffer );
+        _bspdata = LoadBSPImage( (dheader_t *)buffer );
 
-        ParseEntities();
+        ParseEntities(_bspdata);
 
         _leaf_aabb_lock.acquire();
         _leaf_bboxs.resize( MAX_MAP_LEAFS );
         // Decompress the per leaf visibility data.
-        for ( int i = 0; i < g_dmodels[0].visleafs + 1; i++ )
+        for ( int i = 0; i < _bspdata->dmodels[0].visleafs + 1; i++ )
         {
-                dleaf_t *leaf = &g_dleafs[i];
+                dleaf_t *leaf = &_bspdata->dleafs[i];
 
                 uint8_t *pvs = new uint8_t[( MAX_MAP_LEAFS + 7 ) / 8];
-                memset( pvs, 0, ( g_dmodels[0].visleafs + 7 ) / 8 );
+                memset( pvs, 0, ( _bspdata->dmodels[0].visleafs + 7 ) / 8 );
 
                 if ( leaf->visofs != -1 )
                 {
-                        DecompressVis( &g_dvisdata[leaf->visofs], pvs, ( MAX_MAP_LEAFS + 7 ) / 8 );
+                        DecompressVis( _bspdata, &_bspdata->dvisdata[leaf->visofs], pvs, ( MAX_MAP_LEAFS + 7 ) / 8 );
                         _has_pvs_data = true;
                 }
 
@@ -1145,36 +1487,47 @@ bool BSPLoader::read( const Filename &file )
         }
         _leaf_aabb_lock.release();
 
-        LightmapPalettizer lmp( this );
-        _lightmap_dir = lmp.palettize_lightmaps();
-
-        make_faces();
-        SceneGraphReducer gr;
-        gr.apply_attribs( _result.node() );
-
-        load_entities();
-        load_static_props();
-
-        if ( _vis_leafs )
+        if ( !_ai )
         {
-                Randomizer random;
-                // Make a cube outline of the bounds for each leaf so we can visualize them.
-                for ( int leafnum = 0; leafnum < g_dmodels[0].visleafs + 1; leafnum++ )
-                {
-                        dleaf_t *leaf = &g_dleafs[leafnum];
-                        LPoint3 mins( ( leaf->mins[0] - LEAF_NUDGE ) / 16.0, ( leaf->mins[1] - LEAF_NUDGE ) / 16.0, ( leaf->mins[2] - LEAF_NUDGE ) / 16.0 );
-                        LPoint3 maxs( ( leaf->maxs[0] + LEAF_NUDGE ) / 16.0, ( leaf->maxs[1] + LEAF_NUDGE ) / 16.0, ( leaf->maxs[2] + LEAF_NUDGE ) / 16.0 );
-                        NodePath leafvis = _result.attach_new_node( UTIL_make_cube_outline( mins, maxs, LColor( 1, 1, 1, 1 ), 2 ) );
-                        leafvis.clear_model_nodes();
-                        leafvis.flatten_strong();
-                        _leaf_visnp.push_back( leafvis );
-                }
+                LightmapPalettizer lmp( this );
+                _lightmap_dir = lmp.palettize_lightmaps();
+
+                make_faces();
+                SceneGraphReducer gr;
+                gr.apply_attribs( _result.node() );
+        }
+        else
+        {
+                make_faces_ai();
         }
 
-        _amb_probe_mgr.process_ambient_probes();
+        load_entities();
 
-        _update_task = new GenericAsyncTask( file.get_basename_wo_extension() + "-updateTask", update_task, this );
-        AsyncTaskManager::get_global_ptr()->add( _update_task );
+        if ( !_ai )
+        {
+                load_static_props();
+
+                if ( _vis_leafs )
+                {
+                        Randomizer random;
+                        // Make a cube outline of the bounds for each leaf so we can visualize them.
+                        for ( int leafnum = 0; leafnum < _bspdata->dmodels[0].visleafs + 1; leafnum++ )
+                        {
+                                dleaf_t *leaf = &_bspdata->dleafs[leafnum];
+                                LPoint3 mins( ( leaf->mins[0] - LEAF_NUDGE ) / 16.0, ( leaf->mins[1] - LEAF_NUDGE ) / 16.0, ( leaf->mins[2] - LEAF_NUDGE ) / 16.0 );
+                                LPoint3 maxs( ( leaf->maxs[0] + LEAF_NUDGE ) / 16.0, ( leaf->maxs[1] + LEAF_NUDGE ) / 16.0, ( leaf->maxs[2] + LEAF_NUDGE ) / 16.0 );
+                                NodePath leafvis = _result.attach_new_node( UTIL_make_cube_outline( mins, maxs, LColor( 1, 1, 1, 1 ), 2 ) );
+                                leafvis.clear_model_nodes();
+                                leafvis.flatten_strong();
+                                _leaf_visnp.push_back( leafvis );
+                        }
+                }
+
+                _amb_probe_mgr.process_ambient_probes();
+
+                _update_task = new GenericAsyncTask( file.get_basename_wo_extension() + "-updateTask", update_task, this );
+                AsyncTaskManager::get_global_ptr()->add( _update_task );
+        }
 
         _active_level = true;
 
@@ -1185,7 +1538,7 @@ void BSPLoader::update_dynamic_node( const NodePath &node )
 {
         if ( _active_level )
         {
-                _amb_probe_mgr.update_node( node.node() );
+                _amb_probe_mgr.update_node( node.node(), node.get_net_transform() );
         }
 }
 
@@ -1221,6 +1574,19 @@ void BSPLoader::do_optimizations()
                                 flatten_node( gnp );
                 	}
                         flatten_node( mdlroot );
+
+                        // Now restore the bmodel's origin
+                        NodePath temp( "temp" );
+                        temp.node()->steal_children( mdlnode );
+
+                        mdlroot.set_pos( _model_origins[mdlroot] );
+
+                        NodePathCollection children = temp.get_children();
+                        for ( int j = 0; j < children.get_num_paths(); j++ )
+                        {
+                                NodePath child = children[j];
+                                child.wrt_reparent_to( mdlroot );
+                        }
                         
                 }
         }
@@ -1246,6 +1612,7 @@ void BSPLoader::set_materials_file( const Filename &file )
 
 void BSPLoader::cleanup()
 {
+        _model_origins.clear();
         for ( size_t i = 0; i < _model_roots.size(); i++ )
         {
                 if ( !_model_roots[i].is_empty() )
@@ -1280,6 +1647,7 @@ void BSPLoader::cleanup()
         for ( size_t i = 0; i < _py_entities.size(); i++ )
         {
                 PyObject_CallMethod( _py_entities[i], "unload", NULL );
+                Py_DECREF( _py_entities[i] );
         }
         _py_entities.clear();
 #endif
@@ -1293,9 +1661,15 @@ void BSPLoader::cleanup()
                 _result.remove_node();
 
         _active_level = false;
+
+        delete _bspdata;
+        _bspdata = nullptr;
 }
 
 BSPLoader::BSPLoader() :
+#ifdef HAVE_PYTHON
+        _sv_ent_dispatch( nullptr ),
+#endif
         _update_task( nullptr ),
         _gsg( nullptr ),
         _has_pvs_data( false ),
@@ -1308,12 +1682,36 @@ BSPLoader::BSPLoader() :
         _gamma( DEFAULT_GAMMA ),
         _diffuse_stage( new TextureStage( "diffuse_stage" ) ),
         _lightmap_stage( new TextureStage( "lightmap_stage" ) ),
+        _envmap_stage( new TextureStage( "envmap_stage" ) ),
         _amb_probe_mgr( this ),
-        _active_level( false )
+        _active_level( false ),
+        _ai( false ),
+        _bspdata( nullptr )
 {
         _diffuse_stage->set_texcoord_name( "diffuse" );
         _lightmap_stage->set_texcoord_name( "lightmap" );
         _lightmap_stage->set_mode( TextureStage::M_modulate );
+        _envmap_stage->set_mode( TextureStage::M_add );
+}
+
+/**
+ * Sets whether or not this is an AI/Server instance of the loader.
+ * If this is true, only the AI views of entities will be loaded,
+ * and nothing related to rendering will be dealt with.
+ */
+void BSPLoader::set_ai( bool ai )
+{
+        _ai = ai;
+}
+
+/**
+ * Gets whether or not this is an AI/Server instance of the loader.
+ * If this is true, only the AI views of entities will be loaded,
+ * and nothing related to rendering will be dealt with.
+ */
+INLINE bool BSPLoader::is_ai() const
+{
+        return _ai;
 }
 
 INLINE bool BSPLoader::has_active_level() const
@@ -1382,30 +1780,30 @@ NodePath BSPLoader::get_result() const
 
 int BSPLoader::get_num_entities() const
 {
-        return g_numentities;
+        return _bspdata->numentities;
 }
 
 string BSPLoader::get_entity_value( int entnum, const char *key ) const
 {
-        entity_t *ent = &g_entities[entnum];
+        entity_t *ent = &_bspdata->entities[entnum];
         return ValueForKey( ent, key );
 }
 
 int BSPLoader::get_entity_value_int( int entnum, const char *key ) const
 {
-        entity_t *ent = &g_entities[entnum];
+        entity_t *ent = &_bspdata->entities[entnum];
         return IntForKey( ent, key );
 }
 
 float BSPLoader::get_entity_value_float( int entnum, const char *key ) const
 {
-        entity_t *ent = &g_entities[entnum];
+        entity_t *ent = &_bspdata->entities[entnum];
         return FloatForKey( ent, key );
 }
 
 LVector3 BSPLoader::get_entity_value_vector( int entnum, const char *key ) const
 {
-        entity_t *ent = &g_entities[entnum];
+        entity_t *ent = &_bspdata->entities[entnum];
 
         vec3_t vec;
         GetVectorForKey( ent, key, vec );
@@ -1415,7 +1813,7 @@ LVector3 BSPLoader::get_entity_value_vector( int entnum, const char *key ) const
 
 LColor BSPLoader::get_entity_value_color( int entnum, const char *key, bool scale ) const
 {
-        entity_t *ent = &g_entities[entnum];
+        entity_t *ent = &_bspdata->entities[entnum];
 
         return color_from_value( ValueForKey( ent, key ), scale );
 }
@@ -1433,20 +1831,34 @@ NodePath BSPLoader::get_model( int modelnum ) const
 }
 
 #ifdef HAVE_PYTHON
+
 PyObject *BSPLoader::get_py_entity_by_target_name( const string &targetname ) const
 {
         for ( CEntToPyEnt::const_iterator itr = _cent_to_pyent.begin(); itr != _cent_to_pyent.end(); ++itr )
         {
                 CBaseEntity *cent = itr->first;
                 PyObject *pyent = itr->second;
-                if ( ValueForKey( &g_entities[cent->get_entnum()], "targetname" ) == targetname )
+                if ( ValueForKey( &_bspdata->entities[cent->get_entnum()], "targetname" ) == targetname )
                 {
                         return pyent;
                 }
         }
 
-        return nullptr;
+        Py_RETURN_NONE;
 }
+
+void BSPLoader::get_entity_keyvalues( PyObject *list, const int entnum )
+{
+        entity_t *ent = _bspdata->entities + entnum;
+        for ( epair_t *ep = ent->epairs; ep->next != nullptr; ep = ep->next )
+        {
+                PyObject *kv = PyTuple_New( 2 );
+                PyTuple_SetItem( kv, 0, PyString_FromString( ep->key ) );
+                PyTuple_SetItem( kv, 1, PyString_FromString( ep->value ) );
+                PyList_Append( list, kv );
+        }
+}
+
 #endif
 
 void BSPLoader::set_physics_type( int type )
@@ -1495,4 +1907,35 @@ INLINE CPT( GeometricBoundingVolume ) BSPLoader::make_net_bounds( const Transfor
                 GeometricBoundingVolume, original->make_copy() );
         gbv->xform( net_transform->get_mat() );
         return gbv;
+}
+
+/**
+ * Traces a line along the BSP tree. Returns true if the line traced
+ * all the way to the end, false if the line intersected a face.
+ */
+bool BSPLoader::trace_line( const LPoint3 &start, const LPoint3 &end )
+{
+        Ray ray( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, LPoint3::zero(), LPoint3::zero() );
+        FaceFinder finder( _bspdata );
+        bool ret = !finder.find_intersection( ray );
+
+        return ret;
+}
+
+INLINE bspdata_t *BSPLoader::get_bspdata() const
+{
+        return _bspdata;
+}
+
+INLINE CBaseEntity *BSPLoader::get_c_entity( const int entnum ) const
+{
+        for ( size_t i = 0; i < _class_entities.size(); i++ )
+        {
+                if ( _class_entities[i]->get_entnum() == entnum )
+                {
+                        return _class_entities[i];
+                }
+        }
+
+        return nullptr;
 }

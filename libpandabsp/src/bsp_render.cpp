@@ -22,14 +22,15 @@ CPT( RenderAttrib ) IgnorePVSAttrib::make()
 
 TypeDef( BSPCullTraverser );
 
-BSPCullTraverser::BSPCullTraverser( CullTraverser *trav ) :
-        CullTraverser( *trav )
+BSPCullTraverser::BSPCullTraverser( CullTraverser *trav, BSPLoader *loader ) :
+        CullTraverser( *trav ),
+        _loader( loader )
 {
 }
 
 bool BSPCullTraverser::is_in_view( CullTraverserData &data )
 {
-        BSPLoader *loader = BSPLoader::get_global_ptr();
+        BSPLoader *loader = _loader;
         // First test view frustum.
         if ( !data.is_in_view( get_camera_mask() ) )
         {
@@ -55,7 +56,7 @@ bool BSPCullTraverser::is_in_view( CullTraverserData &data )
 
 INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTraverserData &data )
 {
-        BSPLoader *loader = BSPLoader::get_global_ptr();
+        BSPLoader *loader = _loader;
 
         _geom_nodes_pcollector.add_level( 1 );
 
@@ -182,7 +183,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                      !node->get_transform()->is_identity()              &&
                      !node->has_effect( CharacterJointEffect::get_class_type() ) )
                 {
-                        BSPLoader::get_global_ptr()->_amb_probe_mgr.update_node( node );
+                        _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ) );
                 }
         }
 
@@ -229,8 +230,9 @@ CPT( RenderState ) BSPCullTraverser::get_depth_offset_state()
 
 TypeDef( BSPRender );
 
-BSPRender::BSPRender( const std::string &name ) :
-        PandaNode( name )
+BSPRender::BSPRender( const std::string &name, BSPLoader *loader ) :
+        PandaNode( name ),
+        _loader( loader )
 {
         set_cull_callback();
 
@@ -239,10 +241,10 @@ BSPRender::BSPRender( const std::string &name ) :
 
 bool BSPRender::cull_callback( CullTraverser *trav, CullTraverserData &data )
 {
-        BSPLoader *loader = BSPLoader::get_global_ptr();
+        BSPLoader *loader = _loader;
         if ( loader->has_visibility() )
         {
-                BSPCullTraverser bsp_trav( trav );
+                BSPCullTraverser bsp_trav( trav, _loader );
                 bsp_trav.local_object();
                 bsp_trav.traverse_below( data );
                 bsp_trav.end_traverse();

@@ -19,6 +19,8 @@ class dmodel_t;
 
 class EXPCL_PANDABSP CBaseEntity : public TypedReferenceCount
 {
+        TypeDecl( CBaseEntity, TypedReferenceCount );
+
 PUBLISHED:
 	CBaseEntity();
 
@@ -32,41 +34,17 @@ protected:
 	entity_t *_ent;
 	int _entnum;
 	BSPLoader *_loader;
-
-public:
-	static TypeHandle get_class_type()
-	{
-		return _type_handle;
-	}
-	static void init_type()
-	{
-		register_type( _type_handle, "CBaseEntity", TypedReferenceCount::get_class_type() );
-	}
-
-private:
-	static TypeHandle _type_handle;
 };
 
 class EXPCL_PANDABSP CPointEntity : public CBaseEntity
 {
+        TypeDecl( CPointEntity, CBaseEntity );
+
 PUBLISHED:
 	CPointEntity();
 
 	LPoint3 get_origin() const;
 	LVector3 get_angles() const;
-
-public:
-	static TypeHandle get_class_type()
-	{
-		return _type_handle;
-	}
-	static void init_type()
-	{
-		register_type( _type_handle, "CPointEntity", CBaseEntity::get_class_type() );
-	}
-
-private:
-	static TypeHandle _type_handle;
 };
 
 /**
@@ -75,6 +53,8 @@ private:
  */
 class EXPCL_PANDABSP CBoundsEntity : public CBaseEntity
 {
+        TypeDecl( CBoundsEntity, CBaseEntity );
+
 PUBLISHED:
         CBoundsEntity();
 
@@ -89,23 +69,12 @@ public:
 private:
         PT( BoundingBox ) _bounds;
         dmodel_t *_mdl;
-
-public:
-        static TypeHandle get_class_type()
-        {
-                return _type_handle;
-        }
-        static void init_type()
-        {
-                register_type( _type_handle, "CBoundsEntity", CBaseEntity::get_class_type() );
-        }
-
-private:
-        static TypeHandle _type_handle;
 };
 
 class EXPCL_PANDABSP CBrushEntity : public CBaseEntity
 {
+        TypeDecl( CBrushEntity, CBaseEntity );
+
 PUBLISHED:
 	CBrushEntity();
 	
@@ -121,20 +90,6 @@ private:
 	int _modelnum;
 	dmodel_t *_mdl;
 	NodePath _modelnp;
-	
-
-public:
-	static TypeHandle get_class_type()
-	{
-		return _type_handle;
-	}
-	static void init_type()
-	{
-		register_type( _type_handle, "CBrushEntity", CBaseEntity::get_class_type() );
-	}
-
-private:
-	static TypeHandle _type_handle;
 };
 
 #endif // ENTITY_H
