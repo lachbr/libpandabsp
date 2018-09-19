@@ -1832,13 +1832,19 @@ NodePath BSPLoader::get_model( int modelnum ) const
 
 #ifdef HAVE_PYTHON
 
+void BSPLoader::link_cent_to_pyent( int entnum, PyObject *pyent )
+{
+        _cent_to_pyent[get_c_entity( entnum )] = pyent;
+}
+
 PyObject *BSPLoader::get_py_entity_by_target_name( const string &targetname ) const
 {
         for ( CEntToPyEnt::const_iterator itr = _cent_to_pyent.begin(); itr != _cent_to_pyent.end(); ++itr )
         {
                 CBaseEntity *cent = itr->first;
                 PyObject *pyent = itr->second;
-                if ( ValueForKey( &_bspdata->entities[cent->get_entnum()], "targetname" ) == targetname )
+                string tname = ValueForKey( &_bspdata->entities[cent->get_entnum()], "targetname" );
+                if (  tname == targetname )
                 {
                         return pyent;
                 }

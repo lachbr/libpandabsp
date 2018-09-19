@@ -151,6 +151,8 @@ PUBLISHED:
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
 
+        
+
         INLINE int extract_modelnum( int entnum );
         INLINE void get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs );
 
@@ -170,6 +172,7 @@ PUBLISHED:
 	void link_entity_to_class( const string &entname, PyTypeObject *type );
 	PyObject *get_py_entity_by_target_name( const string &targetname ) const;
         void get_entity_keyvalues( PyObject *list, const int entnum );
+        void link_cent_to_pyent( int entum, PyObject *pyent );
 #endif
 
 	int get_num_entities() const;
