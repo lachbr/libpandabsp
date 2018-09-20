@@ -1834,6 +1834,7 @@ NodePath BSPLoader::get_model( int modelnum ) const
 
 void BSPLoader::link_cent_to_pyent( int entnum, PyObject *pyent )
 {
+        Py_INCREF( pyent );
         _cent_to_pyent[get_c_entity( entnum )] = pyent;
 }
 
@@ -1846,6 +1847,7 @@ PyObject *BSPLoader::get_py_entity_by_target_name( const string &targetname ) co
                 string tname = ValueForKey( &_bspdata->entities[cent->get_entnum()], "targetname" );
                 if (  tname == targetname )
                 {
+                        Py_INCREF( pyent );
                         return pyent;
                 }
         }
