@@ -150,7 +150,7 @@ PUBLISHED:
 	void set_physics_type( int type );
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
-
+        void set_texture_contents_file( const Filename &file );
         
 
         INLINE int extract_modelnum( int entnum );

@@ -1947,3 +1947,8 @@ INLINE CBaseEntity *BSPLoader::get_c_entity( const int entnum ) const
 
         return nullptr;
 }
+
+void BSPLoader::set_texture_contents_file( const Filename &file )
+{
+        SetTextureContentsFile( file.get_fullpath().c_str() );
+}
