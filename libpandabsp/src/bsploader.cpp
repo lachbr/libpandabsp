@@ -185,6 +185,11 @@ INLINE int BSPLoader::find_leaf( const NodePath &np )
 
 INLINE int BSPLoader::find_leaf( const LPoint3 &pos )
 {
+        if ( !_active_level )
+        {
+                return 0;
+        }
+
         int i = 0;
 
         // Walk the BSP tree to find the index of the leaf which contains the specified
@@ -213,6 +218,11 @@ INLINE int BSPLoader::find_leaf( const LPoint3 &pos )
 
 INLINE int BSPLoader::find_node( const LPoint3 &pos )
 {
+        if ( !_active_level )
+        {
+                return 0;
+        }
+
         int i = 0;
 
         while ( true )
@@ -1278,6 +1288,10 @@ void BSPLoader::remove_model( int modelnum )
 
 INLINE bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
 {
+        if ( !_active_level )
+        {
+                return true;
+        }
         if ( curr_cluster == cluster )
         {
                 return true;
@@ -1923,6 +1937,11 @@ INLINE CPT( GeometricBoundingVolume ) BSPLoader::make_net_bounds( const Transfor
  */
 bool BSPLoader::trace_line( const LPoint3 &start, const LPoint3 &end )
 {
+        if ( !_active_level )
+        {
+                return true;
+        }
+
         Ray ray( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, LPoint3::zero(), LPoint3::zero() );
         FaceFinder finder( _bspdata );
         bool ret = !finder.find_intersection( ray );
