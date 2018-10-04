@@ -49,6 +49,7 @@
 #include <geomVertexRewriter.h>
 #include <sceneGraphReducer.h>
 #include <characterJointEffect.h>
+#include <orthographicLens.h>
 
 INLINE static void flatten_node( const NodePath &node )
 {
@@ -493,8 +494,34 @@ void BSPLoader::make_faces_ai()
         flatten_node( _result );
 }
 
-static pvector<string> make_bface_shaders( bool lightmap, bool envmap, float envmap_shininess )
+static PT( Shader ) get_csm_caster_shader()
 {
+        stringstream vshader;
+        vshader << "#version 430;\n";
+        vshader << "uniform mat4 p3d_ModelViewProjectionMatrix;\n";
+        vshader << "in vec4 p3d_Vertex;\n";
+        vshader << "out vec4 l_position;\n";
+        vshader << "void main() {\n";
+        vshader << "\t gl_Position = p3d_ModelViewProjectionMatrix * p3d_Vertex;\n";
+        vshader << "\t l_position = gl_Position;\n";
+        vshader << "}\n";
+
+        stringstream pshader;
+        pshader << "#version 430\n";
+        pshader << "in vec4 l_position;\n";
+        pshader << "out vec4 o_color;\n";
+        pshader << "void main() {\n";
+        pshader << "\t float z = (l_position.z / l_position.w) * 0.5 + 0.5;\n";
+        pshader << "\t o_color = vec4(z, z, z, 1.0);\n";
+        pshader << "}\n";
+
+        return Shader::make( Shader::SL_GLSL, vshader.str(), pshader.str() );
+}
+
+static pvector<string> make_bface_shaders( bool lightmap, bool envmap, float envmap_shininess, bool bumped,
+                                           bool normalmap, bool recv_projshadows )
+{
+
         pvector<string> result;
 
         stringstream vshader;
@@ -505,15 +532,27 @@ static pvector<string> make_bface_shaders( bool lightmap, bool envmap, float env
         {
                 vshader << "in vec2 p3d_MultiTexCoord1;\n";
         }
+        if ( recv_projshadows )
+        {
+                vshader << "out vec4 l_projshadowcoords;\n";
+                vshader << "uniform mat4 trans_model_to_clip_of_shadowcam;\n";
+        }
         vshader << "uniform mat4 p3d_ModelViewProjectionMatrix;\n";
+        vshader << "in vec3 p3d_Normal;\n";
         if ( envmap )
         {
                 vshader << "uniform mat4 p3d_ModelViewMatrix;\n";
                 vshader << "uniform mat4 p3d_ViewMatrixInverse;\n";
-                vshader << "in vec3 p3d_Normal;\n";
                 vshader << "uniform mat4 tpose_view_to_model;\n";
+                vshader << "in vec4 mspos_view;\n";
                 //vshader << "out vec3 refl_vec;\n";
                 vshader << "out vec2 envmap_coords;\n";
+        }
+        if ( bumped && normalmap )
+        {
+                vshader << "in vec3 p3d_Tangent;\n";
+                vshader << "in vec3 p3d_Binormal;\n";
+                vshader << "out vec3 tangent;out vec3 binormal;out vec3 vnormal;\n";
         }
         vshader << "out vec2 diff_texcoord;\n";
         if ( lightmap )
@@ -531,14 +570,22 @@ static pvector<string> make_bface_shaders( bool lightmap, bool envmap, float env
         {
                 vshader << "vec4 eye_normal;\neye_normal.xyz = normalize(mat3(tpose_view_to_model) * p3d_Normal);\n"
                         "eye_normal.w = 0.0;\n";
-                vshader << "vec3 eye_pos = vec3(p3d_ModelViewMatrix * p3d_Vertex);\n";
-                vshader << "\t vec3 eye_vec = normalize(eye_pos);\n";
-                //vshader << "\t refl_vec = reflect(eye_vec, eye_normal.xyz);\n";
-                //vshader << "\t refl_vec = vec3(p3d_ViewMatrixInverse * vec4(refl_vec, 0.0));\n";
+                vshader << "\t vec3 eye_vec = (p3d_ModelViewMatrix * p3d_Vertex).xyz;//mspos_view.xyz - p3d_Vertex.xyz);\n";
                 vshader << "\t vec3 r = reflect(eye_vec, eye_normal.xyz);\n";
                 vshader << "\t r = vec3(p3d_ViewMatrixInverse * vec4(r, 0.0));\n";
                 vshader << "\t float m = 2.0 * sqrt(pow(r.x, 2.0) + pow(r.y, 2.0) + pow(r.z + 1.0, 2.0));\n";
                 vshader << "\t envmap_coords = r.xy / m + 0.5;\n";
+        }
+        if ( bumped && normalmap )
+        {
+                vshader << "\t tangent = p3d_Tangent;\n";
+                vshader << "\t binormal = p3d_Binormal;\n";
+                vshader << "\t vnormal = p3d_Normal;\n";
+        }
+        if ( recv_projshadows )
+        {
+                vshader << "vec4 camclip = trans_model_to_clip_of_shadowcam * p3d_Vertex;\n";
+                vshader << "l_projshadowcoords = camclip * vec4(0.5,0.5,0.5,1.0) + camclip.w * vec4(0.5,0.5,0.5,0.0);\n";
         }
         vshader << "}\n";
 
@@ -546,6 +593,12 @@ static pvector<string> make_bface_shaders( bool lightmap, bool envmap, float env
         pshader << "#version 430\n";
         pshader << "uniform sampler2D p3d_Texture0;\n";
         pshader << "in vec2 diff_texcoord;\n";
+        if ( recv_projshadows )
+        {
+                pshader << "uniform sampler2D shadowtex;\n";
+                pshader << "uniform sampler2D shadowdepth;\n";
+                pshader << "in vec4 l_projshadowcoords;\n";
+        }
         if ( lightmap )
         {
                 pshader << "uniform sampler2D p3d_Texture1;\n";
@@ -557,16 +610,66 @@ static pvector<string> make_bface_shaders( bool lightmap, bool envmap, float env
                 //pshader << "in vec3 refl_vec;\n";
                 pshader << "in vec2 envmap_coords;\n";
         }
+        if ( normalmap && bumped )
+        {
+                pshader << "uniform sampler2D normalmap_texture;\n";
+                pshader << "uniform sampler2D lightmap_colors0;uniform sampler2D lightmap_colors1;uniform sampler2D lightmap_colors2;\n";
+                pshader << "uniform vec3 bump_basis0;uniform vec3 bump_basis1;uniform vec3 bump_basis2;\n";
+                pshader << "in vec3 tangent; in vec3 binormal;in vec3 vnormal;\n";
+        }
         pshader << "out vec4 frag_color;\n";
+
         pshader << "void main() {\n";
         pshader << "\t frag_color = texture2D(p3d_Texture0, diff_texcoord);\n";
+        if ( normalmap && bumped )
+        {
+                
+                pshader << "\t mat3 bump_trans = mat3(bump_basis0, bump_basis1, bump_basis2);\n";
+                pshader << "\t vec3 norm_col = texture2D( normalmap_texture, diff_texcoord ).rgb;\n";
+                pshader << "\t vec3 normal = norm_col * 2.0 - 1.0;\n";
+                //pshader << "\t normal *= bump_trans;\n";// * mat3(tangent, binormal, vnormal);\n";
+                //pshader << "\t normal *= vnormal.z;\n";
+                //pshader << "\t normal += tangent * vnormal.x;\n";
+                //pshader << "\t normal += binormal * vnormal.y;\n";
+                pshader << "\t normal = normalize( normal );\n";
+        }
         if ( envmap )
         {
-                pshader << "\t frag_color += (texture2D(envmap_texture, envmap_coords) * " << envmap_shininess << ");\n";
+                pshader << "\t frag_color.rgb += (texture2D(envmap_texture, envmap_coords).rgb * " << envmap_shininess << ");\n";
         }
         if ( lightmap )
         {
-                pshader << "\t frag_color *= texture2D(p3d_Texture1, lm_texcoord);\n";
+                if ( normalmap && bumped )
+                {
+                        pshader << "vec3 dp = vec3(0, 0, 0);\n";
+                        pshader << "dp.x = clamp(dot(normal, bump_basis0), 0, 1);\n";
+                        pshader << "dp.y = clamp(dot(normal, bump_basis1), 0, 1);\n";
+                        pshader << "dp.z = clamp(dot(normal, bump_basis2), 0, 1);\n";
+                        pshader << "dp *= dp;\n";
+
+                        pshader << "vec3 lmcolor0 = texture2D(lightmap_colors0, lm_texcoord).rgb;\n";
+                        pshader << "vec3 lmcolor1 = texture2D(lightmap_colors1, lm_texcoord).rgb;\n";
+                        pshader << "vec3 lmcolor2 = texture2D(lightmap_colors2, lm_texcoord).rgb;\n";
+
+                        pshader << "float sum = dot(dp, vec3(1.0, 1.0, 1.0));\n";
+
+                        pshader << "vec3 final_lightmap = dp.x*lmcolor0 + dp.y*lmcolor1 + dp.z*lmcolor2;\n";
+                        pshader << "final_lightmap *= 1.0 / sum;\n";
+
+                        pshader << "\t frag_color.rgb *= final_lightmap;\n";
+                }
+                else
+                {
+                        pshader << "\t frag_color.rgb *= texture2D(p3d_Texture1, lm_texcoord).rgb;\n";
+                }
+        }
+        if ( recv_projshadows )
+        {
+                //pshader << "vec4 proj = l_projshadowcoords / l_projshadowcoords.w;\n";
+                //pshader << "float mapval = texture2D(shadowdepth, proj.xy).r;\n";
+                //pshader << "if (mapval > proj.z) { frag_color.rgb *= texture2DProj(shadowtex, l_projshadowcoords).rgb; }\n";
+
+                pshader << "frag_color.rgb *= texture2DProj(shadowtex, l_projshadowcoords).rgb;\n";
         }
         pshader << "}\n";
 
@@ -628,6 +731,8 @@ void BSPLoader::make_faces()
                         string envmap = "phase_14/maps/envmap001a.png";
                         float envmap_shininess = -1;
                         bool mat_lightmapped = true;
+                        bool mat_normalmap = false;
+                        string normalmapfile = "";
 
                         PT( Texture ) tex = try_load_texref( texref );
                         string texture_name = texref->name;
@@ -657,6 +762,11 @@ void BSPLoader::make_faces()
                                         else if ( prop->name == "$lightmapped" )
                                         {
                                                 mat_lightmapped = (bool)atoi( prop->value.c_str() );
+                                        }
+                                        else if ( prop->name == "$normalmap" )
+                                        {
+                                                mat_normalmap = true;
+                                                normalmapfile = prop->value;
                                         }
                                         
                                         bspfile_cat.info()
@@ -764,6 +874,7 @@ void BSPLoader::make_faces()
                         LNormald poly_normal = poly->get_normal();
                         int face_type = BSPFaceAttrib::FACETYPE_WALL;
 
+                        bool recv_projshadows = false;
                         if ( poly_normal.almost_equal( LNormald::up(), 0.5 ) )
                         {
                                 // A polygon facing upwards could be considered a ground.
@@ -771,9 +882,11 @@ void BSPLoader::make_faces()
                                 poly->set_bin( "ground" );
                                 poly->set_draw_order( 18 );
                                 face_type = BSPFaceAttrib::FACETYPE_FLOOR;
+                                recv_projshadows = true;
                         }
 
                         data->recompute_vertex_normals( 90.0 );
+                        data->recompute_tangent_binormal_auto();
 
                         NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
 
@@ -784,7 +897,7 @@ void BSPLoader::make_faces()
 
                         if ( has_lighting )
                         {
-                                faceroot.set_texture( _lightmap_stage, lmfaceentry->palette->palette_tex );
+                                faceroot.set_texture( _lightmap_stage, lmfaceentry->palette->palette_tex[0] );
                         }
 
                         faceroot.wrt_reparent_to( modelroot );
@@ -793,14 +906,40 @@ void BSPLoader::make_faces()
                                 faceroot.set_transparency( TransparencyAttrib::M_multisample, 1 );
                         }
 
-                        pvector<string> shaders = make_bface_shaders( has_lighting, envmap_shininess > 0.0, envmap_shininess );
+                        pvector<string> shaders = make_bface_shaders( has_lighting, envmap_shininess > 0.0, envmap_shininess,
+                                                                      face->bumped_lightmap, mat_normalmap, recv_projshadows );
                         faceroot.set_shader( Shader::make( Shader::SL_GLSL, shaders[0], shaders[1] ), 1 );
+                        if ( recv_projshadows )
+                        {
+                                faceroot.set_shader_input( "shadowtex", _shadow_tex );
+                                faceroot.set_shader_input( "shadowdepth", _shadow_depth );
+                                faceroot.set_shader_input( "shadowcam", _shadowcam );
+                        }
                         if ( envmap_shininess > 0.0 )
                         {
                                 PT( Texture ) etex = TexturePool::load_texture( envmap );
                                 etex->set_wrap_u( SamplerState::WM_repeat );
                                 etex->set_wrap_v( SamplerState::WM_repeat );
                                 faceroot.set_shader_input( "envmap_texture", etex );
+                        }
+                        if ( face->bumped_lightmap && mat_normalmap )
+                        {
+                                if ( mat_normalmap )
+                                {
+                                        PT( Texture ) nmtex = TexturePool::load_texture( normalmapfile );
+                                        faceroot.set_shader_input( "normalmap_texture", nmtex );
+                                }
+
+                                for ( int n = 0; n < NUM_BUMP_VECTS; n++ )
+                                {
+                                        stringstream lmss;
+                                        lmss << "lightmap_colors" << n;
+                                        faceroot.set_shader_input( lmss.str(), lmfaceentry->palette->palette_tex[n + 1] );
+
+                                        stringstream bbss;
+                                        bbss << "bump_basis" << n;
+                                        faceroot.set_shader_input( bbss.str(), g_localbumpbasis[n] );
+                                }
                         }
 
                         NodePathCollection gn_npc = faceroot.find_all_matches( "**/+GeomNode" );
@@ -1415,16 +1554,73 @@ void BSPLoader::read_materials_file()
         }
 }
 
+void BSPLoader::setup_shadowcam()
+{
+        PT( Camera ) cam = new Camera( "shadowcam" );
+        cam->set_camera_mask( _shadowcam_mask );
+        cam->set_scene( _render );
+        PT( OrthographicLens ) lens = new OrthographicLens();
+        lens->set_film_size( _shadow_filmsize, _shadow_filmsize );
+        cam->set_lens( lens );
+
+        NodePath state( "state" );
+        state.set_color_scale_off( 10 );
+        state.set_shader_off( 10 );
+        state.set_texture_off( 10 );
+        state.set_light_off( 10 );
+        state.set_fog_off( 10 );
+        state.set_material_off( 10 );
+        state.set_attrib( IgnorePVSAttrib::make(), 10 );
+        state.set_color( _shadow_color, 10 );
+
+        cam->set_initial_state( state.get_state() );
+
+        _render.hide( _shadowcam_mask );
+
+        _shadowcam = _camera.attach_new_node( cam );
+        _shadowcam.set_attrib( IgnorePVSAttrib::make(), 1 );
+        _shadowcam.set_pos( _shadowcam_pos );
+        _shadowcam.look_at( 0, 0, 0 );
+        _shadowcam.set_compass( _render );
+
+        PT( GraphicsOutput ) buf = _win->make_texture_buffer( "shadow", _shadow_texsize, _shadow_texsize );
+        buf->set_clear_color_active( true );
+        buf->set_clear_color( LColor( 1 ) );
+        _shadow_buf = buf;
+        PT( DisplayRegion ) dr = buf->make_display_region();
+        dr->set_camera( _shadowcam );
+
+        PT( Texture ) tex = buf->get_texture();
+        tex->set_border_color( LColor( 1 ) );
+        tex->set_wrap_u( SamplerState::WM_border_color );
+        tex->set_wrap_v( SamplerState::WM_border_color );
+        _shadow_tex = tex;
+
+        _shadow_depth = new Texture( "shadowdepth" );
+        buf->add_render_texture( _shadow_depth, GraphicsOutput::RTM_bind_or_copy,
+                                 GraphicsOutput::RTP_depth_stencil );
+        if ( _win->get_gsg()->get_supports_shadow_filter() )
+        {
+                _shadow_depth->set_minfilter( SamplerState::FT_shadow );
+                _shadow_depth->set_magfilter( SamplerState::FT_shadow );
+        }
+}
+
+Texture *BSPLoader::get_shadow_tex() const
+{
+        return _shadow_tex;
+}
+
 bool BSPLoader::read( const Filename &file )
 {
         cleanup();
 
         if ( !_ai )
         {
-                if ( _gsg == nullptr )
+                if ( _win == nullptr )
                 {
                         bspfile_cat.error()
-                                << "Cannot load BSP file: no GraphicsStateGuardian was specified\n";
+                                << "Cannot load BSP file: no GraphicsWindow was specified\n";
                         return false;
                 }
                 if ( _camera.is_empty() && _want_visibility )
@@ -1453,7 +1649,8 @@ bool BSPLoader::read( const Filename &file )
                 // Scale down the entire loaded level as a conversion from Hammer units to Panda units.
                 // Hammer units are tiny compared to panda.
                 _result.set_scale( HAMMER_TO_PANDA );
-                _result.set_shader_off( 1 );
+
+                setup_shadowcam();
         }
         
         _has_pvs_data = false;
@@ -1509,6 +1706,9 @@ bool BSPLoader::read( const Filename &file )
                 make_faces();
                 SceneGraphReducer gr;
                 gr.apply_attribs( _result.node() );
+
+                _result.set_shader_off( 1 );
+                _result.set_attrib( BSPFaceAttrib::make_default(), 1 );
         }
         else
         {
@@ -1552,7 +1752,7 @@ void BSPLoader::update_dynamic_node( const NodePath &node )
 {
         if ( _active_level )
         {
-                _amb_probe_mgr.update_node( node.node(), node.get_net_transform() );
+                _amb_probe_mgr.update_node( node.node(), node.get_net_transform(), node.get_net_state() );
         }
 }
 
@@ -1615,8 +1815,8 @@ void BSPLoader::do_optimizations()
                 npc[i].flatten_strong();
         }
 
-        _result.premunge_scene( _gsg );
-        _result.prepare_scene( _gsg );
+        _result.premunge_scene( _win->get_gsg() );
+        _result.prepare_scene( _win->get_gsg() );
 }
 
 void BSPLoader::set_materials_file( const Filename &file )
@@ -1642,6 +1842,17 @@ void BSPLoader::cleanup()
         _leaf_bboxs.clear();
         _visible_leaf_bboxs.clear();
         _leaf_aabb_lock.release();
+
+        if ( _shadow_buf != nullptr )
+        {
+                _win->get_engine()->remove_window( _shadow_buf );
+                _shadow_buf = nullptr;
+        }
+
+        if ( !_shadowcam.is_empty() )
+        {
+                _shadowcam.remove_node();
+        }
 
         if ( _update_task != nullptr )
         {
@@ -1685,7 +1896,7 @@ BSPLoader::BSPLoader() :
         _sv_ent_dispatch( nullptr ),
 #endif
         _update_task( nullptr ),
-        _gsg( nullptr ),
+        _win( nullptr ),
         _has_pvs_data( false ),
         _want_visibility( true ),
         _physics_type( PT_panda ),
@@ -1697,15 +1908,73 @@ BSPLoader::BSPLoader() :
         _diffuse_stage( new TextureStage( "diffuse_stage" ) ),
         _lightmap_stage( new TextureStage( "lightmap_stage" ) ),
         _envmap_stage( new TextureStage( "envmap_stage" ) ),
+        _shadow_stage( new TextureStage( "shadow_stage" ) ),
         _amb_probe_mgr( this ),
         _active_level( false ),
         _ai( false ),
-        _bspdata( nullptr )
+        _bspdata( nullptr ),
+        _shadowcam_pos( -30, 25, 40 ),
+        _shadowcam_mask( BitMask32::bit( 5 ) ),
+        _shadow_color( 0.5, 0.5, 0.5, 1.0 ),
+        _shadow_tex( nullptr ),
+        _shadow_buf( nullptr ),
+        _shadow_depth( nullptr ),
+        _shadow_filmsize( 60 ),
+        _shadow_texsize( 1024 )
 {
         _diffuse_stage->set_texcoord_name( "diffuse" );
+        _diffuse_stage->set_sort( 0 );
+
         _lightmap_stage->set_texcoord_name( "lightmap" );
         _lightmap_stage->set_mode( TextureStage::M_modulate );
+        _lightmap_stage->set_sort( 1 );
+
+        _shadow_stage->set_texcoord_name( "shadow" );
+        _shadow_stage->set_sort( 2 );
+
         _envmap_stage->set_mode( TextureStage::M_add );
+}
+
+void BSPLoader::set_shadow_resolution( int filmsize, int texsize )
+{
+        _shadow_filmsize = filmsize;
+        _shadow_texsize = texsize;
+}
+
+void BSPLoader::cast_shadows( NodePath &node )
+{
+        node.show_through( _shadowcam_mask );
+}
+
+void BSPLoader::set_shadow_color( const LColor &color )
+{
+        _shadow_color = color;
+        if ( !_shadowcam.is_empty() )
+        {
+                Camera *cam = DCAST( Camera, _shadowcam.node() );
+                CPT( RenderState ) state = cam->get_initial_state();
+                state = state->set_attrib( ColorAttrib::make_flat( _shadow_color ), 10 );
+                cam->set_initial_state( state );
+        }
+}
+
+void BSPLoader::set_shadow_cam_bitmask( const BitMask32 &mask )
+{
+        _shadowcam_mask = mask;
+        if ( !_shadowcam.is_empty() )
+        {
+                DCAST( Camera, _shadowcam.node() )->set_camera_mask( _shadowcam_mask );
+                _render.hide( mask );
+        }
+}
+
+void BSPLoader::set_shadow_cam_pos( const LPoint3 &pos )
+{
+        _shadowcam_pos = pos;
+        if ( !_shadowcam.is_empty() )
+        {
+                _shadowcam.set_pos( pos );
+        }
 }
 
 /**
@@ -1767,9 +2036,9 @@ INLINE PN_stdfloat BSPLoader::get_gamma() const
         return _gamma;
 }
 
-void BSPLoader::set_gsg( GraphicsStateGuardian *gsg )
+void BSPLoader::set_win( GraphicsWindow *win )
 {
-        _gsg = gsg;
+        _win = win;
 }
 
 void BSPLoader::set_visualize_leafs( bool flag )

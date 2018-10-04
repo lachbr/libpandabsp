@@ -17,6 +17,8 @@ void init_libpandabsp()
         initialized = true;
 
 	BSPFaceAttrib::init_type();
+        //WorldGeometryAttrib::init_type();
+        IgnorePVSAttrib::init_type();
 	CBaseEntity::init_type();
         CPointEntity::init_type();
 	CBrushEntity::init_type();

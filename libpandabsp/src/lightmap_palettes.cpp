@@ -22,7 +22,7 @@ LightmapPalettizer::LightmapPalettizer( const BSPLoader *loader ) :
 {
 }
 
-INLINE PNMImage lightmap_img_for_face( const BSPLoader *loader, const dface_t *face )
+INLINE PNMImage lightmap_img_for_face( const BSPLoader *loader, const dface_t *face, int lmnum = 0 )
 {
         int width = face->lightmap_size[0] + 1;
         int height = face->lightmap_size[1] + 1;
@@ -41,6 +41,8 @@ INLINE PNMImage lightmap_img_for_face( const BSPLoader *loader, const dface_t *f
 
         int luxel = 0;
 
+        int bump_sample_count = face->bumped_lightmap ? NUM_BUMP_VECTS + 1 : 1;
+
         for ( int y = 0; y < height; y++ )
         {
                 for ( int x = 0; x < width; x++ )
@@ -56,9 +58,7 @@ INLINE PNMImage lightmap_img_for_face( const BSPLoader *loader, const dface_t *f
                                         continue;
                                 }
 
-                                // From p3rad
-                                int sample_idx = face->lightofs + lightstyle * num_luxels + luxel;
-                                colorrgbexp32_t *sample = &loader->get_bspdata()->dlightdata[sample_idx];
+                                colorrgbexp32_t *sample = SampleLightmap( loader->get_bspdata(), face, luxel, lightstyle, lmnum );
 
                                 luxel_col.componentwise_mult( color_shift_pixel( sample, loader->get_gamma() ) );
 
@@ -93,7 +93,18 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
 
                 LightmapSource src;
                 src.facenum = facenum;
-                src.lightmap_img = lightmap_img_for_face( _loader, face );
+                if ( face->bumped_lightmap )
+                {
+                        for ( int n = 0; n < NUM_BUMP_VECTS + 1; n++ )
+                        {
+                                src.lightmap_img[n] = lightmap_img_for_face( _loader, face, n );
+                        }
+                }
+                else
+                {
+                        src.lightmap_img[0] = lightmap_img_for_face( _loader, face, 0 );
+                }
+                
                 _sources.push_back( src );
         }
 
@@ -140,11 +151,15 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
                 Palette *pal = &result_vec[i];
                 int width, height;
                 pal->packer->packTextures( width, height, true, false );
-                pal->palette_img = PNMImage( width, height );
-                pal->palette_img.fill( 0.0 );
 
                 PT( LightmapPaletteDirectory::LightmapPaletteEntry ) entry = new LightmapPaletteDirectory::LightmapPaletteEntry;
-                entry->palette_tex = new Texture;
+
+                for ( int n = 0; n < NUM_BUMP_VECTS + 1; n++ )
+                {
+                        pal->palette_img[n] = PNMImage( width, height );
+                        pal->palette_img[n].fill( 0.0 );
+                        entry->palette_tex[n] = new Texture;
+                }
 
                 for ( size_t j = 0; j < pal->sources.size(); j++ )
                 {
@@ -159,23 +174,50 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
                         face_entry->yshift = yshift;
                         face_entry->palette_size[0] = width;
                         face_entry->palette_size[1] = height;
-                        
-                        for ( int y = 0; y < lmheight; y++ )
+
+                        if ( _loader->get_bspdata()->dfaces[src->facenum].bumped_lightmap )
                         {
-                                for ( int x = 0; x < lmwidth; x++ )
+                                for ( int n = 0; n < NUM_BUMP_VECTS + 1; n++ )
                                 {
-                                        pal->palette_img.set_xel( x + xshift, y + yshift, rotated ? src->lightmap_img.get_xel( y, x ) : src->lightmap_img.get_xel( x, y ) );
+                                        for ( int y = 0; y < lmheight; y++ )
+                                        {
+                                                for ( int x = 0; x < lmwidth; x++ )
+                                                {
+                                                        pal->palette_img[n].set_xel( x + xshift, y + yshift, rotated ? src->lightmap_img[n].get_xel( y, x ) : src->lightmap_img[n].get_xel( x, y ) );
+                                                }
+                                        }
+                                }
+                                
+                        }
+                        else
+                        {
+                                for ( int y = 0; y < lmheight; y++ )
+                                {
+                                        for ( int x = 0; x < lmwidth; x++ )
+                                        {
+                                                pal->palette_img[0].set_xel( x + xshift, y + yshift, rotated ? src->lightmap_img[0].get_xel( y, x ) : src->lightmap_img[0].get_xel( x, y ) );
+                                        }
                                 }
                         }
+                        
+                        
 
                         
                         dir.face_index[src->facenum] = face_entry;
                         dir.face_entries.push_back( face_entry );
                 }
 
-                entry->palette_tex->load( pal->palette_img );
-                entry->palette_tex->set_magfilter( SamplerState::FT_linear );
-                entry->palette_tex->set_minfilter( SamplerState::FT_linear_mipmap_linear );
+                for ( int n = 0; n < NUM_BUMP_VECTS + 1; n++ )
+                {
+                        entry->palette_tex[n]->load( pal->palette_img[n] );
+                        entry->palette_tex[n]->set_magfilter( SamplerState::FT_linear );
+                        entry->palette_tex[n]->set_minfilter( SamplerState::FT_linear_mipmap_linear );
+#if 1
+                        stringstream ss;
+                        ss << "test_palette_" << n << ".jpg";
+                        entry->palette_tex[n]->write( Filename( ss.str() ) );
+#endif
+                }
 
                 dir.entries.push_back( entry );
 

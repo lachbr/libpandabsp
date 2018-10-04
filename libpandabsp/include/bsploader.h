@@ -18,6 +18,7 @@
 #include <renderAttrib.h>
 #include <boundingBox.h>
 #include <lightReMutex.h>
+#include <graphicsWindow.h>
 
 #include "lightmap_palettes.h"
 #include "ambient_probes.h"
@@ -142,7 +143,7 @@ PUBLISHED:
 
 	void set_gamma( PN_stdfloat gamma, int overbright = 1 );
         INLINE PN_stdfloat get_gamma() const;
-	void set_gsg( GraphicsStateGuardian *gsg );
+	void set_win( GraphicsWindow *win );
         void set_camera( const NodePath &camera );
 	void set_render( const NodePath &render );
 	void set_want_visibility( bool flag );
@@ -151,7 +152,16 @@ PUBLISHED:
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
         void set_texture_contents_file( const Filename &file );
-        
+
+        void setup_shadowcam();
+
+        void set_shadow_cam_pos( const LPoint3 &pos );
+        void set_shadow_cam_bitmask( const BitMask32 &mask );
+        void set_shadow_color( const LColor &color );
+        void set_shadow_resolution( int filmsize, int texsize );
+        void cast_shadows( NodePath &node );
+
+        Texture *get_shadow_tex() const;
 
         INLINE int extract_modelnum( int entnum );
         INLINE void get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs );
@@ -219,6 +229,7 @@ public:
         INLINE bspdata_t *get_bspdata() const;
 
 private:
+        
         void make_faces();
         void make_faces_ai();
 	void load_entities();
@@ -250,11 +261,20 @@ private:
 	NodePath _result;
         NodePath _camera;
 	NodePath _render;
+        NodePath _shadowcam;
+        BitMask32 _shadowcam_mask;
+        LPoint3 _shadowcam_pos;
+        PT( GraphicsOutput ) _shadow_buf;
+        PT( Texture ) _shadow_tex;
+        PT( Texture ) _shadow_depth;
+        LColor _shadow_color;
+        int _shadow_filmsize;
+        int _shadow_texsize;
 	Filename _materials_file;
         PN_stdfloat _gamma;
 	typedef pmap<string, string> Tex2Mat;
 	Tex2Mat _materials;
-	GraphicsStateGuardian *_gsg;
+	GraphicsWindow *_win;
 	bool _has_pvs_data;
 	bool _want_visibility;
 	bool _want_lightmaps;
@@ -281,6 +301,7 @@ private:
         PT( TextureStage ) _diffuse_stage;
         PT( TextureStage ) _lightmap_stage;
         PT( TextureStage ) _envmap_stage;
+        PT( TextureStage ) _shadow_stage;
 
         pmap<texref_t *, PT( Texture )> _texref_textures;
         pmap<texref_t *, Parser> _texref_materials;

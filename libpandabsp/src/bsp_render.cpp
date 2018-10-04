@@ -6,6 +6,22 @@
 #include <cullHandler.h>
 #include <characterJointEffect.h>
 
+/*
+TypeHandle WorldGeometryAttrib::_type_handle;
+int WorldGeometryAttrib::_attrib_slot;
+
+INLINE WorldGeometryAttrib::WorldGeometryAttrib() :
+        RenderAttrib()
+{
+}
+
+CPT( RenderAttrib ) WorldGeometryAttrib::make()
+{
+        WorldGeometryAttrib *attr = new WorldGeometryAttrib;
+        return return_new( attr );
+}
+*/
+
 TypeHandle IgnorePVSAttrib::_type_handle;
 int IgnorePVSAttrib::_attrib_slot;
 
@@ -179,11 +195,11 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                 }
 
                 if ( !disabled                                          &&
+                     !data._state->has_attrib(BSPFaceAttrib::get_class_slot()) &&
                      node->is_of_type( ModelNode::get_class_type() )    &&
-                     !node->get_transform()->is_identity()              &&
                      !node->has_effect( CharacterJointEffect::get_class_type() ) )
                 {
-                        _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ) );
+                        _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ), data._state );
                 }
         }
 

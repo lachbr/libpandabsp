@@ -16,7 +16,7 @@ struct LightmapPaletteDirectory
 {
         struct LightmapPaletteEntry : public ReferenceCount
         {
-                PT( Texture ) palette_tex;
+                PT( Texture ) palette_tex[NUM_BUMP_VECTS + 1];
         };
 
         struct LightmapFacePaletteEntry : public ReferenceCount
@@ -35,23 +35,28 @@ struct LightmapPaletteDirectory
 struct LightmapSource
 {
         int facenum;
-        PNMImage lightmap_img;
+        PNMImage lightmap_img[NUM_BUMP_VECTS + 1];
 
-        LightmapSource() :
-                lightmap_img( 1, 1 )
+        LightmapSource()
         {
-
+                for ( int i = 0; i < NUM_BUMP_VECTS + 1; i++ )
+                {
+                        lightmap_img[i] = PNMImage( 1, 1 );
+                }
         }
 };
 
 struct Palette
 {
         pvector<LightmapSource *> sources;
-        PNMImage palette_img;
+        PNMImage palette_img[NUM_BUMP_VECTS + 1];
         TEXTURE_PACKER::TexturePacker *packer;
-        Palette() :
-                palette_img( 1, 1 )
+        Palette()
         {
+                for ( int i = 0; i < NUM_BUMP_VECTS + 1; i++ )
+                {
+                        palette_img[i] = PNMImage( 1, 1 );
+                }
         }
 };
 
