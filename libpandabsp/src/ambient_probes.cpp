@@ -18,6 +18,7 @@
 #include <clipPlaneAttrib.h>
 #include <virtualFileSystem.h>
 #include <modelNode.h>
+#include <pstatTimer.h>
 
 ConfigVariableInt parallax_mapping_samples
 ( "parallax-mapping-samples", 3,
@@ -753,14 +754,12 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
 
         pshader << "uniform mat4 p3d_ViewMatrix;\n";
         pshader << "in vec4 l_ambient_term;\n";
-        pshader << "uniform int num_locallights[1];\n";
-        pshader << "uniform int locallight_type[2];\n";
-        pshader << "uniform struct {\n";
-        pshader << "\t vec3 pos;\n";
-        pshader << "\t vec4 direction;\n";
-        pshader << "\t vec4 atten;\n";
-        pshader << "\t vec3 color;\n";
-        pshader << "} locallight[2];\n";
+        pshader << "uniform int light_count[1];\n";
+        pshader << "uniform int light_type[" << MAXLIGHTS << "];\n";
+        pshader << "uniform vec3 light_pos[" << MAXLIGHTS << "];\n";
+        pshader << "uniform vec4 light_direction[" << MAXLIGHTS << "];\n";
+        pshader << "uniform vec4 light_atten[" << MAXLIGHTS << "];\n";
+        pshader << "uniform vec3 light_color[" << MAXLIGHTS << "];\n";
 
         pshader << "const int LIGHTTYPE_SUN = 0;\n";
         pshader << "const int LIGHTTYPE_POINT = 1;\n";
@@ -1010,14 +1009,14 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
         }
 
         // Now factor in local light sources
-        pshader << "\t for (int i = 0; i < num_locallights[0]; i++) {\n";
+        pshader << "\t for (int i = 0; i < light_count[0]; i++) {\n";
 
-        pshader << "\t         lcolor = vec4(locallight[i].color, 1.0);\n";
-        pshader << "\t         latten = locallight[i].atten;\n";
+        pshader << "\t         lcolor = vec4(light_color[i], 1.0);\n";
+        pshader << "\t         latten = light_atten[i];\n";
 
         // point lights
-        pshader << "\t         if (locallight_type[i] == LIGHTTYPE_POINT) {\n";
-        pshader << "\t             lpoint = p3d_ViewMatrix * vec4(locallight[i].pos, 1);\n";
+        pshader << "\t         if (light_type[i] == LIGHTTYPE_POINT) {\n";
+        pshader << "\t             lpoint = p3d_ViewMatrix * vec4(light_pos[i], 1);\n";
         pshader << "\t             lvec = lpoint.xyz - l_eye_position.xyz;\n";
         pshader << "\t             ldist = length(lvec);\n";
         pshader << "\t             lvec = normalize(lvec);\n";
@@ -1052,8 +1051,8 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
         pshader << "\t         }\n";
 
         // sun/directional light
-        pshader << "\t         else if(locallight_type[i] == LIGHTTYPE_SUN) {\n";
-        pshader << "\t             lvec = normalize((p3d_ViewMatrix * locallight[i].direction).xyz);\n";
+        pshader << "\t         else if(light_type[i] == LIGHTTYPE_SUN) {\n";
+        pshader << "\t             lvec = normalize((p3d_ViewMatrix * light_direction[i]).xyz);\n";
         pshader << "\t             lintensity = dot(l_eye_normal.xyz, -lvec);\n";
         if ( key.shade_model == Material::SM_half_lambert )
         {
@@ -1085,9 +1084,9 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
         pshader << "\t         }\n";
 
         // spotlights
-        pshader << "\t         else if (locallight_type[i] == LIGHTTYPE_SPOT) {\n";
-        pshader << "\t             lpoint = p3d_ViewMatrix * vec4(locallight[i].pos, 1);\n";
-        pshader << "\t             ldir = normalize((p3d_ViewMatrix * locallight[i].direction));\n";
+        pshader << "\t         else if (light_type[i] == LIGHTTYPE_SPOT) {\n";
+        pshader << "\t             lpoint = p3d_ViewMatrix * vec4(light_pos[i], 1);\n";
+        pshader << "\t             ldir = normalize((p3d_ViewMatrix * light_direction[i]));\n";
         pshader << "\t             lvec = lpoint.xyz - l_eye_position.xyz;\n";
         pshader << "\t             ldist = length(lvec);\n";
         pshader << "\t             lvec = normalize(lvec);\n";
@@ -1794,7 +1793,7 @@ CPT( ShaderAttrib ) AmbientProbeManager::get_identity_shattr()
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambient_cube", PTA_LVecBase3::empty_array( 6 ) ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "num_locallights", PTA_int::empty_array( 1 ) ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "locallight_type", PTA_int::empty_array( 2 ) ) ) );
-                for ( int i = 0; i < 2; i++ )
+                for ( int i = 0; i < MAXLIGHTS; i++ )
                 {
                         std::stringstream ss;
                         ss << "locallight[" << i << "]";
@@ -2022,6 +2021,17 @@ INLINE void AmbientProbeManager::garbage_collect_cache()
                         itr++;
                 }
         }
+
+        for ( auto itr = _node_data.cbegin(); itr != _node_data.cend(); )
+        {
+                if ( itr->first.was_deleted() )
+                {
+                        _node_data.erase( itr++ );
+                } else
+                {
+                        itr++;
+                }
+        }
 }
 
 void AmbientProbeManager::consider_garbage_collect()
@@ -2034,7 +2044,20 @@ void AmbientProbeManager::consider_garbage_collect()
         }
 }
 
-void AmbientProbeManager::generate_shaders( PandaNode *node, CPT( RenderState ) net_state, bool first )
+INLINE CPT( ShaderAttrib ) set_shader_inputs( CPT( ShaderAttrib ) shattr, const nodeshaderinput_t *input )
+{
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambient_cube", input->ambient_cube ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_count", input->light_count ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_type", input->light_type ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_pos", input->light_pos ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_color", input->light_color ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_direction", input->light_direction ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_atten", input->light_atten ) ) );
+        return shattr;
+}
+
+void AmbientProbeManager::generate_shaders( PandaNode *node, CPT( RenderState ) net_state, bool first, 
+                                            const nodeshaderinput_t *input )
 {
         // We hit another modelNode, stop.
         //if ( node->is_of_type( ModelNode::get_class_type() ) && !first )
@@ -2047,12 +2070,14 @@ void AmbientProbeManager::generate_shaders( PandaNode *node, CPT( RenderState ) 
                 PT( GeomNode ) gn = DCAST( GeomNode, node );
                 for ( int i = 0; i < gn->get_num_geoms(); i++ )
                 {
-                        CPT( RenderState ) geom_state = net_state->compose( gn->get_geom_state( i ) );
-                        if ( geom_state->_generated_shader == nullptr || true )
+                        CPT( RenderState ) geom_state = gn->get_geom_state( i );
+                        CPT( RenderState ) net_geom_state = net_state->compose( geom_state );
+                        if ( geom_state->_generated_shader == nullptr )
                         {
-                                CPT( ShaderAttrib ) shattr = _shader_generator.generate_shader( geom_state );
-                                geom_state->_generated_shader = shattr;
+                                CPT( ShaderAttrib ) shattr = _shader_generator.generate_shader( net_geom_state );
+                                shattr = set_shader_inputs( shattr, input );
                                 geom_state = geom_state->set_attrib( shattr );
+                                geom_state->_generated_shader = shattr;
                                 gn->set_geom_state( i, geom_state );
                         }
                 }
@@ -2061,50 +2086,54 @@ void AmbientProbeManager::generate_shaders( PandaNode *node, CPT( RenderState ) 
         for ( int n = 0; n < node->get_num_children(); n++ )
         {
                 PandaNode *child = node->get_child( n );
-                generate_shaders( child, net_state->compose( child->get_state() ) );
+                generate_shaders( child, net_state->compose( child->get_state() ), false, input );
         }
 }
 
 void AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) curr_trans, CPT(RenderState) net_state )
 {
+        PStatTimer timer( updatenode_collector );
+
         if ( !node || !curr_trans )
         {
                 return;
         }
-        
-        updatenode_collector.start();
 
-        CPT( ShaderAttrib ) shattr = nullptr;
         bool new_instance = false;
-        if ( !node->has_attrib( ShaderAttrib::get_class_type() ) )
+        if ( _node_data.find( node ) == _node_data.end() )
         {
-                // Generate a shader for each RenderState at this node and below,
-                // but this node is the important one, we will be updating shader inputs
-                // for lights and the ambient cube, which will propagate down to any
-                // child RenderStates.
-
-                shattr = _shader_generator.generate_shader( net_state );
+                // This is a new node we have encountered.
                 new_instance = true;
+        }
+
+        PT( nodeshaderinput_t ) input;
+        if ( new_instance )
+        {
+                input = new nodeshaderinput_t;
+                _node_data[node] = input;
+                _pos_cache[node] = curr_trans;
         }
         else
         {
-                shattr = DCAST( ShaderAttrib, node->get_attrib( ShaderAttrib::get_class_type() ) );
+                input = _node_data.at( node );
         }
 
-        generate_shaders( node, net_state, true );
+        if ( input == nullptr )
+        {
+                return;
+        }
+
+        generate_shaders( node, net_state, true, input );
 
         // Is it even necessary to update anything?
-        if ( new_instance )
-        {
-                _pos_cache[node] = curr_trans;
-        }
-        CPT( TransformState ) prev_trans = _pos_cache[node];
+        CPT( TransformState ) prev_trans = _pos_cache.at( node );
         LVector3 pos_delta( 0 );
         if ( prev_trans != nullptr )
         {
                 pos_delta = curr_trans->get_pos() - prev_trans->get_pos();
         }
-        if ( pos_delta.length() >= CHANGED_EPSILON || new_instance )
+
+        if ( pos_delta.length() >= CHANGED_EPSILON )
         {
                 LPoint3 curr_net = curr_trans->get_pos();
                 int leaf_id = _loader->find_leaf( curr_net );
@@ -2124,7 +2153,10 @@ void AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) cu
                                 sample->visnode.set_color_scale( LColor( 0, 1, 0, 1 ), 1 );
                         }
 #endif
-                        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambient_cube", sample->cube ) ) );
+                        for ( int i = 0; i < 6; i++ )
+                        {
+                                input->ambient_cube[i] = sample->cube[i];
+                        }
                 }
 
                 // Update local light sources
@@ -2144,14 +2176,13 @@ void AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) cu
                         sky_idx = 0;
                 }
 
-                while ( locallights.size() < 2 )
+                while ( locallights.size() < MAXLIGHTS )
                 {
                         locallights.push_back( dummy_light );
                 }
                 size_t numlights = locallights.size();
-                PTA_int lighttypes = PTA_int::empty_array( 2 );
                 int lights_updated = 0;
-                for ( size_t i = 0; i < numlights && lights_updated < 2; i++ )
+                for ( size_t i = 0; i < numlights && lights_updated < MAXLIGHTS; i++ )
                 {
                         light_t *light = locallights[i];
                         if ( i != sky_idx && !is_light_visible( curr_net, light ) )
@@ -2159,29 +2190,20 @@ void AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) cu
                                 // The light is occluded, don't add it.
                                 continue;
                         }
-                        lighttypes.set_element( lights_updated, light->type );
-                        stringstream ss;
-                        ss << "locallight[" << lights_updated << "]";
-                        std::string lightname = ss.str();
-                        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".pos", light->pos ) ) );
-                        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".color", light->color ) ) );
-                        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".direction", light->direction ) ) );
-                        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( lightname + ".atten", light->atten ) ) );
+
+                        input->light_type[lights_updated] = light->type;
+                        input->light_pos[lights_updated] = light->pos;
+                        input->light_color[lights_updated] = light->color;
+                        input->light_direction[lights_updated] = light->direction;
+                        input->light_atten[lights_updated] = light->atten;
+
                         lights_updated++;
                 }
-                PTA_int pta_numlights = PTA_int::empty_array( 1 );
-                pta_numlights.set_element( 0, lights_updated );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "num_locallights", pta_numlights ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "locallight_type", lighttypes ) ) );
-
-                // Apply the modified shader attrib.
-                node->set_attrib( shattr );
+                input->light_count[0] = lights_updated;
 
                 // Cache the last position.
                 _pos_cache[node] = curr_trans;
         }
-
-        updatenode_collector.stop();
 }
 
 INLINE ambientprobe_t *AmbientProbeManager::find_closest_sample( int leaf_id, const LPoint3 &pos )

@@ -38,6 +38,33 @@ struct light_t : public ReferenceCount
         LVector4 atten;
 };
 
+#define MAXLIGHTS 2
+
+struct nodeshaderinput_t : public ReferenceCount
+{
+        PTA_LVecBase3 ambient_cube;
+
+        PTA_int light_count;
+        PTA_int light_type;
+        PTA_LVecBase3 light_pos;
+        PTA_LVecBase3 light_color;
+        PTA_LVecBase4 light_direction;
+        PTA_LVecBase4 light_atten;
+
+        nodeshaderinput_t() :
+                ReferenceCount()
+        {
+                ambient_cube = PTA_LVecBase3::empty_array( 6 );
+
+                light_count = PTA_int::empty_array( 1 );
+                light_type = PTA_int::empty_array( MAXLIGHTS );
+                light_pos = PTA_LVecBase3::empty_array( MAXLIGHTS );
+                light_color = PTA_LVecBase3::empty_array( MAXLIGHTS );
+                light_direction = PTA_LVecBase4::empty_array( MAXLIGHTS );
+                light_atten = PTA_LVecBase4::empty_array( MAXLIGHTS );
+        }
+};
+
 /**
  * Generates shaders for dynamic objects in a BSP level.
  * GLSL
@@ -146,7 +173,8 @@ private:
         INLINE void garbage_collect_cache();
 
 
-        void generate_shaders( PandaNode *node, CPT( RenderState ) net_state, bool first = false );
+        void generate_shaders( PandaNode *node, CPT( RenderState ) net_state, bool first,
+                               const nodeshaderinput_t *input );
 
 private:
         BSPLoader *_loader;
@@ -154,6 +182,7 @@ private:
 
         // NodePaths to be influenced by the ambient probes.
         pmap<WPT( PandaNode ), CPT( TransformState )> _pos_cache;
+        pmap<WPT( PandaNode ), PT( nodeshaderinput_t )> _node_data;
         pmap<int, pvector<ambientprobe_t>> _probes;
         pvector<ambientprobe_t *> _all_probes;
         pvector<PT( light_t )> _all_lights;
