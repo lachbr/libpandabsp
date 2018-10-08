@@ -1167,6 +1167,11 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
         {
                 pshader << "\t result *= p3d_Color;\n";
         }
+        //if ( key.light_ramp == nullptr ||
+        //     key.light_ramp->get_mode() == LightRampAttrib::LRT_default )
+        //{
+        //        pshader << "\t result = clamp(result, 0.0, 1.0);\n";
+        //}
         pshader << "\t // End view-space light summations\n";
 
         // Combine in alpha, which bypasses lighting calculations.  Use of lerp
@@ -1391,7 +1396,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
 
         // The multiply is a workaround for a radeon driver bug.  It's annoying as
         // heck, since it produces an extra instruction.
-        pshader << "\t o_color = result * 1.000001;\n";
+        pshader << "\t o_color = result * 1.0000001;\n";
         if ( key.alpha_test_mode != RenderAttrib::M_none )
         {
                 pshader << "\t // Shader subsumes normal alpha test.\n";
@@ -1402,6 +1407,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
         }
         pshader << "}\n";
 
+#if 0
         if ( key.texture_flags & shaderinfo_t::TEXTUREFLAGS_NORMALMAP )
         {
                 VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
@@ -1418,6 +1424,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
                 *ost << pshader.str();
                 vfs->close_write_file( ost );
         }
+#endif
 
         PT( Shader ) shader = Shader::make( Shader::SL_GLSL, vshader.str(), pshader.str() );
         nassertr( shader != nullptr, nullptr );
@@ -2133,7 +2140,7 @@ void AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) cu
                 pos_delta = curr_trans->get_pos() - prev_trans->get_pos();
         }
 
-        if ( pos_delta.length() >= CHANGED_EPSILON )
+        if ( pos_delta.length() >= CHANGED_EPSILON || new_instance )
         {
                 LPoint3 curr_net = curr_trans->get_pos();
                 int leaf_id = _loader->find_leaf( curr_net );

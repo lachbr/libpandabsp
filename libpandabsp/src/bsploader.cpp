@@ -671,6 +671,7 @@ static pvector<string> make_bface_shaders( bool lightmap, bool envmap, float env
 
                 pshader << "frag_color.rgb *= texture2DProj(shadowtex, l_projshadowcoords).rgb;\n";
         }
+        //pshader << "frag_color.rgb = clamp(frag_color.rgb, 0.0, 1.0);\n";
         pshader << "}\n";
 
         result.push_back( vshader.str() );
@@ -1288,7 +1289,6 @@ void BSPLoader::load_entities()
                                         PT( CBoundsEntity ) entity = new CBoundsEntity;
                                         entity->set_data( entnum, ent, this, mdl );
                                         _class_entities.push_back( entity );
-                                        std::cout << "Adding trigger or water to class entities" << std::endl;
 #ifdef HAVE_PYTHON
                                         PyObject *py_ent = DTool_CreatePyInstance<CBoundsEntity>( entity, true );
                                         make_pyent( entity, py_ent, classname );
@@ -1540,7 +1540,6 @@ void BSPLoader::read_materials_file()
                 {
                         if ( c == '\n' || i == data.length() - 1 )
                         {
-                                cout << "Texture `" << texname << "` is Material `" << material << "`" << endl;
                                 _materials[texname] = material;
                                 texname = "";
                                 material = "";
