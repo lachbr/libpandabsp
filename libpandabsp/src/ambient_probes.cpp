@@ -1020,7 +1020,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
         pshader << "\t             lvec = lpoint.xyz - l_eye_position.xyz;\n";
         pshader << "\t             ldist = length(lvec);\n";
         pshader << "\t             lvec = normalize(lvec);\n";
-        pshader << "\t             lintensity = dot(l_eye_normal.xyz, lvec);\n";
+        pshader << "\t             lintensity = clamp(dot(l_eye_normal.xyz, lvec), 0, 1);\n";
         if ( key.shade_model == Material::SM_half_lambert )
         {
                 pshader << "\t     lintensity = half_lambert(lintensity);\n";
@@ -1053,7 +1053,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
         // sun/directional light
         pshader << "\t         else if(light_type[i] == LIGHTTYPE_SUN) {\n";
         pshader << "\t             lvec = normalize((p3d_ViewMatrix * light_direction[i]).xyz);\n";
-        pshader << "\t             lintensity = dot(l_eye_normal.xyz, -lvec);\n";
+        pshader << "\t             lintensity = clamp(dot(l_eye_normal.xyz, -lvec), 0, 1);\n";
         if ( key.shade_model == Material::SM_half_lambert )
         {
                 pshader << "\t     lintensity = half_lambert(lintensity);\n";
@@ -1090,7 +1090,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
         pshader << "\t             lvec = lpoint.xyz - l_eye_position.xyz;\n";
         pshader << "\t             ldist = length(lvec);\n";
         pshader << "\t             lvec = normalize(lvec);\n";
-        pshader << "\t             lintensity = dot(l_eye_normal.xyz, lvec);\n";
+        pshader << "\t             lintensity = clamp(dot(l_eye_normal.xyz, lvec), 0, 1);\n";
         if ( key.shade_model == Material::SM_half_lambert )
         {
                 pshader << "\t     lintensity = half_lambert(lintensity);\n";
@@ -1099,7 +1099,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::generate_shader( CPT( RenderState ) net_
         {
                 pshader << "\t     lintensity = texture2D(p3d_Material.lightwarp, vec2(lintensity * 0.5 + 0.5, 0.5));\n";
         }
-        pshader << "\t             float dot2 = dot(lvec, normalize(-ldir.xyz));\n";
+        pshader << "\t             float dot2 = clamp(dot(lvec, normalize(-ldir.xyz)), 0, 1);\n";
         pshader << "\t             if (dot2 <= latten.z) { /* outside light cone */ continue; }\n";
         pshader << "\t             float denominator = ldist * latten.x;\n";
         pshader << "\t             lattenv = lintensity * dot2 / denominator;\n";
@@ -2051,26 +2051,14 @@ void AmbientProbeManager::consider_garbage_collect()
         }
 }
 
-INLINE CPT( ShaderAttrib ) set_shader_inputs( CPT( ShaderAttrib ) shattr, const nodeshaderinput_t *input )
+INLINE bool has_shader_off( const ShaderAttrib *shattr )
 {
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambient_cube", input->ambient_cube ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_count", input->light_count ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_type", input->light_type ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_pos", input->light_pos ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_color", input->light_color ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_direction", input->light_direction ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_atten", input->light_atten ) ) );
-        return shattr;
+        return shattr->has_shader() && shattr->get_shader() == nullptr && !shattr->auto_shader();
 }
 
 void AmbientProbeManager::generate_shaders( PandaNode *node, CPT( RenderState ) net_state, bool first, 
                                             const nodeshaderinput_t *input )
 {
-        // We hit another modelNode, stop.
-        //if ( node->is_of_type( ModelNode::get_class_type() ) && !first )
-        //{
-        //        return;
-        //}
 
         if ( node->is_of_type( GeomNode::get_class_type() ) )
         {
@@ -2079,21 +2067,38 @@ void AmbientProbeManager::generate_shaders( PandaNode *node, CPT( RenderState ) 
                 {
                         CPT( RenderState ) geom_state = gn->get_geom_state( i );
                         CPT( RenderState ) net_geom_state = net_state->compose( geom_state );
-                        if ( geom_state->_generated_shader == nullptr )
+
+                        if ( net_state->has_attrib( ShaderAttrib::get_class_slot() ) )
+                        {
+                                const ShaderAttrib *shattr = DCAST( ShaderAttrib, net_state->get_attrib( ShaderAttrib::get_class_slot() ) );
+                                if ( !shattr->auto_shader() )
+                                {
+                                        // Auto shader not enabled
+                                        continue;
+                                }
+                        }
+                        else
+                        {
+                                continue;
+                        }
+
+                        UpdateSeq &seq = _loader->_generated_shader_seq;
+
+                        if ( ( net_geom_state->_generated_shader == nullptr || net_geom_state->_generated_shader_seq != seq) ||
+                             ( geom_state->_generated_shader == nullptr || geom_state->_generated_shader_seq != seq ) )
                         {
                                 CPT( ShaderAttrib ) shattr = _shader_generator.generate_shader( net_geom_state );
                                 shattr = set_shader_inputs( shattr, input );
+
+                                net_geom_state->_generated_shader = shattr;
+                                net_geom_state->_generated_shader_seq = seq;
+
                                 geom_state = geom_state->set_attrib( shattr );
                                 geom_state->_generated_shader = shattr;
+                                geom_state->_generated_shader_seq = seq;
                                 gn->set_geom_state( i, geom_state );
                         }
                 }
-        }
-
-        for ( int n = 0; n < node->get_num_children(); n++ )
-        {
-                PandaNode *child = node->get_child( n );
-                generate_shaders( child, net_state->compose( child->get_state() ), false, input );
         }
 }
 
@@ -2127,6 +2132,7 @@ void AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) cu
 
         if ( input == nullptr )
         {
+                cout << "Missing input for node " << node->get_name() << endl;
                 return;
         }
 
@@ -2139,8 +2145,12 @@ void AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) cu
         {
                 pos_delta = curr_trans->get_pos() - prev_trans->get_pos();
         }
+        else
+        {
+                _pos_cache[node] = curr_trans;
+        }
 
-        if ( pos_delta.length() >= CHANGED_EPSILON || new_instance )
+        if ( pos_delta.length() >= EQUAL_EPSILON || new_instance )
         {
                 LPoint3 curr_net = curr_trans->get_pos();
                 int leaf_id = _loader->find_leaf( curr_net );
@@ -2229,4 +2239,20 @@ INLINE ambientprobe_t *AmbientProbeManager::find_closest_sample( int leaf_id, co
         } );
 
         return samples[0];
+}
+
+void AmbientProbeManager::cleanup()
+{
+        _sunlight = nullptr;
+        _pos_cache.clear();
+        _node_data.clear();
+        _probes.clear();
+        _all_probes.clear();
+        _light_pvs.clear();
+        _all_lights.clear();
+}
+
+BSPShaderGenerator *AmbientProbeManager::get_shader_generator()
+{
+        return &_shader_generator;
 }

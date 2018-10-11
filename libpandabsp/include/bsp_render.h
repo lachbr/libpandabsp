@@ -6,8 +6,10 @@
 #include <pandaNode.h>
 #include <modelNode.h>
 #include <cullTraverser.h>
+#include <cullableObject.h>
 
 class BSPLoader;
+struct nodeshaderinput_t;
 
 class BSPCullTraverser : public CullTraverser
 {
@@ -27,6 +29,7 @@ private:
 
 private:
         BSPLoader *_loader;
+        const nodeshaderinput_t *_shinput;
 };
 
 /**
@@ -75,6 +78,31 @@ private:
         static TypeHandle _type_handle;
         static int _attrib_slot;
 };
+/*
+class AmbientProbeManager;
+
+class BSPCullableObject : public CullableObject
+{
+public:
+        INLINE BSPCullableObject();
+        INLINE BSPCullableObject( BSPLoader *loader, AmbientProbeManager *mgr, CPT(nodeshaderinput_t) shaderinfo,
+                                  CPT( Geom ) geom, CPT( RenderState ) state,
+                                  CPT( TransformState ) internal_transform );
+
+        INLINE BSPCullableObject( const BSPCullableObject &copy );
+        INLINE void operator = ( const BSPCullableObject &copy );
+
+        ALLOC_DELETED_CHAIN( BSPCullableObject );
+
+protected:
+        virtual void ensure_generated_shader( GraphicsStateGuardianBase *gsg );
+
+private:
+        CPT(nodeshaderinput_t) _shaderinfo;
+        BSPLoader *_loader;
+        AmbientProbeManager *_mgr;
+};
+*/
 
 /**
  * Indicates that this node and all below it are static world geometry.

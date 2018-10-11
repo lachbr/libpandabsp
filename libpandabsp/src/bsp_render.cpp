@@ -40,7 +40,8 @@ TypeDef( BSPCullTraverser );
 
 BSPCullTraverser::BSPCullTraverser( CullTraverser *trav, BSPLoader *loader ) :
         CullTraverser( *trav ),
-        _loader( loader )
+        _loader( loader ),
+        _shinput( nullptr )
 {
 }
 
@@ -90,7 +91,8 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                         continue;
                 }
 
-                CPT( RenderState ) state = data._state->compose( geoms.get_geom_state( i ) );
+                CPT( RenderState ) geom_state = geoms.get_geom_state( i );
+                CPT( RenderState ) state = data._state->compose( geom_state );
                 if ( state->has_cull_callback() && !state->cull_callback( this, data ) )
                 {
                         // Cull.
@@ -152,25 +154,16 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
 
 void BSPCullTraverser::traverse_below( CullTraverserData &data )
 {
+
         _nodes_pcollector.add_level( 1 );
         PandaNodePipelineReader *node_reader = data.node_reader();
         PandaNode *node = data.node();
 
+        const nodeshaderinput_t *shinput = _shinput;
+
         // Add the current node to be drawn during the Draw stage.
         if ( !data.is_this_node_hidden( get_camera_mask() ) )
         {
-                if ( node->is_of_type( GeomNode::get_class_type() ) )
-                {
-                        // HACKHACK:
-                        // Needed to test the individual Geoms against the PVS.
-                        add_geomnode_for_draw( DCAST( GeomNode, node ), data );
-                }
-                else
-                {
-                        node->add_for_draw( this, data );
-                }
-
-                // Check for a decal effect.
                 // Check for a decal effect.
                 const RenderEffects *node_effects = node_reader->get_effects();
                 if ( node_effects->has_decal() )
@@ -180,26 +173,29 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                         data._state = data._state->compose( get_depth_offset_state() );
                 }
 
-                // Update the node's ambient probe stuff:
-                // For a node to be influenced by dynamic lights and ambient cubes
-                // it must be a ModelNode with non-identity local transform and no
-                // CharacterJointEffect (meaning it's not an exposed joint).
-
-                // Check if this node was given set_shader_off()
-                bool disabled = false;
-                CPT( ShaderAttrib ) shattr = DCAST( ShaderAttrib, data._state->get_attrib_def( ShaderAttrib::get_class_slot() ) );
-                if ( ( shattr->has_shader() && shattr->get_shader() == nullptr && !shattr->auto_shader() ) )
+                if ( node->is_of_type( GeomNode::get_class_type() ) )
                 {
-                        // Shaders are disabled, don't update with ambient probes.
-                        disabled = true;
+                        // Check if this node was given set_shader_off()
+                        bool disabled = true;
+                        if ( data._state->has_attrib( ShaderAttrib::get_class_slot() ) )
+                        {
+                                const ShaderAttrib *shattr = DCAST( ShaderAttrib, data._state->get_attrib( ShaderAttrib::get_class_slot() ) );
+                                disabled = !shattr->auto_shader();
+                        }
+
+                        if ( !disabled )
+                        {
+                                // Update the node's ambient probe stuff:
+                                _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ), data._state );
+                        }
+
+                        // HACKHACK:
+                        // Needed to test the individual Geoms against the PVS.
+                        add_geomnode_for_draw( DCAST( GeomNode, node ), data );
                 }
-
-                if ( !disabled                                          &&
-                     !data._state->has_attrib(BSPFaceAttrib::get_class_slot()) &&
-                     node->is_of_type( ModelNode::get_class_type() )    &&
-                     !node->has_effect( CharacterJointEffect::get_class_type() ) )
+                else
                 {
-                        _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ), data._state );
+                        node->add_for_draw( this, data );
                 }
         }
 
@@ -324,3 +320,73 @@ bool BSPModel::safe_to_flatten() const
 {
         return false;
 }
+
+/*
+INLINE BSPCullableObject::BSPCullableObject()
+        : CullableObject(),
+        _loader(nullptr),
+        _mgr(nullptr),
+        _shaderinfo(nullptr)
+{
+}
+
+INLINE BSPCullableObject::BSPCullableObject(
+        BSPLoader *loader,
+        AmbientProbeManager *mgr, CPT(nodeshaderinput_t) shaderinfo,
+        CPT( Geom ) geom, CPT( RenderState ) state,
+        CPT( TransformState ) internal_transform ) :
+
+        CullableObject( geom, state, internal_transform ),
+        _shaderinfo( shaderinfo ),
+        _loader( loader ),
+        _mgr( mgr )
+{
+
+}
+
+INLINE BSPCullableObject::BSPCullableObject( const BSPCullableObject &copy ) :
+        CullableObject( copy ),
+        _shaderinfo( copy._shaderinfo ),
+        _loader( copy._loader ),
+        _mgr( copy._mgr )
+{
+}
+
+INLINE void BSPCullableObject::operator=( const BSPCullableObject &copy )
+{
+        CullableObject::operator=( copy );
+        _shaderinfo = copy._shaderinfo;
+        _loader = copy._loader;
+        _mgr = copy._mgr;
+}
+
+void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsg )
+{
+        if ( !_loader->has_active_level() )
+        {
+                CullableObject::ensure_generated_shader( gsg );
+        }
+        /
+        else
+        {
+                if ( _shaderinfo != nullptr && _state->has_attrib( ShaderAttrib::get_class_slot() ) )
+                {
+                        const ShaderAttrib *shattr = DCAST( ShaderAttrib, _state->get_attrib( ShaderAttrib::get_class_slot() ) );
+                        if ( shattr->auto_shader() )
+                        {
+                                if ( _state->_generated_shader == nullptr || !_state->_generated_shader_seq.is_initial() )
+                                {
+                                        CPT( ShaderAttrib ) gen_shattr = _mgr->get_shader_generator()->generate_shader( _state );
+                                        //gen_shattr = set_shader_inputs( gen_shattr, _shaderinfo );
+                                        _state->_generated_shader = gen_shattr;
+                                        _state->_generated_shader_seq = UpdateSeq::initial();
+                                }
+
+                                _state->_generated_shader = set_shader_inputs( DCAST( ShaderAttrib, _state->_generated_shader ), _shaderinfo );
+                        }
+                }
+
+        }
+        /
+}
+*/

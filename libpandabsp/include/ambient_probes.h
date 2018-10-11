@@ -8,6 +8,8 @@
 #include <colorAttrib.h>
 #include <texGenAttrib.h>
 #include <lightRampAttrib.h>
+#include <cullableObject.h>
+#include <shaderAttrib.h>
 
 class BSPLoader;
 struct dleafambientindex_t;
@@ -64,6 +66,20 @@ struct nodeshaderinput_t : public ReferenceCount
                 light_atten = PTA_LVecBase4::empty_array( MAXLIGHTS );
         }
 };
+
+class AmbientProbeManager;
+
+INLINE CPT( ShaderAttrib ) set_shader_inputs( CPT( ShaderAttrib ) shattr, const nodeshaderinput_t *input )
+{
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambient_cube", input->ambient_cube ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_count", input->light_count ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_type", input->light_type ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_pos", input->light_pos ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_color", input->light_color ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_direction", input->light_direction ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_atten", input->light_atten ) ) );
+        return shattr;
+}
 
 /**
  * Generates shaders for dynamic objects in a BSP level.
@@ -159,8 +175,12 @@ public:
 
         void update_node( PandaNode *node, CPT( TransformState ) net_ts, CPT( RenderState ) net_state );
 
+        void cleanup();
+
         static CPT( ShaderAttrib ) get_identity_shattr();
         static CPT( Shader ) get_shader();
+
+        BSPShaderGenerator *get_shader_generator();
 
 public:
         void consider_garbage_collect();

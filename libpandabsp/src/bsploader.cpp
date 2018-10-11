@@ -1634,7 +1634,14 @@ bool BSPLoader::read( const Filename &file )
                                 << "Cannot load BSP file: no render NodePath specified\n";
                         return false;
                 }
+
+                // Disable the builtin shader generator in favor of the BSP
+                // shader generator. The original one will be restored when
+                // the BSP level in unloaded.
+                //_win->get_gsg()->set_use_shader_generator( false );
         }
+
+        _generated_shader_seq++;
 
         dtexdata_init();
 
@@ -1823,8 +1830,72 @@ void BSPLoader::set_materials_file( const Filename &file )
         _materials_file = file;
 }
 
+void BSPLoader::add_dynamic_node( const NodePath &node )
+{
+        _explicit_dynamic_nodes.push_back( WeakNodePath( node ) );
+}
+
 void BSPLoader::cleanup()
 {
+        if ( _active_level )
+        {
+                // Cleanup any shaders we generated on the Geom states.
+
+                if ( !_render.is_empty() )
+                {
+                        NodePathCollection npc = _render.find_all_matches( "**/+GeomNode" );
+
+                        for ( size_t i = 0; i < _explicit_dynamic_nodes.size(); i++ )
+                        {
+                                if ( _explicit_dynamic_nodes[i].was_deleted() )
+                                {
+                                        continue;
+                                }
+
+                                npc.add_paths_from( _explicit_dynamic_nodes[i].get_node_path().find_all_matches( "**/+GeomNode" ) );
+                        }
+
+                        for ( int i = 0; i < npc.get_num_paths(); i++ )
+                        {
+                                // If the net state at this node has no shaderAttrib or autoShader,
+                                // we know for a fact that we didn't generate a shader at any of the Geoms.
+                                CPT( RenderState ) net_state = npc[i].get_net_state();
+                                if ( !net_state->has_attrib( ShaderAttrib::get_class_slot() ) )
+                                {
+                                        cout << "No ShaderAttrib at net state at node " << npc[i].get_name() << endl;
+                                        continue;
+                                }
+                                else if ( !DCAST( ShaderAttrib, net_state->get_attrib( ShaderAttrib::get_class_slot() ) )->auto_shader() )
+                                {
+                                        cout << "No autoShader at net state of node " << npc[i].get_name() << endl;
+                                        continue;
+                                }
+
+                                PT( GeomNode ) gn = DCAST( GeomNode, npc[i].node() );
+                                for ( int j = 0; j < gn->get_num_geoms(); j++ )
+                                {
+                                        CPT( RenderState ) state = gn->get_geom_state( j );
+                                        if ( state->_generated_shader != nullptr )
+                                        {
+                                                // We generated a shader for this Geom, remove it.
+                                                state = state->remove_attrib( ShaderAttrib::get_class_slot() );
+                                                state->_generated_shader = nullptr;
+                                                cout << "Removing BSP Generated shader from GeomNode " << gn->get_name() << endl;
+                                                gn->set_geom_state( j, state );
+                                        }
+                                        else
+                                        {
+                                                cout << "Geom state does not have _generated_shader on node " << gn->get_name() << endl;
+                                        }
+                                }
+                        }
+                }
+        }
+
+        _active_level = false;
+
+        _amb_probe_mgr.cleanup();
+
         _model_origins.clear();
         for ( size_t i = 0; i < _model_roots.size(); i++ )
         {
@@ -1867,6 +1938,8 @@ void BSPLoader::cleanup()
         }
         _nodepath_entities.clear();
 
+        _cent_to_pyent.clear();
+
 #ifdef HAVE_PYTHON
         for ( size_t i = 0; i < _py_entities.size(); i++ )
         {
@@ -1884,10 +1957,13 @@ void BSPLoader::cleanup()
         if ( !_result.is_empty() )
                 _result.remove_node();
 
-        _active_level = false;
-
         delete _bspdata;
         _bspdata = nullptr;
+
+        if ( !_ai && _win != nullptr )
+        {
+                //_win->get_gsg()->set_use_shader_generator( true );
+        }
 }
 
 BSPLoader::BSPLoader() :
@@ -1919,7 +1995,8 @@ BSPLoader::BSPLoader() :
         _shadow_buf( nullptr ),
         _shadow_depth( nullptr ),
         _shadow_filmsize( 60 ),
-        _shadow_texsize( 1024 )
+        _shadow_texsize( 1024 ),
+        _original_shadergen( nullptr )
 {
         _diffuse_stage->set_texcoord_name( "diffuse" );
         _diffuse_stage->set_sort( 0 );
@@ -2147,6 +2224,23 @@ void BSPLoader::get_entity_keyvalues( PyObject *list, const int entnum )
                 PyTuple_SetItem( kv, 1, PyString_FromString( ep->value ) );
                 PyList_Append( list, kv );
         }
+}
+
+PyObject *BSPLoader::find_all_entities( const string &classname )
+{
+        PyObject *list = PyList_New( 0 );
+
+        for ( auto itr = _cent_to_pyent.begin(); itr != _cent_to_pyent.end(); ++itr )
+        {
+                string cls = ValueForKey( _bspdata->entities + itr->first->get_entnum(), "classname" );
+                if ( classname == cls )
+                {
+                        PyList_Append( list, itr->second );
+                }
+        }
+
+        Py_INCREF( list );
+        return list;
 }
 
 #endif

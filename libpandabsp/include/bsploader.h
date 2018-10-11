@@ -155,6 +155,8 @@ PUBLISHED:
 
         void setup_shadowcam();
 
+        void add_dynamic_node( const NodePath &node );
+
         void set_shadow_cam_pos( const LPoint3 &pos );
         void set_shadow_cam_bitmask( const BitMask32 &mask );
         void set_shadow_color( const LColor &color );
@@ -181,6 +183,7 @@ PUBLISHED:
 #ifdef HAVE_PYTHON
 	void link_entity_to_class( const string &entname, PyTypeObject *type );
 	PyObject *get_py_entity_by_target_name( const string &targetname ) const;
+        PyObject *find_all_entities( const string &classname );
         void get_entity_keyvalues( PyObject *list, const int entnum );
         void link_cent_to_pyent( int entum, PyObject *pyent );
 #endif
@@ -303,6 +306,8 @@ private:
         PT( TextureStage ) _envmap_stage;
         PT( TextureStage ) _shadow_stage;
 
+        pvector<WeakNodePath> _explicit_dynamic_nodes;
+
         pmap<texref_t *, PT( Texture )> _texref_textures;
         pmap<texref_t *, Parser> _texref_materials;
         vector<uint8_t *> _leaf_pvs;
@@ -321,6 +326,8 @@ private:
         AmbientProbeManager _amb_probe_mgr;
 	
         PT( GenericAsyncTask ) _update_task;
+        PT( ShaderGenerator ) _original_shadergen;
+        UpdateSeq _generated_shader_seq;
 
 	friend class BSPFaceAttrib;
         friend class BSPGeomNode;
