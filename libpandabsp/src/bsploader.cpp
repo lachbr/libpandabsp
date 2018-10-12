@@ -883,7 +883,10 @@ void BSPLoader::make_faces()
                                 poly->set_bin( "ground" );
                                 poly->set_draw_order( 18 );
                                 face_type = BSPFaceAttrib::FACETYPE_FLOOR;
-                                recv_projshadows = true;
+                                if ( _want_shadows )
+                                {
+                                        recv_projshadows = true;
+                                }
                         }
 
                         data->recompute_vertex_normals( 90.0 );
@@ -1634,11 +1637,6 @@ bool BSPLoader::read( const Filename &file )
                                 << "Cannot load BSP file: no render NodePath specified\n";
                         return false;
                 }
-
-                // Disable the builtin shader generator in favor of the BSP
-                // shader generator. The original one will be restored when
-                // the BSP level in unloaded.
-                //_win->get_gsg()->set_use_shader_generator( false );
         }
 
         _generated_shader_seq++;
@@ -1656,7 +1654,10 @@ bool BSPLoader::read( const Filename &file )
                 // Hammer units are tiny compared to panda.
                 _result.set_scale( HAMMER_TO_PANDA );
 
-                setup_shadowcam();
+                if ( _want_shadows )
+                {
+                        setup_shadowcam();
+                }
         }
         
         _has_pvs_data = false;
@@ -1862,12 +1863,10 @@ void BSPLoader::cleanup()
                                 CPT( RenderState ) net_state = npc[i].get_net_state();
                                 if ( !net_state->has_attrib( ShaderAttrib::get_class_slot() ) )
                                 {
-                                        cout << "No ShaderAttrib at net state at node " << npc[i].get_name() << endl;
                                         continue;
                                 }
                                 else if ( !DCAST( ShaderAttrib, net_state->get_attrib( ShaderAttrib::get_class_slot() ) )->auto_shader() )
                                 {
-                                        cout << "No autoShader at net state of node " << npc[i].get_name() << endl;
                                         continue;
                                 }
 
@@ -1880,12 +1879,7 @@ void BSPLoader::cleanup()
                                                 // We generated a shader for this Geom, remove it.
                                                 state = state->remove_attrib( ShaderAttrib::get_class_slot() );
                                                 state->_generated_shader = nullptr;
-                                                cout << "Removing BSP Generated shader from GeomNode " << gn->get_name() << endl;
                                                 gn->set_geom_state( j, state );
-                                        }
-                                        else
-                                        {
-                                                cout << "Geom state does not have _generated_shader on node " << gn->get_name() << endl;
                                         }
                                 }
                         }
@@ -1959,11 +1953,6 @@ void BSPLoader::cleanup()
 
         delete _bspdata;
         _bspdata = nullptr;
-
-        if ( !_ai && _win != nullptr )
-        {
-                //_win->get_gsg()->set_use_shader_generator( true );
-        }
 }
 
 BSPLoader::BSPLoader() :
@@ -1996,7 +1985,7 @@ BSPLoader::BSPLoader() :
         _shadow_depth( nullptr ),
         _shadow_filmsize( 60 ),
         _shadow_texsize( 1024 ),
-        _original_shadergen( nullptr )
+        _want_shadows( true )
 {
         _diffuse_stage->set_texcoord_name( "diffuse" );
         _diffuse_stage->set_sort( 0 );
@@ -2009,6 +1998,11 @@ BSPLoader::BSPLoader() :
         _shadow_stage->set_sort( 2 );
 
         _envmap_stage->set_mode( TextureStage::M_add );
+}
+
+void BSPLoader::set_want_shadows( bool flag )
+{
+        _want_shadows = flag;
 }
 
 void BSPLoader::set_shadow_resolution( int filmsize, int texsize )

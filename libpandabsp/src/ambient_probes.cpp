@@ -2051,9 +2051,16 @@ void AmbientProbeManager::consider_garbage_collect()
         }
 }
 
-INLINE bool has_shader_off( const ShaderAttrib *shattr )
+INLINE CPT( ShaderAttrib ) set_shader_inputs( CPT( ShaderAttrib ) shattr, const nodeshaderinput_t *input )
 {
-        return shattr->has_shader() && shattr->get_shader() == nullptr && !shattr->auto_shader();
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambient_cube", input->ambient_cube ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_count", input->light_count ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_type", input->light_type ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_pos", input->light_pos ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_color", input->light_color ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_direction", input->light_direction ) ) );
+        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_atten", input->light_atten ) ) );
+        return shattr;
 }
 
 void AmbientProbeManager::generate_shaders( PandaNode *node, CPT( RenderState ) net_state, bool first, 
@@ -2132,7 +2139,6 @@ void AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) cu
 
         if ( input == nullptr )
         {
-                cout << "Missing input for node " << node->get_name() << endl;
                 return;
         }
 

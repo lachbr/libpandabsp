@@ -6,22 +6,6 @@
 #include <cullHandler.h>
 #include <characterJointEffect.h>
 
-/*
-TypeHandle WorldGeometryAttrib::_type_handle;
-int WorldGeometryAttrib::_attrib_slot;
-
-INLINE WorldGeometryAttrib::WorldGeometryAttrib() :
-        RenderAttrib()
-{
-}
-
-CPT( RenderAttrib ) WorldGeometryAttrib::make()
-{
-        WorldGeometryAttrib *attr = new WorldGeometryAttrib;
-        return return_new( attr );
-}
-*/
-
 TypeHandle IgnorePVSAttrib::_type_handle;
 int IgnorePVSAttrib::_attrib_slot;
 
@@ -40,8 +24,7 @@ TypeDef( BSPCullTraverser );
 
 BSPCullTraverser::BSPCullTraverser( CullTraverser *trav, BSPLoader *loader ) :
         CullTraverser( *trav ),
-        _loader( loader ),
-        _shinput( nullptr )
+        _loader( loader )
 {
 }
 
@@ -158,8 +141,6 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
         _nodes_pcollector.add_level( 1 );
         PandaNodePipelineReader *node_reader = data.node_reader();
         PandaNode *node = data.node();
-
-        const nodeshaderinput_t *shinput = _shinput;
 
         // Add the current node to be drawn during the Draw stage.
         if ( !data.is_this_node_hidden( get_camera_mask() ) )
@@ -320,73 +301,3 @@ bool BSPModel::safe_to_flatten() const
 {
         return false;
 }
-
-/*
-INLINE BSPCullableObject::BSPCullableObject()
-        : CullableObject(),
-        _loader(nullptr),
-        _mgr(nullptr),
-        _shaderinfo(nullptr)
-{
-}
-
-INLINE BSPCullableObject::BSPCullableObject(
-        BSPLoader *loader,
-        AmbientProbeManager *mgr, CPT(nodeshaderinput_t) shaderinfo,
-        CPT( Geom ) geom, CPT( RenderState ) state,
-        CPT( TransformState ) internal_transform ) :
-
-        CullableObject( geom, state, internal_transform ),
-        _shaderinfo( shaderinfo ),
-        _loader( loader ),
-        _mgr( mgr )
-{
-
-}
-
-INLINE BSPCullableObject::BSPCullableObject( const BSPCullableObject &copy ) :
-        CullableObject( copy ),
-        _shaderinfo( copy._shaderinfo ),
-        _loader( copy._loader ),
-        _mgr( copy._mgr )
-{
-}
-
-INLINE void BSPCullableObject::operator=( const BSPCullableObject &copy )
-{
-        CullableObject::operator=( copy );
-        _shaderinfo = copy._shaderinfo;
-        _loader = copy._loader;
-        _mgr = copy._mgr;
-}
-
-void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsg )
-{
-        if ( !_loader->has_active_level() )
-        {
-                CullableObject::ensure_generated_shader( gsg );
-        }
-        /
-        else
-        {
-                if ( _shaderinfo != nullptr && _state->has_attrib( ShaderAttrib::get_class_slot() ) )
-                {
-                        const ShaderAttrib *shattr = DCAST( ShaderAttrib, _state->get_attrib( ShaderAttrib::get_class_slot() ) );
-                        if ( shattr->auto_shader() )
-                        {
-                                if ( _state->_generated_shader == nullptr || !_state->_generated_shader_seq.is_initial() )
-                                {
-                                        CPT( ShaderAttrib ) gen_shattr = _mgr->get_shader_generator()->generate_shader( _state );
-                                        //gen_shattr = set_shader_inputs( gen_shattr, _shaderinfo );
-                                        _state->_generated_shader = gen_shattr;
-                                        _state->_generated_shader_seq = UpdateSeq::initial();
-                                }
-
-                                _state->_generated_shader = set_shader_inputs( DCAST( ShaderAttrib, _state->_generated_shader ), _shaderinfo );
-                        }
-                }
-
-        }
-        /
-}
-*/

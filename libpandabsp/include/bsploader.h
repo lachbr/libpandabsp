@@ -157,6 +157,7 @@ PUBLISHED:
 
         void add_dynamic_node( const NodePath &node );
 
+        void set_want_shadows( bool flag );
         void set_shadow_cam_pos( const LPoint3 &pos );
         void set_shadow_cam_bitmask( const BitMask32 &mask );
         void set_shadow_color( const LColor &color );
@@ -273,6 +274,7 @@ private:
         LColor _shadow_color;
         int _shadow_filmsize;
         int _shadow_texsize;
+        bool _want_shadows;
 	Filename _materials_file;
         PN_stdfloat _gamma;
 	typedef pmap<string, string> Tex2Mat;
@@ -326,7 +328,6 @@ private:
         AmbientProbeManager _amb_probe_mgr;
 	
         PT( GenericAsyncTask ) _update_task;
-        PT( ShaderGenerator ) _original_shadergen;
         UpdateSeq _generated_shader_seq;
 
 	friend class BSPFaceAttrib;

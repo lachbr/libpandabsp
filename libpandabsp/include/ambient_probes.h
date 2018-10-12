@@ -11,6 +11,8 @@
 #include <cullableObject.h>
 #include <shaderAttrib.h>
 
+#include <unordered_map>
+
 class BSPLoader;
 struct dleafambientindex_t;
 struct dleafambientlighting_t;
@@ -66,20 +68,6 @@ struct nodeshaderinput_t : public ReferenceCount
                 light_atten = PTA_LVecBase4::empty_array( MAXLIGHTS );
         }
 };
-
-class AmbientProbeManager;
-
-INLINE CPT( ShaderAttrib ) set_shader_inputs( CPT( ShaderAttrib ) shattr, const nodeshaderinput_t *input )
-{
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambient_cube", input->ambient_cube ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_count", input->light_count ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_type", input->light_type ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_pos", input->light_pos ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_color", input->light_color ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_direction", input->light_direction ) ) );
-        shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "light_atten", input->light_atten ) ) );
-        return shattr;
-}
 
 /**
  * Generates shaders for dynamic objects in a BSP level.
@@ -201,9 +189,9 @@ private:
         BSPShaderGenerator _shader_generator;
 
         // NodePaths to be influenced by the ambient probes.
-        pmap<WPT( PandaNode ), CPT( TransformState )> _pos_cache;
-        pmap<WPT( PandaNode ), PT( nodeshaderinput_t )> _node_data;
-        pmap<int, pvector<ambientprobe_t>> _probes;
+        phash_map<WPT( PandaNode ), CPT( TransformState )> _pos_cache;
+        phash_map<WPT( PandaNode ), PT( nodeshaderinput_t )> _node_data;
+        phash_map<int, pvector<ambientprobe_t>> _probes;
         pvector<ambientprobe_t *> _all_probes;
         pvector<PT( light_t )> _all_lights;
         pvector<pvector<light_t *>> _light_pvs;
