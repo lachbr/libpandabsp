@@ -60,6 +60,10 @@ INLINE static void flatten_node( const NodePath &node )
         SceneGraphReducer gr;
         gr.apply_attribs( node.node() );
         gr.flatten( node.node(), ~0 );
+        gr.make_compatible_state( node.node() );
+        gr.collect_vertex_data( node.node(), ~( SceneGraphReducer::CVD_format |
+                                                SceneGraphReducer::CVD_name |
+                                                SceneGraphReducer::CVD_animation_type ) );
 }
 
 PStatCollector bfa_collector( "BSP:BSPFaceAttrib" );
