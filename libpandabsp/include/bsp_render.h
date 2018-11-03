@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file bsp_render.h
+ * @author Brian Lach
+ * @date August 07, 2018
+ */
+
 #ifndef BSPRENDER_H
 #define BSPRENDER_H
 

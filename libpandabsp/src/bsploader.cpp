@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file bsploader.cpp
+ * @author Brian Lach
+ * @date March 27, 2018
+ */
+
 #include "bsploader.h"
 
 #include "bsp_trace.h"

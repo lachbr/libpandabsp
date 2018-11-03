@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file shader_spec.h
+ * @author Brian Lach
+ * @date November 02, 2018
+ */
+
 #ifndef SHADER_SPEC_H
 #define SHADER_SPEC_H
 

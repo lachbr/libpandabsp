@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file bsploader.h
+ * @author Brian Lach
+ * @date March 27, 2018
+ */
+
 #ifndef BSPLOADER_H
 #define BSPLOADER_H
 

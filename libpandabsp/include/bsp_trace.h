@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file bsp_trace.h
+ * @author Brian Lach
+ * @date August 23, 2018
+ */
+
 #ifndef BSP_TRACE_H
 #define BSP_TRACE_H
 

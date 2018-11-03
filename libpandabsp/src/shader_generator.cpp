@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file shader_generator.cpp
+ * @author Brian Lach
+ * @date October 22, 2018
+ */
+
 #include "shader_generator.h"
 #include "pssmCameraRig.h"
 #include "bsp_material.h"

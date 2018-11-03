@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file shader_generator.h
+ * @author Brian Lach
+ * @date October 22, 2018
+ */
+
 #ifndef BSP_SHADERGENERATOR_H
 #define BSP_SHADERGENERATOR_H
 

@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file config_bsp.h
+ * @author Brian Lach
+ * @date March 27, 2018
+ */
+
 #ifndef CONFIG_BSP_H
 #define CONFIG_BSP_H
 

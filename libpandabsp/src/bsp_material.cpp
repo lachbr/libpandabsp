@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file bsp_material.cpp
+ * @author Brian Lach
+ * @date November 02, 2018
+ */
+
 #include "bsp_material.h"
 #include "shader_generator.h"
 

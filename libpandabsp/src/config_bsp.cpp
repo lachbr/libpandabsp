@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file config_bsp.cpp
+ * @author Brian Lach
+ * @date March 27, 2018
+ */
+
 #include "config_bsp.h"
 #include "entity.h"
 #include "bsploader.h"

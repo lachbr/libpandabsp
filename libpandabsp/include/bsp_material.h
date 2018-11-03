@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file bsp_material.h
+ * @author Brian Lach
+ * @date November 02, 2018
+ */
+
 #ifndef BSP_MATERIAL_H
 #define BSP_MATERIAL_H
 

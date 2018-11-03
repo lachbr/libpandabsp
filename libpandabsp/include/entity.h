@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file entity.h
+ * @author Brian Lach
+ * @date May 03, 2018
+ */
+
 #ifndef ENTITY_H
 #define ENTITY_H
 

@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file ambient_probes.cpp
+ * @author Brian Lach
+ * @date August 03, 2018
+ */
+
 #include "ambient_probes.h"
 #include "bsploader.h"
 #include "bspfile.h"

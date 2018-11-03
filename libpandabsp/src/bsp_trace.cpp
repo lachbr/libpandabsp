@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file bsp_trace.cpp
+ * @author Brian Lach
+ * @date August 23, 2018
+ */
+
 #include "bsp_trace.h"
 
 INLINE bool point_in_winding( const Winding& w, const dplane_t& plane, const vec_t* const point, vec_t epsilon = 0.0 )
