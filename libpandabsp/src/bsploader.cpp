@@ -7,6 +7,7 @@
 #include "entity.h"
 #include "mathlib.h"
 #include "viftokenizer.h"
+#include "bsp_material.h"
 
 #include <array>
 #include <bitset>
@@ -51,10 +52,12 @@
 #include <characterJointEffect.h>
 #include <orthographicLens.h>
 
+#define DEFAULT_BRUSH_SHADER "LightmappedGeneric"
+
 INLINE static void flatten_node( const NodePath &node )
 {
         // Mimic a flatten strong operation, but do not attempt to combine
-        // Geoms, as each face needs to be it's own Geom for effective leaf
+        // Geoms, as each world brush face needs to be it's own Geom for effective leaf
         // culling.
 
         SceneGraphReducer gr;
@@ -347,7 +350,7 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
                 lm_uv[1] /= -ld->faceentry->palette_size[1];
         }
 
-        v->set_uv( "diffuse", df_uv );
+        v->set_uv( "basetexture", df_uv );
         v->set_uv( "lightmap", lm_uv );
 
         return v;
@@ -742,12 +745,14 @@ void BSPLoader::make_faces()
                         PT( Texture ) tex = try_load_texref( texref );
                         string texture_name = texref->name;
                         string material = "default";
+                        string shader = DEFAULT_BRUSH_SHADER;
                         if ( _texref_materials.find( texref ) != _texref_materials.end() )
                         {
                                 bspfile_cat.info()
                                         << "Material properties for " << texref->name << ":\n";
                                 Parser *p = &_texref_materials[texref];
                                 Object obj = p->_base_objects[0];
+                                shader = obj.name;
                                 vector<Property> props = p->get_properties( obj );
                                 for ( size_t i = 0; i < props.size(); i++ )
                                 {
@@ -897,15 +902,36 @@ void BSPLoader::make_faces()
                         data->recompute_tangent_binormal_auto();
 
                         NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
+                        faceroot.set_shader_auto();
 
                         if ( has_texture )
                         {
-                                faceroot.set_texture( _diffuse_stage, tex );
+                                PT( TextureStage ) base_stage = new TextureStage( "basetexture" );
+                                base_stage->set_texcoord_name( "basetexture" );
+
+                                faceroot.set_texture( base_stage, tex );
                         }
 
                         if ( has_lighting )
                         {
-                                faceroot.set_texture( _lightmap_stage, lmfaceentry->palette->palette_tex[0] );
+                                PT( TextureStage ) lm_stage = new TextureStage( face->bumped_lightmap ? "lightmapArray" : "lightmap" );
+                                lm_stage->set_texcoord_name( "lightmap" );
+
+                                if ( !face->bumped_lightmap )
+                                {
+                                        faceroot.set_texture( lm_stage, lmfaceentry->palette->palette_tex );
+                                }
+                                else
+                                {
+                                        faceroot.set_texture( lm_stage, lmfaceentry->palette->bump_palette_array_tex );
+                                }
+                        }
+                        if ( mat_normalmap )
+                        {
+                                PT( Texture ) nmtex = TexturePool::load_texture( normalmapfile );
+                                PT( TextureStage ) nmstage = new TextureStage( "normalmap" );
+
+                                faceroot.set_texture( nmstage, nmtex );
                         }
 
                         faceroot.wrt_reparent_to( modelroot );
@@ -914,41 +940,31 @@ void BSPLoader::make_faces()
                                 faceroot.set_transparency( TransparencyAttrib::M_multisample, 1 );
                         }
 
-                        pvector<string> shaders = make_bface_shaders( has_lighting, envmap_shininess > 0.0, envmap_shininess,
-                                                                      face->bumped_lightmap, mat_normalmap, recv_projshadows );
-                        faceroot.set_shader( Shader::make( Shader::SL_GLSL, shaders[0], shaders[1] ), 1 );
-                        if ( recv_projshadows )
-                        {
-                                faceroot.set_shader_input( "shadowtex", _shadow_tex );
-                                faceroot.set_shader_input( "shadowdepth", _shadow_depth );
-                                faceroot.set_shader_input( "shadowcam", _shadowcam );
-                        }
+                        PT( BSPMaterial ) face_mat = new BSPMaterial;
+                        face_mat->set_shader( shader );
+
                         if ( envmap_shininess > 0.0 )
                         {
                                 PT( Texture ) etex = TexturePool::load_texture( envmap );
                                 etex->set_wrap_u( SamplerState::WM_repeat );
                                 etex->set_wrap_v( SamplerState::WM_repeat );
-                                faceroot.set_shader_input( "envmap_texture", etex );
+                                PT( TextureStage ) estage = new TextureStage( "spheremap" );
+                                faceroot.set_texture( estage, etex );
+                                face_mat->set_shader_input( ShaderInput( "envmapShininess", LVecBase2( envmap_shininess ) ) );
                         }
-                        if ( face->bumped_lightmap && mat_normalmap )
-                        {
-                                if ( mat_normalmap )
-                                {
-                                        PT( Texture ) nmtex = TexturePool::load_texture( normalmapfile );
-                                        faceroot.set_shader_input( "normalmap_texture", nmtex );
-                                }
 
-                                for ( int n = 0; n < NUM_BUMP_VECTS; n++ )
-                                {
-                                        stringstream lmss;
-                                        lmss << "lightmap_colors" << n;
-                                        faceroot.set_shader_input( lmss.str(), lmfaceentry->palette->palette_tex[n + 1] );
+                        //pvector<string> shaders = make_bface_shaders( has_lighting, envmap_shininess > 0.0, envmap_shininess,
+                        //                                              face->bumped_lightmap, mat_normalmap, recv_projshadows );
+                        //faceroot.set_shader( Shader::make( Shader::SL_GLSL, shaders[0], shaders[1] ), 1 );
+                        //if ( recv_projshadows )
+                        //{
+                        //        faceroot.set_shader_input( "shadowtex", _shadow_tex );
+                        //        faceroot.set_shader_input( "shadowdepth", _shadow_depth );
+                        //        faceroot.set_shader_input( "shadowcam", _shadowcam );
+                        //}
 
-                                        stringstream bbss;
-                                        bbss << "bump_basis" << n;
-                                        faceroot.set_shader_input( bbss.str(), g_localbumpbasis[n] );
-                                }
-                        }
+                        cout << "Face material shader: " << face_mat->get_shader() << endl;
+                        faceroot.set_material( face_mat, 1 );
 
                         NodePathCollection gn_npc = faceroot.find_all_matches( "**/+GeomNode" );
                         for ( int i = 0; i < gn_npc.get_num_paths(); i++ )
@@ -1718,7 +1734,7 @@ bool BSPLoader::read( const Filename &file )
                 SceneGraphReducer gr;
                 gr.apply_attribs( _result.node() );
 
-                _result.set_shader_off( 1 );
+                //_result.set_shader_off( 1 );
                 _result.set_attrib( BSPFaceAttrib::make_default(), 1 );
         }
         else
@@ -1991,7 +2007,7 @@ BSPLoader::BSPLoader() :
         _shadow_texsize( 1024 ),
         _want_shadows( true )
 {
-        _diffuse_stage->set_texcoord_name( "diffuse" );
+        _diffuse_stage->set_texcoord_name( "basetexture" );
         _diffuse_stage->set_sort( 0 );
 
         _lightmap_stage->set_texcoord_name( "lightmap" );

@@ -19,9 +19,10 @@ struct dleafambientlighting_t;
 
 enum
 {
-        LIGHTTYPE_SUN   = 0,
-        LIGHTTYPE_POINT = 1,
-        LIGHTTYPE_SPOT  = 2,
+        LIGHTTYPE_SUN           = 0,
+        LIGHTTYPE_POINT         = 1,
+        LIGHTTYPE_SPHERE        = 2,
+        LIGHTTYPE_SPOT          = 3,
 };
 
 struct ambientprobe_t
@@ -50,10 +51,7 @@ struct nodeshaderinput_t : public ReferenceCount
 
         PTA_int light_count;
         PTA_int light_type;
-        PTA_LVecBase3 light_pos;
-        PTA_LVecBase3 light_color;
-        PTA_LVecBase4 light_direction;
-        PTA_LVecBase4 light_atten;
+        PTA_LMatrix4f light_data;
 
         nodeshaderinput_t() :
                 ReferenceCount()
@@ -62,95 +60,8 @@ struct nodeshaderinput_t : public ReferenceCount
 
                 light_count = PTA_int::empty_array( 1 );
                 light_type = PTA_int::empty_array( MAXLIGHTS );
-                light_pos = PTA_LVecBase3::empty_array( MAXLIGHTS );
-                light_color = PTA_LVecBase3::empty_array( MAXLIGHTS );
-                light_direction = PTA_LVecBase4::empty_array( MAXLIGHTS );
-                light_atten = PTA_LVecBase4::empty_array( MAXLIGHTS );
+                light_data = PTA_LMatrix4f::empty_array( MAXLIGHTS );
         }
-};
-
-/**
- * Generates shaders for dynamic objects in a BSP level.
- * GLSL
- */
-class BSPShaderGenerator
-{
-public:
-        BSPShaderGenerator();
-
-        CPT( ShaderAttrib ) generate_shader( CPT( RenderState ) net_state );
-
-        struct shaderinfo_t
-        {
-                shaderinfo_t();
-                bool operator < ( const shaderinfo_t &other ) const;
-                bool operator == ( const shaderinfo_t &other ) const;
-                bool operator != ( const shaderinfo_t &other ) const { return !operator ==( other ); }
-
-                int material_flags;
-                int texture_flags;
-                int shade_model;
-
-                ColorAttrib::Type color_type;
-
-                GeomVertexAnimationSpec anim_spec;
-
-                int fog_mode;
-
-                int outputs;
-                bool calc_primary_alpha;
-                bool disable_alpha_write;
-                RenderAttrib::PandaCompareFunc alpha_test_mode;
-                PN_stdfloat alpha_test_ref;
-
-                int num_clip_planes;
-
-                CPT( LightRampAttrib ) light_ramp;
-
-                enum textureflags
-                {
-                        TEXTUREFLAGS_HAS_RGB = 0x001,
-                        TEXTUREFLAGS_HAS_ALPHA = 0x002,
-                        TEXTUREFLAGS_HAS_SCALE = 0x004,
-                        TEXTUREFLAGS_HAS_MAT = 0x008,
-                        TEXTUREFLAGS_SAVED_RESULT = 0x010,
-                        TEXTUREFLAGS_NORMALMAP = 0x020,
-                        TEXTUREFLAGS_HEIGHTMAP = 0x040,
-                        TEXTUREFLAGS_GLOWMAP = 0x080,
-                        TEXTUREFLAGS_GLOSSMAP = 0x100,
-                        TEXTUREFLAGS_USES_COLOR = 0x200,
-                        TEXTUREFLAGS_USES_PRIMARY_COLOR = 0x400,
-                        TEXTUREFLAGS_USES_LAST_SAVED_RESULT = 0x800,
-
-                        TEXTUREFLAGS_RGB_SCALE_2 = 0x1000,
-                        TEXTUREFLAGS_RGB_SCALE_4 = 0x2000,
-                        TEXTUREFLAGS_ALPHA_SCALE_2 = 0x4000,
-                        TEXTUREFLAGS_ALPHA_SCALE_4 = 0x8000,
-                        TEXTUREFLAGS_SPHEREMAP = 0x10000,
-
-                        TEXTUREFLAGS_COMBINE_RGB_MODE_SHIFT = 16,
-                        TEXTUREFLAGS_COMBINE_RGB_MODE_MASK = 0x0000f0000,
-                        TEXTUREFLAGS_COMBINE_ALPHA_MODE_SHIFT = 20,
-                        TEXTUREFLAGS_COMBINE_ALPHA_MODE_MASK = 0x000f00000,
-                };
-
-                struct textureinfo_t
-                {
-                        CPT_InternalName texcoord_name;
-                        Texture::TextureType type;
-                        TextureStage::Mode mode;
-                        TexGenAttrib::Mode gen_mode;
-                        int flags;
-                        uint16_t combine_rgb;
-                        uint16_t combine_alpha;
-                };
-                pvector<textureinfo_t> textures;
-        };
-
-private:
-        void analyze_renderstate( shaderinfo_t &key, CPT( RenderState ) state );
-
-        pmap<shaderinfo_t, CPT( ShaderAttrib )> _shader_cache;
 };
 
 class AmbientProbeManager
@@ -161,14 +72,9 @@ public:
 
         void process_ambient_probes();
 
-        void update_node( PandaNode *node, CPT( TransformState ) net_ts, CPT( RenderState ) net_state );
+        nodeshaderinput_t *update_node( PandaNode *node, CPT( TransformState ) net_ts, CPT( RenderState ) net_state );
 
         void cleanup();
-
-        static CPT( ShaderAttrib ) get_identity_shattr();
-        static CPT( Shader ) get_shader();
-
-        BSPShaderGenerator *get_shader_generator();
 
 public:
         void consider_garbage_collect();
@@ -180,13 +86,8 @@ private:
 
         INLINE void garbage_collect_cache();
 
-
-        void generate_shaders( PandaNode *node, CPT( RenderState ) net_state, bool first,
-                               const nodeshaderinput_t *input );
-
 private:
         BSPLoader *_loader;
-        BSPShaderGenerator _shader_generator;
 
         // NodePaths to be influenced by the ambient probes.
         phash_map<WPT( PandaNode ), CPT( TransformState )> _pos_cache;
@@ -200,9 +101,6 @@ private:
         NodePath _vis_root;
 
         double _last_garbage_collect_time;
-
-        static CPT( Shader ) _shader;
-        static CPT( ShaderAttrib ) _identity_shattr;
 };
 
 #endif // AMBIENT_PROBES_H

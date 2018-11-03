@@ -6,6 +6,46 @@
 #include <cullHandler.h>
 #include <characterJointEffect.h>
 
+#include "shader_generator.h"
+
+INLINE void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsgbase )
+{
+        GraphicsStateGuardian *gsg = DCAST( GraphicsStateGuardian, gsgbase );
+        ShaderGenerator *shgen = gsg->get_shader_generator();
+        if ( shgen == nullptr )
+        {
+                return;
+        }
+        if ( shgen->is_of_type( PSSMShaderGenerator::get_class_type() ) )
+        {
+                PSSMShaderGenerator *pshgen = DCAST( PSSMShaderGenerator, shgen );
+
+                const ShaderAttrib *shader_attrib;
+                _state->get_attrib_def( shader_attrib );
+
+                if ( shader_attrib->auto_shader() )
+                {
+                        if ( _state->_generated_shader == nullptr )//||
+                             //_state->_generated_shader_seq != gsg->_generated_shader_seq )
+                        {
+                                GeomVertexAnimationSpec spec;
+
+                                // Currently we overload this flag to request vertex animation for the
+                                // shader generator.
+                                if ( shader_attrib->get_flag( ShaderAttrib::F_hardware_skinning ) )
+                                {
+                                        spec.set_hardware( 4, true );
+                                }
+
+                                // Cache the generated ShaderAttrib on the shader state.
+                                _state->_generated_shader = pshgen->synthesize_shader( _state, spec, _bsp_node_input );
+                                //_state->_generated_shader_seq = _generated_shader_seq;
+                        }
+                }
+
+        }
+}
+
 TypeHandle IgnorePVSAttrib::_type_handle;
 int IgnorePVSAttrib::_attrib_slot;
 
@@ -54,7 +94,7 @@ bool BSPCullTraverser::is_in_view( CullTraverserData &data )
         return ret;
 }
 
-INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTraverserData &data )
+INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTraverserData &data, nodeshaderinput_t *shinput )
 {
         BSPLoader *loader = _loader;
 
@@ -128,8 +168,8 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                         }                        
                 }
 
-                CullableObject *object =
-                        new CullableObject( std::move( geom ), std::move( state ), internal_transform );
+                BSPCullableObject *object =
+                        new BSPCullableObject( std::move( geom ), std::move( state ), internal_transform, shinput );
                 get_cull_handler()->record_object( object, this );
                 _geoms_pcollector.add_level( 1 );
         }
@@ -164,15 +204,16 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                                 disabled = !shattr->auto_shader();
                         }
 
+                        nodeshaderinput_t *shinput = nullptr;
                         if ( !disabled )
                         {
                                 // Update the node's ambient probe stuff:
-                                _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ), data._state );
+                                shinput = _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ), data._state );
                         }
 
                         // HACKHACK:
                         // Needed to test the individual Geoms against the PVS.
-                        add_geomnode_for_draw( DCAST( GeomNode, node ), data );
+                        add_geomnode_for_draw( DCAST( GeomNode, node ), data, shinput );
                 }
                 else
                 {
@@ -228,8 +269,6 @@ BSPRender::BSPRender( const std::string &name, BSPLoader *loader ) :
         _loader( loader )
 {
         set_cull_callback();
-
-        set_attrib( AmbientProbeManager::get_identity_shattr() );
 }
 
 bool BSPRender::cull_callback( CullTraverser *trav, CullTraverserData &data )
