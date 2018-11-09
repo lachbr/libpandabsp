@@ -297,6 +297,7 @@ private:
         bool _ai;
 	int _physics_type;
 	pvector<BoundingBox *> _visible_leaf_bboxs;
+        pvector<int> _visible_leafs;
 	int _curr_leaf_idx;
 
         // for purely client-sided, non networked entities
@@ -338,6 +339,21 @@ private:
 	
         PT( GenericAsyncTask ) _update_task;
         UpdateSeq _generated_shader_seq;
+
+        struct WorldSpawnGeomState
+        {
+                CPT( Geom ) geom;
+                CPT( RenderState ) state;
+
+                INLINE WorldSpawnGeomState( CPT( Geom ) g, CPT( RenderState ) st )
+                {
+                        geom = g;
+                        state = st;
+                }
+        };
+
+        pvector<WorldSpawnGeomState> _leaf_geoms;
+        pvector<pvector<int>> _leaf_geom_list;
 
 	friend class BSPFaceAttrib;
         friend class BSPGeomNode;

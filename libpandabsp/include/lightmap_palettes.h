@@ -25,8 +25,7 @@ struct LightmapPaletteDirectory
 {
         struct LightmapPaletteEntry : public ReferenceCount
         {
-                PT( Texture ) palette_tex;
-                PT( Texture ) bump_palette_array_tex;
+                PT( Texture ) palette_tex[NUM_BUMP_VECTS + 1];
         };
 
         struct LightmapFacePaletteEntry : public ReferenceCount

@@ -68,7 +68,7 @@ VertexLitGenericSpec::VertexLitGenericSpec() :
 }
 
 ShaderSpec::Permutations VertexLitGenericSpec::setup_permutations( const RenderState *rs,
-                                                                   const GeomVertexAnimationSpec &anim, 
+                                                                   const GeomVertexAnimationSpec &anim,
                                                                    PSSMShaderGenerator *generator )
 {
         Permutations result = ShaderSpec::setup_permutations( rs, anim, generator );
@@ -441,6 +441,13 @@ LightmappedGenericSpec::LightmappedGenericSpec() :
 {
 }
 
+static std::string get_texcoord( size_t idx )
+{
+        stringstream ss;
+        ss << "p3d_MultiTexCoord" << idx;
+        return ss.str();
+}
+
 ShaderSpec::Permutations LightmappedGenericSpec::setup_permutations( const RenderState *rs,
                                                                      const GeomVertexAnimationSpec &anim,
                                                                      PSSMShaderGenerator *generator )
@@ -449,6 +456,7 @@ ShaderSpec::Permutations LightmappedGenericSpec::setup_permutations( const Rende
 
         const TextureAttrib *tattr;
         rs->get_attrib_def( tattr );
+        int basetexture_coord = -1;
         for ( size_t i = 0; i < tattr->get_num_on_stages(); i++ )
         {
                 TextureStage *stage = tattr->get_on_stage( i );
@@ -457,28 +465,43 @@ ShaderSpec::Permutations LightmappedGenericSpec::setup_permutations( const Rende
                 if ( stage->get_name() == "basetexture" )
                 {
                         result.add_permutation( "BASETEXTURE", "1" );
+                        result.add_permutation( "BASETEXTURE_COORD", get_texcoord( i ) );
+                        basetexture_coord = i;
                         result.add_input( ShaderInput( "baseTextureSampler", tex ) );
                 }
                 else if ( stage->get_name() == "lightmap" )
                 {
                         result.add_permutation( "FLAT_LIGHTMAP", "1" );
+                        result.add_permutation( "LIGHTMAP_COORD", get_texcoord( i ) );
                         result.add_input( ShaderInput( "lightmapSampler", tex ) );
                 }
-                else if ( stage->get_name() == "lightmapArray" )
+                else if ( stage->get_name() == "lightmap0" )
                 {
                         result.add_permutation( "BUMPED_LIGHTMAP", "1" );
-                        result.add_input( ShaderInput( "lightmapArraySampler", tex ) );
+                        result.add_permutation( "LIGHTMAP_COORD", get_texcoord( i ) );
+                        result.add_input( ShaderInput( "lightmap0Sampler", tex ) );
+                }
+                else if ( stage->get_name() == "lightmap1" )
+                {
+                        result.add_input( ShaderInput( "lightmap1Sampler", tex ) );
+                }
+                else if ( stage->get_name() == "lightmap2" )
+                {
+                        result.add_input( ShaderInput( "lightmap2Sampler", tex ) );
                 }
                 else if ( stage->get_name() == "normalmap" )
                 {
                         result.add_permutation( "NORMALMAP", "1" );
+                        if ( basetexture_coord == -1 )
+                        {
+                                result.add_permutation( "NORMALMAP_COORD", get_texcoord( i ) );
+                        }
                         result.add_input( ShaderInput( "normalSampler", tex ) );
                 }
                 else if ( stage->get_name() == "spheremap" )
                 {
                         result.add_permutation( "SPHEREMAP", "1" );
                         result.add_input( ShaderInput( "sphereSampler", tex ) );
-                        result.add_input( ShaderInput( "envmapShininess", LVecBase2( 1.0 ) ) );
                 }
         }
 

@@ -312,6 +312,7 @@ nodeshaderinput_t *AmbientProbeManager::update_node( PandaNode *node, CPT( Trans
         if ( new_instance )
         {
                 input = new nodeshaderinput_t;
+                input->node_sequence = _node_sequence++;
                 _node_data[node] = input;
                 _pos_cache[node] = curr_trans;
         }

@@ -195,7 +195,18 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                                                             const GeomVertexAnimationSpec &anim,
                                                             nodeshaderinput_t *bsp_node_input )
 {
-        CPT( ShaderAttrib ) shattr = synthesize_shader( rs, anim );
+        CPT( ShaderAttrib ) shattr = nullptr;
+        if ( rs->_generated_shader != nullptr && bsp_node_input != nullptr )
+        {
+                shattr = DCAST( ShaderAttrib, rs->_generated_shader );
+        }
+        else
+        {
+                shattr = synthesize_shader( rs, anim );
+        }
+
+        nassertr( shattr != nullptr, nullptr );
+
         CPT( RenderAttrib ) attr = shattr;
 
         if ( bsp_node_input != nullptr )
@@ -204,6 +215,14 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                 attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightData", bsp_node_input->light_data ) );
                 attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightTypes", bsp_node_input->light_type ) );
                 attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "ambientCube", bsp_node_input->ambient_cube ) );
+        }
+        else
+        {
+                // Fill in default empty values so we don't crash.
+                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightCount", PTA_int::empty_array( 1 ) ) );
+                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightData", PTA_LMatrix4::empty_array( MAXLIGHTS ) ) );
+                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightTypes", PTA_int::empty_array( MAXLIGHTS ) ) );
+                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ) );
         }
 
         return DCAST( ShaderAttrib, attr );
@@ -316,9 +335,9 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
 
         CPT( RenderAttrib ) shattr = ShaderAttrib::make( shader );
         // Add any inputs from the shader spec.
-        for ( size_t i = 0; i < permutations.inputs.size(); i++ )
+        for ( auto itr = permutations.inputs.begin(); itr != permutations.inputs.end(); itr++ )
         {
-                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( permutations.inputs[i].input );
+                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( itr->second.input );
         }
         // Also any flags.
         for ( size_t i = 0; i < permutations.flags.size(); i++ )

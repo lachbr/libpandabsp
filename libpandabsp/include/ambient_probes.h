@@ -19,6 +19,7 @@
 #include <lightRampAttrib.h>
 #include <cullableObject.h>
 #include <shaderAttrib.h>
+#include <updateSeq.h>
 
 #include <unordered_map>
 
@@ -61,6 +62,8 @@ struct nodeshaderinput_t : public ReferenceCount
         PTA_int light_count;
         PTA_int light_type;
         PTA_LMatrix4f light_data;
+
+        UpdateSeq node_sequence;
 
         nodeshaderinput_t() :
                 ReferenceCount()
@@ -108,6 +111,8 @@ private:
         light_t *_sunlight;
 
         NodePath _vis_root;
+
+        UpdateSeq _node_sequence;
 
         double _last_garbage_collect_time;
 };

@@ -12,11 +12,84 @@
 
 #include <material.h>
 #include <shaderInput.h>
+#include <pmap.h>
+#include <textureStage.h>
+
+/**
+ * This simple interface maintains a single TextureStage object for each unique name.
+ * It avoids the creation of duplicate TextureStages with the same name, which
+ * reduces texture swapping and draw call overhead.
+ *
+ * If using our shader system, you should always use this interface to get TextureStages.
+ * You are not required to change any properties on the returned TextureStage, as the shader
+ * specification will know what to do with the TextureStage from the name.
+ * 
+ * For example, you do not need to call TextureStage::set_mode() or NodePath::set_tex_gen().
+ * If you apply a texture to a node with the get_normalmap() stage, the shader specification
+ * will know that the texture you supplied is to be treated as a normal map.
+ */
+class TextureStages
+{
+PUBLISHED:
+        static TextureStage *get( const std::string &name );
+        static TextureStage *get( const std::string &name, const std::string &uv_name );
+
+        static TextureStage *get_basetexture();
+        static TextureStage *get_lightmap();
+        static TextureStage *get_bumped_lightmap( int n );
+        static TextureStage *get_spheremap();
+        static TextureStage *get_cubemap();
+        static TextureStage *get_normalmap();
+        static TextureStage *get_heightmap();
+        static TextureStage *get_glossmap();
+        static TextureStage *get_glowmap();
+
+private:
+        typedef pmap<std::string, PT( TextureStage )> tspool_t;
+        static tspool_t _stage_pool;
+};
+
+class Materials
+{
+PUBLISHED:
+        static Material *get( Material *mat );
+
+private:
+        static LightMutex _lock;
+
+        // We store a map of CPT(Material) to PT(Material).  These are two
+        // equivalent structures, but different pointers.  The first pointer never
+        // leaves this class.  If the second pointer changes value, we'll notice it
+        // and return a new one.
+        typedef pmap< CPT( Material ), PT( Material ), indirect_compare_to<const Material *> > matmap_t;
+        static matmap_t _materials;
+};
+
+#define DEFAULT_SHADER "VertexLitGeneric"
 
 class BSPMaterial : public Material
 {
 PUBLISHED:
-        explicit BSPMaterial(const std::string &name = "");
+        INLINE explicit BSPMaterial( const std::string &name = "" ) :
+                Material( name ),
+                _shader_name( DEFAULT_SHADER )
+        {
+        }
+
+        INLINE BSPMaterial( const BSPMaterial &copy ) :
+                Material( copy ),
+                _shader_name( copy._shader_name ),
+                _shader_inputs( copy._shader_inputs )
+        {
+        }
+
+        INLINE void operator = ( const BSPMaterial &copy )
+        {
+                Material::operator = ( copy );
+                _shader_name = copy._shader_name;
+                _shader_inputs = copy._shader_inputs;
+        }
+
 
         void set_shader( const std::string &shader_name );
         INLINE std::string get_shader() const
@@ -29,6 +102,9 @@ PUBLISHED:
         {
                 return _shader_inputs;
         }
+
+        virtual int compare_to_impl(const Material *other) const;
+        virtual size_t get_hash_impl() const;
 
 private:
         std::string _shader_name;

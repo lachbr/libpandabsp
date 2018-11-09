@@ -60,6 +60,11 @@
 #include <sceneGraphReducer.h>
 #include <characterJointEffect.h>
 #include <orthographicLens.h>
+#include <cullBinAttrib.h>
+#include <materialAttrib.h>
+#include <materialPool.h>
+
+static PStatCollector bsp_build_leaf_geom_collector( "BSP:BuildAcceleratedLeafGeomStructure" );
 
 #define DEFAULT_BRUSH_SHADER "LightmappedGeneric"
 
@@ -719,6 +724,7 @@ void BSPLoader::make_faces()
                 name << "model-" << modelnum;
                 PT( BSPModel ) bspmdl = new BSPModel( name.str() );
                 NodePath modelroot = _result.attach_new_node( bspmdl );
+                modelroot.set_shader_auto();
 
                 _model_origins[modelroot] = ( ( ( mins + maxs ) / 2.0 ) + origin ) / 16.0;
 
@@ -911,36 +917,32 @@ void BSPLoader::make_faces()
                         data->recompute_tangent_binormal_auto();
 
                         NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
-                        faceroot.set_shader_auto();
 
                         if ( has_texture )
                         {
-                                PT( TextureStage ) base_stage = new TextureStage( "basetexture" );
-                                base_stage->set_texcoord_name( "basetexture" );
-
-                                faceroot.set_texture( base_stage, tex );
+                                faceroot.set_texture( TextureStages::get_basetexture(), tex );
                         }
 
                         if ( has_lighting )
                         {
-                                PT( TextureStage ) lm_stage = new TextureStage( face->bumped_lightmap ? "lightmapArray" : "lightmap" );
-                                lm_stage->set_texcoord_name( "lightmap" );
-
-                                if ( !face->bumped_lightmap )
+                                if ( face->bumped_lightmap && mat_normalmap )
                                 {
-                                        faceroot.set_texture( lm_stage, lmfaceentry->palette->palette_tex );
+                                        for ( int n = 0; n < NUM_BUMP_VECTS; n++ )
+                                        {
+                                                faceroot.set_texture( TextureStages::get_bumped_lightmap( n ),
+                                                                      lmfaceentry->palette->palette_tex[n + 1] );
+                                        }
                                 }
                                 else
                                 {
-                                        faceroot.set_texture( lm_stage, lmfaceentry->palette->bump_palette_array_tex );
+                                        faceroot.set_texture( TextureStages::get_lightmap(),
+                                                              lmfaceentry->palette->palette_tex[0] );
                                 }
                         }
                         if ( mat_normalmap )
                         {
                                 PT( Texture ) nmtex = TexturePool::load_texture( normalmapfile );
-                                PT( TextureStage ) nmstage = new TextureStage( "normalmap" );
-
-                                faceroot.set_texture( nmstage, nmtex );
+                                faceroot.set_texture( TextureStages::get_normalmap(), nmtex );
                         }
 
                         faceroot.wrt_reparent_to( modelroot );
@@ -957,23 +959,11 @@ void BSPLoader::make_faces()
                                 PT( Texture ) etex = TexturePool::load_texture( envmap );
                                 etex->set_wrap_u( SamplerState::WM_repeat );
                                 etex->set_wrap_v( SamplerState::WM_repeat );
-                                PT( TextureStage ) estage = new TextureStage( "spheremap" );
-                                faceroot.set_texture( estage, etex );
-                                face_mat->set_shader_input( ShaderInput( "envmapShininess", LVecBase2( envmap_shininess ) ) );
+                                faceroot.set_texture( TextureStages::get_spheremap(), etex );
+                                face_mat->set_shininess( envmap_shininess );
                         }
 
-                        //pvector<string> shaders = make_bface_shaders( has_lighting, envmap_shininess > 0.0, envmap_shininess,
-                        //                                              face->bumped_lightmap, mat_normalmap, recv_projshadows );
-                        //faceroot.set_shader( Shader::make( Shader::SL_GLSL, shaders[0], shaders[1] ), 1 );
-                        //if ( recv_projshadows )
-                        //{
-                        //        faceroot.set_shader_input( "shadowtex", _shadow_tex );
-                        //        faceroot.set_shader_input( "shadowdepth", _shadow_depth );
-                        //        faceroot.set_shader_input( "shadowcam", _shadowcam );
-                        //}
-
-                        cout << "Face material shader: " << face_mat->get_shader() << endl;
-                        faceroot.set_material( face_mat, 1 );
+                        faceroot.set_material( Materials::get( face_mat ) );
 
                         NodePathCollection gn_npc = faceroot.find_all_matches( "**/+GeomNode" );
                         for ( int i = 0; i < gn_npc.get_num_paths(); i++ )
@@ -1389,7 +1379,8 @@ void BSPLoader::load_entities()
                         {
                                 if ( _sv_ent_dispatch != nullptr )
                                 {
-                                        PyObject *ret = PyObject_CallMethod( _sv_ent_dispatch, "createServerEntity", "Oi", _svent_to_class[classname], entnum );
+                                        PyObject *ret = PyObject_CallMethod( _sv_ent_dispatch, "createServerEntity",
+                                                                             "Oi", _svent_to_class[classname], entnum );
                                         if ( !ret )
                                         {
                                                 PyErr_Print();
@@ -1496,9 +1487,11 @@ void BSPLoader::update()
         {
                 _curr_leaf_idx = curr_leaf_idx;
                 _visible_leaf_bboxs.clear();
+                _visible_leafs.clear();
 
                 // Add ourselves to the visible list.
                 _visible_leaf_bboxs.push_back( _leaf_bboxs[curr_leaf_idx] );
+                _visible_leafs.push_back( curr_leaf_idx );
 
                 if ( _vis_leafs )
                 {
@@ -1519,6 +1512,7 @@ void BSPLoader::update()
                                         _leaf_visnp[i].set_color_scale( LColor( 0, 0, 1, 1 ), 1 );
                                 }
                                 _visible_leaf_bboxs.push_back( _leaf_bboxs[i] );
+                                _visible_leafs.push_back( i );
                         }
                         else
                         {
@@ -1743,7 +1737,7 @@ bool BSPLoader::read( const Filename &file )
                 SceneGraphReducer gr;
                 gr.apply_attribs( _result.node() );
 
-                //_result.set_shader_off( 1 );
+                _result.set_shader_off();
                 _result.set_attrib( BSPFaceAttrib::make_default(), 1 );
         }
         else
@@ -1851,6 +1845,63 @@ void BSPLoader::do_optimizations()
                 npc[i].flatten_strong();
         }
 
+        //========================================================================
+        // Since it's safe to assume that worldspawn geometry will never move,
+        // we can predetermine which leafs contain which worldspawn Geoms.
+        // This will greatly optimize Cull, as we no longer have to test
+        // each Geom against each visible leaf to determine visibility,
+        // we already know which Geoms are visible.
+
+        std::cout
+                << "There are " << _bspdata->dmodels[0].numfaces << " world faces." << std::endl;
+
+        bsp_build_leaf_geom_collector.start();
+
+        std::cout
+                << "Building accelerated leaf Geom structure...\n";
+
+        _leaf_geom_list.resize( _bspdata->dmodels[0].visleafs + 1 );
+        NodePath worldspawn = get_model( 0 );
+        NodePathCollection geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
+        for ( int i = 0; i < geomnodes.get_num_paths(); i++ )
+        {
+                CPT( TransformState ) transform = geomnodes[i].get_net_transform();
+                CPT( RenderState ) node_state = geomnodes[i].get_net_state();
+                
+                PT( GeomNode ) gn = DCAST( GeomNode, geomnodes[i].node() );
+                int num_geoms = gn->get_num_geoms();
+                _leaf_geoms.reserve( _leaf_geoms.size() + num_geoms );
+                for ( int j = 0; j < num_geoms; j++ )
+                {
+                        CPT( Geom ) geom = gn->get_geom( j );
+                        CPT( RenderState ) geom_state = gn->get_geom_state( j );
+
+                        CPT( RenderState ) net_state = node_state->compose( geom_state );
+                        size_t geom_idx = _leaf_geoms.size();
+                        _leaf_geoms.push_back( WorldSpawnGeomState( geom, net_state ) );
+                        for ( int leafnum = 0; leafnum < _bspdata->dmodels[0].visleafs + 1; leafnum++ )
+                        {
+                                PT( BoundingBox ) leaf_bounds = _leaf_bboxs[leafnum];
+
+                                // Move the Geom bounds into leaf AABB space (world space).
+                                PT( GeometricBoundingVolume ) geom_gbv = geom->get_bounds()
+                                        ->make_copy()->as_geometric_bounding_volume();
+                                geom_gbv->xform( transform->get_mat() );
+
+                                if ( leaf_bounds->contains( geom_gbv ) != BoundingVolume::IF_no_intersection )
+                                {
+                                        // This leaf contains this geom!
+                                        _leaf_geom_list[leafnum].push_back( geom_idx );
+                                }
+                        }
+                }
+        }
+
+        std::cout
+                << "Done.\n";
+
+        bsp_build_leaf_geom_collector.stop();
+
         _result.premunge_scene( _win->get_gsg() );
         _result.prepare_scene( _win->get_gsg() );
 }
@@ -1932,6 +1983,9 @@ void BSPLoader::cleanup()
         _leaf_pvs.clear();
 
         _leaf_aabb_lock.acquire();
+        _leaf_geom_list.clear();
+        _leaf_geoms.clear();
+        _visible_leafs.clear();
         _leaf_bboxs.clear();
         _visible_leaf_bboxs.clear();
         _leaf_aabb_lock.release();

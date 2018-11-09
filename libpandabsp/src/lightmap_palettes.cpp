@@ -163,19 +163,11 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
 
                 PT( LightmapPaletteDirectory::LightmapPaletteEntry ) entry = new LightmapPaletteDirectory::LightmapPaletteEntry;
 
-                entry->palette_tex = new Texture;
-                entry->palette_tex->set_magfilter( SamplerState::FT_linear );
-                entry->palette_tex->set_minfilter( SamplerState::FT_linear_mipmap_linear );
-
-                entry->bump_palette_array_tex = new Texture;
-                entry->bump_palette_array_tex->setup_2d_texture_array( width, height, NUM_BUMP_VECTS, Texture::T_float, Texture::F_rgb16 );
-                entry->bump_palette_array_tex->set_magfilter( SamplerState::FT_linear );
-                entry->bump_palette_array_tex->set_minfilter( SamplerState::FT_linear_mipmap_linear );
-
                 for ( int n = 0; n < NUM_BUMP_VECTS + 1; n++ )
                 {
                         pal->palette_img[n] = PNMImage( width, height );
                         pal->palette_img[n].fill( 0.0 );
+                        entry->palette_tex[n] = new Texture;
                 }
 
                 for ( size_t j = 0; j < pal->sources.size(); j++ )
@@ -226,14 +218,15 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
 
                 for ( int n = 0; n < NUM_BUMP_VECTS + 1; n++ )
                 {
-                        if ( n == 0 )
-                        {
-                                entry->palette_tex->load( pal->palette_img[n] );
-                        }
-                        else
-                        {
-                                entry->bump_palette_array_tex->load( pal->palette_img[n], n - 1, 0 );
-                        }
+                        entry->palette_tex[n]->load( pal->palette_img[n] );
+                        entry->palette_tex[n]->set_magfilter( SamplerState::FT_linear );
+                        entry->palette_tex[n]->set_minfilter( SamplerState::FT_linear_mipmap_linear );
+#if 1
+                        stringstream ss;
+                        ss << "test_palette_" << n << ".jpg";
+                        entry->palette_tex[n]->write( Filename( ss.str() ) );
+#endif
+
                 }
 
                 dir.entries.push_back( entry );

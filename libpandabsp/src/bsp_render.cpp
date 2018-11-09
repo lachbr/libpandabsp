@@ -15,7 +15,15 @@
 #include <cullHandler.h>
 #include <characterJointEffect.h>
 
+#include <bitset>
+
 #include "shader_generator.h"
+
+static PStatCollector pvs_test_geom_collector( "Cull:BSP:Geom_LeafBoundsIntersect" );
+static PStatCollector pvs_test_node_collector( "Cull:BSP:Node_LeafBoundsIntersect" );
+static PStatCollector pvs_xform_collector( "Cull:BSP:Geom_LeafBoundsXForm" );
+static PStatCollector pvs_node_xform_collector( "Cull:BSP:Node_LeafBoundsXForm" );
+static PStatCollector addfordraw_collector( "Cull:BSP:AddForDraw" );
 
 INLINE void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsgbase )
 {
@@ -34,9 +42,10 @@ INLINE void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBas
 
                 if ( shader_attrib->auto_shader() )
                 {
-                        if ( _state->_generated_shader == nullptr )//||
-                             //_state->_generated_shader_seq != gsg->_generated_shader_seq )
+                        if ( _state->_generated_shader == nullptr ||
+                                _bsp_node_input != nullptr )// && _state->_generated_shader_seq != _bsp_node_input->node_sequence ) )
                         {
+
                                 GeomVertexAnimationSpec spec;
 
                                 // Currently we overload this flag to request vertex animation for the
@@ -48,7 +57,10 @@ INLINE void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBas
 
                                 // Cache the generated ShaderAttrib on the shader state.
                                 _state->_generated_shader = pshgen->synthesize_shader( _state, spec, _bsp_node_input );
-                                //_state->_generated_shader_seq = _generated_shader_seq;
+                                //if ( _bsp_node_input != nullptr )
+                                //{
+                                //        _state->_generated_shader_seq = _bsp_node_input->node_sequence;
+                                //}
                         }
                 }
 
@@ -95,12 +107,45 @@ bool BSPCullTraverser::is_in_view( CullTraverserData &data )
         // View frustum test passed.
         // Now test against PVS (AABBs of all potentially visible leafs).
 
+        pvs_node_xform_collector.start();
         CPT( GeometricBoundingVolume ) bbox = loader->make_net_bounds(
                 data.get_net_transform( this ),
                 data.node()->get_bounds()->as_geometric_bounding_volume() );
+        pvs_node_xform_collector.stop();
 
+        pvs_test_node_collector.start();
         bool ret = loader->pvs_bounds_test( bbox );
+        pvs_test_node_collector.stop();
         return ret;
+}
+
+INLINE bool geom_cull_test( CPT( Geom ) geom, CPT( RenderState ) state, CullTraverserData &data, const GeometricBoundingVolume *&geom_gbv )
+{
+        CPT( BoundingVolume ) geom_volume = geom->get_bounds();
+        geom_gbv = DCAST( GeometricBoundingVolume, geom_volume );
+
+        if ( data._view_frustum != nullptr )
+        {
+                int result = data._view_frustum->contains( geom_gbv );
+                if ( result == BoundingVolume::IF_no_intersection )
+                {
+                        // Cull this Geom.
+                        return false;
+                }
+        }
+        if ( !data._cull_planes->is_empty() )
+        {
+                // Also cull the Geom against the cull planes.
+                int result;
+                data._cull_planes->do_cull( result, state, geom_gbv );
+                if ( result == BoundingVolume::IF_no_intersection )
+                {
+                        // Cull.
+                        return false;
+                }
+        }
+
+        return true;
 }
 
 INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTraverserData &data, nodeshaderinput_t *shinput )
@@ -138,42 +183,28 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                 if ( num_geoms > 1 )
                 {
                         // Cull the individual Geom against the view frustum/leaf AABBs/cull planes.
-                        CPT( BoundingVolume ) geom_volume = geom->get_bounds();
-                        const GeometricBoundingVolume *geom_gbv =
-                                DCAST( GeometricBoundingVolume, geom_volume );
-
-                        if ( data._view_frustum != nullptr )
+                        const GeometricBoundingVolume *geom_gbv;
+                        if ( !geom_cull_test( geom, state, data, geom_gbv ) )
                         {
-                                int result = data._view_frustum->contains( geom_gbv );
-                                if ( result == BoundingVolume::IF_no_intersection )
-                                {
-                                        // Cull this Geom.
-                                        continue;
-                                }
-                        }
-                        if ( !data._cull_planes->is_empty() )
-                        {
-                                // Also cull the Geom against the cull planes.
-                                int result;
-                                data._cull_planes->do_cull( result, state, geom_gbv );
-                                if ( result == BoundingVolume::IF_no_intersection )
-                                {
-                                        // Cull.
-                                        continue;
-                                }
+                                continue;
                         }
 
                         if ( !state->has_attrib( IgnorePVSAttrib::get_class_slot() ) )
                         {
+                                pvs_xform_collector.start();
                                 CPT( GeometricBoundingVolume ) net_geom_volume =
                                         loader->make_net_bounds( net_transform, geom_gbv );
+                                pvs_xform_collector.stop();
 
+                                pvs_test_geom_collector.start();
                                 // Test geom bounds against visible leaf bounding boxes.
                                 if ( !loader->pvs_bounds_test( net_geom_volume ) )
                                 {
                                         // Didn't intersect any, cull.
+                                        pvs_test_geom_collector.stop();
                                         continue;
                                 }
+                                pvs_test_geom_collector.stop();
                         }                        
                 }
 
@@ -184,12 +215,22 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
         }
 }
 
+static PStatCollector wsp_ctest_collector( "Cull:BSP:WorldSpawn:CullTest" );
+static PStatCollector wsp_tuple_collector( "Cull:BSP:WorldSpawn:Tuple" );
+static PStatCollector wsp_bitset_collector( "Cull:BSP:WorldSpawn:BitSetTest" );
+static PStatCollector wsp_record_collector( "Cull:BSP:WorldSpawn:RecordGeom" );
+static PStatCollector wsp_trav_collector( "Cull:BSP:WorldSpawn:TraverseLeafs" );
+static PStatCollector wsp_geom_traverse_collector( "Cull:BSP:WorldSpawn:TraverseLeafGeoms" );
+static PStatCollector wsp_make_cullableobject_collector( "Cull:BSP:WorldSpawn:MakeCullableObject" );
+
 void BSPCullTraverser::traverse_below( CullTraverserData &data )
 {
 
         _nodes_pcollector.add_level( 1 );
         PandaNodePipelineReader *node_reader = data.node_reader();
         PandaNode *node = data.node();
+
+        bool keep_going = true;
 
         // Add the current node to be drawn during the Draw stage.
         if ( !data.is_this_node_hidden( get_camera_mask() ) )
@@ -203,7 +244,77 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                         data._state = data._state->compose( get_depth_offset_state() );
                 }
 
-                if ( node->is_of_type( GeomNode::get_class_type() ) )
+                if ( node->is_of_type( BSPModel::get_class_type() ) &&
+                     node->get_name() == "model-0" )
+                {
+                        wsp_trav_collector.start();
+
+                        CPT( TransformState ) internal_transform = data.get_internal_transform( this );
+
+                        keep_going = false;
+
+                        // We have a specialized way of rendering worldspawn.
+                        // Cuts down on Cull time.
+                        bitset<MAX_MAP_FACES> rendered;
+                        bitset<MAX_MAP_FACES> culled;
+                        size_t num_visible_leafs = _loader->_visible_leafs.size();
+                        for ( size_t i = 0; i < num_visible_leafs; i++ )
+                        {
+                                const int &leaf = _loader->_visible_leafs[i];
+                                //std::cout << "Leaf " << leaf << " is visible." << std::endl;
+                                const pvector<int> &geoms = _loader->_leaf_geom_list[leaf];
+                                size_t num_geoms = geoms.size();
+                                wsp_geom_traverse_collector.start();
+                                for ( size_t j = 0; j < num_geoms; j++ )
+                                {
+                                        const int &geom_id = geoms[j];
+
+                                        wsp_bitset_collector.start();
+                                        if ( culled.test( geom_id ) || rendered.test( geom_id ) )
+                                        {
+                                                // Geom already culled or rendered.
+                                                wsp_bitset_collector.stop();
+                                                continue;
+                                        }
+                                        wsp_bitset_collector.stop();
+
+                                        wsp_tuple_collector.start();
+                                        const BSPLoader::WorldSpawnGeomState &gs =
+                                                _loader->_leaf_geoms[geom_id];
+                                        wsp_tuple_collector.stop();
+                                        //CPT( TransformState ) transform = std::get<2>( _loader->_leaf_geoms[geom_id] );
+
+                                        wsp_ctest_collector.start();
+                                        const GeometricBoundingVolume *geom_gbv;
+                                        if ( !geom_cull_test( gs.geom, gs.state, data, geom_gbv ) )
+                                        {
+                                                // Geom culled away by view frustum or clip planes.
+                                                culled.set( geom_id );
+                                                wsp_ctest_collector.stop();
+                                                continue;
+                                        }
+                                        wsp_ctest_collector.stop();
+
+                                        wsp_make_cullableobject_collector.start();
+                                        // Go ahead and render this worldspawn Geom.
+                                        CullableObject *object = new CullableObject(
+                                                std::move( gs.geom ), std::move( gs.state ),
+                                                internal_transform );
+                                        wsp_make_cullableobject_collector.stop();
+                                        wsp_record_collector.start();
+                                        get_cull_handler()->record_object( object, this );
+                                        _geoms_pcollector.add_level( 1 );
+                                        wsp_record_collector.stop();
+
+                                        // Make sure we don't render this geom again.
+                                        rendered.set( geom_id );
+                                }
+                                wsp_geom_traverse_collector.stop();
+                        }
+
+                        wsp_trav_collector.stop();
+                }
+                else if ( node->is_of_type( GeomNode::get_class_type() ) )
                 {
                         // Check if this node was given set_shader_off()
                         bool disabled = true;
@@ -222,12 +333,20 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
 
                         // HACKHACK:
                         // Needed to test the individual Geoms against the PVS.
+                        addfordraw_collector.start();
                         add_geomnode_for_draw( DCAST( GeomNode, node ), data, shinput );
+                        addfordraw_collector.stop();
                 }
                 else
                 {
                         node->add_for_draw( this, data );
                 }
+        }
+
+        if ( !keep_going )
+        {
+                // Don't continue to the children of this node.
+                return;
         }
 
         // Now visit all the node's children.

@@ -52,7 +52,7 @@ PUBLISHED:
                         }
                 };
 
-                pvector<Input> inputs;
+                pmap<std::string, Input> inputs;
 
         PUBLISHED:
 
@@ -66,7 +66,7 @@ PUBLISHED:
                         Input input;
                         input.input = inp;
                         input.important = important;
-                        inputs.push_back( input );
+                        inputs[inp.get_name()->get_name()] = input;
                 }
 
                 void add_flag( int flag )
@@ -130,10 +130,13 @@ PUBLISHED:
                         {
                                 return inputs.size() < other.inputs.size();
                         }
-                        for ( size_t i = 0; i < inputs.size(); i++ )
+
+                        auto iitr = inputs.begin();
+                        auto iitr2 = other.inputs.begin();
+                        for ( ; iitr != inputs.end(); iitr++, iitr2++ )
                         {
-                                const Input &a = inputs[i];
-                                const Input &b = other.inputs[i];
+                                const Input &a = iitr->second;
+                                const Input &b = iitr2->second;
                                 if ( !a.important )
                                 {
                                         continue;
