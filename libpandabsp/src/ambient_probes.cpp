@@ -248,7 +248,7 @@ INLINE bool AmbientProbeManager::is_sky_visible( const LPoint3 &point )
         findsky_collector.start();
 
         LPoint3 start( ( point + LPoint3( 0, 0, 0.05 ) ) * 16 );
-        LPoint3 end = start - ( _sunlight->direction.get_xyz() * 10000 );
+        LPoint3 end = start + ( _sunlight->direction.get_xyz() * 10000 );
         Ray ray( start, end, LPoint3::zero(), LPoint3::zero() );
         FaceFinder finder( _loader->_bspdata );
         bool ret = !finder.find_intersection( ray );
@@ -441,11 +441,6 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
                 input->sky_idx = sky_idx;
         }
         
-
-        //while ( locallights.size() < MAXLIGHTS )
-        //{
-        //        locallights.push_back( dummy_light );
-        //}
         size_t numlights = input->locallights.size();
         int lights_updated = 0;
 
@@ -491,6 +486,7 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
 
                 LVector3 interp_light( 0 );
 
+                // Check for the same light in the old state to interpolate the color.
                 for ( size_t j = 0; j < oldstate.light_count[0]; j++ )
                 {
                         if ( oldstate.light_ids[j] == light->id )
@@ -498,11 +494,8 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
                                 // This light also existed in the old state.
                                 // Interpolate the color.
                                 LVector3 oldcolor = LMatrix4( oldstate.light_data[j] ).get_row3( 3 );
-                                //data.set_row( 3, light->color - delta );
-                                //std::cout << light->color << " <= " << oldcolor << std::endl;
-                                if ( j < oldstate.active_lights )//j < oldstate.active_lights )
+                                if ( j < oldstate.active_lights )
                                 {
-                                        //std::cout << light->id << " active in both" << std::endl;
                                         // Only record a match if this light was
                                         // also active in the old state.
                                         match[j] = 1;
@@ -514,10 +507,6 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
 
                 LVector3 delta = light->color - interp_light;
                 delta *= atten_factor;
-                if ( delta != 0 )
-                {
-                        //std::cout << "Ramp up light " << light->id << ", " << delta << std::endl;
-                }
                 data.set_row( 3, light->color - delta );
 
                 input->light_data[lights_updated] = data;
@@ -545,8 +534,6 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
                         break;
                 }
 
-                //std::cout << "Ramp down light " << oldstate.light_ids[i] << std::endl;
-
                 LVector3 new_color = color * atten_factor;
 
                 input->light_type[lights_updated] = oldstate.light_type[i];
@@ -560,7 +547,6 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
         }
 
         input->light_count[0] = lights_updated;
-        //std::cout << lights_updated << std::endl;
 
         return input;
 }
