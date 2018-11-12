@@ -76,9 +76,10 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
         _pssm_rig->set_pssm_distance( 200.0 );
         _pssm_rig->set_resolution( pssm_size );
         _pssm_rig->set_use_fixed_film_size( true );
-        _pssm_rig->reparent_to( _render );
+        
         if ( want_pssm )
         {
+                _pssm_rig->reparent_to( _render );
                 _pssm_split_texture_array = new Texture( "pssmSplitTextureArray" );
                 _pssm_split_texture_array->setup_2d_texture_array( pssm_size, pssm_size, pssm_splits, Texture::T_float, Texture::F_depth_component32 );
                 _pssm_split_texture_array->set_clear_color( LVecBase4( 1.0 ) );
@@ -176,7 +177,7 @@ AsyncTask::DoneStatus PSSMShaderGenerator::update_pssm( GenericAsyncTask *task, 
         return AsyncTask::DS_cont;
 }
 
-INLINE void apply_material_inputs( CPT( RenderAttrib ) shattr, BSPMaterial *bspmat )
+INLINE CPT( RenderAttrib ) apply_material_inputs( CPT( RenderAttrib ) shattr, BSPMaterial *bspmat )
 {
         if ( bspmat != nullptr )
         {
@@ -189,48 +190,38 @@ INLINE void apply_material_inputs( CPT( RenderAttrib ) shattr, BSPMaterial *bspm
                         shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( mat_inps[i] );
                 }
         }
+        return shattr;
 }
 
 CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *rs,
                                                             const GeomVertexAnimationSpec &anim,
                                                             nodeshaderinput_t *bsp_node_input )
 {
-        CPT( ShaderAttrib ) shattr = nullptr;
-        if ( rs->_generated_shader != nullptr && bsp_node_input != nullptr )
-        {
-                shattr = DCAST( ShaderAttrib, rs->_generated_shader );
-        }
-        else
-        {
-                shattr = synthesize_shader( rs, anim );
-        }
-
-        nassertr( shattr != nullptr, nullptr );
-
-        CPT( RenderAttrib ) attr = shattr;
+        CPT( ShaderAttrib ) shattr = synthesize_shader( rs, anim );
 
         if ( bsp_node_input != nullptr )
         {
-                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightCount", bsp_node_input->light_count ) );
-                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightData", bsp_node_input->light_data ) );
-                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightTypes", bsp_node_input->light_type ) );
-                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "ambientCube", bsp_node_input->ambient_cube ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightCount", bsp_node_input->light_count ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData", bsp_node_input->light_data ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightTypes", bsp_node_input->light_type ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambientCube", bsp_node_input->ambient_cube ) ) );
         }
         else
         {
                 // Fill in default empty values so we don't crash.
-                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightCount", PTA_int::empty_array( 1 ) ) );
-                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightData", PTA_LMatrix4::empty_array( MAXLIGHTS ) ) );
-                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "lightTypes", PTA_int::empty_array( MAXLIGHTS ) ) );
-                attr = DCAST( ShaderAttrib, attr )->set_shader_input( ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightCount", PTA_int::empty_array( 1 ) ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightTypes", PTA_int::empty_array( MAX_TOTAL_LIGHTS ) ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ) ) );
         }
 
-        return DCAST( ShaderAttrib, attr );
+        return shattr;
 }
 
 CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *rs,
                                                             const GeomVertexAnimationSpec &anim )
 {
+
         findmatshader_collector.start();
 
         // First figure out which shader to use.
@@ -246,6 +237,14 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                 bspmat = DCAST( BSPMaterial, mat );
                 shader_name = bspmat->get_shader();
         }
+
+#if 0
+        if ( shader_name == DEFAULT_SHADER )
+        {
+                int *ptr = nullptr;
+                *ptr = 1;
+        }
+#endif
 
         if ( _shaders.find( shader_name ) == _shaders.end() )
         {
@@ -281,7 +280,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                 if ( itr != spec->_generated_shaders.end() )
                 {
                         CPT( RenderAttrib ) shattr = itr->second;
-                        apply_material_inputs( shattr, bspmat );
+                        shattr = apply_material_inputs( shattr, bspmat );
 
                         lookup_collector.stop();
                         return DCAST( ShaderAttrib, shattr );
@@ -350,7 +349,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         spec->_generated_shaders[permutations] = attr;
 #endif
 
-        apply_material_inputs( shattr, bspmat );
+        shattr = apply_material_inputs( shattr, bspmat );
         attr = DCAST( ShaderAttrib, shattr );
 
         synthesize_collector.stop();

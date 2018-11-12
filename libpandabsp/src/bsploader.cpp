@@ -948,7 +948,7 @@ void BSPLoader::make_faces()
                         faceroot.wrt_reparent_to( modelroot );
                         if ( Texture::has_alpha( tex->get_format() ) )
                         {
-                                faceroot.set_transparency( TransparencyAttrib::M_multisample, 1 );
+                                faceroot.set_transparency( TransparencyAttrib::M_alpha, 1 );
                         }
 
                         PT( BSPMaterial ) face_mat = new BSPMaterial;
@@ -1236,15 +1236,20 @@ void BSPLoader::load_static_props()
                                 GNWG_result res = get_geomnode_with_geom( propmdl, geom );
                                 PT( Geom ) mod_geom = res.geomnode->modify_geom( res.geomidx );
 
-                                if ( lightsrc != nullptr && res.geomnode->get_name() == "__lightsource__" )
+                                //if ( lightsrc != nullptr && res.geomnode->get_name() == "__lightsource__" )
+                                //{
+                                //        bspfile_cat.info()
+                                //                << "Applying color " << lightsrc_col << " to vertices on __lightsource__\n";
+                                //        for ( int j = 0; j < mod_vdata->get_num_rows(); j++ )
+                                //        {
+                                //                color_mod.set_row( j );
+                                //                color_mod.set_data4f( lightsrc_col );
+                                //        }
+                                //}
+
+                                if ( res.geomnode->get_name() == "__lightsource__" )
                                 {
-                                        bspfile_cat.info()
-                                                << "Applying color " << lightsrc_col << " to vertices on __lightsource__\n";
-                                        for ( int j = 0; j < mod_vdata->get_num_rows(); j++ )
-                                        {
-                                                color_mod.set_row( j );
-                                                color_mod.set_data4f( lightsrc_col );
-                                        }
+                                        continue;
                                 }
 
                                 mod_geom->set_vertex_data( mod_vdata );
@@ -1938,23 +1943,13 @@ void BSPLoader::cleanup()
 
                         for ( int i = 0; i < npc.get_num_paths(); i++ )
                         {
-                                // If the net state at this node has no shaderAttrib or autoShader,
-                                // we know for a fact that we didn't generate a shader at any of the Geoms.
-                                CPT( RenderState ) net_state = npc[i].get_net_state();
-                                if ( !net_state->has_attrib( ShaderAttrib::get_class_slot() ) )
-                                {
-                                        continue;
-                                }
-                                else if ( !DCAST( ShaderAttrib, net_state->get_attrib( ShaderAttrib::get_class_slot() ) )->auto_shader() )
-                                {
-                                        continue;
-                                }
-
                                 PT( GeomNode ) gn = DCAST( GeomNode, npc[i].node() );
                                 for ( int j = 0; j < gn->get_num_geoms(); j++ )
                                 {
                                         CPT( RenderState ) state = gn->get_geom_state( j );
-                                        if ( state->_generated_shader != nullptr )
+                                        const ShaderAttrib *geom_shattr;
+                                        state->get_attrib_def( geom_shattr );
+                                        if ( ( geom_shattr->auto_shader() && geom_shattr->get_flag( BSPSHADERFLAG_AUTO ) ) )
                                         {
                                                 // We generated a shader for this Geom, remove it.
                                                 state = state->remove_attrib( ShaderAttrib::get_class_slot() );
@@ -1979,6 +1974,8 @@ void BSPLoader::cleanup()
         _model_roots.clear();
 
         _materials.clear();
+
+        _geom_shader_cache.clear();
 
         _leaf_pvs.clear();
 

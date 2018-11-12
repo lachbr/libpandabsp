@@ -340,6 +340,9 @@ private:
         PT( GenericAsyncTask ) _update_task;
         UpdateSeq _generated_shader_seq;
 
+        typedef SimpleHashMap<const Geom *, CPT( RenderAttrib ), pointer_hash> geomshadercache_t;
+        geomshadercache_t _geom_shader_cache;
+
         struct WorldSpawnGeomState
         {
                 CPT( Geom ) geom;
@@ -360,6 +363,7 @@ private:
         friend class AmbientProbeManager;
         friend class BSPCullTraverser;
         friend class BSPRender;
+        friend class BSPCullableObject;
 
         static BSPLoader *_global_ptr;
 

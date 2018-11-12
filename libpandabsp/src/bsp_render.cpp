@@ -24,9 +24,16 @@ static PStatCollector pvs_test_node_collector( "Cull:BSP:Node_LeafBoundsIntersec
 static PStatCollector pvs_xform_collector( "Cull:BSP:Geom_LeafBoundsXForm" );
 static PStatCollector pvs_node_xform_collector( "Cull:BSP:Node_LeafBoundsXForm" );
 static PStatCollector addfordraw_collector( "Cull:BSP:AddForDraw" );
+static PStatCollector findgeomshader_collector( "Cull:BSP:FindGeomShader" );
 
-INLINE void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsgbase )
+CullableObject *BSPCullableObject::make_copy()
 {
+        return new BSPCullableObject( *this );
+}
+
+void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsgbase )
+{
+#if 1
         GraphicsStateGuardian *gsg = DCAST( GraphicsStateGuardian, gsgbase );
         ShaderGenerator *shgen = gsg->get_shader_generator();
         if ( shgen == nullptr )
@@ -42,10 +49,14 @@ INLINE void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBas
 
                 if ( shader_attrib->auto_shader() )
                 {
-                        if ( _state->_generated_shader == nullptr ||
-                                _bsp_node_input != nullptr )// && _state->_generated_shader_seq != _bsp_node_input->node_sequence ) )
-                        {
+                        BSPLoader *loader = BSPLoader::get_global_ptr();
 
+                        CPT( RenderAttrib ) generated_shader = nullptr;
+                        findgeomshader_collector.start();
+                        int itr = loader->_geom_shader_cache.find( _geom );
+                        findgeomshader_collector.stop();
+                        if ( itr == -1 || _state->_generated_shader == nullptr )
+                        {
                                 GeomVertexAnimationSpec spec;
 
                                 // Currently we overload this flag to request vertex animation for the
@@ -56,15 +67,32 @@ INLINE void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBas
                                 }
 
                                 // Cache the generated ShaderAttrib on the shader state.
-                                _state->_generated_shader = pshgen->synthesize_shader( _state, spec, _bsp_node_input );
-                                //if ( _bsp_node_input != nullptr )
-                                //{
-                                //        _state->_generated_shader_seq = _bsp_node_input->node_sequence;
-                                //}
+                                generated_shader = pshgen->synthesize_shader( _state, spec, _bsp_node_input );
+                                generated_shader = DCAST( ShaderAttrib, generated_shader )->set_flag( BSPSHADERFLAG_AUTO, true );
+                                loader->_geom_shader_cache[_geom] = generated_shader;
                         }
+                        else
+                        {
+                                generated_shader = loader->_geom_shader_cache.get_data( itr );
+                        }
+
+                        nassertv( generated_shader != nullptr );
+
+                        //if ( _bsp_node_input != nullptr )
+                        //{
+                        //        
+                        //        std::cout << _state << " => " << _bsp_node_input->node_sequence << std::endl;
+                        //}
+
+                        //generated_shader = DCAST( ShaderAttrib, generated_shader )->set_shader_auto();
+
+                        _state = _state->set_attrib( generated_shader );
+                        _state->_generated_shader = generated_shader;
+                        
                 }
 
         }
+#endif
 }
 
 TypeHandle IgnorePVSAttrib::_type_handle;
@@ -208,6 +236,62 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                         }                        
                 }
 
+#if 0
+
+                bool updated_geom_state = false;
+
+                CPT( ShaderAttrib ) gs_shattr = nullptr;
+                geom_state->get_attrib( gs_shattr );
+                const ShaderAttrib *shattr = nullptr;
+                state->get_attrib_def( shattr );
+                if ( shattr->auto_shader() )
+                {
+                        if ( ( gs_shattr == nullptr || ( gs_shattr != nullptr && gs_shattr->auto_shader() ) ) && geom_state->_generated_shader == nullptr )
+                        {
+                                GeomVertexAnimationSpec spec;
+
+                                // Currently we overload this flag to request vertex animation for the
+                                // shader generator.
+                                if ( shattr->get_flag( ShaderAttrib::F_hardware_skinning ) )
+                                {
+                                        spec.set_hardware( 4, true );
+                                }
+
+                                BSPLoader *loader = BSPLoader::get_global_ptr();
+                                ShaderGenerator *shgen = loader->_win->get_gsg()->get_shader_generator();
+                                if ( shgen != nullptr && shgen->is_of_type( PSSMShaderGenerator::get_class_type() ) )
+                                {
+                                        std::cout << "Generating shader for geom, " << shinput << std::endl;
+
+                                        PSSMShaderGenerator *pshgen = DCAST( PSSMShaderGenerator, shgen );
+                                        gs_shattr = pshgen->synthesize_shader( state, spec, shinput );
+                                        gs_shattr = DCAST( ShaderAttrib, gs_shattr->set_flag( BSPSHADERFLAG_AUTO, true ) );
+                                        //gs_shattr = DCAST( ShaderAttrib, gs_shattr->set_shader_auto() );
+                                        geom_state = geom_state->add_attrib( gs_shattr, 1 );
+                                        geom_state->_generated_shader = gs_shattr;
+                                        //geom_state->_generated_shader_seq = shinput->node_sequence;
+                                        node->set_geom_state( i, geom_state );
+
+                                        updated_geom_state = true;
+                                }
+                        }
+                }
+
+                if ( updated_geom_state )
+                {
+                        // Compose the updated state from the root of the graph to this Geom.
+                        state = data._state->compose( geom_state );
+                        state->_generated_shader = gs_shattr;
+                        //state->_generated_shader_seq = shinput->node_sequence;
+                }
+
+                //if ( gs_shattr != nullptr && gs_shattr->auto_shader() && !gs_shattr->has_shader_input( "ambientCube" ) )
+                //{
+                //        std::cout << "Skipping geom " << geom << " with no ambientCube???" << std::endl;
+                //        continue;
+                //}
+                //std::cout << gs_shattr->has_shader_input( "ambientCube" ) << std::endl;
+#endif
                 BSPCullableObject *object =
                         new BSPCullableObject( std::move( geom ), std::move( state ), internal_transform, shinput );
                 get_cull_handler()->record_object( object, this );
@@ -324,7 +408,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                                 disabled = !shattr->auto_shader();
                         }
 
-                        nodeshaderinput_t *shinput = nullptr;
+                        PT( nodeshaderinput_t ) shinput = nullptr;
                         if ( !disabled )
                         {
                                 // Update the node's ambient probe stuff:

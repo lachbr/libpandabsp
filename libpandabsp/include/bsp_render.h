@@ -17,6 +17,12 @@
 #include <cullTraverser.h>
 #include <cullableObject.h>
 
+// Appends onto ShaderAttrib flags which are already 0-3
+enum
+{
+        BSPSHADERFLAG_AUTO = 4,
+};
+
 class BSPLoader;
 struct nodeshaderinput_t;
 
@@ -33,7 +39,7 @@ public:
                                   CPT( TransformState ) internal_transform,
                                   nodeshaderinput_t *bsp_node_input ) :
                 CullableObject( std::move(geom), std::move(state), internal_transform ),
-                _bsp_node_input( std::move(bsp_node_input) )
+                _bsp_node_input( bsp_node_input )
         {
         }
 
@@ -49,7 +55,9 @@ public:
                 _bsp_node_input = copy._bsp_node_input;
         }
 
-        INLINE virtual void ensure_generated_shader( GraphicsStateGuardianBase *gsgbase );
+        virtual CullableObject *make_copy();
+
+        virtual void ensure_generated_shader( GraphicsStateGuardianBase *gsgbase );
 
         PT( nodeshaderinput_t ) _bsp_node_input;
 

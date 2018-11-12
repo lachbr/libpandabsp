@@ -172,6 +172,8 @@ ShaderSpec::Permutations VertexLitGenericSpec::setup_permutations( const RenderS
                 }
         }
 
+        BSPLoader *bsploader = BSPLoader::get_global_ptr();
+
         // Store the material flags (not the material values itself).
         const MaterialAttrib *material;
         rs->get_attrib_def( material );
@@ -205,7 +207,8 @@ ShaderSpec::Permutations VertexLitGenericSpec::setup_permutations( const RenderS
                         {
                                 result.permutations["MAT_LIGHTWARP"] = "1";
                         }
-                        if ( mat->get_shade_model() == Material::SM_half_lambert )
+                        if ( mat->get_shade_model() == Material::SM_half_lambert ||
+                             bsploader->has_active_level() ) // all dynamic objects in BSP levels are half lambert
                         {
                                 result.permutations["MAT_HALFLAMBERT"] = "1";
                         }
@@ -215,8 +218,6 @@ ShaderSpec::Permutations VertexLitGenericSpec::setup_permutations( const RenderS
                         }
                 }
         }
-
-        BSPLoader *bsploader = BSPLoader::get_global_ptr();
 
         if ( !bsploader->has_active_level() )
         {
@@ -247,7 +248,7 @@ ShaderSpec::Permutations VertexLitGenericSpec::setup_permutations( const RenderS
                                 result.permutations["NORMAL_OFFSET_SCALE"] = normal_offset_scale.get_string_value();
 
                                 stringstream ss;
-                                ss << ( 1.0 / pssm_size ) * softness_factor;
+                                ss << ( 1.0 / pssm_size.get_value() ) * softness_factor.get_value();
                                 result.permutations["SHADOW_BLUR"] = ss.str();
 
                                 result.add_input( ShaderInput( "pssmSplitSampler", generator->get_pssm_array_texture() ) );
@@ -275,16 +276,24 @@ ShaderSpec::Permutations VertexLitGenericSpec::setup_permutations( const RenderS
         }
         else
         {
-                need_eye_normal = true;
-                need_eye_position = true;
-                need_world_normal = true; // for ambient cube
+                const LightAttrib *la;
+                rs->get_attrib_def( la );
 
-                result.permutations["LIGHTING"] = "1";
-                result.permutations["BSP_LIGHTING"] = "1";
-                stringstream nlss;
-                nlss << MAXLIGHTS;
-                result.permutations["NUM_LIGHTS"] = nlss.str();
-                result.permutations["AMBIENT_CUBE"] = "1";
+                // Make sure there is no setLightOff()
+                if ( !la->has_all_off() )
+                {
+                        need_eye_normal = true;
+                        need_eye_position = true;
+                        need_world_normal = true; // for ambient cube
+
+                        result.permutations["LIGHTING"] = "1";
+                        result.permutations["BSP_LIGHTING"] = "1";
+                        stringstream nlss;
+                        nlss << MAX_TOTAL_LIGHTS;
+                        result.permutations["NUM_LIGHTS"] = nlss.str();
+                        result.permutations["AMBIENT_CUBE"] = "1";
+                }
+                
         }
 
         const LightRampAttrib *lra;
@@ -349,7 +358,6 @@ ShaderSpec::Permutations VertexLitGenericSpec::setup_permutations( const RenderS
                 {
                         result.permutations["SPHEREMAP"] = "1";
                         result.add_input( ShaderInput( "sphereSampler", tex ) );
-                        need_tbn = true;
                         need_eye_position = true;
                         need_eye_normal = true;
                 }

@@ -29,11 +29,19 @@
 #include <modelNode.h>
 #include <pstatTimer.h>
 
+#include <bitset>
+
 #include "bsp_trace.h"
 
 static PStatCollector findsky_collector( "AmbientProbes:FindLight/Sky" );
 static PStatCollector updatenode_collector( "AmbientProbes:UpdateNodes" );
 static PStatCollector closestsample_collector( "AmbientProbes:FindClosestSample" );
+
+static ConfigVariableBool cfg_lightaverage
+( "light-average", true, "Activates/deactivate light averaging" );
+
+static ConfigVariableDouble cfg_lightinterp
+( "light-lerp-speed", 5.0, "Controls the speed of light interpolation, 0 turns off interpolation" );
 
 using std::cos;
 using std::sin;
@@ -48,6 +56,7 @@ AmbientProbeManager::AmbientProbeManager() :
         _loader( nullptr ),
         _sunlight( nullptr )
 {
+        dummy_light->id = -1;
         dummy_light->leaf = 0;
         dummy_light->type = 0;
 }
@@ -106,6 +115,7 @@ void AmbientProbeManager::process_ambient_probes()
                 if ( !strncmp( classname, "light", 5 ) )
                 {
                         PT( light_t ) light = new light_t;
+                        light->id = entnum;
 
                         vec3_t pos;
                         GetVectorForKey( ent, "origin", pos );
@@ -130,6 +140,11 @@ void AmbientProbeManager::process_ambient_probes()
                                 angles[1] = pitch;
                                 angles[0] = temp;
                                 VectorCopy( angles_to_vector( angles ), light->direction );
+                                if ( light->type == LIGHTTYPE_SUN )
+                                {
+                                        // Flip light direction to match Panda DirectionalLights.
+                                        light->direction = -light->direction;
+                                }
                                 light->direction[3] = 0.0;
                         }
 
@@ -258,26 +273,27 @@ INLINE bool AmbientProbeManager::is_light_visible( const LPoint3 &point, const l
 
 INLINE void AmbientProbeManager::garbage_collect_cache()
 {
-        for ( auto itr = _pos_cache.cbegin(); itr != _pos_cache.cend(); )
+        for ( size_t i = 0; i < _pos_cache.size(); )
         {
-                if ( itr->first.was_deleted() )
+                if ( _pos_cache.get_key( i ).was_deleted() )
                 {
-                        _pos_cache.erase( itr++ );
+                        _pos_cache.remove_element( i++ );
                 }
                 else
                 {
-                        itr++;
+                        i++;
                 }
         }
 
-        for ( auto itr = _node_data.cbegin(); itr != _node_data.cend(); )
+        for ( size_t i = 0; i < _node_data.size(); )
         {
-                if ( itr->first.was_deleted() )
+                if ( _node_data.get_key( i ).was_deleted() )
                 {
-                        _node_data.erase( itr++ );
-                } else
+                        _node_data.remove_element( i++ );
+                }
+                else
                 {
-                        itr++;
+                        i++;
                 }
         }
 }
@@ -292,7 +308,7 @@ void AmbientProbeManager::consider_garbage_collect()
         }
 }
 
-nodeshaderinput_t *AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) curr_trans, CPT(RenderState) net_state )
+PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) curr_trans, CPT(RenderState) net_state )
 {
         PStatTimer timer( updatenode_collector );
 
@@ -302,7 +318,7 @@ nodeshaderinput_t *AmbientProbeManager::update_node( PandaNode *node, CPT( Trans
         }
 
         bool new_instance = false;
-        if ( _node_data.find( node ) == _node_data.end() )
+        if ( _node_data.find( node ) == -1 )
         {
                 // This is a new node we have encountered.
                 new_instance = true;
@@ -318,7 +334,7 @@ nodeshaderinput_t *AmbientProbeManager::update_node( PandaNode *node, CPT( Trans
         }
         else
         {
-                input = _node_data.at( node );
+                input = _node_data[node];
         }
 
         if ( input == nullptr )
@@ -327,7 +343,7 @@ nodeshaderinput_t *AmbientProbeManager::update_node( PandaNode *node, CPT( Trans
         }
 
         // Is it even necessary to update anything?
-        CPT( TransformState ) prev_trans = _pos_cache.at( node );
+        CPT( TransformState ) prev_trans = _pos_cache[node];
         LVector3 pos_delta( 0 );
         if ( prev_trans != nullptr )
         {
@@ -338,17 +354,38 @@ nodeshaderinput_t *AmbientProbeManager::update_node( PandaNode *node, CPT( Trans
                 _pos_cache[node] = curr_trans;
         }
 
-        if ( pos_delta.length() >= EQUAL_EPSILON || new_instance )
-        {
-                LPoint3 curr_net = curr_trans->get_pos();
-                int leaf_id = _loader->find_leaf( curr_net );
+        bool pos_changed = pos_delta.length() >= EQUAL_EPSILON || new_instance;
 
+        double now = ClockObject::get_global_clock()->get_frame_time();
+        float dt = now - input->lighting_time;
+        if ( dt <= 0.0 )
+        {
+                dt = 0.0;
+        }
+        else
+        {
+                input->lighting_time = now;
+        }
+
+        float atten_factor = exp( -cfg_lightinterp.get_value() * dt );
+
+        LPoint3 curr_net = curr_trans->get_pos();
+        int leaf_id = _loader->find_leaf( curr_net );
+
+        if ( pos_changed )
+        {
                 // Update ambient cube
                 if ( _probes[leaf_id].size() > 0 )
                 {
                         ambientprobe_t *sample = find_closest_sample( leaf_id, curr_net );
+                        input->amb_probe = sample;
 
 #ifdef VISUALIZE_AMBPROBES
+                        std::cout << "Box colors:" << std::endl;
+                        for ( int i = 0; i < 6; i++ )
+                        {
+                                std::cout << "\t" << sample->cube[i] << std::endl;
+                        }
                         for ( size_t j = 0; j < _probes[leaf_id].size(); j++ )
                         {
                                 _probes[leaf_id][j].visnode.set_color_scale( LColor( 0, 0, 1, 1 ), 1 );
@@ -358,11 +395,30 @@ nodeshaderinput_t *AmbientProbeManager::update_node( PandaNode *node, CPT( Trans
                                 sample->visnode.set_color_scale( LColor( 0, 1, 0, 1 ), 1 );
                         }
 #endif
-                        for ( int i = 0; i < 6; i++ )
-                        {
-                                input->ambient_cube[i] = sample->cube[i];
-                        }
                 }
+
+                // Cache the last position.
+                _pos_cache[node] = curr_trans;
+        }
+
+        if ( input->amb_probe )
+        {
+                // Interpolate ambient probe colors
+                LVector3 delta( 0 );
+                for ( int i = 0; i < 6; i++ )
+                {
+                        if ( cfg_lightaverage.get_value() )
+                        {
+                                delta = input->amb_probe->cube[i] - input->ambient_cube[i];
+                                delta *= atten_factor;
+                        }
+                        input->ambient_cube[i] = input->amb_probe->cube[i] - delta;
+                }
+        }
+
+        if ( pos_changed )
+        {
+                input->occluded_lights.reset();
 
                 // Update local light sources
                 pvector<light_t *> locallights = _light_pvs[leaf_id];
@@ -381,38 +437,130 @@ nodeshaderinput_t *AmbientProbeManager::update_node( PandaNode *node, CPT( Trans
                         sky_idx = 0;
                 }
 
-                while ( locallights.size() < MAXLIGHTS )
+                input->locallights = locallights;
+                input->sky_idx = sky_idx;
+        }
+        
+
+        //while ( locallights.size() < MAXLIGHTS )
+        //{
+        //        locallights.push_back( dummy_light );
+        //}
+        size_t numlights = input->locallights.size();
+        int lights_updated = 0;
+
+        int match[MAX_TOTAL_LIGHTS];
+        memset( match, 0, sizeof( int ) * MAX_TOTAL_LIGHTS );
+
+        nodeshaderinput_t oldstate = nodeshaderinput_t( *input );
+        oldstate.local_object();
+
+        input->active_lights = 0;
+
+        // Add lights for new state
+        for ( size_t i = 0; i < numlights && lights_updated < MAX_ACTIVE_LIGHTS; i++ )
+        {
+                light_t *light = input->locallights[i];
+
+                bool occluded = false;
+
+                if ( pos_changed )
                 {
-                        locallights.push_back( dummy_light );
-                }
-                size_t numlights = locallights.size();
-                int lights_updated = 0;
-                for ( size_t i = 0; i < numlights && lights_updated < MAXLIGHTS; i++ )
-                {
-                        light_t *light = locallights[i];
-                        if ( i != sky_idx && !is_light_visible( curr_net, light ) )
+                        if ( i != input->sky_idx && !is_light_visible( curr_net, light ) )
                         {
                                 // The light is occluded, don't add it.
-                                continue;
+                                input->occluded_lights.set( i );
+                                occluded = true;
                         }
-
-                        input->light_type[lights_updated] = light->type;
-
-                        // Pack the light data into a 4x4 matrix.
-                        LMatrix4f data;
-                        data.set_row( 0, light->pos );
-                        data.set_row( 1, light->direction );
-                        data.set_row( 2, light->atten );
-                        data.set_row( 3, light->color );
-                        input->light_data[lights_updated] = data;
-
-                        lights_updated++;
                 }
-                input->light_count[0] = lights_updated;
 
-                // Cache the last position.
-                _pos_cache[node] = curr_trans;
+                if ( occluded || input->occluded_lights.test( i ) )
+                {
+                        // light occluded
+                        continue;
+                }
+
+                input->light_type[lights_updated] = light->type;
+
+                // Pack the light data into a 4x4 matrix.
+                LMatrix4f data;
+                data.set_row( 0, LVector4( light->pos, 1.0 ) );
+                data.set_row( 1, light->direction );
+                data.set_row( 2, light->atten );
+                data.set_row( 3, light->color );
+
+                LVector3 interp_light( 0 );
+
+                for ( size_t j = 0; j < oldstate.light_count[0]; j++ )
+                {
+                        if ( oldstate.light_ids[j] == light->id )
+                        {
+                                // This light also existed in the old state.
+                                // Interpolate the color.
+                                LVector3 oldcolor = LMatrix4( oldstate.light_data[j] ).get_row3( 3 );
+                                //data.set_row( 3, light->color - delta );
+                                //std::cout << light->color << " <= " << oldcolor << std::endl;
+                                if ( j < oldstate.active_lights )//j < oldstate.active_lights )
+                                {
+                                        //std::cout << light->id << " active in both" << std::endl;
+                                        // Only record a match if this light was
+                                        // also active in the old state.
+                                        match[j] = 1;
+                                }
+                                interp_light = oldcolor;
+                                break;
+                        }
+                }
+
+                LVector3 delta = light->color - interp_light;
+                delta *= atten_factor;
+                if ( delta != 0 )
+                {
+                        //std::cout << "Ramp up light " << light->id << ", " << delta << std::endl;
+                }
+                data.set_row( 3, light->color - delta );
+
+                input->light_data[lights_updated] = data;
+                input->light_ids[lights_updated] = light->id;
+                input->active_lights++;
+
+                lights_updated++;
         }
+
+        // Fade out any lights that were removed in the new state
+        for ( size_t i = 0; i < oldstate.light_count[0]; i++ )
+        {
+                if ( match[i] == 1 )
+                {
+                        continue;
+                }
+                LVector3 color = LMatrix4( oldstate.light_data[i] ).get_row3( 3 );
+                if ( color.length_squared() < 1.0 )
+                {
+                        continue;
+                }
+
+                if ( lights_updated >= MAX_TOTAL_LIGHTS )
+                {
+                        break;
+                }
+
+                //std::cout << "Ramp down light " << oldstate.light_ids[i] << std::endl;
+
+                LVector3 new_color = color * atten_factor;
+
+                input->light_type[lights_updated] = oldstate.light_type[i];
+                // Pack the light data into a 4x4 matrix.
+                LMatrix4f data = oldstate.light_data[i];
+                data.set_row( 3, new_color );
+                input->light_data[lights_updated] = data;
+                input->light_ids[lights_updated] = oldstate.light_ids[i];
+
+                lights_updated++;
+        }
+
+        input->light_count[0] = lights_updated;
+        //std::cout << lights_updated << std::endl;
 
         return input;
 }
