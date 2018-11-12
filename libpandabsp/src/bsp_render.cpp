@@ -86,6 +86,12 @@ void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsgb
 
                         //generated_shader = DCAST( ShaderAttrib, generated_shader )->set_shader_auto();
 
+                        // Cache the shader on the old state
+                        _state->_generated_shader = generated_shader;
+
+                        // Now make a unique attrib, avoids composition cache.
+                        // The composition cache will unify states and result in shared bsp node inputs,
+                        // which is bad.
                         _state = _state->set_attrib( generated_shader );
                         _state->_generated_shader = generated_shader;
                         
