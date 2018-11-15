@@ -28,14 +28,25 @@
 #include <virtualFileSystem.h>
 #include <modelNode.h>
 #include <pstatTimer.h>
+#include <lineSegs.h>
 
 #include <bitset>
 
 #include "bsp_trace.h"
 
 static PStatCollector findsky_collector( "AmbientProbes:FindLight/Sky" );
-static PStatCollector updatenode_collector( "AmbientProbes:UpdateNodes" );
-static PStatCollector closestsample_collector( "AmbientProbes:FindClosestSample" );
+static PStatCollector updatenode_collector              ( "AmbientProbes:UpdateNodes" );
+static PStatCollector finddata_collector                ( "AmbientProbes:UpdateNodes:FindNodeData" );
+static PStatCollector update_ac_collector               ( "AmbientProbes:UpdateNodes:UpdateAmbientCube" );
+static PStatCollector update_locallights_collector      ( "AmbientProbes:UpdateNodes:UpdateLocalLights" );
+static PStatCollector interp_ac_collector               ( "AmbientProbes:UpdateNodes:InterpAmbientCube" );
+static PStatCollector copystate_collector               ( "AmbientProbes:UpdateNodes:CopyState" );
+static PStatCollector addlights_collector               ( "AmbientProbes:UpdateNodes:AddLights" );
+static PStatCollector fadelights_collector              ( "AmbientProbes:UpdateNodes:FadeLights" );
+static PStatCollector xformlight_collector( "AmbientProbes:XformLight" );
+
+static LineSegs dbg_trace_segs;
+static NodePath dbg_trace_np( "dbg_trace" );
 
 static ConfigVariableBool cfg_lightaverage
 ( "light-average", true, "Activates/deactivate light averaging" );
@@ -245,29 +256,42 @@ INLINE bool AmbientProbeManager::is_sky_visible( const LPoint3 &point )
                 return false;
         }
 
-        findsky_collector.start();
+        //findsky_collector.start();
 
         LPoint3 start( ( point + LPoint3( 0, 0, 0.05 ) ) * 16 );
         LPoint3 end = start + ( _sunlight->direction.get_xyz() * 10000 );
         Ray ray( start, end, LPoint3::zero(), LPoint3::zero() );
         FaceFinder finder( _loader->_bspdata );
         bool ret = !finder.find_intersection( ray );
+        //Trace trace;
+        //CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _loader->_bspdata, trace );
 
-        findsky_collector.stop();
+        //findsky_collector.stop();
 
+        //return !trace.has_hit();
         return ret;
 }
 
 INLINE bool AmbientProbeManager::is_light_visible( const LPoint3 &point, const light_t *light )
 {
-        findsky_collector.start();
+        //findsky_collector.start();
 
         Ray ray( ( point + LPoint3( 0, 0, 0.05 ) ) * 16, light->pos * 16, LPoint3::zero(), LPoint3::zero() );
         FaceFinder finder( _loader->_bspdata );
         bool ret = !finder.find_intersection( ray );
+        //Trace trace;
+        //CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _loader->_bspdata, trace );
 
-        findsky_collector.stop();
+        //if ( !dbg_trace_np.is_empty() )
+        //        dbg_trace_np.remove_node();
+        //dbg_trace_segs.set_color( LColor( 1.0, 0.0, 0.0, 1.0 ) );
+        //dbg_trace_segs.move_to( ray.start / 16 );
+        //dbg_trace_segs.draw_to( ray.end / 16 );
+        
 
+        //findsky_collector.stop();
+
+        //return !trace.has_hit();
         return ret;
 }
 
@@ -308,7 +332,8 @@ void AmbientProbeManager::consider_garbage_collect()
         }
 }
 
-PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( TransformState ) curr_trans, CPT(RenderState) net_state )
+PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
+                                                          const TransformState *curr_trans )
 {
         PStatTimer timer( updatenode_collector );
 
@@ -317,6 +342,7 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
                 return nullptr;
         }
 
+        finddata_collector.start();
         bool new_instance = false;
         if ( _node_data.find( node ) == -1 )
         {
@@ -336,6 +362,8 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
         {
                 input = _node_data[node];
         }
+
+        finddata_collector.stop();
 
         if ( input == nullptr )
         {
@@ -372,6 +400,7 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
         LPoint3 curr_net = curr_trans->get_pos();
         int leaf_id = _loader->find_leaf( curr_net );
 
+        update_ac_collector.start();
         if ( pos_changed )
         {
                 // Update ambient cube
@@ -400,14 +429,16 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
                 // Cache the last position.
                 _pos_cache[node] = curr_trans;
         }
+        update_ac_collector.stop();
 
+        interp_ac_collector.start();
         if ( input->amb_probe )
         {
                 // Interpolate ambient probe colors
                 LVector3 delta( 0 );
                 for ( int i = 0; i < 6; i++ )
                 {
-                        if ( cfg_lightaverage.get_value() )
+                        if ( cfg_lightaverage.get_value() && input->amb_probe->cube[i] != input->ambient_cube[i] )
                         {
                                 delta = input->amb_probe->cube[i] - input->ambient_cube[i];
                                 delta *= atten_factor;
@@ -415,7 +446,9 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
                         input->ambient_cube[i] = input->amb_probe->cube[i] - delta;
                 }
         }
+        interp_ac_collector.stop();
 
+        update_locallights_collector.start();
         if ( pos_changed )
         {
                 input->occluded_lights.reset();
@@ -440,6 +473,7 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
                 input->locallights = locallights;
                 input->sky_idx = sky_idx;
         }
+        update_locallights_collector.stop();
         
         size_t numlights = input->locallights.size();
         int lights_updated = 0;
@@ -447,11 +481,14 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
         int match[MAX_TOTAL_LIGHTS];
         memset( match, 0, sizeof( int ) * MAX_TOTAL_LIGHTS );
 
+        copystate_collector.start();
         nodeshaderinput_t oldstate = nodeshaderinput_t( *input );
         oldstate.local_object();
+        copystate_collector.stop();
 
         input->active_lights = 0;
 
+        addlights_collector.start();
         // Add lights for new state
         for ( size_t i = 0; i < numlights && lights_updated < MAX_ACTIVE_LIGHTS; i++ )
         {
@@ -479,8 +516,8 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
 
                 // Pack the light data into a 4x4 matrix.
                 LMatrix4f data;
-                data.set_row( 0, LVector4( light->pos, 1.0 ) );
-                data.set_row( 1, light->direction );
+                data.set_row( 0, light->eye_pos );
+                data.set_row( 1, light->eye_direction );
                 data.set_row( 2, light->atten );
                 data.set_row( 3, light->color );
 
@@ -515,7 +552,9 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
 
                 lights_updated++;
         }
+        addlights_collector.stop();
 
+        fadelights_collector.start();
         // Fade out any lights that were removed in the new state
         for ( size_t i = 0; i < oldstate.light_count[0]; i++ )
         {
@@ -545,16 +584,61 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node, CPT( 
 
                 lights_updated++;
         }
+        fadelights_collector.stop();
 
         input->light_count[0] = lights_updated;
 
         return input;
 }
 
+INLINE void xform_light( light_t *light, const LMatrix4 &cam_mat )
+{
+        if ( light->type != LIGHTTYPE_SUN ) // sun has no position, just direction
+        {
+                light->eye_pos = cam_mat.xform( LVector4( light->pos, 1.0 ) );
+        }
+
+        if ( light->type != LIGHTTYPE_POINT ) // point lights have no directional component
+        {
+                light->eye_direction = cam_mat.xform( light->direction );
+        }
+}
+
+/**
+ * Transforms all potentially visible lights into eye space.
+ */
+void AmbientProbeManager::xform_lights( const TransformState *cam_trans )
+{
+        if ( dbg_trace_np.is_empty() )
+        {
+                dbg_trace_np = _loader->_render.attach_new_node( dbg_trace_segs.create() );
+                dbg_trace_np.set_shader_off();
+                dbg_trace_segs.reset();
+        }
+        
+        
+
+        PStatTimer timer( xformlight_collector );
+
+        LMatrix4 cam_mat = cam_trans->get_mat();
+
+        int cam_leaf = _loader->find_leaf( cam_trans->get_pos() );
+        const pvector<light_t *> &lights = _light_pvs[cam_leaf];
+        size_t numlights = lights.size();
+        for ( size_t i = 0; i < numlights; i++ )
+        {
+                light_t *light = lights[i];
+                xform_light( light, cam_mat );
+        }
+
+        if ( _sunlight != nullptr )
+        {
+                xform_light( _sunlight, cam_mat );
+        }
+}
+
 INLINE ambientprobe_t *AmbientProbeManager::find_closest_sample( int leaf_id, const LPoint3 &pos )
 {
-        PStatTimer timer( closestsample_collector );
-
         pvector<ambientprobe_t> &probes = _probes[leaf_id];
         pvector<ambientprobe_t *> samples;
         samples.resize( probes.size() );

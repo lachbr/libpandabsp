@@ -53,6 +53,10 @@ struct light_t : public ReferenceCount
         LPoint3 pos;
         LVector3 color;
         LVector4 atten;
+
+        // If the light is potentially visible, updated each frame.
+        LVector4 eye_pos;
+        LVector4 eye_direction;
 };
 
 // Max stationary lights
@@ -62,6 +66,7 @@ struct light_t : public ReferenceCount
 
 #define LIGHTING_UNINITIALIZED -1
 
+#ifndef CPPPARSER
 struct nodeshaderinput_t : public ReferenceCount
 {
         PTA_LVecBase3 ambient_cube;
@@ -122,6 +127,9 @@ struct nodeshaderinput_t : public ReferenceCount
                 light_count.set_data( other.light_count.get_data() );
         }
 };
+#else
+struct nodeshaderinput_t;
+#endif
 
 class AmbientProbeManager
 {
@@ -131,12 +139,14 @@ public:
 
         void process_ambient_probes();
 
-        PT( nodeshaderinput_t ) update_node( PandaNode *node, CPT( TransformState ) net_ts, CPT( RenderState ) net_state );
+        PT( nodeshaderinput_t ) update_node( PandaNode *node, const TransformState *net_ts );
 
         void cleanup();
 
 public:
         void consider_garbage_collect();
+
+        void xform_lights( const TransformState *cam_trans );
 
 private:
         INLINE ambientprobe_t *find_closest_sample( int leaf_id, const LPoint3 &pos );

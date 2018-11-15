@@ -25,6 +25,7 @@ static PStatCollector pvs_xform_collector( "Cull:BSP:Geom_LeafBoundsXForm" );
 static PStatCollector pvs_node_xform_collector( "Cull:BSP:Node_LeafBoundsXForm" );
 static PStatCollector addfordraw_collector( "Cull:BSP:AddForDraw" );
 static PStatCollector findgeomshader_collector( "Cull:BSP:FindGeomShader" );
+static PStatCollector ambientprobe_nodes_collector( "BSP Dynamic Nodes" );
 
 CullableObject *BSPCullableObject::make_copy()
 {
@@ -418,7 +419,8 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                         if ( !disabled )
                         {
                                 // Update the node's ambient probe stuff:
-                                shinput = _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ), data._state );
+                                shinput = _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ) );
+                                ambientprobe_nodes_collector.add_level( 1 );
                         }
 
                         // HACKHACK:
@@ -494,6 +496,12 @@ bool BSPRender::cull_callback( CullTraverser *trav, CullTraverserData &data )
         BSPLoader *loader = _loader;
         if ( loader->has_visibility() )
         {
+                ambientprobe_nodes_collector.flush_level();
+                ambientprobe_nodes_collector.set_level( 0 );
+
+                // Transform all of the potentially visible lights into view space for this frame.
+                loader->_amb_probe_mgr.xform_lights( trav->get_scene()->get_cs_world_transform() );
+
                 BSPCullTraverser bsp_trav( trav, _loader );
                 bsp_trav.local_object();
                 bsp_trav.traverse_below( data );

@@ -1787,7 +1787,7 @@ void BSPLoader::update_dynamic_node( const NodePath &node )
 {
         if ( _active_level )
         {
-                _amb_probe_mgr.update_node( node.node(), node.get_net_transform(), node.get_net_state() );
+                _amb_probe_mgr.update_node( node.node(), node.get_net_transform() );
         }
 }
 
@@ -2381,7 +2381,10 @@ bool BSPLoader::trace_line( const LPoint3 &start, const LPoint3 &end )
         Ray ray( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, LPoint3::zero(), LPoint3::zero() );
         FaceFinder finder( _bspdata );
         bool ret = !finder.find_intersection( ray );
+        //Trace trace;
+        //CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _bspdata, trace );
 
+        //return !trace.has_hit();
         return ret;
 }
 

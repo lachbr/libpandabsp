@@ -26,4 +26,9 @@ public:
 
 };
 
+struct bspdata_t;
+
+extern void CM_BoxTrace( const Ray &ray, int headnode, int brushmask,
+                         bool compute_endpoint, const bspdata_t *bspdata, Trace &trace );
+
 #endif // BSP_TRACE_H
