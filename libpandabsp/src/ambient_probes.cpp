@@ -34,7 +34,6 @@
 
 #include "bsp_trace.h"
 
-static PStatCollector findsky_collector( "AmbientProbes:FindLight/Sky" );
 static PStatCollector updatenode_collector              ( "AmbientProbes:UpdateNodes" );
 static PStatCollector finddata_collector                ( "AmbientProbes:UpdateNodes:FindNodeData" );
 static PStatCollector update_ac_collector               ( "AmbientProbes:UpdateNodes:UpdateAmbientCube" );
@@ -256,43 +255,22 @@ INLINE bool AmbientProbeManager::is_sky_visible( const LPoint3 &point )
                 return false;
         }
 
-        //findsky_collector.start();
-
         LPoint3 start( ( point + LPoint3( 0, 0, 0.05 ) ) * 16 );
         LPoint3 end = start + ( _sunlight->direction.get_xyz() * 10000 );
         Ray ray( start, end, LPoint3::zero(), LPoint3::zero() );
-        FaceFinder finder( _loader->_bspdata );
-        bool ret = !finder.find_intersection( ray );
-        //Trace trace;
-        //CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _loader->_bspdata, trace );
+        Trace trace;
+        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _loader->_bspdata, trace );
 
-        //findsky_collector.stop();
-
-        //return !trace.has_hit();
-        return ret;
+        return !trace.has_hit();
 }
 
 INLINE bool AmbientProbeManager::is_light_visible( const LPoint3 &point, const light_t *light )
 {
-        //findsky_collector.start();
-
         Ray ray( ( point + LPoint3( 0, 0, 0.05 ) ) * 16, light->pos * 16, LPoint3::zero(), LPoint3::zero() );
-        FaceFinder finder( _loader->_bspdata );
-        bool ret = !finder.find_intersection( ray );
-        //Trace trace;
-        //CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _loader->_bspdata, trace );
+        Trace trace;
+        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _loader->_bspdata, trace );
 
-        //if ( !dbg_trace_np.is_empty() )
-        //        dbg_trace_np.remove_node();
-        //dbg_trace_segs.set_color( LColor( 1.0, 0.0, 0.0, 1.0 ) );
-        //dbg_trace_segs.move_to( ray.start / 16 );
-        //dbg_trace_segs.draw_to( ray.end / 16 );
-        
-
-        //findsky_collector.stop();
-
-        //return !trace.has_hit();
-        return ret;
+        return !trace.has_hit();
 }
 
 INLINE void AmbientProbeManager::garbage_collect_cache()

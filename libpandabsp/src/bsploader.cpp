@@ -1113,6 +1113,8 @@ static void clear_model_nodes_below( const NodePath &top )
 
 void BSPLoader::load_static_props()
 {
+        SimpleHashMap<int, NodePath, int_hash> leaf2props;
+
         for ( size_t propnum = 0; propnum < _bspdata->dstaticprops.size(); propnum++ )
         {
                 dstaticprop_t *prop = &_bspdata->dstaticprops[propnum];
@@ -1150,7 +1152,9 @@ void BSPLoader::load_static_props()
                         lightsrc_col = color_from_value( ValueForKey( lightsrc, "_light" ) );
                 }
 
-                if ( prop->first_vertex_data != -1 )
+                if ( prop->first_vertex_data != -1 &&
+                     ( prop->flags & STATICPROPFLAGS_STATICLIGHTING ) != 0 &&
+                     ( prop->flags & STATICPROPFLAGS_DYNAMICLIGHTING ) == 0 )
                 {
                         // prop has pre computed per vertex lighting
                         pvector<VDataDef> vdatadefs;
@@ -1251,6 +1255,40 @@ void BSPLoader::load_static_props()
                                 {
                                         continue;
                                 }
+#ifdef CIO
+                                else
+                                {
+                                        // game specific code, yuck
+                                        //
+                                        // don't apply vertex lighting to shadow models
+
+                                        bool shadow_skip = false;
+ 
+                                        for ( int j = 0; j < res.geomnode->get_num_geoms(); j++ )
+                                        {
+                                                const RenderState *state = res.geomnode->get_geom_state( j );
+                                                const TextureAttrib *tattr;
+                                                if ( state->get_attrib( tattr ) )
+                                                {
+                                                        if ( tattr->get_num_on_stages() == 0 )
+                                                        {
+                                                                continue;
+                                                        }
+                                                        Texture *tex = tattr->get_on_texture( tattr->get_on_stage( 0 ) );
+                                                        if ( tex->get_name().find( "square_drop_shadow" ) != string::npos ||
+                                                             tex->get_name().find( "drop-shadow" ) != string::npos )
+                                                        {
+                                                                // don't apply vertex lighting to a shadow model
+                                                                shadow_skip = true;
+                                                                break;
+                                                        }
+                                                }
+                                        }
+
+                                        if ( shadow_skip )
+                                                continue;
+                                }
+#endif
 
                                 mod_geom->set_vertex_data( mod_vdata );
                                 res.geomnode->set_geom( res.geomidx, mod_geom );
@@ -1259,11 +1297,104 @@ void BSPLoader::load_static_props()
                         // since this prop has static lighting applied to the vertices
                         // ignore any shaders, dynamic lights, or materials.
                         // also make sure the vertex colors are rendered.
-                        propmdl.set_shader_off( 1 );
-                        propmdl.set_light_off( 1 );
-                        propmdl.set_material_off( 1 );
-                        propmdl.set_attrib( ColorAttrib::make_vertex(), 2 );
+                        propnp.set_shader_off( 1 );
+                        propnp.set_light_off( 1 );
+                        propnp.set_material_off( 1 );
+                        propnp.set_attrib( ColorAttrib::make_vertex(), 2 );
                 }
+                else if ( prop->flags & STATICPROPFLAGS_NOLIGHTING )
+                {
+                        propnp.set_shader_off( 1 );
+                        propnp.set_light_off( 1 );
+                        propnp.set_material_off( 1 );
+                }
+
+#ifdef CIO
+                if ( prop->flags & STATICPROPFLAGS_LIGHTMAPSHADOWS ||
+                     prop->flags & STATICPROPFLAGS_REALSHADOWS )
+                {
+                        // game specific code!
+
+                        // we want to strip the fake drop shadows
+                        // since we either have lightmap shadows
+                        // or realtime depth shadows
+
+                        // GeomNodes with the drop_shadow texture on any of the RenderStates
+                        // will be completely removed. it's a little brute force, but should work.
+
+                        NodePathCollection npc = propmdl.find_all_matches( "**/+GeomNode" );
+                        for ( int i = 0; i < npc.get_num_paths(); i++ )
+                        {
+                                NodePath np = npc[i];
+                                GeomNode *gn = DCAST( GeomNode, np.node() );
+                                for ( int j = 0; j < gn->get_num_geoms(); j++ )
+                                {
+                                        const RenderState *state = gn->get_geom_state( j );
+                                        const TextureAttrib *tattr;
+                                        if ( state->get_attrib( tattr ) )
+                                        {
+                                                if ( tattr->get_num_on_stages() == 0 )
+                                                {
+                                                        continue;
+                                                }
+                                                Texture *tex = tattr->get_on_texture( tattr->get_on_stage( 0 ) );
+                                                if ( tex->get_name().find( "square_drop_shadow" ) != string::npos ||
+                                                     tex->get_name().find( "drop-shadow" ) != string::npos )
+                                                {
+                                                        np.remove_node();
+                                                }
+                                        }
+                                }
+                        }
+                }
+#endif
+
+                if ( prop->flags & STATICPROPFLAGS_DOUBLESIDE )
+                {
+                        propmdl.set_two_sided( true, 1 );
+                }
+
+                if ( prop->flags & STATICPROPFLAGS_HARDFLATTEN )
+                {
+                        propmdl.clear_model_nodes();
+                        propmdl.flatten_strong();
+                }
+
+                // only do group flattening if the prop doesn't
+                // use dynamic lighting (ambient probes).
+                //
+                // grouping all of the static props together
+                // will mess up the origin on each prop and they
+                // won't be dynamically lit correctly.
+
+                if ( ( prop->flags & STATICPROPFLAGS_GROUPFLATTEN ) != 0 &&
+                     ( prop->flags & STATICPROPFLAGS_DYNAMICLIGHTING ) == 0 )
+                {
+                        // find the leaf this prop resides in
+                        int leaf = find_leaf( propnp.get_pos() );
+                        if ( leaf2props.find( leaf ) == -1 )
+                        {
+                                stringstream ss;
+                                ss << "propGroupLeaf" << leaf;
+                                leaf2props.store( leaf, _result.attach_new_node( new BSPProp( ss.str() ) ) );
+                        }
+                        // move the prop underneath that leaf node group
+                        propnp.wrt_reparent_to( leaf2props[leaf] );
+                }
+        }
+
+        // any props with the STATICPROPFLAGS_GROUPFLATTEN bit
+        // have been grouped together under a common node for each leaf
+        //
+        // this means that any props in the same leaf will be
+        // aggressively flattened together
+        //
+        // do the flattening
+        for ( size_t i = 0; i < leaf2props.size(); i++ )
+        {
+                NodePath groupnp = leaf2props.get_data( i );
+                clear_model_nodes_below( groupnp );
+                groupnp.flatten_strong();
         }
 }
 
@@ -1842,13 +1973,13 @@ void BSPLoader::do_optimizations()
 
 
         // We can flatten the props since they just sit there.
-        NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
-        for ( int i = 0; i < npc.get_num_paths(); i++ )
-        {
-                DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
-                clear_model_nodes_below( npc[i] );
-                npc[i].flatten_strong();
-        }
+        //NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
+        //for ( int i = 0; i < npc.get_num_paths(); i++ )
+        //{
+        //        DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
+        //        clear_model_nodes_below( npc[i] );
+        //        npc[i].flatten_strong();
+        //}
 
         //========================================================================
         // Since it's safe to assume that worldspawn geometry will never move,
@@ -2379,13 +2510,10 @@ bool BSPLoader::trace_line( const LPoint3 &start, const LPoint3 &end )
         }
 
         Ray ray( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, LPoint3::zero(), LPoint3::zero() );
-        FaceFinder finder( _bspdata );
-        bool ret = !finder.find_intersection( ray );
-        //Trace trace;
-        //CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _bspdata, trace );
+        Trace trace;
+        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _bspdata, trace );
 
-        //return !trace.has_hit();
-        return ret;
+        return !trace.has_hit();
 }
 
 INLINE bspdata_t *BSPLoader::get_bspdata() const

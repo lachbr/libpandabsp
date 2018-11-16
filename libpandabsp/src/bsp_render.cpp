@@ -79,14 +79,6 @@ void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsgb
 
                         nassertv( generated_shader != nullptr );
 
-                        //if ( _bsp_node_input != nullptr )
-                        //{
-                        //        
-                        //        std::cout << _state << " => " << _bsp_node_input->node_sequence << std::endl;
-                        //}
-
-                        //generated_shader = DCAST( ShaderAttrib, generated_shader )->set_shader_auto();
-
                         // Cache the shader on the old state
                         _state->_generated_shader = generated_shader;
 
@@ -243,62 +235,6 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                         }                        
                 }
 
-#if 0
-
-                bool updated_geom_state = false;
-
-                CPT( ShaderAttrib ) gs_shattr = nullptr;
-                geom_state->get_attrib( gs_shattr );
-                const ShaderAttrib *shattr = nullptr;
-                state->get_attrib_def( shattr );
-                if ( shattr->auto_shader() )
-                {
-                        if ( ( gs_shattr == nullptr || ( gs_shattr != nullptr && gs_shattr->auto_shader() ) ) && geom_state->_generated_shader == nullptr )
-                        {
-                                GeomVertexAnimationSpec spec;
-
-                                // Currently we overload this flag to request vertex animation for the
-                                // shader generator.
-                                if ( shattr->get_flag( ShaderAttrib::F_hardware_skinning ) )
-                                {
-                                        spec.set_hardware( 4, true );
-                                }
-
-                                BSPLoader *loader = BSPLoader::get_global_ptr();
-                                ShaderGenerator *shgen = loader->_win->get_gsg()->get_shader_generator();
-                                if ( shgen != nullptr && shgen->is_of_type( PSSMShaderGenerator::get_class_type() ) )
-                                {
-                                        std::cout << "Generating shader for geom, " << shinput << std::endl;
-
-                                        PSSMShaderGenerator *pshgen = DCAST( PSSMShaderGenerator, shgen );
-                                        gs_shattr = pshgen->synthesize_shader( state, spec, shinput );
-                                        gs_shattr = DCAST( ShaderAttrib, gs_shattr->set_flag( BSPSHADERFLAG_AUTO, true ) );
-                                        //gs_shattr = DCAST( ShaderAttrib, gs_shattr->set_shader_auto() );
-                                        geom_state = geom_state->add_attrib( gs_shattr, 1 );
-                                        geom_state->_generated_shader = gs_shattr;
-                                        //geom_state->_generated_shader_seq = shinput->node_sequence;
-                                        node->set_geom_state( i, geom_state );
-
-                                        updated_geom_state = true;
-                                }
-                        }
-                }
-
-                if ( updated_geom_state )
-                {
-                        // Compose the updated state from the root of the graph to this Geom.
-                        state = data._state->compose( geom_state );
-                        state->_generated_shader = gs_shattr;
-                        //state->_generated_shader_seq = shinput->node_sequence;
-                }
-
-                //if ( gs_shattr != nullptr && gs_shattr->auto_shader() && !gs_shattr->has_shader_input( "ambientCube" ) )
-                //{
-                //        std::cout << "Skipping geom " << geom << " with no ambientCube???" << std::endl;
-                //        continue;
-                //}
-                //std::cout << gs_shattr->has_shader_input( "ambientCube" ) << std::endl;
-#endif
                 BSPCullableObject *object =
                         new BSPCullableObject( std::move( geom ), std::move( state ), internal_transform, shinput );
                 get_cull_handler()->record_object( object, this );
@@ -352,7 +288,6 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                         for ( size_t i = 0; i < num_visible_leafs; i++ )
                         {
                                 const int &leaf = _loader->_visible_leafs[i];
-                                //std::cout << "Leaf " << leaf << " is visible." << std::endl;
                                 const pvector<int> &geoms = _loader->_leaf_geom_list[leaf];
                                 size_t num_geoms = geoms.size();
                                 wsp_geom_traverse_collector.start();

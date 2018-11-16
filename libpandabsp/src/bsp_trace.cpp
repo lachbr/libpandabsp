@@ -17,11 +17,6 @@
 static PStatCollector piw_collector( "BSP:Trace:PointInWinding" );
 static PStatCollector ff_collector( "BSP:FaceFinder" );
 
-#include <nodePath.h>
-#include <collisionPlane.h>
-#include <collisionNode.h>
-static SimpleHashMap<int, NodePath, int_hash> planenum2node;
-
 #define PIW_PVEC // Use panda vectors for point_in_winding ( eigen sse )
 
 #ifdef PIW_PVEC
@@ -153,9 +148,6 @@ bool FaceFinder::enumerate_node( int node_id, const Ray &ray, float f, int conte
 
 #define NEVER_UPDATED -99999
 
-
-#include "bsploader.h"
-
 template <bool IS_POINT>
 void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
 {
@@ -178,26 +170,11 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
         float dist;
 
         dbrushside_t *side = nullptr;
-        //for ( const dbrushside_t *sidelimit = side + brush->numsides; side < sidelimit; side++ )
         for (int i = 0; i < brush->numsides; i++ )
         {
                 side = &trace->bspdata->dbrushsides[brush->firstside + i];
                 dplane_t *plane = trace->bspdata->dplanes + side->planenum;
                 LVector3 plane_normal( plane->normal[0], plane->normal[1], plane->normal[2] );
-                std::cout << plane_normal << ", " << plane->dist << std::endl;
-
-                if ( planenum2node.find( side->planenum ) == -1 )
-                {
-                        PT( CollisionPlane ) cplane = new CollisionPlane( LPlane( plane->normal[0], plane->normal[1],
-                                                                                  plane->normal[2], plane->dist / 16.0 ) );
-                        PT( CollisionNode ) cnode = new CollisionNode( "cn" );
-                        cnode->add_solid( cplane );
-                        NodePath cplanenp = BSPLoader::get_global_ptr()->get_result().get_parent().attach_new_node( cnode );
-                        cplanenp.set_shader_off( 1 );
-                        cplanenp.set_light_off( 1 );
-                        cplanenp.show();
-                        planenum2node[side->planenum] = cplanenp;
-                }
 
                 if (!IS_POINT )
                 {
@@ -205,7 +182,7 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
                         // push the plane out appropriately for mins/maxs
 
                         dist = DotProductAbs( plane_normal, trace->extents );
-                        dist = plane->dist - dist;
+                        dist = plane->dist + dist;
                 }
                 else
                 {
@@ -217,23 +194,18 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
                         }
                 }
 
-                float d1 = DotProduct( p1, plane_normal ) - dist;
-                float d2 = DotProduct(p2, plane_normal ) - dist;
-
-                std::cout << d1 << ", " << d2 << std::endl;
+                float d1 = p1.dot( plane_normal ) - dist;
+                float d2 = p2.dot( plane_normal ) - dist;
 
                 // if completely in front of face, no intersection
                 if ( d1 > 0.0 )
                 {
                         startout = true;
-                        
 
                         if ( d2 > 0.0 )
                         {
-                                std::cout << "Completely in front of face" << std::endl;
                                 return;
                         }
-                        std::cout << "Start out" << std::endl;
                 }
                 else
                 {
@@ -241,7 +213,6 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
                         {
                                 continue;
                         }
-                        std::cout << "get out" << std::endl;
                         getout = true;
                 }
 
@@ -249,7 +220,6 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
                 if ( d1 > d2 )
                 {
                         // enter
-                        std::cout << "enter " << enter_frac << std::endl;
                         float f = ( d1 - DIST_EPSILON );
                         if ( f < 0.f )
                         {
@@ -264,7 +234,6 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
                 }
                 else
                 {	// leave
-                        std::cout << "leave " << leave_frac << std::endl;
                         float f = ( d1 + DIST_EPSILON ) / ( d1 - d2 );
                         if ( f < leave_frac )
                         {
@@ -299,14 +268,12 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
                 trace->start_solid = true;
                 // return starting contents
                 trace->contents = brush_contents;
-                std::cout << "start solid" << std::endl;
 
                 if ( !getout )
                 {
                         trace->all_solid = true;
                         trace->fraction = 0.0f;
                         trace->fraction_left_solid = 1.0f;
-                        std::cout << "all solid" << std::endl;
                 }
                 else
                 {
@@ -319,7 +286,6 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
                                 // This could occur if a previous trace didn't start us in solid
                                 if ( trace->fraction <= leave_frac )
                                 {
-                                        std::cout << trace->fraction << " <= leave_frac (" << leave_frac << ")" << std::endl;
                                         trace->fraction = 1.0f;
                                         trace->surface = nullptr;
                                 }
@@ -327,8 +293,6 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
                 }
                 return;
         }
-
-        std::cout << "enter_frac " << enter_frac << " leave_frac " << leave_frac << std::endl;
 
         // We haven't hit anything at all until we've left...
         if ( enter_frac < leave_frac )
@@ -338,7 +302,6 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
                         // WE HIT SOMETHING!!!!!
                         if ( enter_frac < 0 )
                                 enter_frac = 0;
-                        std::cout << "hit something" << std::endl;
                         trace->fraction = enter_frac;
                         trace->plane = *( trace->bspdata->dplanes + leadside->planenum );
                         trace->surface = trace->bspdata->texinfo + side->texinfo;
@@ -536,6 +499,11 @@ void CM_ComputeTraceEndpoints( const Ray &ray, Trace *trace )
 
 static PStatCollector bt_collector( "BSP:CM_BoxTrace" );
 
+/**
+ * Traces a line/ray along the BSP tree.
+ * Starts at the specified node, only intersects with specified brush contents mask.
+ * Results of the trace are filled in, use Trace::has_hit() to see if the line intersected something.
+ */
 void CM_BoxTrace( const Ray &ray, int headnode, int brushmask, bool compute_endpoint, const bspdata_t *bspdata, Trace &trace )
 {
         PStatTimer timer( bt_collector );
@@ -556,6 +524,4 @@ void CM_BoxTrace( const Ray &ray, int headnode, int brushmask, bool compute_endp
         {
                 CM_ComputeTraceEndpoints( ray, &trace );
         }
-
-        std::cout << "CM_BoxTrace (" << trace.start_pos << " => " << trace.end_pos << ") : " << trace.fraction << std::endl;
 }
