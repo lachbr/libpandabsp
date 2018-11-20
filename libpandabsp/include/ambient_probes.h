@@ -87,6 +87,21 @@ struct nodeshaderinput_t : public ReferenceCount
 
         int active_lights;
 
+        INLINE void copy_needed( const nodeshaderinput_t *other )
+        {
+                light_count.set_data( other->light_count.get_data() );
+                light_ids.set_data( other->light_ids.get_data() );
+                light_data.set_data( other->light_data.get_data() );
+                light_type.set_data( other->light_type.get_data() );
+                active_lights = other->active_lights;
+        }
+
+        INLINE nodeshaderinput_t( const nodeshaderinput_t *other ) :
+                ReferenceCount()
+        {
+                copy_needed( other );
+        }
+
         nodeshaderinput_t() :
                 ReferenceCount()
         {

@@ -14,6 +14,7 @@
 #include <cullableObject.h>
 #include <cullHandler.h>
 #include <characterJointEffect.h>
+#include <renderModeAttrib.h>
 
 #include <bitset>
 
@@ -26,6 +27,9 @@ static PStatCollector pvs_node_xform_collector( "Cull:BSP:Node_LeafBoundsXForm" 
 static PStatCollector addfordraw_collector( "Cull:BSP:AddForDraw" );
 static PStatCollector findgeomshader_collector( "Cull:BSP:FindGeomShader" );
 static PStatCollector ambientprobe_nodes_collector( "BSP Dynamic Nodes" );
+
+static ConfigVariableColor dynamic_wf_color( "bsp-dynamic-wireframe-color", LColor( 0, 1.0, 1.0, 1.0 ) );
+static ConfigVariableColor brush_wf_color( "bsp-brush-wireframe-color", LColor( 231 / 255.0, 129 / 255.0, 129 / 255.0, 1.0 ) );
 
 CullableObject *BSPCullableObject::make_copy()
 {
@@ -235,6 +239,16 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                         }                        
                 }
 
+                if ( _loader->get_wireframe() )
+                {
+                        CPT( RenderAttrib ) wfattr = RenderModeAttrib::make( RenderModeAttrib::M_wireframe,
+                                                                             0.5, true, dynamic_wf_color );
+                        CPT( RenderAttrib ) tattr = TextureAttrib::make_all_off();
+                        CPT( RenderAttrib ) cattr = ColorAttrib::make_flat( dynamic_wf_color );
+                        CPT( RenderState ) wfstate = RenderState::make( wfattr, tattr, cattr, 10 );
+                        state = state->compose( wfstate );
+                }
+
                 BSPCullableObject *object =
                         new BSPCullableObject( std::move( geom ), std::move( state ), internal_transform, shinput );
                 get_cull_handler()->record_object( object, this );
@@ -321,10 +335,20 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                                         }
                                         wsp_ctest_collector.stop();
 
+                                        CPT( RenderState ) state = gs.state;
+
+                                        if ( _loader->get_wireframe() )
+                                        {
+                                                CPT( RenderAttrib ) wfattr = RenderModeAttrib::make( RenderModeAttrib::M_filled_wireframe,
+                                                                                                     0.5, true, brush_wf_color );
+                                                CPT( RenderState ) wfstate = RenderState::make( wfattr, 1 );
+                                                state = state->compose( wfstate );
+                                        }                                        
+
                                         wsp_make_cullableobject_collector.start();
                                         // Go ahead and render this worldspawn Geom.
                                         CullableObject *object = new CullableObject(
-                                                std::move( gs.geom ), std::move( gs.state ),
+                                                std::move( gs.geom ), std::move( state ),
                                                 internal_transform );
                                         wsp_make_cullableobject_collector.stop();
                                         wsp_record_collector.start();

@@ -462,6 +462,13 @@ ShaderSpec::Permutations LightmappedGenericSpec::setup_permutations( const Rende
 {
         Permutations result = ShaderSpec::setup_permutations( rs, anim, generator );
 
+        const LightRampAttrib *lra;
+        rs->get_attrib_def( lra );
+        if ( lra->get_mode() != LightRampAttrib::LRT_default )
+        {
+                result.permutations["HDR"] = "1";
+        }
+
         const TextureAttrib *tattr;
         rs->get_attrib_def( tattr );
         int basetexture_coord = -1;

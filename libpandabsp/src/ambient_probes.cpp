@@ -460,8 +460,9 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
         memset( match, 0, sizeof( int ) * MAX_TOTAL_LIGHTS );
 
         copystate_collector.start();
-        nodeshaderinput_t oldstate = nodeshaderinput_t( *input );
+        nodeshaderinput_t oldstate( input );
         oldstate.local_object();
+        // light count, light ids, light data, activelights, light_type
         copystate_collector.stop();
 
         input->active_lights = 0;

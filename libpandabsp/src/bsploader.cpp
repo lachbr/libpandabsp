@@ -305,6 +305,74 @@ LTexCoord BSPLoader::get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool li
         return LTexCoord( s_vec.dot( vert_pos ) + s_dist, t_vec.dot( vert_pos ) + t_dist );
 }
 
+LTexCoord get_lightcoords( texinfo_t *texinfo, dvertex_t *vert, dface_t *face, FaceLightmapData *ld )
+{
+        float *vpos = vert->point;
+        LVector3 vec( vpos[0], vpos[1], vpos[2] );
+
+        float s_scale, t_scale;
+        float s_offset, t_offset;
+        LTexCoord lightcoord;
+
+        bool flipped = ld->faceentry != nullptr && ld->faceentry->flipped;
+
+        int texsize[2];
+        texsize[0] = flipped ? face->lightmap_size[1] : face->lightmap_size[0];
+        texsize[1] = flipped ? face->lightmap_size[0] : face->lightmap_size[1];
+        int texmins[2];
+        texmins[0] = flipped ? face->lightmap_mins[1] : face->lightmap_mins[0];
+        texmins[1] = flipped ? face->lightmap_mins[0] : face->lightmap_mins[1];        
+
+        if ( ld->faceentry != nullptr )
+        {
+                s_scale = 1.0 / (float)ld->faceentry->palette_size[0];
+                s_offset = (float)ld->faceentry->xshift * s_scale;
+        }
+        else
+        {
+                s_scale = 1.0;
+                s_offset = 0.0;
+        }
+        s_scale = texsize[0] * s_scale;
+
+        if ( ld->faceentry != nullptr )
+        {
+                t_scale = 1.0 / -(float)ld->faceentry->palette_size[1];
+                t_offset = (float)ld->faceentry->yshift * t_scale;
+        }
+        else
+        {
+                t_scale = -1.0;
+                t_offset = 0.0;
+        }
+        t_scale = texsize[1] * t_scale;        
+
+        lightcoord[0] = DotProduct( vec, texinfo->lightmap_vecs[0] ) +
+                texinfo->lightmap_vecs[0][3];
+        lightcoord[1] = DotProduct( vec, texinfo->lightmap_vecs[1] ) +
+                texinfo->lightmap_vecs[1][3];
+
+        if ( flipped )
+        {
+                float tmp = lightcoord[1];
+                lightcoord[1] = lightcoord[0];
+                lightcoord[0] = tmp;
+        }
+
+        lightcoord[0] -= texmins[0];
+        lightcoord[0] += 0.5;
+        lightcoord[0] /= texsize[0];
+        
+        lightcoord[1] -= texmins[1];
+        lightcoord[1] += 0.5;
+        lightcoord[1] /= texsize[1];
+
+        lightcoord[0] = s_offset + lightcoord[0] * s_scale;
+        lightcoord[1] = t_offset + lightcoord[1] * t_scale;
+
+        return lightcoord;
+}
+
 PT( EggVertex ) BSPLoader::make_vertex_ai( EggVertexPool *vpool, EggPolygon *poly, dedge_t *edge, int k )
 {
         dvertex_t *vert = &_bspdata->dvertexes[edge->v[k]];
@@ -335,10 +403,11 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
 
         // Texture and lightmap coordinates
         LTexCoord uv = get_vertex_uv( texinfo, vert );
-        LTexCoord luv = get_vertex_uv( texinfo, vert, true );
+        LTexCoord luv = get_lightcoords( texinfo, vert, face, ld );
         LTexCoordd df_uv( uv.get_x() / df_width, -uv.get_y() / df_height );
+        LTexCoordd lm_uv( luv[0], luv[1] );
+#if 0
         LTexCoordd lm_uv( 0, 0 );
-
         if ( ld->faceentry != nullptr )
         {
                 // This face has an entry in a lightmap palette.
@@ -363,6 +432,7 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
                 lm_uv[0] /= ld->faceentry->palette_size[0];
                 lm_uv[1] /= -ld->faceentry->palette_size[1];
         }
+#endif
 
         v->set_uv( "basetexture", df_uv );
         v->set_uv( "lightmap", lm_uv );
@@ -2196,7 +2266,8 @@ BSPLoader::BSPLoader() :
         _shadow_depth( nullptr ),
         _shadow_filmsize( 60 ),
         _shadow_texsize( 1024 ),
-        _want_shadows( true )
+        _want_shadows( true ),
+        _wireframe( false )
 {
         _diffuse_stage->set_texcoord_name( "basetexture" );
         _diffuse_stage->set_sort( 0 );
@@ -2209,6 +2280,16 @@ BSPLoader::BSPLoader() :
         _shadow_stage->set_sort( 2 );
 
         _envmap_stage->set_mode( TextureStage::M_add );
+}
+
+void BSPLoader::set_wireframe( bool flag )
+{
+        _wireframe = flag;
+}
+
+INLINE bool BSPLoader::get_wireframe() const
+{
+        return _wireframe;
 }
 
 void BSPLoader::set_want_shadows( bool flag )

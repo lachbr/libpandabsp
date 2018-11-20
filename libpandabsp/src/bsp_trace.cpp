@@ -146,6 +146,12 @@ bool FaceFinder::enumerate_node( int node_id, const Ray &ray, float f, int conte
         return true;
 }
 
+//==============================================================================================//
+// This is the more efficient ray tracing algorithm, derived from Source Engine's cmodel.cpp
+// The above code shouldn't be used for any real-time ray tracing.
+// We might be well off just removing the code altogether.
+//==============================================================================================//
+
 #define NEVER_UPDATED -99999
 
 template <bool IS_POINT>
@@ -176,12 +182,12 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
                 dplane_t *plane = trace->bspdata->dplanes + side->planenum;
                 LVector3 plane_normal( plane->normal[0], plane->normal[1], plane->normal[2] );
 
-                if (!IS_POINT )
+                if ( !IS_POINT )
                 {
                         // general box case
                         // push the plane out appropriately for mins/maxs
 
-                        dist = DotProductAbs( plane_normal, trace->extents );
+                        dist = fabsf( plane_normal.dot( trace->extents ) );//DotProductAbs( plane_normal, trace->extents );
                         dist = plane->dist + dist;
                 }
                 else
@@ -371,6 +377,7 @@ void CM_RecursiveHullCheckImpl( Trace *trace, int num, const float p1f, const fl
         {
                 node = trace->bspdata->dnodes + num;
                 const dplane_t *plane = trace->bspdata->dplanes + node->planenum;
+                LVector3 plane_normal( plane->normal[0], plane->normal[1], plane->normal[2] );
                 int type = plane->type;
                 float dist = plane->dist;
 
@@ -382,15 +389,15 @@ void CM_RecursiveHullCheckImpl( Trace *trace, int num, const float p1f, const fl
                 }
                 else
                 {
-                        t1 = DotProduct( plane->normal, p1 ) - dist;
-                        t2 = DotProduct( plane->normal, p2 ) - dist;
+                        t1 = p1.dot( plane_normal ) - dist;
+                        t2 = p2.dot( plane_normal ) - dist;
                         if ( IS_POINT )
                         {
                                 offset = 0.0;
                         }
                         else
                         {
-                                offset = DotProductAbs( trace->extents, plane->normal );
+                                offset = fabsf( plane_normal.dot( trace->extents ) );
                         }
                 }
 

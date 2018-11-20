@@ -161,6 +161,8 @@ PUBLISHED:
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
         void set_texture_contents_file( const Filename &file );
+        void set_wireframe( bool flag );
+        INLINE bool get_wireframe() const;
 
         void setup_shadowcam();
 
@@ -284,6 +286,7 @@ private:
         int _shadow_filmsize;
         int _shadow_texsize;
         bool _want_shadows;
+        bool _wireframe;
 	Filename _materials_file;
         PN_stdfloat _gamma;
 	typedef pmap<string, string> Tex2Mat;
