@@ -28,7 +28,25 @@ public:
 
 struct bspdata_t;
 
+struct cboxbrush_t
+{
+        LVector3 mins;
+        LVector3 maxs;
+
+        unsigned short surface_indices[6];
+
+        int is_box;
+};
+
+struct collbspdata_t
+{
+        const bspdata_t *bspdata;
+        cboxbrush_t boxbrushes[MAX_MAP_BRUSHES];
+};
+
+extern collbspdata_t *SetupCollisionBSPData( const bspdata_t *bspdata );
+
 extern void CM_BoxTrace( const Ray &ray, int headnode, int brushmask,
-                         bool compute_endpoint, const bspdata_t *bspdata, Trace &trace );
+                         bool compute_endpoint, const collbspdata_t *bspdata, Trace &trace );
 
 #endif // BSP_TRACE_H

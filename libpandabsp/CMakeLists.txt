@@ -3,11 +3,15 @@ file (GLOB HEADERS "include/*.h")
 
 file (GLOB CM_SRCS "../../panda_hl_bsp_tools/common/*.cpp")
 file (GLOB CM_INC "../../panda_hl_bsp_tools/common/*.h")
+file (GLOB SSE_SRCS "../../panda_hl_bsp_tools/common/mathlib/*.cpp")
+file (GLOB SSE_INC "../../panda_hl_bsp_tools/common/mathlib/*.h")
 
 source_group("Header Files" FILES ${HEADERS})
 source_group("Source Files" FILES ${SRCS})
 source_group("Header Files\\common" FILES ${CM_INC})
 source_group("Source Files\\common" FILES ${CM_SRCS})
+source_group("Source Files\\common\\mathlib" FILES ${SSE_SRCS})
+source_group("Header Files\\common\\mathlib" FILES ${SSE_INC})
 
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type.")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG")
@@ -21,7 +25,7 @@ link_directories(${P3BSP_PANDA3D_DIR}/lib ${P3BSP_PANDA3D_DIR}/python/libs ../vi
 
 add_definitions(-DNOMINMAX -DBUILDING_LIBPANDABSP -DWITHIN_PANDA -DCOMPILER_MSVC64 -DVERSION_64BIT -DDOUBLEVEC_T -DSYSTEM_WIN32 -DSTDC_HEADERS -DCIO)
 
-add_library(libpandabsp SHARED ${SRCS} ${HEADERS} ${CM_INC} ${CM_SRCS})
+add_library(libpandabsp SHARED ${SRCS} ${HEADERS} ${CM_INC} ${CM_SRCS} ${SSE_INC} ${SSE_SRCS})
 
 set_target_properties(libpandabsp PROPERTIES SUFFIX ".pyd")
 set_target_properties(libpandabsp PROPERTIES OUTPUT_NAME "bsp")

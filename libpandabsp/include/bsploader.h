@@ -139,6 +139,8 @@ private:
 
 };
 
+struct collbspdata_t;
+
 /**
  * Loads and handles the operations of PBSP files.
  */
@@ -273,6 +275,7 @@ private:
 
 private:
         bspdata_t *_bspdata;
+        collbspdata_t *_colldata;
 	NodePath _result;
         NodePath _camera;
 	NodePath _render;

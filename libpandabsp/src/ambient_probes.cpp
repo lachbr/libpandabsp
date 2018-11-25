@@ -259,7 +259,7 @@ INLINE bool AmbientProbeManager::is_sky_visible( const LPoint3 &point )
         LPoint3 end = start + ( _sunlight->direction.get_xyz() * 10000 );
         Ray ray( start, end, LPoint3::zero(), LPoint3::zero() );
         Trace trace;
-        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _loader->_bspdata, trace );
+        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _loader->_colldata, trace );
 
         return !trace.has_hit();
 }
@@ -268,7 +268,7 @@ INLINE bool AmbientProbeManager::is_light_visible( const LPoint3 &point, const l
 {
         Ray ray( ( point + LPoint3( 0, 0, 0.05 ) ) * 16, light->pos * 16, LPoint3::zero(), LPoint3::zero() );
         Trace trace;
-        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _loader->_bspdata, trace );
+        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _loader->_colldata, trace );
 
         return !trace.has_hit();
 }

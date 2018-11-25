@@ -1979,6 +1979,8 @@ bool BSPLoader::read( const Filename &file )
                 AsyncTaskManager::get_global_ptr()->add( _update_task );
         }
 
+        _colldata = SetupCollisionBSPData( _bspdata );
+
         _active_level = true;
 
         return true;
@@ -2232,7 +2234,12 @@ void BSPLoader::cleanup()
         if ( !_result.is_empty() )
                 _result.remove_node();
 
-        delete _bspdata;
+        if ( _colldata )
+                delete _colldata;
+        _colldata = nullptr;
+
+        if ( _bspdata )
+                delete _bspdata;
         _bspdata = nullptr;
 }
 
@@ -2257,7 +2264,6 @@ BSPLoader::BSPLoader() :
         _amb_probe_mgr( this ),
         _active_level( false ),
         _ai( false ),
-        _bspdata( nullptr ),
         _shadowcam_pos( -30, 25, 40 ),
         _shadowcam_mask( BitMask32::bit( 5 ) ),
         _shadow_color( 0.5, 0.5, 0.5, 1.0 ),
@@ -2267,7 +2273,9 @@ BSPLoader::BSPLoader() :
         _shadow_filmsize( 60 ),
         _shadow_texsize( 1024 ),
         _want_shadows( true ),
-        _wireframe( false )
+        _wireframe( false ),
+        _bspdata( nullptr ),
+        _colldata( nullptr )
 {
         _diffuse_stage->set_texcoord_name( "basetexture" );
         _diffuse_stage->set_sort( 0 );
@@ -2592,7 +2600,7 @@ bool BSPLoader::trace_line( const LPoint3 &start, const LPoint3 &end )
 
         Ray ray( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, LPoint3::zero(), LPoint3::zero() );
         Trace trace;
-        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _bspdata, trace );
+        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _colldata, trace );
 
         return !trace.has_hit();
 }
