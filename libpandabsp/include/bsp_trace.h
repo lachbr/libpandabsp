@@ -13,6 +13,8 @@
 #include <winding.h>
 #include <bsptools.h>
 
+#include "mathlib/ssemath.h"
+
 /**
  * Enumerates the BSP tree checking for intersections with any non TEX_SPECIAL faces.
  */
@@ -32,6 +34,9 @@ struct cboxbrush_t
 {
         LVector3 mins;
         LVector3 maxs;
+
+        fltx4 ssemins;
+        fltx4 ssemaxs;
 
         unsigned short surface_indices[6];
 
