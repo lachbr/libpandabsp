@@ -13,8 +13,6 @@
 #include <winding.h>
 #include <bsptools.h>
 
-#include "mathlib/ssemath.h"
-
 /**
  * Enumerates the BSP tree checking for intersections with any non TEX_SPECIAL faces.
  */
