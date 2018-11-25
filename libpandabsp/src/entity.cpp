@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file entity.cpp
+ * @author Brian Lach
+ * @date May 03, 2018
+ */
+
 #include "entity.h"
 #include "bsploader.h"
 

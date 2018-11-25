@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file bsploader.cpp
+ * @author Brian Lach
+ * @date March 27, 2018
+ */
+
 #include "bsploader.h"
 
 #include "bsp_trace.h"
@@ -7,6 +16,7 @@
 #include "entity.h"
 #include "mathlib.h"
 #include "viftokenizer.h"
+#include "bsp_material.h"
 
 #include <array>
 #include <bitset>
@@ -50,11 +60,18 @@
 #include <sceneGraphReducer.h>
 #include <characterJointEffect.h>
 #include <orthographicLens.h>
+#include <cullBinAttrib.h>
+#include <materialAttrib.h>
+#include <materialPool.h>
+
+static PStatCollector bsp_build_leaf_geom_collector( "BSP:BuildAcceleratedLeafGeomStructure" );
+
+#define DEFAULT_BRUSH_SHADER "LightmappedGeneric"
 
 INLINE static void flatten_node( const NodePath &node )
 {
         // Mimic a flatten strong operation, but do not attempt to combine
-        // Geoms, as each face needs to be it's own Geom for effective leaf
+        // Geoms, as each world brush face needs to be it's own Geom for effective leaf
         // culling.
 
         SceneGraphReducer gr;
@@ -288,6 +305,74 @@ LTexCoord BSPLoader::get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool li
         return LTexCoord( s_vec.dot( vert_pos ) + s_dist, t_vec.dot( vert_pos ) + t_dist );
 }
 
+LTexCoord get_lightcoords( texinfo_t *texinfo, dvertex_t *vert, dface_t *face, FaceLightmapData *ld )
+{
+        float *vpos = vert->point;
+        LVector3 vec( vpos[0], vpos[1], vpos[2] );
+
+        float s_scale, t_scale;
+        float s_offset, t_offset;
+        LTexCoord lightcoord;
+
+        bool flipped = ld->faceentry != nullptr && ld->faceentry->flipped;
+
+        int texsize[2];
+        texsize[0] = flipped ? face->lightmap_size[1] : face->lightmap_size[0];
+        texsize[1] = flipped ? face->lightmap_size[0] : face->lightmap_size[1];
+        int texmins[2];
+        texmins[0] = flipped ? face->lightmap_mins[1] : face->lightmap_mins[0];
+        texmins[1] = flipped ? face->lightmap_mins[0] : face->lightmap_mins[1];        
+
+        if ( ld->faceentry != nullptr )
+        {
+                s_scale = 1.0 / (float)ld->faceentry->palette_size[0];
+                s_offset = (float)ld->faceentry->xshift * s_scale;
+        }
+        else
+        {
+                s_scale = 1.0;
+                s_offset = 0.0;
+        }
+        s_scale = texsize[0] * s_scale;
+
+        if ( ld->faceentry != nullptr )
+        {
+                t_scale = 1.0 / -(float)ld->faceentry->palette_size[1];
+                t_offset = (float)ld->faceentry->yshift * t_scale;
+        }
+        else
+        {
+                t_scale = -1.0;
+                t_offset = 0.0;
+        }
+        t_scale = texsize[1] * t_scale;        
+
+        lightcoord[0] = DotProduct( vec, texinfo->lightmap_vecs[0] ) +
+                texinfo->lightmap_vecs[0][3];
+        lightcoord[1] = DotProduct( vec, texinfo->lightmap_vecs[1] ) +
+                texinfo->lightmap_vecs[1][3];
+
+        if ( flipped )
+        {
+                float tmp = lightcoord[1];
+                lightcoord[1] = lightcoord[0];
+                lightcoord[0] = tmp;
+        }
+
+        lightcoord[0] -= texmins[0];
+        lightcoord[0] += 0.5;
+        lightcoord[0] /= texsize[0];
+        
+        lightcoord[1] -= texmins[1];
+        lightcoord[1] += 0.5;
+        lightcoord[1] /= texsize[1];
+
+        lightcoord[0] = s_offset + lightcoord[0] * s_scale;
+        lightcoord[1] = t_offset + lightcoord[1] * t_scale;
+
+        return lightcoord;
+}
+
 PT( EggVertex ) BSPLoader::make_vertex_ai( EggVertexPool *vpool, EggPolygon *poly, dedge_t *edge, int k )
 {
         dvertex_t *vert = &_bspdata->dvertexes[edge->v[k]];
@@ -318,10 +403,11 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
 
         // Texture and lightmap coordinates
         LTexCoord uv = get_vertex_uv( texinfo, vert );
-        LTexCoord luv = get_vertex_uv( texinfo, vert, true );
+        LTexCoord luv = get_lightcoords( texinfo, vert, face, ld );
         LTexCoordd df_uv( uv.get_x() / df_width, -uv.get_y() / df_height );
+        LTexCoordd lm_uv( luv[0], luv[1] );
+#if 0
         LTexCoordd lm_uv( 0, 0 );
-
         if ( ld->faceentry != nullptr )
         {
                 // This face has an entry in a lightmap palette.
@@ -346,8 +432,9 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
                 lm_uv[0] /= ld->faceentry->palette_size[0];
                 lm_uv[1] /= -ld->faceentry->palette_size[1];
         }
+#endif
 
-        v->set_uv( "diffuse", df_uv );
+        v->set_uv( "basetexture", df_uv );
         v->set_uv( "lightmap", lm_uv );
 
         return v;
@@ -707,6 +794,7 @@ void BSPLoader::make_faces()
                 name << "model-" << modelnum;
                 PT( BSPModel ) bspmdl = new BSPModel( name.str() );
                 NodePath modelroot = _result.attach_new_node( bspmdl );
+                modelroot.set_shader_auto();
 
                 _model_origins[modelroot] = ( ( ( mins + maxs ) / 2.0 ) + origin ) / 16.0;
 
@@ -742,12 +830,14 @@ void BSPLoader::make_faces()
                         PT( Texture ) tex = try_load_texref( texref );
                         string texture_name = texref->name;
                         string material = "default";
+                        string shader = DEFAULT_BRUSH_SHADER;
                         if ( _texref_materials.find( texref ) != _texref_materials.end() )
                         {
                                 bspfile_cat.info()
                                         << "Material properties for " << texref->name << ":\n";
                                 Parser *p = &_texref_materials[texref];
                                 Object obj = p->_base_objects[0];
+                                shader = obj.name;
                                 vector<Property> props = p->get_properties( obj );
                                 for ( size_t i = 0; i < props.size(); i++ )
                                 {
@@ -900,55 +990,50 @@ void BSPLoader::make_faces()
 
                         if ( has_texture )
                         {
-                                faceroot.set_texture( _diffuse_stage, tex );
+                                faceroot.set_texture( TextureStages::get_basetexture(), tex );
                         }
 
                         if ( has_lighting )
                         {
-                                faceroot.set_texture( _lightmap_stage, lmfaceentry->palette->palette_tex[0] );
+                                if ( face->bumped_lightmap && mat_normalmap )
+                                {
+                                        for ( int n = 0; n < NUM_BUMP_VECTS; n++ )
+                                        {
+                                                faceroot.set_texture( TextureStages::get_bumped_lightmap( n ),
+                                                                      lmfaceentry->palette->palette_tex[n + 1] );
+                                        }
+                                }
+                                else
+                                {
+                                        faceroot.set_texture( TextureStages::get_lightmap(),
+                                                              lmfaceentry->palette->palette_tex[0] );
+                                }
+                        }
+                        if ( mat_normalmap )
+                        {
+                                PT( Texture ) nmtex = TexturePool::load_texture( normalmapfile );
+                                faceroot.set_texture( TextureStages::get_normalmap(), nmtex );
                         }
 
                         faceroot.wrt_reparent_to( modelroot );
                         if ( Texture::has_alpha( tex->get_format() ) )
                         {
-                                faceroot.set_transparency( TransparencyAttrib::M_multisample, 1 );
+                                faceroot.set_transparency( TransparencyAttrib::M_alpha, 1 );
                         }
 
-                        pvector<string> shaders = make_bface_shaders( has_lighting, envmap_shininess > 0.0, envmap_shininess,
-                                                                      face->bumped_lightmap, mat_normalmap, recv_projshadows );
-                        faceroot.set_shader( Shader::make( Shader::SL_GLSL, shaders[0], shaders[1] ), 1 );
-                        if ( recv_projshadows )
-                        {
-                                faceroot.set_shader_input( "shadowtex", _shadow_tex );
-                                faceroot.set_shader_input( "shadowdepth", _shadow_depth );
-                                faceroot.set_shader_input( "shadowcam", _shadowcam );
-                        }
+                        PT( BSPMaterial ) face_mat = new BSPMaterial;
+                        face_mat->set_shader( shader );
+
                         if ( envmap_shininess > 0.0 )
                         {
                                 PT( Texture ) etex = TexturePool::load_texture( envmap );
                                 etex->set_wrap_u( SamplerState::WM_repeat );
                                 etex->set_wrap_v( SamplerState::WM_repeat );
-                                faceroot.set_shader_input( "envmap_texture", etex );
+                                faceroot.set_texture( TextureStages::get_spheremap(), etex );
+                                face_mat->set_shininess( envmap_shininess );
                         }
-                        if ( face->bumped_lightmap && mat_normalmap )
-                        {
-                                if ( mat_normalmap )
-                                {
-                                        PT( Texture ) nmtex = TexturePool::load_texture( normalmapfile );
-                                        faceroot.set_shader_input( "normalmap_texture", nmtex );
-                                }
 
-                                for ( int n = 0; n < NUM_BUMP_VECTS; n++ )
-                                {
-                                        stringstream lmss;
-                                        lmss << "lightmap_colors" << n;
-                                        faceroot.set_shader_input( lmss.str(), lmfaceentry->palette->palette_tex[n + 1] );
-
-                                        stringstream bbss;
-                                        bbss << "bump_basis" << n;
-                                        faceroot.set_shader_input( bbss.str(), g_localbumpbasis[n] );
-                                }
-                        }
+                        faceroot.set_material( Materials::get( face_mat ) );
 
                         NodePathCollection gn_npc = faceroot.find_all_matches( "**/+GeomNode" );
                         for ( int i = 0; i < gn_npc.get_num_paths(); i++ )
@@ -1098,6 +1183,8 @@ static void clear_model_nodes_below( const NodePath &top )
 
 void BSPLoader::load_static_props()
 {
+        SimpleHashMap<int, NodePath, int_hash> leaf2props;
+
         for ( size_t propnum = 0; propnum < _bspdata->dstaticprops.size(); propnum++ )
         {
                 dstaticprop_t *prop = &_bspdata->dstaticprops[propnum];
@@ -1135,7 +1222,9 @@ void BSPLoader::load_static_props()
                         lightsrc_col = color_from_value( ValueForKey( lightsrc, "_light" ) );
                 }
 
-                if ( prop->first_vertex_data != -1 )
+                if ( prop->first_vertex_data != -1 &&
+                     ( prop->flags & STATICPROPFLAGS_STATICLIGHTING ) != 0 &&
+                     ( prop->flags & STATICPROPFLAGS_DYNAMICLIGHTING ) == 0 )
                 {
                         // prop has pre computed per vertex lighting
                         pvector<VDataDef> vdatadefs;
@@ -1221,16 +1310,55 @@ void BSPLoader::load_static_props()
                                 GNWG_result res = get_geomnode_with_geom( propmdl, geom );
                                 PT( Geom ) mod_geom = res.geomnode->modify_geom( res.geomidx );
 
-                                if ( lightsrc != nullptr && res.geomnode->get_name() == "__lightsource__" )
+                                //if ( lightsrc != nullptr && res.geomnode->get_name() == "__lightsource__" )
+                                //{
+                                //        bspfile_cat.info()
+                                //                << "Applying color " << lightsrc_col << " to vertices on __lightsource__\n";
+                                //        for ( int j = 0; j < mod_vdata->get_num_rows(); j++ )
+                                //        {
+                                //                color_mod.set_row( j );
+                                //                color_mod.set_data4f( lightsrc_col );
+                                //        }
+                                //}
+
+                                if ( res.geomnode->get_name() == "__lightsource__" )
                                 {
-                                        bspfile_cat.info()
-                                                << "Applying color " << lightsrc_col << " to vertices on __lightsource__\n";
-                                        for ( int j = 0; j < mod_vdata->get_num_rows(); j++ )
-                                        {
-                                                color_mod.set_row( j );
-                                                color_mod.set_data4f( lightsrc_col );
-                                        }
+                                        continue;
                                 }
+#ifdef CIO
+                                else
+                                {
+                                        // game specific code, yuck
+                                        //
+                                        // don't apply vertex lighting to shadow models
+
+                                        bool shadow_skip = false;
+ 
+                                        for ( int j = 0; j < res.geomnode->get_num_geoms(); j++ )
+                                        {
+                                                const RenderState *state = res.geomnode->get_geom_state( j );
+                                                const TextureAttrib *tattr;
+                                                if ( state->get_attrib( tattr ) )
+                                                {
+                                                        if ( tattr->get_num_on_stages() == 0 )
+                                                        {
+                                                                continue;
+                                                        }
+                                                        Texture *tex = tattr->get_on_texture( tattr->get_on_stage( 0 ) );
+                                                        if ( tex->get_name().find( "square_drop_shadow" ) != string::npos ||
+                                                             tex->get_name().find( "drop-shadow" ) != string::npos )
+                                                        {
+                                                                // don't apply vertex lighting to a shadow model
+                                                                shadow_skip = true;
+                                                                break;
+                                                        }
+                                                }
+                                        }
+
+                                        if ( shadow_skip )
+                                                continue;
+                                }
+#endif
 
                                 mod_geom->set_vertex_data( mod_vdata );
                                 res.geomnode->set_geom( res.geomidx, mod_geom );
@@ -1239,11 +1367,104 @@ void BSPLoader::load_static_props()
                         // since this prop has static lighting applied to the vertices
                         // ignore any shaders, dynamic lights, or materials.
                         // also make sure the vertex colors are rendered.
-                        propmdl.set_shader_off( 1 );
-                        propmdl.set_light_off( 1 );
-                        propmdl.set_material_off( 1 );
-                        propmdl.set_attrib( ColorAttrib::make_vertex(), 2 );
+                        propnp.set_shader_off( 1 );
+                        propnp.set_light_off( 1 );
+                        propnp.set_material_off( 1 );
+                        propnp.set_attrib( ColorAttrib::make_vertex(), 2 );
                 }
+                else if ( prop->flags & STATICPROPFLAGS_NOLIGHTING )
+                {
+                        propnp.set_shader_off( 1 );
+                        propnp.set_light_off( 1 );
+                        propnp.set_material_off( 1 );
+                }
+
+#ifdef CIO
+                if ( prop->flags & STATICPROPFLAGS_LIGHTMAPSHADOWS ||
+                     prop->flags & STATICPROPFLAGS_REALSHADOWS )
+                {
+                        // game specific code!
+
+                        // we want to strip the fake drop shadows
+                        // since we either have lightmap shadows
+                        // or realtime depth shadows
+
+                        // GeomNodes with the drop_shadow texture on any of the RenderStates
+                        // will be completely removed. it's a little brute force, but should work.
+
+                        NodePathCollection npc = propmdl.find_all_matches( "**/+GeomNode" );
+                        for ( int i = 0; i < npc.get_num_paths(); i++ )
+                        {
+                                NodePath np = npc[i];
+                                GeomNode *gn = DCAST( GeomNode, np.node() );
+                                for ( int j = 0; j < gn->get_num_geoms(); j++ )
+                                {
+                                        const RenderState *state = gn->get_geom_state( j );
+                                        const TextureAttrib *tattr;
+                                        if ( state->get_attrib( tattr ) )
+                                        {
+                                                if ( tattr->get_num_on_stages() == 0 )
+                                                {
+                                                        continue;
+                                                }
+                                                Texture *tex = tattr->get_on_texture( tattr->get_on_stage( 0 ) );
+                                                if ( tex->get_name().find( "square_drop_shadow" ) != string::npos ||
+                                                     tex->get_name().find( "drop-shadow" ) != string::npos )
+                                                {
+                                                        np.remove_node();
+                                                }
+                                        }
+                                }
+                        }
+                }
+#endif
+
+                if ( prop->flags & STATICPROPFLAGS_DOUBLESIDE )
+                {
+                        propmdl.set_two_sided( true, 1 );
+                }
+
+                if ( prop->flags & STATICPROPFLAGS_HARDFLATTEN )
+                {
+                        propmdl.clear_model_nodes();
+                        propmdl.flatten_strong();
+                }
+
+                // only do group flattening if the prop doesn't
+                // use dynamic lighting (ambient probes).
+                //
+                // grouping all of the static props together
+                // will mess up the origin on each prop and they
+                // won't be dynamically lit correctly.
+
+                if ( ( prop->flags & STATICPROPFLAGS_GROUPFLATTEN ) != 0 &&
+                     ( prop->flags & STATICPROPFLAGS_DYNAMICLIGHTING ) == 0 )
+                {
+                        // find the leaf this prop resides in
+                        int leaf = find_leaf( propnp.get_pos() );
+                        if ( leaf2props.find( leaf ) == -1 )
+                        {
+                                stringstream ss;
+                                ss << "propGroupLeaf" << leaf;
+                                leaf2props.store( leaf, _result.attach_new_node( new BSPProp( ss.str() ) ) );
+                        }
+                        // move the prop underneath that leaf node group
+                        propnp.wrt_reparent_to( leaf2props[leaf] );
+                }
+        }
+
+        // any props with the STATICPROPFLAGS_GROUPFLATTEN bit
+        // have been grouped together under a common node for each leaf
+        //
+        // this means that any props in the same leaf will be
+        // aggressively flattened together
+        //
+        // do the flattening
+        for ( size_t i = 0; i < leaf2props.size(); i++ )
+        {
+                NodePath groupnp = leaf2props.get_data( i );
+                clear_model_nodes_below( groupnp );
+                groupnp.flatten_strong();
         }
 }
 
@@ -1364,7 +1585,8 @@ void BSPLoader::load_entities()
                         {
                                 if ( _sv_ent_dispatch != nullptr )
                                 {
-                                        PyObject *ret = PyObject_CallMethod( _sv_ent_dispatch, "createServerEntity", "Oi", _svent_to_class[classname], entnum );
+                                        PyObject *ret = PyObject_CallMethod( _sv_ent_dispatch, "createServerEntity",
+                                                                             "Oi", _svent_to_class[classname], entnum );
                                         if ( !ret )
                                         {
                                                 PyErr_Print();
@@ -1471,9 +1693,11 @@ void BSPLoader::update()
         {
                 _curr_leaf_idx = curr_leaf_idx;
                 _visible_leaf_bboxs.clear();
+                _visible_leafs.clear();
 
                 // Add ourselves to the visible list.
                 _visible_leaf_bboxs.push_back( _leaf_bboxs[curr_leaf_idx] );
+                _visible_leafs.push_back( curr_leaf_idx );
 
                 if ( _vis_leafs )
                 {
@@ -1494,6 +1718,7 @@ void BSPLoader::update()
                                         _leaf_visnp[i].set_color_scale( LColor( 0, 0, 1, 1 ), 1 );
                                 }
                                 _visible_leaf_bboxs.push_back( _leaf_bboxs[i] );
+                                _visible_leafs.push_back( i );
                         }
                         else
                         {
@@ -1718,7 +1943,7 @@ bool BSPLoader::read( const Filename &file )
                 SceneGraphReducer gr;
                 gr.apply_attribs( _result.node() );
 
-                _result.set_shader_off( 1 );
+                _result.set_shader_off();
                 _result.set_attrib( BSPFaceAttrib::make_default(), 1 );
         }
         else
@@ -1754,6 +1979,8 @@ bool BSPLoader::read( const Filename &file )
                 AsyncTaskManager::get_global_ptr()->add( _update_task );
         }
 
+        _colldata = SetupCollisionBSPData( _bspdata );
+
         _active_level = true;
 
         return true;
@@ -1763,7 +1990,7 @@ void BSPLoader::update_dynamic_node( const NodePath &node )
 {
         if ( _active_level )
         {
-                _amb_probe_mgr.update_node( node.node(), node.get_net_transform(), node.get_net_state() );
+                _amb_probe_mgr.update_node( node.node(), node.get_net_transform() );
         }
 }
 
@@ -1818,13 +2045,70 @@ void BSPLoader::do_optimizations()
 
 
         // We can flatten the props since they just sit there.
-        NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
-        for ( int i = 0; i < npc.get_num_paths(); i++ )
+        //NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
+        //for ( int i = 0; i < npc.get_num_paths(); i++ )
+        //{
+        //        DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
+        //        clear_model_nodes_below( npc[i] );
+        //        npc[i].flatten_strong();
+        //}
+
+        //========================================================================
+        // Since it's safe to assume that worldspawn geometry will never move,
+        // we can predetermine which leafs contain which worldspawn Geoms.
+        // This will greatly optimize Cull, as we no longer have to test
+        // each Geom against each visible leaf to determine visibility,
+        // we already know which Geoms are visible.
+
+        std::cout
+                << "There are " << _bspdata->dmodels[0].numfaces << " world faces." << std::endl;
+
+        bsp_build_leaf_geom_collector.start();
+
+        std::cout
+                << "Building accelerated leaf Geom structure...\n";
+
+        _leaf_geom_list.resize( _bspdata->dmodels[0].visleafs + 1 );
+        NodePath worldspawn = get_model( 0 );
+        NodePathCollection geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
+        for ( int i = 0; i < geomnodes.get_num_paths(); i++ )
         {
-                DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
-                clear_model_nodes_below( npc[i] );
-                npc[i].flatten_strong();
+                CPT( TransformState ) transform = geomnodes[i].get_net_transform();
+                CPT( RenderState ) node_state = geomnodes[i].get_net_state();
+                
+                PT( GeomNode ) gn = DCAST( GeomNode, geomnodes[i].node() );
+                int num_geoms = gn->get_num_geoms();
+                _leaf_geoms.reserve( _leaf_geoms.size() + num_geoms );
+                for ( int j = 0; j < num_geoms; j++ )
+                {
+                        CPT( Geom ) geom = gn->get_geom( j );
+                        CPT( RenderState ) geom_state = gn->get_geom_state( j );
+
+                        CPT( RenderState ) net_state = node_state->compose( geom_state );
+                        size_t geom_idx = _leaf_geoms.size();
+                        _leaf_geoms.push_back( WorldSpawnGeomState( geom, net_state ) );
+                        for ( int leafnum = 0; leafnum < _bspdata->dmodels[0].visleafs + 1; leafnum++ )
+                        {
+                                PT( BoundingBox ) leaf_bounds = _leaf_bboxs[leafnum];
+
+                                // Move the Geom bounds into leaf AABB space (world space).
+                                PT( GeometricBoundingVolume ) geom_gbv = geom->get_bounds()
+                                        ->make_copy()->as_geometric_bounding_volume();
+                                geom_gbv->xform( transform->get_mat() );
+
+                                if ( leaf_bounds->contains( geom_gbv ) != BoundingVolume::IF_no_intersection )
+                                {
+                                        // This leaf contains this geom!
+                                        _leaf_geom_list[leafnum].push_back( geom_idx );
+                                }
+                        }
+                }
         }
+
+        std::cout
+                << "Done.\n";
+
+        bsp_build_leaf_geom_collector.stop();
 
         _result.premunge_scene( _win->get_gsg() );
         _result.prepare_scene( _win->get_gsg() );
@@ -1862,23 +2146,13 @@ void BSPLoader::cleanup()
 
                         for ( int i = 0; i < npc.get_num_paths(); i++ )
                         {
-                                // If the net state at this node has no shaderAttrib or autoShader,
-                                // we know for a fact that we didn't generate a shader at any of the Geoms.
-                                CPT( RenderState ) net_state = npc[i].get_net_state();
-                                if ( !net_state->has_attrib( ShaderAttrib::get_class_slot() ) )
-                                {
-                                        continue;
-                                }
-                                else if ( !DCAST( ShaderAttrib, net_state->get_attrib( ShaderAttrib::get_class_slot() ) )->auto_shader() )
-                                {
-                                        continue;
-                                }
-
                                 PT( GeomNode ) gn = DCAST( GeomNode, npc[i].node() );
                                 for ( int j = 0; j < gn->get_num_geoms(); j++ )
                                 {
                                         CPT( RenderState ) state = gn->get_geom_state( j );
-                                        if ( state->_generated_shader != nullptr )
+                                        const ShaderAttrib *geom_shattr;
+                                        state->get_attrib_def( geom_shattr );
+                                        if ( ( geom_shattr->auto_shader() && geom_shattr->get_flag( BSPSHADERFLAG_AUTO ) ) )
                                         {
                                                 // We generated a shader for this Geom, remove it.
                                                 state = state->remove_attrib( ShaderAttrib::get_class_slot() );
@@ -1904,9 +2178,14 @@ void BSPLoader::cleanup()
 
         _materials.clear();
 
+        _geom_shader_cache.clear();
+
         _leaf_pvs.clear();
 
         _leaf_aabb_lock.acquire();
+        _leaf_geom_list.clear();
+        _leaf_geoms.clear();
+        _visible_leafs.clear();
         _leaf_bboxs.clear();
         _visible_leaf_bboxs.clear();
         _leaf_aabb_lock.release();
@@ -1955,7 +2234,12 @@ void BSPLoader::cleanup()
         if ( !_result.is_empty() )
                 _result.remove_node();
 
-        delete _bspdata;
+        if ( _colldata )
+                delete _colldata;
+        _colldata = nullptr;
+
+        if ( _bspdata )
+                delete _bspdata;
         _bspdata = nullptr;
 }
 
@@ -1980,7 +2264,6 @@ BSPLoader::BSPLoader() :
         _amb_probe_mgr( this ),
         _active_level( false ),
         _ai( false ),
-        _bspdata( nullptr ),
         _shadowcam_pos( -30, 25, 40 ),
         _shadowcam_mask( BitMask32::bit( 5 ) ),
         _shadow_color( 0.5, 0.5, 0.5, 1.0 ),
@@ -1989,9 +2272,12 @@ BSPLoader::BSPLoader() :
         _shadow_depth( nullptr ),
         _shadow_filmsize( 60 ),
         _shadow_texsize( 1024 ),
-        _want_shadows( true )
+        _want_shadows( true ),
+        _wireframe( false ),
+        _bspdata( nullptr ),
+        _colldata( nullptr )
 {
-        _diffuse_stage->set_texcoord_name( "diffuse" );
+        _diffuse_stage->set_texcoord_name( "basetexture" );
         _diffuse_stage->set_sort( 0 );
 
         _lightmap_stage->set_texcoord_name( "lightmap" );
@@ -2002,6 +2288,16 @@ BSPLoader::BSPLoader() :
         _shadow_stage->set_sort( 2 );
 
         _envmap_stage->set_mode( TextureStage::M_add );
+}
+
+void BSPLoader::set_wireframe( bool flag )
+{
+        _wireframe = flag;
+}
+
+INLINE bool BSPLoader::get_wireframe() const
+{
+        return _wireframe;
 }
 
 void BSPLoader::set_want_shadows( bool flag )
@@ -2303,10 +2599,10 @@ bool BSPLoader::trace_line( const LPoint3 &start, const LPoint3 &end )
         }
 
         Ray ray( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, LPoint3::zero(), LPoint3::zero() );
-        FaceFinder finder( _bspdata );
-        bool ret = !finder.find_intersection( ray );
+        Trace trace;
+        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _colldata, trace );
 
-        return ret;
+        return !trace.has_hit();
 }
 
 INLINE bspdata_t *BSPLoader::get_bspdata() const

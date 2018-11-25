@@ -1,7 +1,19 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file config_bsp.cpp
+ * @author Brian Lach
+ * @date March 27, 2018
+ */
+
 #include "config_bsp.h"
 #include "entity.h"
 #include "bsploader.h"
 #include "bsp_render.h"
+#include "shader_generator.h"
+#include "bsp_material.h"
+#include "shader_spec.h"
 
 ConfigureDef( config_bsp );
 ConfigureFn( config_bsp )
@@ -28,4 +40,10 @@ void init_libpandabsp()
         BSPRoot::init_type();
         BSPProp::init_type();
         BSPModel::init_type();
+        PSSMShaderGenerator::init_type();
+
+        BSPMaterial::init_type();
+        BSPMaterial::register_with_read_factory();
+
+        ShaderSpec::init_type();
 }

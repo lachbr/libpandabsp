@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file bsploader.h
+ * @author Brian Lach
+ * @date March 27, 2018
+ */
+
 #ifndef BSPLOADER_H
 #define BSPLOADER_H
 
@@ -130,6 +139,8 @@ private:
 
 };
 
+struct collbspdata_t;
+
 /**
  * Loads and handles the operations of PBSP files.
  */
@@ -152,6 +163,8 @@ PUBLISHED:
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
         void set_texture_contents_file( const Filename &file );
+        void set_wireframe( bool flag );
+        INLINE bool get_wireframe() const;
 
         void setup_shadowcam();
 
@@ -262,6 +275,7 @@ private:
 
 private:
         bspdata_t *_bspdata;
+        collbspdata_t *_colldata;
 	NodePath _result;
         NodePath _camera;
 	NodePath _render;
@@ -275,6 +289,7 @@ private:
         int _shadow_filmsize;
         int _shadow_texsize;
         bool _want_shadows;
+        bool _wireframe;
 	Filename _materials_file;
         PN_stdfloat _gamma;
 	typedef pmap<string, string> Tex2Mat;
@@ -288,6 +303,7 @@ private:
         bool _ai;
 	int _physics_type;
 	pvector<BoundingBox *> _visible_leaf_bboxs;
+        pvector<int> _visible_leafs;
 	int _curr_leaf_idx;
 
         // for purely client-sided, non networked entities
@@ -330,11 +346,30 @@ private:
         PT( GenericAsyncTask ) _update_task;
         UpdateSeq _generated_shader_seq;
 
+        typedef SimpleHashMap<const Geom *, CPT( RenderAttrib ), pointer_hash> geomshadercache_t;
+        geomshadercache_t _geom_shader_cache;
+
+        struct WorldSpawnGeomState
+        {
+                CPT( Geom ) geom;
+                CPT( RenderState ) state;
+
+                INLINE WorldSpawnGeomState( CPT( Geom ) g, CPT( RenderState ) st )
+                {
+                        geom = g;
+                        state = st;
+                }
+        };
+
+        pvector<WorldSpawnGeomState> _leaf_geoms;
+        pvector<pvector<int>> _leaf_geom_list;
+
 	friend class BSPFaceAttrib;
         friend class BSPGeomNode;
         friend class AmbientProbeManager;
         friend class BSPCullTraverser;
         friend class BSPRender;
+        friend class BSPCullableObject;
 
         static BSPLoader *_global_ptr;
 

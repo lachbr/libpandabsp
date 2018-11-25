@@ -1,3 +1,12 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * Copyright (c) CIO Team. All rights reserved.
+ *
+ * @file lightmap_palettes.h
+ * @author Brian Lach
+ * @date August 01, 2018
+ */
+
 #ifndef LIGHTMAP_PALETTES_H
 #define LIGHTMAP_PALETTES_H
 
