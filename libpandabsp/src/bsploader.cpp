@@ -776,6 +776,16 @@ void BSPLoader::make_faces()
         bspfile_cat.info()
                 << "Making faces...\n";
 
+        // build table of per-face beginning index into vertnormalindices
+        int face_vertnormalindices[MAX_MAP_FACES];
+        memset( face_vertnormalindices, -1, sizeof( int ) * MAX_MAP_FACES );
+        int normal_index = 0;
+        for ( int i = 0; i < _bspdata->numfaces; i++ )
+        {
+                face_vertnormalindices[i] = normal_index;
+                normal_index += _bspdata->dfaces[i].numedges;
+        }
+
         // In BSP files, models are brushes that have been grouped together to be used as an entity.
         // We can group all of the face GeomNodes of the model to a root node.
         for ( int modelnum = 0; modelnum < _bspdata->nummodels; modelnum++ )
@@ -928,10 +938,23 @@ void BSPLoader::make_faces()
 
                         ld.faceentry = lmfaceentry;
 
+                        LNormald poly_normal( 0 );
+
                         int last_edge = face->firstedge + face->numedges;
                         int first_edge = face->firstedge;
                         for ( int j = last_edge - 1; j >= first_edge; j-- )
                         {
+                                LNormald normal( 0 );
+                                if ( face_vertnormalindices[facenum] != -1 )
+                                {
+                                        int vert_normal_idx = face_vertnormalindices[facenum] + ( j - first_edge );
+                                        vec3_t normalf_v;
+                                        VectorCopy( _bspdata->vertnormals[_bspdata->vertnormalindices[vert_normal_idx]].point, normalf_v );
+                                        normal = LNormald( normalf_v[0], normalf_v[1], normalf_v[2] );
+                                }
+
+                                poly_normal += normal;
+
                                 int surf_edge = _bspdata->dsurfedges[j];
 
                                 dedge_t *edge;
@@ -946,6 +969,7 @@ void BSPLoader::make_faces()
                                         {
                                                 PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
                                                                                  face, k, &ld, tex );
+                                                v->set_normal( normal );
                                                 vpool->add_vertex( v );
                                                 poly->add_vertex( v );
                                         }
@@ -956,6 +980,7 @@ void BSPLoader::make_faces()
                                         {
                                                 PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
                                                                                  face, k, &ld, tex );
+                                                v->set_normal( normal );
                                                 vpool->add_vertex( v );
                                                 poly->add_vertex( v );
                                         }
@@ -965,8 +990,8 @@ void BSPLoader::make_faces()
                         data->remove_unused_vertices( true );
                         data->remove_invalid_primitives( true );
 
-                        poly->recompute_polygon_normal();
-                        LNormald poly_normal = poly->get_normal();
+                        poly_normal /= face->numedges;
+
                         int face_type = BSPFaceAttrib::FACETYPE_WALL;
 
                         bool recv_projshadows = false;
@@ -983,7 +1008,6 @@ void BSPLoader::make_faces()
                                 }
                         }
 
-                        data->recompute_vertex_normals( 90.0 );
                         data->recompute_tangent_binormal_auto();
 
                         NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
