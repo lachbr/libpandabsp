@@ -10,7 +10,6 @@
 */
 
 #include "bsp_trace.h"
-#include "mathlib/ssemath.h"
 
 #include <pstatTimer.h>
 #include <pstatCollector.h>
@@ -156,29 +155,22 @@ bool FaceFinder::enumerate_node( int node_id, const Ray &ray, float f, int conte
 // SIMD accelerated ray tracing for box brushes
 
 const fltx4 Four_DistEpsilons = { DIST_EPSILON,DIST_EPSILON,DIST_EPSILON,DIST_EPSILON };
-const int32_t ALIGN_16BYTE g_CubeFaceIndex0[4] = { 0,1,2,-1 };
-const int32_t ALIGN_16BYTE g_CubeFaceIndex1[4] = { 3,4,5,-1 };
+const fltx4 g_CubeFaceIndex0 = { 0, 1, 2, -1 };
+const fltx4 g_CubeFaceIndex1 = { 3, 4, 5, -1 };
 
 bool IntersectRayWithBoxBrush( Trace *trace, const dbrush_t *brush, const cboxbrush_t *bbrush )
 {
-        // Load the unaligned ray/box parameters into SIMD registers
-        fltx4 start = LoadUnaligned3SIMD( trace->start_pos.get_data() );
-        fltx4 extents = LoadUnaligned3SIMD( trace->extents.get_data() );
-        fltx4 delta = LoadUnaligned3SIMD( trace->delta.get_data() );
-        fltx4 boxmins = LoadAlignedSIMD( bbrush->mins );
-        fltx4 boxmaxs = LoadAlignedSIMD( bbrush->maxs );
-
         // compute the mins/maxs of the box expanded by the ray extents
         // relocate the problem so that the ray start is at the origin
-        fltx4 offsetmins = SubSIMD( boxmins, start );
-        fltx4 offsetmaxs = SubSIMD( boxmaxs, start );
-        fltx4 offsetmins_exp = SubSIMD( offsetmins, extents );
-        fltx4 offsetmaxs_exp = AddSIMD( offsetmaxs, extents );
+        fltx4 offsetmins = SubSIMD( bbrush->ssemaxs, trace->sse_start );
+        fltx4 offsetmaxs = SubSIMD( bbrush->ssemaxs, trace->sse_start );
+        fltx4 offsetmins_exp = SubSIMD( offsetmins, trace->sse_extents );
+        fltx4 offsetmaxs_exp = AddSIMD( offsetmaxs, trace->sse_extents );
 
         // check to see if both the origin (start point) and the end point (delta) are on the front side
         // of any of the box sides - if so there can be no intersection
         fltx4 startout_mins = CmpLtSIMD( Four_Zeros, offsetmins_exp );
-        fltx4 endout_mins = CmpLtSIMD( delta, offsetmins_exp );
+        fltx4 endout_mins = CmpLtSIMD( trace->sse_delta, offsetmins_exp );
         fltx4 mins_mask = AndSIMD( startout_mins, endout_mins );
         fltx4 startout_maxs = CmpGtSIMD( Four_Zeros, offsetmaxs_exp );
         fltx4 endout_maxs = CmpGtSIMD( Four_Zeros, offsetmaxs_exp );
@@ -190,9 +182,8 @@ bool IntersectRayWithBoxBrush( Trace *trace, const dbrush_t *brush, const cboxbr
         
         fltx4 cross_plane = OrSIMD( XorSIMD( startout_mins, endout_mins ), XorSIMD( startout_maxs, endout_maxs ) );
         // now build the per-axis interval of t for intersections
-        fltx4 inv_delta = LoadUnaligned3SIMD( trace->inv_delta.get_data() );
-        fltx4 tmins = MulSIMD( offsetmins_exp, inv_delta );
-        fltx4 tmaxs = MulSIMD( offsetmaxs_exp, inv_delta );
+        fltx4 tmins = MulSIMD( offsetmins_exp, trace->sse_inv_delta );
+        fltx4 tmaxs = MulSIMD( offsetmaxs_exp, trace->sse_inv_delta );
         // now sort the interval per axis
         fltx4 mint = MinSIMD( tmins, tmaxs );
         fltx4 maxt = MaxSIMD( tmins, tmaxs );
@@ -216,11 +207,11 @@ bool IntersectRayWithBoxBrush( Trace *trace, const dbrush_t *brush, const cboxbr
                 offsetmins_exp = SubSIMD( offsetmins_exp, Four_DistEpsilons );
                 offsetmaxs_exp = AddSIMD( offsetmaxs_exp, Four_DistEpsilons );
 
-                fltx4 tmins = MulSIMD( offsetmins_exp, inv_delta );
-                fltx4 tmaxs = MulSIMD( offsetmaxs_exp, inv_delta );
+                fltx4 tmins = MulSIMD( offsetmins_exp, trace->sse_inv_delta );
+                fltx4 tmaxs = MulSIMD( offsetmaxs_exp, trace->sse_inv_delta );
 
-                fltx4 minface0 = LoadAlignedSIMD( (float *)g_CubeFaceIndex0 );
-                fltx4 minface1 = LoadAlignedSIMD( (float *)g_CubeFaceIndex1 );
+                fltx4 minface0 = g_CubeFaceIndex0;
+                fltx4 minface1 = g_CubeFaceIndex1;
                 fltx4 face_mask = CmpLeSIMD( tmins, tmaxs );
                 fltx4 mint = MinSIMD( tmins, tmaxs );
                 fltx4 maxt = MaxSIMD( tmins, tmaxs );
@@ -312,10 +303,8 @@ bool IntersectRayWithBoxBrush( Trace *trace, const dbrush_t *brush, const cboxbr
 #define NEVER_UPDATED -99999
 
 template <bool IS_POINT>
-void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush )
+void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush, int brush_idx )
 {
-        int brush_idx = brush - trace->bspdata->bspdata->dbrushes.data();
-
         // special SIMD accelerated case for box brushes ( 6 sides and axis-aligned )
         if ( trace->bspdata->boxbrushes[brush_idx].is_box )
         {
@@ -488,6 +477,8 @@ void CM_TraceToLeaf( Trace *trace, int leaf_idx, float start_frac, float end_fra
 {
         const dleaf_t *leaf = trace->bspdata->bspdata->dleafs + leaf_idx;
 
+        bool simd_loaded = false;
+
         //
         // trace ray/box sweep against all brushes in this leaf
         //
@@ -506,7 +497,14 @@ void CM_TraceToLeaf( Trace *trace, int leaf_idx, float start_frac, float end_fra
                         continue;
                 }
 
-                CM_ClipBoxToBrush<IS_POINT>( trace, brush );
+                // only load SIMD if we have to
+                if ( trace->bspdata->boxbrushes[brushidx].is_box && !simd_loaded )
+                {
+                        trace->load_simd();
+                        simd_loaded = true;
+                }   
+
+                CM_ClipBoxToBrush<IS_POINT>( trace, brush, brushidx );
                 if ( !trace->fraction )
                 {
                         return;
@@ -744,6 +742,9 @@ collbspdata_t *SetupCollisionBSPData( const bspdata_t *bspdata )
                                         bbrush.mins[axis] = -plane->dist;
                                         bbrush.surface_indices[axis] = t;
                                 }
+
+                                bbrush.ssemins = LoadAlignedSIMD( LVector4( bbrush.mins, 0 ).get_data() );
+                                bbrush.ssemaxs = LoadAlignedSIMD( LVector4( bbrush.maxs, 0 ).get_data() );
                         }
 
                         if ( is_box )

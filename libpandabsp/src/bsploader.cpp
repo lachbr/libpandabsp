@@ -776,6 +776,16 @@ void BSPLoader::make_faces()
         bspfile_cat.info()
                 << "Making faces...\n";
 
+        // build table of per-face beginning index into vertnormalindices
+        int face_vertnormalindices[MAX_MAP_FACES];
+        memset( face_vertnormalindices, -1, sizeof( int ) * MAX_MAP_FACES );
+        int normal_index = 0;
+        for ( int i = 0; i < _bspdata->numfaces; i++ )
+        {
+                face_vertnormalindices[i] = normal_index;
+                normal_index += _bspdata->dfaces[i].numedges;
+        }
+
         // In BSP files, models are brushes that have been grouped together to be used as an entity.
         // We can group all of the face GeomNodes of the model to a root node.
         for ( int modelnum = 0; modelnum < _bspdata->nummodels; modelnum++ )
@@ -928,10 +938,23 @@ void BSPLoader::make_faces()
 
                         ld.faceentry = lmfaceentry;
 
+                        LNormald poly_normal( 0 );
+
                         int last_edge = face->firstedge + face->numedges;
                         int first_edge = face->firstedge;
                         for ( int j = last_edge - 1; j >= first_edge; j-- )
                         {
+                                LNormald normal( 0 );
+                                if ( face_vertnormalindices[facenum] != -1 )
+                                {
+                                        int vert_normal_idx = face_vertnormalindices[facenum] + ( j - first_edge );
+                                        vec3_t normalf_v;
+                                        VectorCopy( _bspdata->vertnormals[_bspdata->vertnormalindices[vert_normal_idx]].point, normalf_v );
+                                        normal = LNormald( normalf_v[0], normalf_v[1], normalf_v[2] );
+                                }
+
+                                poly_normal += normal;
+
                                 int surf_edge = _bspdata->dsurfedges[j];
 
                                 dedge_t *edge;
@@ -946,6 +969,7 @@ void BSPLoader::make_faces()
                                         {
                                                 PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
                                                                                  face, k, &ld, tex );
+                                                v->set_normal( normal );
                                                 vpool->add_vertex( v );
                                                 poly->add_vertex( v );
                                         }
@@ -956,6 +980,7 @@ void BSPLoader::make_faces()
                                         {
                                                 PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
                                                                                  face, k, &ld, tex );
+                                                v->set_normal( normal );
                                                 vpool->add_vertex( v );
                                                 poly->add_vertex( v );
                                         }
@@ -965,8 +990,8 @@ void BSPLoader::make_faces()
                         data->remove_unused_vertices( true );
                         data->remove_invalid_primitives( true );
 
-                        poly->recompute_polygon_normal();
-                        LNormald poly_normal = poly->get_normal();
+                        poly_normal /= face->numedges;
+
                         int face_type = BSPFaceAttrib::FACETYPE_WALL;
 
                         bool recv_projshadows = false;
@@ -983,7 +1008,6 @@ void BSPLoader::make_faces()
                                 }
                         }
 
-                        data->recompute_vertex_normals( 90.0 );
                         data->recompute_tangent_binormal_auto();
 
                         NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
@@ -2043,16 +2067,83 @@ void BSPLoader::do_optimizations()
                 }
         }
 
-
         // We can flatten the props since they just sit there.
-        //NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
-        //for ( int i = 0; i < npc.get_num_paths(); i++ )
-        //{
-        //        DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
-        //        clear_model_nodes_below( npc[i] );
-        //        npc[i].flatten_strong();
-        //}
+        NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
+        for ( int i = 0; i < npc.get_num_paths(); i++ )
+        {
+                DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
+                clear_model_nodes_below( npc[i] );
+                npc[i].flatten_strong();
+        }
 
+        std::cout << "There are " << _bspdata->dmodels[0].numfaces << " world faces." << std::endl;
+
+        // another very important optimization is to try and flatten all faces together that are in the same leaf
+
+        // determine list of geoms for each leaf
+        // foreach leaf: move geoms to new node, flatten that node, move geoms back to worldspawn
+        // generate leaf geom structure
+
+        NodePath worldspawn = get_model( 0 );
+        NodePathCollection geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
+
+        byte geoms_found[5][MAX_MAP_FACES];
+        memset( geoms_found, 0, MAX_MAP_FACES * 5 );
+        int global_geomnum = 0;
+
+        PT( GeomNode ) newgn = new GeomNode( "worldspawn" );
+
+        // not including the solid leaf 0
+        for ( int leafnum = 1; leafnum < _bspdata->dmodels[0].visleafs + 1; leafnum++ )
+        {
+                PT( GeomNode ) lgn = new GeomNode( "leafnode" );
+                NodePath leafnode( lgn );
+
+                BoundingBox *leaf_bounds = _leaf_bboxs[leafnum];
+
+                for ( int i = 0; i < geomnodes.get_num_paths(); i++ )
+                {
+                        CPT( TransformState ) transform = geomnodes[i].get_net_transform();
+                        CPT( RenderState ) node_state = geomnodes[i].get_net_state();
+
+                        PT( GeomNode ) gn = DCAST( GeomNode, geomnodes[i].node() );
+                        int num_geoms = gn->get_num_geoms();
+
+                        for ( int geomnum = 0; geomnum < num_geoms; geomnum++ )
+                        {
+                                if ( geoms_found[i][geomnum] )
+                                        continue;
+
+                                const Geom *geom = gn->get_geom( geomnum );
+
+                                        // Move the Geom bounds into leaf AABB space (world space).
+                                PT( GeometricBoundingVolume ) geom_gbv = geom->get_bounds()
+                                        ->make_copy()->as_geometric_bounding_volume();
+                                geom_gbv->xform( transform->get_mat() );
+
+                                if ( leaf_bounds->contains( geom_gbv ) != BoundingVolume::IF_no_intersection )
+                                {
+                                        // This leaf contains this geom!
+                                        lgn->add_geom( gn->modify_geom( geomnum ), gn->get_geom_state( geomnum ) );
+                                        geoms_found[i][geomnum] = 1;
+                                }
+                        }
+                }
+                
+                // aggressively combine all geoms in this leaf
+                leafnode.clear_model_nodes();
+                leafnode.flatten_strong();
+
+                // now move the new geoms back to worldspawn
+                newgn->add_geoms_from( lgn );
+        }
+        
+        // replace the old non-flattened geoms with the new ones
+        worldspawn.node()->remove_all_children();
+        worldspawn.attach_new_node( newgn );
+
+        std::cout << "Flattened to " << newgn->get_num_geoms() << " world faces\n";
+        
         //========================================================================
         // Since it's safe to assume that worldspawn geometry will never move,
         // we can predetermine which leafs contain which worldspawn Geoms.
@@ -2060,17 +2151,14 @@ void BSPLoader::do_optimizations()
         // each Geom against each visible leaf to determine visibility,
         // we already know which Geoms are visible.
 
-        std::cout
-                << "There are " << _bspdata->dmodels[0].numfaces << " world faces." << std::endl;
-
         bsp_build_leaf_geom_collector.start();
 
-        std::cout
-                << "Building accelerated leaf Geom structure...\n";
+        std::cout << "Building accelerated leaf Geom structure...\n";
+
+        worldspawn = get_model( 0 );
+        geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
 
         _leaf_geom_list.resize( _bspdata->dmodels[0].visleafs + 1 );
-        NodePath worldspawn = get_model( 0 );
-        NodePathCollection geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
         for ( int i = 0; i < geomnodes.get_num_paths(); i++ )
         {
                 CPT( TransformState ) transform = geomnodes[i].get_net_transform();
@@ -2102,11 +2190,14 @@ void BSPLoader::do_optimizations()
                                         _leaf_geom_list[leafnum].push_back( geom_idx );
                                 }
                         }
+
+                        PT( Geom ) modgeom = gn->modify_geom( j );
+                        modgeom->set_bounds_type( BoundingVolume::BT_fastest );
+                        gn->set_geom( j, modgeom );
                 }
         }
 
-        std::cout
-                << "Done.\n";
+        std::cout << "Done.\n";
 
         bsp_build_leaf_geom_collector.stop();
 

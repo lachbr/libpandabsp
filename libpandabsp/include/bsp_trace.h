@@ -33,6 +33,9 @@ struct cboxbrush_t
         LVector3 mins;
         LVector3 maxs;
 
+        fltx4 ssemins;
+        fltx4 ssemaxs;
+
         unsigned short surface_indices[6];
 
         int is_box;
