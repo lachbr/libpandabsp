@@ -36,7 +36,7 @@ PUBLISHED:
 
         static TextureStage *get_basetexture();
         static TextureStage *get_lightmap();
-        static TextureStage *get_bumped_lightmap( int n );
+        static TextureStage *get_bumped_lightmap();
         static TextureStage *get_spheremap();
         static TextureStage *get_cubemap();
         static TextureStage *get_normalmap();
