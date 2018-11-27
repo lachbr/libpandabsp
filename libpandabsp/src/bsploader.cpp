@@ -2067,25 +2067,16 @@ void BSPLoader::do_optimizations()
                 }
         }
 
-
         // We can flatten the props since they just sit there.
-        //NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
-        //for ( int i = 0; i < npc.get_num_paths(); i++ )
-        //{
-        //        DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
-        //        clear_model_nodes_below( npc[i] );
-        //        npc[i].flatten_strong();
-        //}
+        NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
+        for ( int i = 0; i < npc.get_num_paths(); i++ )
+        {
+                DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
+                clear_model_nodes_below( npc[i] );
+                npc[i].flatten_strong();
+        }
 
-        //========================================================================
-        // Since it's safe to assume that worldspawn geometry will never move,
-        // we can predetermine which leafs contain which worldspawn Geoms.
-        // This will greatly optimize Cull, as we no longer have to test
-        // each Geom against each visible leaf to determine visibility,
-        // we already know which Geoms are visible.
-
-        std::cout
-                << "There are " << _bspdata->dmodels[0].numfaces << " world faces." << std::endl;
+        std::cout << "There are " << _bspdata->dmodels[0].numfaces << " world faces." << std::endl;
 
         // another very important optimization is to try and flatten all faces together that are in the same leaf
 
@@ -2139,24 +2130,30 @@ void BSPLoader::do_optimizations()
                         }
                 }
                 
-
+                // aggressively combine all geoms in this leaf
                 leafnode.clear_model_nodes();
                 leafnode.flatten_strong();
 
                 // now move the new geoms back to worldspawn
                 newgn->add_geoms_from( lgn );
         }
-
+        
+        // replace the old non-flattened geoms with the new ones
         worldspawn.node()->remove_all_children();
         worldspawn.attach_new_node( newgn );
 
-
-        //std::cout << "Flattened to " << wsgn->get_num_geoms() << " world faces\n";
+        std::cout << "Flattened to " << newgn->get_num_geoms() << " world faces\n";
+        
+        //========================================================================
+        // Since it's safe to assume that worldspawn geometry will never move,
+        // we can predetermine which leafs contain which worldspawn Geoms.
+        // This will greatly optimize Cull, as we no longer have to test
+        // each Geom against each visible leaf to determine visibility,
+        // we already know which Geoms are visible.
 
         bsp_build_leaf_geom_collector.start();
 
-        std::cout
-                << "Building accelerated leaf Geom structure...\n";
+        std::cout << "Building accelerated leaf Geom structure...\n";
 
         worldspawn = get_model( 0 );
         geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
@@ -2200,8 +2197,7 @@ void BSPLoader::do_optimizations()
                 }
         }
 
-        std::cout
-                << "Done.\n";
+        std::cout << "Done.\n";
 
         bsp_build_leaf_geom_collector.stop();
 

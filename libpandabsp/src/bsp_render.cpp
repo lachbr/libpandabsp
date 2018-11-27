@@ -298,6 +298,8 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                         // Cuts down on Cull time.
                         byte visited[MAX_MAP_FACES] = { 0 };
 
+                        _loader->_leaf_aabb_lock.acquire();
+
                         size_t num_visible_leafs = _loader->_visible_leafs.size();
                         for ( size_t i = 0; i < num_visible_leafs; i++ )
                         {
@@ -363,6 +365,8 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                                 }
                                 
                         }
+
+                        _loader->_leaf_aabb_lock.release();
 
                         wsp_trav_collector.stop();
                 }
