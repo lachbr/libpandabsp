@@ -2087,14 +2087,81 @@ void BSPLoader::do_optimizations()
         std::cout
                 << "There are " << _bspdata->dmodels[0].numfaces << " world faces." << std::endl;
 
+        // another very important optimization is to try and flatten all faces together that are in the same leaf
+
+        // determine list of geoms for each leaf
+        // foreach leaf: move geoms to new node, flatten that node, move geoms back to worldspawn
+        // generate leaf geom structure
+
+        NodePath worldspawn = get_model( 0 );
+        NodePathCollection geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
+
+        byte geoms_found[5][MAX_MAP_FACES];
+        memset( geoms_found, 0, MAX_MAP_FACES * 5 );
+        int global_geomnum = 0;
+
+        PT( GeomNode ) newgn = new GeomNode( "worldspawn" );
+
+        // not including the solid leaf 0
+        for ( int leafnum = 1; leafnum < _bspdata->dmodels[0].visleafs + 1; leafnum++ )
+        {
+                PT( GeomNode ) lgn = new GeomNode( "leafnode" );
+                NodePath leafnode( lgn );
+
+                BoundingBox *leaf_bounds = _leaf_bboxs[leafnum];
+
+                for ( int i = 0; i < geomnodes.get_num_paths(); i++ )
+                {
+                        CPT( TransformState ) transform = geomnodes[i].get_net_transform();
+                        CPT( RenderState ) node_state = geomnodes[i].get_net_state();
+
+                        PT( GeomNode ) gn = DCAST( GeomNode, geomnodes[i].node() );
+                        int num_geoms = gn->get_num_geoms();
+
+                        for ( int geomnum = 0; geomnum < num_geoms; geomnum++ )
+                        {
+                                if ( geoms_found[i][geomnum] )
+                                        continue;
+
+                                const Geom *geom = gn->get_geom( geomnum );
+
+                                        // Move the Geom bounds into leaf AABB space (world space).
+                                PT( GeometricBoundingVolume ) geom_gbv = geom->get_bounds()
+                                        ->make_copy()->as_geometric_bounding_volume();
+                                geom_gbv->xform( transform->get_mat() );
+
+                                if ( leaf_bounds->contains( geom_gbv ) != BoundingVolume::IF_no_intersection )
+                                {
+                                        // This leaf contains this geom!
+                                        lgn->add_geom( gn->modify_geom( geomnum ), gn->get_geom_state( geomnum ) );
+                                        geoms_found[i][geomnum] = 1;
+                                }
+                        }
+                }
+                
+
+                leafnode.clear_model_nodes();
+                leafnode.flatten_strong();
+
+                // now move the new geoms back to worldspawn
+                newgn->add_geoms_from( lgn );
+        }
+
+        worldspawn.node()->remove_all_children();
+        worldspawn.attach_new_node( newgn );
+
+
+        //std::cout << "Flattened to " << wsgn->get_num_geoms() << " world faces\n";
+
         bsp_build_leaf_geom_collector.start();
 
         std::cout
                 << "Building accelerated leaf Geom structure...\n";
 
+        worldspawn = get_model( 0 );
+        geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
+
         _leaf_geom_list.resize( _bspdata->dmodels[0].visleafs + 1 );
-        NodePath worldspawn = get_model( 0 );
-        NodePathCollection geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
         for ( int i = 0; i < geomnodes.get_num_paths(); i++ )
         {
                 CPT( TransformState ) transform = geomnodes[i].get_net_transform();
@@ -2126,6 +2193,10 @@ void BSPLoader::do_optimizations()
                                         _leaf_geom_list[leafnum].push_back( geom_idx );
                                 }
                         }
+
+                        PT( Geom ) modgeom = gn->modify_geom( j );
+                        modgeom->set_bounds_type( BoundingVolume::BT_fastest );
+                        gn->set_geom( j, modgeom );
                 }
         }
 

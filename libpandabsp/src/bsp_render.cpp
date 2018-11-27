@@ -296,21 +296,23 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
 
                         // We have a specialized way of rendering worldspawn.
                         // Cuts down on Cull time.
-                        bitset<MAX_MAP_FACES> rendered;
-                        bitset<MAX_MAP_FACES> culled;
+                        byte visited[MAX_MAP_FACES] = { 0 };
+
                         size_t num_visible_leafs = _loader->_visible_leafs.size();
                         for ( size_t i = 0; i < num_visible_leafs; i++ )
                         {
                                 const int &leaf = _loader->_visible_leafs[i];
                                 const pvector<int> &geoms = _loader->_leaf_geom_list[leaf];
                                 size_t num_geoms = geoms.size();
-                                wsp_geom_traverse_collector.start();
+                                
                                 for ( size_t j = 0; j < num_geoms; j++ )
                                 {
+                                        wsp_geom_traverse_collector.start();
                                         const int &geom_id = geoms[j];
+                                        wsp_geom_traverse_collector.stop();
 
                                         wsp_bitset_collector.start();
-                                        if ( culled.test( geom_id ) || rendered.test( geom_id ) )
+                                        if ( visited[geom_id] )
                                         {
                                                 // Geom already culled or rendered.
                                                 wsp_bitset_collector.stop();
@@ -329,7 +331,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                                         if ( !geom_cull_test( gs.geom, gs.state, data, geom_gbv ) )
                                         {
                                                 // Geom culled away by view frustum or clip planes.
-                                                culled.set( geom_id );
+                                                visited[geom_id] = 1;
                                                 wsp_ctest_collector.stop();
                                                 continue;
                                         }
@@ -357,9 +359,9 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                                         wsp_record_collector.stop();
 
                                         // Make sure we don't render this geom again.
-                                        rendered.set( geom_id );
+                                        visited[geom_id] = 1;
                                 }
-                                wsp_geom_traverse_collector.stop();
+                                
                         }
 
                         wsp_trav_collector.stop();
