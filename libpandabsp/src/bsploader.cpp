@@ -1021,16 +1021,13 @@ void BSPLoader::make_faces()
                         {
                                 if ( face->bumped_lightmap && mat_normalmap )
                                 {
-                                        for ( int n = 0; n < NUM_BUMP_VECTS; n++ )
-                                        {
-                                                faceroot.set_texture( TextureStages::get_bumped_lightmap( n ),
-                                                                      lmfaceentry->palette->palette_tex[n + 1] );
-                                        }
+                                        faceroot.set_texture( TextureStages::get_bumped_lightmap(),
+                                                                lmfaceentry->palette->palette_tex );
                                 }
                                 else
                                 {
                                         faceroot.set_texture( TextureStages::get_lightmap(),
-                                                              lmfaceentry->palette->palette_tex[0] );
+                                                              lmfaceentry->palette->palette_tex );
                                 }
                         }
                         if ( mat_normalmap )

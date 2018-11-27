@@ -277,18 +277,19 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_ReferenceCount;
 extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
 #endif
-// LVecBase4f
+// Namable
 #ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_LVecBase4f;
-inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
-  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
-}
+static struct Dtool_PyTypedObject *Dtool_Ptr_Namable;
 #else
-extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
-extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
+extern struct Dtool_PyTypedObject Dtool_Namable;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
+#endif
+// TypedReferenceCount
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_TypedReferenceCount;
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
 #endif
 // LVector3f
 #ifndef LINK_ALL_STATIC
@@ -316,26 +317,18 @@ extern struct Dtool_PyTypedObject Dtool_LPoint3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
 extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
 #endif
-// Namable
+// LVecBase4f
 #ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_Namable;
+static struct Dtool_PyTypedObject *Dtool_Ptr_LVecBase4f;
+inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
+  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
+}
 #else
-extern struct Dtool_PyTypedObject Dtool_Namable;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
-#endif
-// TypedReferenceCount
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_TypedReferenceCount;
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
-#endif
-// TypedWritableReferenceCount
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_TypedWritableReferenceCount;
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
+extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
+extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
 #endif
 // TypedWritable
 #ifndef LINK_ALL_STATIC
@@ -343,6 +336,13 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_TypedWritable;
 #else
 extern struct Dtool_PyTypedObject Dtool_TypedWritable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedWritable;
+#endif
+// TypedWritableReferenceCount
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_TypedWritableReferenceCount;
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
 #endif
 // BitMask< uint32_t, 32 >
 #ifndef LINK_ALL_STATIC
@@ -357,13 +357,6 @@ extern struct Dtool_PyTypedObject Dtool_BitMask_uint32_t_32;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_BitMask_uint32_t_32 = &Dtool_BitMask_uint32_t_32;
 extern BitMask< uint32_t, 32 > *Dtool_Coerce_BitMask_uint32_t_32(PyObject *args, BitMask< uint32_t, 32 > &coerced);
 #endif
-// GeomVertexAnimationSpec
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_GeomVertexAnimationSpec;
-#else
-extern struct Dtool_PyTypedObject Dtool_GeomVertexAnimationSpec;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GeomVertexAnimationSpec = &Dtool_GeomVertexAnimationSpec;
-#endif
 // RenderAttrib
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_RenderAttrib;
@@ -371,19 +364,19 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_RenderAttrib;
 extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
 #endif
+// GeomVertexAnimationSpec
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_GeomVertexAnimationSpec;
+#else
+extern struct Dtool_PyTypedObject Dtool_GeomVertexAnimationSpec;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GeomVertexAnimationSpec = &Dtool_GeomVertexAnimationSpec;
+#endif
 // TextureStage
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_TextureStage;
 #else
 extern struct Dtool_PyTypedObject Dtool_TextureStage;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TextureStage = &Dtool_TextureStage;
-#endif
-// TransformState
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_TransformState;
-#else
-extern struct Dtool_PyTypedObject Dtool_TransformState;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TransformState = &Dtool_TransformState;
 #endif
 // RenderState
 #ifndef LINK_ALL_STATIC
@@ -398,19 +391,19 @@ extern struct Dtool_PyTypedObject Dtool_RenderState;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderState = &Dtool_RenderState;
 extern bool Dtool_ConstCoerce_RenderState(PyObject *args, CPT(RenderState) &coerced);
 #endif
+// TransformState
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_TransformState;
+#else
+extern struct Dtool_PyTypedObject Dtool_TransformState;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TransformState = &Dtool_TransformState;
+#endif
 // PandaNode
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_PandaNode;
 #else
 extern struct Dtool_PyTypedObject Dtool_PandaNode;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_PandaNode = &Dtool_PandaNode;
-#endif
-// GeometricBoundingVolume
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_GeometricBoundingVolume;
-#else
-extern struct Dtool_PyTypedObject Dtool_GeometricBoundingVolume;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dtool_GeometricBoundingVolume;
 #endif
 // Texture
 #ifndef LINK_ALL_STATIC
@@ -419,12 +412,12 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_Texture;
 extern struct Dtool_PyTypedObject Dtool_Texture;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Texture = &Dtool_Texture;
 #endif
-// ShaderInput
+// GeometricBoundingVolume
 #ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_ShaderInput;
+static struct Dtool_PyTypedObject *Dtool_Ptr_GeometricBoundingVolume;
 #else
-extern struct Dtool_PyTypedObject Dtool_ShaderInput;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderInput = &Dtool_ShaderInput;
+extern struct Dtool_PyTypedObject Dtool_GeometricBoundingVolume;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dtool_GeometricBoundingVolume;
 #endif
 // NodePath
 #ifndef LINK_ALL_STATIC
@@ -433,12 +426,26 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_NodePath;
 extern struct Dtool_PyTypedObject Dtool_NodePath;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_NodePath = &Dtool_NodePath;
 #endif
+// ShaderInput
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_ShaderInput;
+#else
+extern struct Dtool_PyTypedObject Dtool_ShaderInput;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderInput = &Dtool_ShaderInput;
+#endif
 // CullTraverser
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_CullTraverser;
 #else
 extern struct Dtool_PyTypedObject Dtool_CullTraverser;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_CullTraverser = &Dtool_CullTraverser;
+#endif
+// GraphicsStateGuardian
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_GraphicsStateGuardian;
+#else
+extern struct Dtool_PyTypedObject Dtool_GraphicsStateGuardian;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsStateGuardian = &Dtool_GraphicsStateGuardian;
 #endif
 // ShaderGenerator
 #ifndef LINK_ALL_STATIC
@@ -459,13 +466,6 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderGenerator = &Dtool_Shad
 extern bool Dtool_ConstCoerce_ShaderGenerator(PyObject *args, CPT(ShaderGenerator) &coerced);
 extern bool Dtool_Coerce_ShaderGenerator(PyObject *args, PT(ShaderGenerator) &coerced);
 #endif
-// GraphicsStateGuardian
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_GraphicsStateGuardian;
-#else
-extern struct Dtool_PyTypedObject Dtool_GraphicsStateGuardian;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsStateGuardian = &Dtool_GraphicsStateGuardian;
-#endif
 // BoundingBox
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_BoundingBox;
@@ -480,19 +480,19 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_GraphicsWindow;
 extern struct Dtool_PyTypedObject Dtool_GraphicsWindow;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsWindow = &Dtool_GraphicsWindow;
 #endif
-// ModelNode
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_ModelNode;
-#else
-extern struct Dtool_PyTypedObject Dtool_ModelNode;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelNode = &Dtool_ModelNode;
-#endif
 // Material
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_Material;
 #else
 extern struct Dtool_PyTypedObject Dtool_Material;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Material = &Dtool_Material;
+#endif
+// ModelNode
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_ModelNode;
+#else
+extern struct Dtool_PyTypedObject Dtool_ModelNode;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelNode = &Dtool_ModelNode;
 #endif
 
 /**
@@ -3182,6 +3182,19 @@ static PyObject *Dtool_BSPLoader_find_leaf_88(PyObject *self, PyObject *arg) {
     return nullptr;
   }
   {
+    // -2 inline int BSPLoader::find_leaf(LPoint3 const &pos)
+    LPoint3 const *arg_this = nullptr;
+    DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_LPoint3f);
+    if (arg_this != nullptr) {
+      int return_value = (*local_this).find_leaf(*arg_this);
+      if (Dtool_CheckErrorOccurred()) {
+        return nullptr;
+      }
+      return Dtool_WrapValue(return_value);
+    }
+  }
+
+  {
     // -2 inline int BSPLoader::find_leaf(NodePath const &np)
     NodePath const *arg_this = nullptr;
     DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_NodePath);
@@ -3194,7 +3207,6 @@ static PyObject *Dtool_BSPLoader_find_leaf_88(PyObject *self, PyObject *arg) {
     }
   }
 
-  // No coercion possible: inline int BSPLoader::find_leaf(NodePath const &np)
   {
     // -2 inline int BSPLoader::find_leaf(LPoint3 const &pos)
     LPoint3f arg_local;
@@ -3208,8 +3220,10 @@ static PyObject *Dtool_BSPLoader_find_leaf_88(PyObject *self, PyObject *arg) {
     }
   }
 
+  // No coercion possible: inline int BSPLoader::find_leaf(NodePath const &np)
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
+      "find_leaf(const BSPLoader self, const LPoint3f pos)\n"
       "find_leaf(const BSPLoader self, const NodePath np)\n");
   }
   return nullptr;
@@ -3218,6 +3232,7 @@ static PyObject *Dtool_BSPLoader_find_leaf_88(PyObject *self, PyObject *arg) {
 #ifndef NDEBUG
 static const char *Dtool_BSPLoader_find_leaf_88_comment =
   "C++ Interface:\n"
+  "find_leaf(const BSPLoader self, const LPoint3f pos)\n"
   "find_leaf(const BSPLoader self, const NodePath np)\n";
 #else
 static const char *Dtool_BSPLoader_find_leaf_88_comment = nullptr;
@@ -6490,47 +6505,32 @@ static const char *Dtool_TextureStages_get_lightmap_171_comment = nullptr;
 
 /**
  * Python function wrapper for:
- * static TextureStage *TextureStages::get_bumped_lightmap(int n)
+ * static TextureStage *TextureStages::get_bumped_lightmap(void)
  */
-static PyObject *Dtool_TextureStages_get_bumped_lightmap_172(PyObject *, PyObject *arg) {
-  // 1-static TextureStage *TextureStages::get_bumped_lightmap(int n)
-  if (PyLongOrInt_Check(arg)) {
-    long arg_val = PyLongOrInt_AS_LONG(arg);
-#if (SIZEOF_LONG > SIZEOF_INT) && !defined(NDEBUG)
-    if (arg_val < INT_MIN || arg_val > INT_MAX) {
-      return PyErr_Format(PyExc_OverflowError,
-                          "value %ld out of range for signed integer",
-                          arg_val);
-    }
-#endif
-    TextureStage *return_value = TextureStages::get_bumped_lightmap((int)arg_val);
+static PyObject *Dtool_TextureStages_get_bumped_lightmap_172(PyObject *, PyObject *) {
+  // 1-static TextureStage *TextureStages::get_bumped_lightmap(void)
+  TextureStage *return_value = TextureStages::get_bumped_lightmap();
+  if (return_value != nullptr) {
+    return_value->ref();
+  }
+  if (Dtool_CheckErrorOccurred()) {
     if (return_value != nullptr) {
-      return_value->ref();
+      unref_delete(return_value);
     }
-    if (Dtool_CheckErrorOccurred()) {
-      if (return_value != nullptr) {
-        unref_delete(return_value);
-      }
-      return nullptr;
-    }
-    if (return_value == nullptr) {
-      Py_INCREF(Py_None);
-      return Py_None;
-    } else {
-      return DTool_CreatePyInstanceTyped((void *)return_value, *Dtool_Ptr_TextureStage, true, false, return_value->as_typed_object()->get_type_index());
-    }
+    return nullptr;
   }
-  if (!_PyErr_OCCURRED()) {
-    return Dtool_Raise_BadArgumentsError(
-      "get_bumped_lightmap(int n)\n");
+  if (return_value == nullptr) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  } else {
+    return DTool_CreatePyInstanceTyped((void *)return_value, *Dtool_Ptr_TextureStage, true, false, return_value->as_typed_object()->get_type_index());
   }
-  return nullptr;
 }
 
 #ifndef NDEBUG
 static const char *Dtool_TextureStages_get_bumped_lightmap_172_comment =
   "C++ Interface:\n"
-  "get_bumped_lightmap(int n)\n";
+  "get_bumped_lightmap()\n";
 #else
 static const char *Dtool_TextureStages_get_bumped_lightmap_172_comment = nullptr;
 #endif
@@ -10826,8 +10826,8 @@ static PyMethodDef Dtool_Methods_TextureStages[] = {
   {"getBasetexture", &Dtool_TextureStages_get_basetexture_170, METH_NOARGS | METH_STATIC, (const char *)Dtool_TextureStages_get_basetexture_170_comment},
   {"get_lightmap", &Dtool_TextureStages_get_lightmap_171, METH_NOARGS | METH_STATIC, (const char *)Dtool_TextureStages_get_lightmap_171_comment},
   {"getLightmap", &Dtool_TextureStages_get_lightmap_171, METH_NOARGS | METH_STATIC, (const char *)Dtool_TextureStages_get_lightmap_171_comment},
-  {"get_bumped_lightmap", &Dtool_TextureStages_get_bumped_lightmap_172, METH_O | METH_STATIC, (const char *)Dtool_TextureStages_get_bumped_lightmap_172_comment},
-  {"getBumpedLightmap", &Dtool_TextureStages_get_bumped_lightmap_172, METH_O | METH_STATIC, (const char *)Dtool_TextureStages_get_bumped_lightmap_172_comment},
+  {"get_bumped_lightmap", &Dtool_TextureStages_get_bumped_lightmap_172, METH_NOARGS | METH_STATIC, (const char *)Dtool_TextureStages_get_bumped_lightmap_172_comment},
+  {"getBumpedLightmap", &Dtool_TextureStages_get_bumped_lightmap_172, METH_NOARGS | METH_STATIC, (const char *)Dtool_TextureStages_get_bumped_lightmap_172_comment},
   {"get_spheremap", &Dtool_TextureStages_get_spheremap_173, METH_NOARGS | METH_STATIC, (const char *)Dtool_TextureStages_get_spheremap_173_comment},
   {"getSpheremap", &Dtool_TextureStages_get_spheremap_173, METH_NOARGS | METH_STATIC, (const char *)Dtool_TextureStages_get_spheremap_173_comment},
   {"get_cubemap", &Dtool_TextureStages_get_cubemap_174, METH_NOARGS | METH_STATIC, (const char *)Dtool_TextureStages_get_cubemap_174_comment},
@@ -11435,31 +11435,31 @@ void Dtool_bsp_ResolveExternals() {
   Dtool_Ptr_Filename = LookupRuntimeTypedClass(Filename::get_class_type());
   Dtool_Ptr_TypedObject = LookupRuntimeTypedClass(TypedObject::get_class_type());
   Dtool_Ptr_ReferenceCount = LookupRuntimeTypedClass(ReferenceCount::get_class_type());
-  Dtool_Ptr_LVecBase4f = LookupRuntimeTypedClass(LVecBase4f::get_class_type());
-  Dtool_Ptr_LVector3f = LookupRuntimeTypedClass(LVector3f::get_class_type());
-  Dtool_Ptr_LPoint3f = LookupRuntimeTypedClass(LPoint3f::get_class_type());
   Dtool_Ptr_Namable = LookupRuntimeTypedClass(Namable::get_class_type());
   Dtool_Ptr_TypedReferenceCount = LookupRuntimeTypedClass(TypedReferenceCount::get_class_type());
-  Dtool_Ptr_TypedWritableReferenceCount = LookupRuntimeTypedClass(TypedWritableReferenceCount::get_class_type());
+  Dtool_Ptr_LVector3f = LookupRuntimeTypedClass(LVector3f::get_class_type());
+  Dtool_Ptr_LPoint3f = LookupRuntimeTypedClass(LPoint3f::get_class_type());
+  Dtool_Ptr_LVecBase4f = LookupRuntimeTypedClass(LVecBase4f::get_class_type());
   Dtool_Ptr_TypedWritable = LookupRuntimeTypedClass(TypedWritable::get_class_type());
+  Dtool_Ptr_TypedWritableReferenceCount = LookupRuntimeTypedClass(TypedWritableReferenceCount::get_class_type());
   Dtool_Ptr_BitMask_uint32_t_32 = LookupRuntimeTypedClass(BitMask< uint32_t, 32 >::get_class_type());
-  Dtool_Ptr_GeomVertexAnimationSpec = LookupNamedClass("GeomVertexAnimationSpec");
   Dtool_Ptr_RenderAttrib = LookupRuntimeTypedClass(RenderAttrib::get_class_type());
+  Dtool_Ptr_GeomVertexAnimationSpec = LookupNamedClass("GeomVertexAnimationSpec");
   Dtool_Ptr_TextureStage = LookupRuntimeTypedClass(TextureStage::get_class_type());
-  Dtool_Ptr_TransformState = LookupRuntimeTypedClass(TransformState::get_class_type());
   Dtool_Ptr_RenderState = LookupRuntimeTypedClass(RenderState::get_class_type());
+  Dtool_Ptr_TransformState = LookupRuntimeTypedClass(TransformState::get_class_type());
   Dtool_Ptr_PandaNode = LookupRuntimeTypedClass(PandaNode::get_class_type());
-  Dtool_Ptr_GeometricBoundingVolume = LookupRuntimeTypedClass(GeometricBoundingVolume::get_class_type());
   Dtool_Ptr_Texture = LookupRuntimeTypedClass(Texture::get_class_type());
-  Dtool_Ptr_ShaderInput = LookupNamedClass("ShaderInput");
+  Dtool_Ptr_GeometricBoundingVolume = LookupRuntimeTypedClass(GeometricBoundingVolume::get_class_type());
   Dtool_Ptr_NodePath = LookupRuntimeTypedClass(NodePath::get_class_type());
+  Dtool_Ptr_ShaderInput = LookupNamedClass("ShaderInput");
   Dtool_Ptr_CullTraverser = LookupRuntimeTypedClass(CullTraverser::get_class_type());
-  Dtool_Ptr_ShaderGenerator = LookupRuntimeTypedClass(ShaderGenerator::get_class_type());
   Dtool_Ptr_GraphicsStateGuardian = LookupRuntimeTypedClass(GraphicsStateGuardian::get_class_type());
+  Dtool_Ptr_ShaderGenerator = LookupRuntimeTypedClass(ShaderGenerator::get_class_type());
   Dtool_Ptr_BoundingBox = LookupRuntimeTypedClass(BoundingBox::get_class_type());
   Dtool_Ptr_GraphicsWindow = LookupRuntimeTypedClass(GraphicsWindow::get_class_type());
-  Dtool_Ptr_ModelNode = LookupRuntimeTypedClass(ModelNode::get_class_type());
   Dtool_Ptr_Material = LookupRuntimeTypedClass(Material::get_class_type());
+  Dtool_Ptr_ModelNode = LookupRuntimeTypedClass(ModelNode::get_class_type());
 #endif
 }
 
@@ -11532,7 +11532,7 @@ static PyMethodDef python_simple_funcs[] = {
 
 struct LibraryDef bsp_moddef = {python_simple_funcs};
 static InterrogateModuleDef _in_module_def = {
-  1542662256,  /* file_identifier */
+  1543339029,  /* file_identifier */
   "bsp",  /* library_name */
   "t5GT",  /* library_hash_name */
   "bsp",  /* module_name */

@@ -1,4 +1,4 @@
-1542662256
+1543339029
 3 3
 3 bsp 4 t5GT 3 bsp 
 160
@@ -586,8 +586,8 @@ static TextureStage *TextureStages::get_basetexture(void);
 static TextureStage *TextureStages::get_lightmap(void);
 
 298 19 get_bumped_lightmap 0 4 346 34 TextureStages::get_bumped_lightmap 0 1 140 0
-63
-static TextureStage *TextureStages::get_bumped_lightmap(int n);
+62
+static TextureStage *TextureStages::get_bumped_lightmap(void);
 
 299 13 get_spheremap 0 4 346 28 TextureStages::get_spheremap 0 1 141 0
 56
@@ -810,7 +810,7 @@ BSPMaterial::~BSPMaterial(void);
 137 0 0 7 169 476 0 0 0 2 4 name 1 380  7 uv_name 1 380  
 138 0 0 7 170 476 0 0 0 0 
 139 0 0 7 171 476 0 0 0 0 
-140 0 0 7 172 476 0 0 0 1 1 n 1 326  
+140 0 0 7 172 476 0 0 0 0 
 141 0 0 7 173 476 0 0 0 0 
 142 0 0 7 174 476 0 0 0 0 
 143 0 0 7 175 476 0 0 0 0 

@@ -62,11 +62,9 @@ TextureStage *TextureStages::get_lightmap()
         return get( "lightmap", "lightmap" );
 }
 
-TextureStage *TextureStages::get_bumped_lightmap( int n )
+TextureStage *TextureStages::get_bumped_lightmap()
 {
-        std::stringstream ss;
-        ss << "lightmap" << n;
-        return get( ss.str(), "lightmap" );
+        return get( "lightmap_bumped", "lightmap" );
 }
 
 TextureStage *TextureStages::get_spheremap()

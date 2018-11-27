@@ -490,19 +490,11 @@ ShaderSpec::Permutations LightmappedGenericSpec::setup_permutations( const Rende
                         result.add_permutation( "LIGHTMAP_COORD", get_texcoord( i ) );
                         result.add_input( ShaderInput( "lightmapSampler", tex ) );
                 }
-                else if ( stage->get_name() == "lightmap0" )
+                else if ( stage->get_name() == "lightmap_bumped" )
                 {
                         result.add_permutation( "BUMPED_LIGHTMAP", "1" );
                         result.add_permutation( "LIGHTMAP_COORD", get_texcoord( i ) );
-                        result.add_input( ShaderInput( "lightmap0Sampler", tex ) );
-                }
-                else if ( stage->get_name() == "lightmap1" )
-                {
-                        result.add_input( ShaderInput( "lightmap1Sampler", tex ) );
-                }
-                else if ( stage->get_name() == "lightmap2" )
-                {
-                        result.add_input( ShaderInput( "lightmap2Sampler", tex ) );
+                        result.add_input( ShaderInput( "lightmapSampler", tex ) );
                 }
                 else if ( stage->get_name() == "normalmap" )
                 {
