@@ -27,8 +27,16 @@ add_definitions(-DNOMINMAX -DBUILDING_LIBPANDABSP -DWITHIN_PANDA -DCOMPILER_MSVC
 
 add_library(libpandabsp SHARED ${SRCS} ${HEADERS} ${CM_INC} ${CM_SRCS} ${SSE_INC} ${SSE_SRCS})
 
-set_target_properties(libpandabsp PROPERTIES SUFFIX ".pyd")
-set_target_properties(libpandabsp PROPERTIES OUTPUT_NAME "bsp")
+set(bsp_suff .pyd CACHE STRING "Extension of output file")
+set(bsp_out bsp CACHE STRING "Name of output file")
+
+set_target_properties(libpandabsp PROPERTIES SUFFIX ${bsp_suff})
+set_target_properties(libpandabsp PROPERTIES OUTPUT_NAME ${bsp_out})
+
+string(REGEX REPLACE "/" "\\\\" P3BSP_PANDA3D_DIR ${P3BSP_PANDA3D_DIR})
+
+add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${P3BSP_PANDA3D_DIR}\\panda3d\\${bsp_out}${bsp_suff})
+add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}.pdb ${P3BSP_PANDA3D_DIR}\\panda3d\\${bsp_out}.pdb)
 
 target_link_libraries(libpandabsp libpanda.lib
                             libpandaexpress.lib

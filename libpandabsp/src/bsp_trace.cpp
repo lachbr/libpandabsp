@@ -152,17 +152,21 @@ bool FaceFinder::enumerate_node( int node_id, const Ray &ray, float f, int conte
 // We might be well off just removing the code altogether.
 //==============================================================================================//
 
+#define FLTX4_PRINT(flt) flt.m128_f32[0] << " " << flt.m128_f32[1] << " " << flt.m128_f32[2] << " " << flt.m128_f32[3]
+
 // SIMD accelerated ray tracing for box brushes
 
 const fltx4 Four_DistEpsilons = { DIST_EPSILON,DIST_EPSILON,DIST_EPSILON,DIST_EPSILON };
-const fltx4 g_CubeFaceIndex0 = { 0, 1, 2, -1 };
-const fltx4 g_CubeFaceIndex1 = { 3, 4, 5, -1 };
+//const fltx4 g_CubeFaceIndex0 = { 0, 1, 2, -1 };
+//const fltx4 g_CubeFaceIndex1 = { 3, 4, 5, -1 };
+const int32_t ALIGN_16BYTE g_CubeFaceIndex0[4] = { 0, 1, 2, -1 };
+const int32_t ALIGN_16BYTE g_CubeFaceIndex1[4] = { 3, 4, 5, -1 };
 
 bool IntersectRayWithBoxBrush( Trace *trace, const dbrush_t *brush, const cboxbrush_t *bbrush )
 {
         // compute the mins/maxs of the box expanded by the ray extents
         // relocate the problem so that the ray start is at the origin
-        fltx4 offsetmins = SubSIMD( bbrush->ssemaxs, trace->sse_start );
+        fltx4 offsetmins = SubSIMD( bbrush->ssemins, trace->sse_start );
         fltx4 offsetmaxs = SubSIMD( bbrush->ssemaxs, trace->sse_start );
         fltx4 offsetmins_exp = SubSIMD( offsetmins, trace->sse_extents );
         fltx4 offsetmaxs_exp = AddSIMD( offsetmaxs, trace->sse_extents );
@@ -173,7 +177,7 @@ bool IntersectRayWithBoxBrush( Trace *trace, const dbrush_t *brush, const cboxbr
         fltx4 endout_mins = CmpLtSIMD( trace->sse_delta, offsetmins_exp );
         fltx4 mins_mask = AndSIMD( startout_mins, endout_mins );
         fltx4 startout_maxs = CmpGtSIMD( Four_Zeros, offsetmaxs_exp );
-        fltx4 endout_maxs = CmpGtSIMD( Four_Zeros, offsetmaxs_exp );
+        fltx4 endout_maxs = CmpGtSIMD( trace->sse_delta, offsetmaxs_exp );
         fltx4 maxs_mask = AndSIMD( startout_maxs, endout_maxs );
         if ( IsAnyNegative( SetWToZeroSIMD( OrSIMD( mins_mask, maxs_mask ) ) ) )
         {
@@ -210,8 +214,8 @@ bool IntersectRayWithBoxBrush( Trace *trace, const dbrush_t *brush, const cboxbr
                 fltx4 tmins = MulSIMD( offsetmins_exp, trace->sse_inv_delta );
                 fltx4 tmaxs = MulSIMD( offsetmaxs_exp, trace->sse_inv_delta );
 
-                fltx4 minface0 = g_CubeFaceIndex0;
-                fltx4 minface1 = g_CubeFaceIndex1;
+                fltx4 minface0 = LoadAlignedSIMD( (float *)g_CubeFaceIndex0 );//g_CubeFaceIndex0;
+                fltx4 minface1 = LoadAlignedSIMD( (float *)g_CubeFaceIndex1 ); //g_CubeFaceIndex1;
                 fltx4 face_mask = CmpLeSIMD( tmins, tmaxs );
                 fltx4 mint = MinSIMD( tmins, tmaxs );
                 fltx4 maxt = MaxSIMD( tmins, tmaxs );
@@ -254,7 +258,7 @@ bool IntersectRayWithBoxBrush( Trace *trace, const dbrush_t *brush, const cboxbr
                         {
                                 float t2 = SubFloat( first_out, 0 );
                                 trace->start_solid = true;
-                                trace->contents = brush->contents;
+                                trace->hit_contents = brush->contents;
                                 if ( t2 >= 1.0f )
                                 {
                                         trace->all_solid = true;
@@ -291,7 +295,7 @@ bool IntersectRayWithBoxBrush( Trace *trace, const dbrush_t *brush, const cboxbr
                                                 trace->plane.normal[face_idx] = -1.0f;
                                         }
                                         trace->plane.type = (planetypes)face_idx;
-                                        trace->contents = brush->contents;
+                                        trace->hit_contents = brush->contents;
                                         return true;
                                 }
                         }
@@ -327,15 +331,14 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush, int brush_idx )
 
         bool getout = false;
         bool startout = false;
-        dbrushside_t *leadside = nullptr;
+        const dbrushside_t *leadside = nullptr;
 
         float dist;
 
-        dbrushside_t *side = nullptr;
-        for (int i = 0; i < brush->numsides; i++ )
+        const dbrushside_t *side = &trace->bspdata->bspdata->dbrushsides[brush->firstside];
+        for (const dbrushside_t * const sidelimit = side + brush->numsides; side < sidelimit; side++)
         {
-                side = (dbrushside_t *)&trace->bspdata->bspdata->dbrushsides[brush->firstside + i];
-                dplane_t *plane = (dplane_t *)trace->bspdata->bspdata->dplanes + side->planenum;
+                const dplane_t *plane = trace->bspdata->bspdata->dplanes + side->planenum;
                 LVector3 plane_normal( plane->normal[0], plane->normal[1], plane->normal[2] );
 
                 if ( !IS_POINT )
@@ -343,7 +346,7 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush, int brush_idx )
                         // general box case
                         // push the plane out appropriately for mins/maxs
 
-                        dist = fabsf( plane_normal.dot( trace->extents ) );//DotProductAbs( plane_normal, trace->extents );
+                        dist = DotProductAbs( plane_normal, trace->extents );
                         dist = plane->dist + dist;
                 }
                 else
@@ -429,7 +432,7 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush, int brush_idx )
         {	// original point was inside brush
                 trace->start_solid = true;
                 // return starting contents
-                trace->contents = brush_contents;
+                trace->hit_contents = brush_contents;
 
                 if ( !getout )
                 {
@@ -467,7 +470,7 @@ void CM_ClipBoxToBrush( Trace *trace, const dbrush_t *brush, int brush_idx )
                         trace->fraction = enter_frac;
                         trace->plane = *( trace->bspdata->bspdata->dplanes + leadside->planenum );
                         trace->surface = (texinfo_t *)trace->bspdata->bspdata->texinfo + side->texinfo;
-                        trace->contents = brush_contents;
+                        trace->hit_contents = brush_contents;
                 }
         }
 }
@@ -482,11 +485,10 @@ void CM_TraceToLeaf( Trace *trace, int leaf_idx, float start_frac, float end_fra
         //
         // trace ray/box sweep against all brushes in this leaf
         //
-        const int numleafbrushes = leaf->numleafbrushes;
-        const int lastleafbrush = leaf->firstleafbrush + numleafbrushes;
-        for ( int leafbrush = leaf->firstleafbrush; leafbrush < lastleafbrush; leafbrush++ )
+        for ( int leafbrush = 0; leafbrush < leaf->numleafbrushes; leafbrush++ )
         {
-                int brushidx = trace->bspdata->bspdata->dleafbrushes[leafbrush];
+                int lbidx = leaf->firstleafbrush + leafbrush;
+                int brushidx = trace->bspdata->bspdata->dleafbrushes[lbidx];
 
                 const dbrush_t *brush = &trace->bspdata->bspdata->dbrushes[brushidx];
 
@@ -542,7 +544,6 @@ void CM_RecursiveHullCheckImpl( Trace *trace, int num, const float p1f, const fl
         {
                 node = trace->bspdata->bspdata->dnodes + num;
                 const dplane_t *plane = trace->bspdata->bspdata->dplanes + node->planenum;
-                LVector3 plane_normal( plane->normal[0], plane->normal[1], plane->normal[2] );
                 int type = plane->type;
                 float dist = plane->dist;
 
@@ -554,15 +555,15 @@ void CM_RecursiveHullCheckImpl( Trace *trace, int num, const float p1f, const fl
                 }
                 else
                 {
-                        t1 = p1.dot( plane_normal ) - dist;
-                        t2 = p2.dot( plane_normal ) - dist;
+                        t1 = DotProduct( plane->normal, p1 ) - dist;
+                        t2 = DotProduct( plane->normal, p2 ) - dist;
                         if ( IS_POINT )
                         {
                                 offset = 0.0;
                         }
                         else
                         {
-                                offset = fabsf( plane_normal.dot( trace->extents ) );
+                                offset = DotProductAbs( trace->extents, plane->normal );
                         }
                 }
 
