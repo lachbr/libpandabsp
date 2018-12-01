@@ -136,6 +136,8 @@ void AmbientProbeManager::process_ambient_probes()
                         light->color = color_from_value( ValueForKey( ent, "_light" ) ).get_xyz();
                         light->type = lighttype_from_classname( classname );
 
+                        lightfalloffparams_t params = GetLightFalloffParams( ent, light->color );
+
                         if ( light->type == LIGHTTYPE_SUN ||
                              light->type == LIGHTTYPE_SPOT)
                         {
@@ -161,17 +163,18 @@ void AmbientProbeManager::process_ambient_probes()
                         if ( light->type == LIGHTTYPE_SPOT ||
                              light->type == LIGHTTYPE_POINT )
                         {
-                                float fade = FloatForKey( ent, "_fade" );
-                                light->atten = LVector4( fade / 16.0, 0, 0, 0 );
+                                light->falloff = LVector4( params.constant_atten, params.linear_atten, params.quadratic_atten, 0 );
+                                light->falloff2 = LVector4( params.start_fade_distance, params.end_fade_distance, params.cap_distance, 0 );
+                                light->falloff3 = LVector4( 0, 0, 0, 0 );
                                 if ( light->type == LIGHTTYPE_SPOT )
                                 {
-                                        float stopdot = FloatForKey( ent, "_cone" );
+                                        float stopdot = FloatForKey( ent, "_inner_cone" );
                                         if ( !stopdot )
                                         {
                                                 stopdot = 10;
                                         }
-                                        float stopdot2 = FloatForKey( ent, "_cone2" );
-                                        if ( !stopdot2 )
+                                        float stopdot2 = FloatForKey( ent, "_cone" );
+                                        if ( !stopdot2 || stopdot2 < stopdot )
                                         {
                                                 stopdot2 = stopdot;
                                         }
@@ -180,11 +183,22 @@ void AmbientProbeManager::process_ambient_probes()
                                                 stopdot2 = stopdot;
                                         }
 
-                                        stopdot = (float)std::cos( stopdot / 180 * Q_PI );
-                                        stopdot2 = (float)std::cos( stopdot2 / 180 * Q_PI );
+                                        // this is a point light if stop dots are 180
+                                        if ( stopdot == 180 && stopdot2 == 180 )
+                                        {
+                                                light->type = LIGHTTYPE_POINT;
+                                        }
+                                        else
+                                        {
+                                                stopdot = (float)std::cos( stopdot / 180 * Q_PI );
+                                                stopdot2 = (float)std::cos( stopdot2 / 180 * Q_PI );
+                                                float exp = FloatForKey( ent, "_exponent" );
 
-                                        light->atten[1] = stopdot;
-                                        light->atten[2] = stopdot2;
+                                                light->falloff3[0] = exp;
+
+                                                light->falloff[3] = stopdot;
+                                                light->falloff2[3] = stopdot2;
+                                        }
                                 }
                         }
 
@@ -497,8 +511,11 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
                 LMatrix4f data;
                 data.set_row( 0, light->eye_pos );
                 data.set_row( 1, light->eye_direction );
-                data.set_row( 2, light->atten );
+                data.set_row( 2, light->falloff );
                 data.set_row( 3, light->color );
+                LMatrix4 data2;
+                data2.set_row( 0, light->falloff2 );
+                data2.set_row( 1, light->falloff3 );
 
                 LVector3 interp_light( 0 );
 
@@ -526,6 +543,7 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
                 data.set_row( 3, light->color - delta );
 
                 input->light_data[lights_updated] = data;
+                input->light_data2[lights_updated] = data2;
                 input->light_ids[lights_updated] = light->id;
                 input->active_lights++;
 

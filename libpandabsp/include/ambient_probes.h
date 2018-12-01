@@ -52,7 +52,9 @@ struct light_t : public ReferenceCount
         LVector4 direction;
         LPoint3 pos;
         LVector3 color;
-        LVector4 atten;
+        LVector4 falloff;
+        LVector4 falloff2;
+        LVector4 falloff3;
 
         // If the light is potentially visible, updated each frame.
         LVector4 eye_pos;
@@ -74,6 +76,7 @@ struct nodeshaderinput_t : public ReferenceCount
         PTA_int light_count;
         PTA_int light_type;
         PTA_LMatrix4f light_data;
+        PTA_LMatrix4f light_data2;
 
         PN_stdfloat lighting_time;
         PTA_int light_ids;
@@ -110,6 +113,7 @@ struct nodeshaderinput_t : public ReferenceCount
                 light_count = PTA_int::empty_array( 1 );
                 light_type = PTA_int::empty_array( MAX_TOTAL_LIGHTS );
                 light_data = PTA_LMatrix4f::empty_array( MAX_TOTAL_LIGHTS );
+                light_data2 = PTA_LMatrix4f::empty_array( MAX_TOTAL_LIGHTS );
                 light_ids = PTA_int::empty_array( MAX_TOTAL_LIGHTS );
                 amb_probe = nullptr;
                 sky_idx = -1;
@@ -138,6 +142,7 @@ struct nodeshaderinput_t : public ReferenceCount
                 ambient_cube.set_data( other.ambient_cube.get_data() );
                 light_type.set_data( other.light_type.get_data() );
                 light_data.set_data( other.light_data.get_data() );
+                light_data2.set_data( other.light_data2.get_data() );
                 light_ids.set_data( other.light_ids.get_data() );
                 light_count.set_data( other.light_count.get_data() );
         }

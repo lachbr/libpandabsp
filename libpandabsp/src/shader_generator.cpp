@@ -203,6 +203,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         {
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightCount", bsp_node_input->light_count ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData", bsp_node_input->light_data ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData2", bsp_node_input->light_data2 ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightTypes", bsp_node_input->light_type ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambientCube", bsp_node_input->ambient_cube ) ) );
         }
@@ -211,6 +212,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                 // Fill in default empty values so we don't crash.
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightCount", PTA_int::empty_array( 1 ) ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData2", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightTypes", PTA_int::empty_array( MAX_TOTAL_LIGHTS ) ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ) ) );
         }
