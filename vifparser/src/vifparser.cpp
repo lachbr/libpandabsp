@@ -2,17 +2,17 @@
 
 #include <string>
 
-vector<Object> Parser::_global_all_objects;
-vector<Object> Parser::_global_base_objects;
+pvector<Object> Parser::_global_all_objects;
+pvector<Object> Parser::_global_base_objects;
 
-vector<Property> Parser::get_properties( Object &obj )
+pvector<Property> Parser::get_properties( Object &obj )
 {
         return obj.properties;
 }
 
-vector<Object> Parser::get_base_objects_with_name( const string &name )
+pvector<Object> Parser::get_base_objects_with_name( const string &name )
 {
-        vector<Object> result;
+        pvector<Object> result;
         for ( size_t i = 0; i < _base_objects.size(); i++ )
         {
                 Object obj = _base_objects[i];
@@ -58,7 +58,7 @@ bool Parser::has_object_named( Object &baseObj, const string &name )
 
 string Parser::get_property_value( Object &obj, const string &key )
 {
-        string val;
+        string val = "";
         for ( size_t i = 0; i < obj.properties.size(); i++ )
         {
                 Property prop = obj.properties[i];
@@ -72,9 +72,9 @@ string Parser::get_property_value( Object &obj, const string &key )
         return val;
 }
 
-vector<float> Parser::parse_float_list_str( string &str )
+pvector<float> Parser::parse_float_list_str( const string &str )
 {
-        vector<float> result;
+        pvector<float> result;
         string curr_num_string;
         int current = 0;
         while ( current < str.length() )
@@ -101,9 +101,9 @@ vector<float> Parser::parse_float_list_str( string &str )
         return result;
 }
 
-vector<int> Parser::parse_num_list_str( string &str )
+pvector<int> Parser::parse_num_list_str( const string &str )
 {
-        vector<int> result;
+        pvector<int> result;
         string curr_num_string;
         int current = 0;
         while ( current < str.length() )
@@ -130,12 +130,12 @@ vector<int> Parser::parse_num_list_str( string &str )
         return result;
 }
 
-vector<vector<int>> Parser::parse_int_tuple_list_str( string &str )
+pvector<pvector<int>> Parser::parse_int_tuple_list_str( const string &str )
 {
-        vector<vector<int>> result;
+        pvector<pvector<int>> result;
         int current = 0;
         string curr_num_string;
-        vector<int> tuple_result;
+        pvector<int> tuple_result;
 
         while ( current < str.length() )
         {
@@ -164,12 +164,12 @@ vector<vector<int>> Parser::parse_int_tuple_list_str( string &str )
         return result;
 }
 
-vector<vector<float>> Parser::parse_num_array_str( string &str )
+pvector<pvector<float>> Parser::parse_num_array_str( const string &str )
 {
-        vector<vector<float>> result;
+        pvector<pvector<float>> result;
         int current = 0;
         string curr_num_string;
-        vector<float> array_result;
+        pvector<float> array_result;
         while ( current < str.length() )
         {
                 char let = str[current];
@@ -220,7 +220,7 @@ vector<vector<float>> Parser::parse_num_array_str( string &str )
         return result;
 }
 
-Object Parser::get_object_with_id( string &id )
+Object Parser::get_object_with_id( const string &id )
 {
         Object result;
         for ( size_t i = 0; i < _all_objects.size(); i++ )
@@ -234,9 +234,9 @@ Object Parser::get_object_with_id( string &id )
         return result;
 }
 
-vector<Object> Parser::get_objects_with_name( Object &base_obj, const string &name )
+pvector<Object> Parser::get_objects_with_name( Object &base_obj, const string &name )
 {
-        vector<Object> result;
+        pvector<Object> result;
         for ( size_t i = 0; i < base_obj.objects.size(); i++ )
         {
                 Object obj = base_obj.objects[i];
@@ -249,7 +249,7 @@ vector<Object> Parser::get_objects_with_name( Object &base_obj, const string &na
 }
 
 // Warning: If there are multiple objects with the same name, only the first occurance will be returned.
-// Use Parser::get_objects_with_name to get a vector of objects with the name.
+// Use Parser::get_objects_with_name to get a pvector of objects with the name.
 Object Parser::get_object_with_name( Object &base_obj, const string &name )
 {
         Object result;
@@ -365,4 +365,46 @@ Parser::Parser( TokenVec &tokens )
 
                 _base_objects.push_back( walk_obj() );
         }
+}
+
+string Parser::parse( const LVecBase2f &v )
+{
+        stringstream ss;
+        ss << "[ " << v[0] << " " << v[1] << " ]";
+        return ss.str();
+}
+
+string Parser::parse( const LVecBase3f &v )
+{
+        stringstream ss;
+        ss << "[ " << v[0] << " " << v[1] << " " << v[2] << " ]";
+        return ss.str();
+}
+
+string Parser::parse( const LVecBase4f &v )
+{
+        stringstream ss;
+        ss << "[ " << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << " ]";
+        return ss.str();
+}
+
+LVecBase2f Parser::to_2f( const std::string &str )
+{
+        pvector<float> vec = Parser::parse_float_list_str( str );
+        nassertr( vec.size() >= 2, LVecBase2f( 0 ) );
+        return LVecBase2f( vec[0], vec[1] );
+}
+
+LVecBase3f Parser::to_3f( const std::string &str )
+{
+        pvector<float> vec = Parser::parse_float_list_str( str );
+        nassertr( vec.size() >= 3, LVecBase3f( 0 ) );
+        return LVecBase3f( vec[0], vec[1], vec[2] );
+}
+
+LVecBase4f Parser::to_4f( const std::string &str )
+{
+        pvector<float> vec = Parser::parse_float_list_str( str );
+        nassertr( vec.size() >= 4, LVecBase4f( 0 ) );
+        return LVecBase4f( vec[0], vec[1], vec[2], vec[3] );
 }

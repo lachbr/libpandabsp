@@ -509,12 +509,12 @@ BSPProp::BSPProp( const std::string &name ) :
 
 bool BSPProp::safe_to_combine() const
 {
-        return false;
+        return true;
 }
 
 bool BSPProp::safe_to_flatten() const
 {
-        return false;
+        return true;
 }
 
 BSPModel::BSPModel( const std::string &name ) :

@@ -848,7 +848,7 @@ void BSPLoader::make_faces()
                                 Parser *p = &_texref_materials[texref];
                                 Object obj = p->_base_objects[0];
                                 shader = obj.name;
-                                vector<Property> props = p->get_properties( obj );
+                                pvector<Property> props = p->get_properties( obj );
                                 for ( size_t i = 0; i < props.size(); i++ )
                                 {
                                         Property *prop = &props[i];
@@ -1462,7 +1462,7 @@ void BSPLoader::load_static_props()
                      ( prop->flags & STATICPROPFLAGS_DYNAMICLIGHTING ) == 0 )
                 {
                         // find the leaf this prop resides in
-                        int leaf = find_leaf( propnp.get_pos() );
+                        int leaf = find_leaf( pos / 16.0 );
                         if ( leaf2props.find( leaf ) == -1 )
                         {
                                 stringstream ss;
@@ -1974,6 +1974,8 @@ bool BSPLoader::read( const Filename &file )
 
         load_entities();
 
+        _active_level = true;
+
         if ( !_ai )
         {
                 load_static_props();
@@ -2001,8 +2003,6 @@ bool BSPLoader::read( const Filename &file )
         }
 
         _colldata = SetupCollisionBSPData( _bspdata );
-
-        _active_level = true;
 
         return true;
 }
