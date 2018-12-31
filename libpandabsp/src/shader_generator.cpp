@@ -11,6 +11,7 @@
 #include "pssmCameraRig.h"
 #include "bsp_material.h"
 #include "ambient_probes.h"
+#include "cubemaps.h"
 
 #include <pStatTimer.h>
 #include <config_pgraphnodes.h>
@@ -43,6 +44,18 @@ using namespace std;
 static PStatCollector findmatshader_collector( "*:Munge:PSSMShaderGen:FindMatShader" );
 static PStatCollector lookup_collector( "*:Munge:PSSMShaderGen:Lookup" );
 static PStatCollector synthesize_collector( "*:Munge:PSSMShaderGen:Synthesize" );
+
+static PT( Texture ) identity_cubemap = nullptr;
+static Texture *get_identity_cubemap()
+{
+        if ( !identity_cubemap )
+        {
+                identity_cubemap = new Texture( "cubemap_identity" );
+                identity_cubemap->setup_cube_map();
+        }
+
+        return identity_cubemap;
+}
 
 ConfigVariableInt pssm_splits( "pssm-splits", 3 );
 ConfigVariableInt pssm_size( "pssm-size", 1024 );
@@ -183,12 +196,12 @@ INLINE CPT( RenderAttrib ) apply_material_inputs( CPT( RenderAttrib ) shattr, BS
         {
                 // Materials can also provide their own shader inputs.
                 // Material inputs can override shader spec inputs.
-                const pvector<ShaderInput> &mat_inps = bspmat->get_shader_inputs();
-                size_t num_matinps = mat_inps.size();
-                for ( size_t i = 0; i < num_matinps; i++ )
-                {
-                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( mat_inps[i] );
-                }
+                //const pvector<ShaderInput> &mat_inps = bspmat->get_shader_inputs();
+                //size_t num_matinps = mat_inps.size();
+                //for ( size_t i = 0; i < num_matinps; i++ )
+                //{
+                //        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( mat_inps[i] );
+                //}
         }
         return shattr;
 }
@@ -206,6 +219,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData2", bsp_node_input->light_data2 ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightTypes", bsp_node_input->light_type ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambientCube", bsp_node_input->ambient_cube ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "envmapSampler", bsp_node_input->cubemap_tex ) ) );
         }
         else
         {
@@ -215,6 +229,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData2", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightTypes", PTA_int::empty_array( MAX_TOTAL_LIGHTS ) ) ) );
                 shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ) ) );
+                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "envmapSampler", get_identity_cubemap() ) ) );
         }
 
         return shattr;
@@ -230,23 +245,15 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         // VertexLitGeneric by default, unless specified by a Material.
         std::string shader_name = DEFAULT_SHADER;
 
-        const MaterialAttrib *mattr;
+        const BSPMaterialAttrib *mattr;
         rs->get_attrib_def( mattr );
-        Material *mat = mattr->get_material();
-        BSPMaterial *bspmat = nullptr;
-        if ( mat != nullptr && mat->is_of_type( BSPMaterial::get_class_type() ) )
+        const BSPMaterial *mat = mattr->get_material();
+        if ( !mat )
         {
-                bspmat = DCAST( BSPMaterial, mat );
-                shader_name = bspmat->get_shader();
+                return DCAST( ShaderAttrib, ShaderAttrib::make_default() );
         }
 
-#if 0
-        if ( shader_name == DEFAULT_SHADER )
-        {
-                int *ptr = nullptr;
-                *ptr = 1;
-        }
-#endif
+        shader_name = mat->get_shader();
 
         if ( _shaders.find( shader_name ) == _shaders.end() )
         {
@@ -254,7 +261,8 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                 // add_shader().
 
                 std::stringstream msg;
-                msg << "Don't know about shader `" << shader_name << "`\n";
+                msg << "Don't know about shader `" << shader_name << "` referenced by material `"
+                        << mat->get_file().get_fullpath() << "`\n";
                 msg << "Known shaders are:\n";
                 for ( auto itr = _shaders.begin(); itr != _shaders.end(); ++itr )
                 {
@@ -269,20 +277,20 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
 
         findmatshader_collector.stop();
 
-        ShaderSpec::Permutations permutations;
+        ShaderPermutations permutations;
         ShaderSpec *spec;
         
         {
                 PStatTimer timer( lookup_collector );
 
                 spec = _shaders[shader_name];
-                permutations = spec->setup_permutations( rs, anim, this );
+                permutations = spec->setup_permutations( mat, rs, anim, this );
 #if 1
                 auto itr = spec->_generated_shaders.find( permutations );
                 if ( itr != spec->_generated_shaders.end() )
                 {
                         CPT( RenderAttrib ) shattr = itr->second;
-                        shattr = apply_material_inputs( shattr, bspmat );
+                        //shattr = apply_material_inputs( shattr, mat );
 
                         lookup_collector.stop();
                         return DCAST( ShaderAttrib, shattr );
@@ -292,7 +300,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         
         synthesize_collector.start();
 
-        VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
+        //VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
         stringstream defines;
         for ( auto itr = permutations.permutations.begin(); itr != permutations.permutations.end(); ++itr )
         {
@@ -303,31 +311,31 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         string vertext;
         stringstream vshader, gshader, fshader;
 
-        if ( !spec->_vertex_file.empty() )
+        if ( spec->_has_vertex )
         {
-                string vdata = vfs->read_file( spec->_vertex_file, true );
+                string vdata = spec->_vertex_source;
                 eofl = vdata.find_first_of( '\n' );
                 vertext = vdata.substr( 0, eofl );
                 vdata = vdata.substr( eofl );
                 vshader << vertext << "\n" << defines.str() << vdata;
-                vfs->write_file( Filename( "generated_" + shader_name + ".vert.glsl" ), vshader.str(), true );
+                //vfs->write_file( Filename( "generated_" + shader_name + ".vert.glsl" ), vshader.str(), true );
         }
-        if ( !spec->_geom_file.empty() )
+        if ( spec->_has_geom )
         {
-                string gdata = vfs->read_file( spec->_geom_file, true );
+                string gdata = spec->_geom_source;
                 eofl = gdata.find_first_of( '\n' );
                 vertext = gdata.substr( 0, eofl );
                 gdata = gdata.substr( eofl );
                 gshader << vertext << "\n" << defines.str() << gdata;
         }
-        if ( !spec->_pixel_file.empty() )
+        if ( spec->_has_pixel )
         {
-                string fdata = vfs->read_file( spec->_pixel_file, true );
+                string fdata = spec->_pixel_source;
                 eofl = fdata.find_first_of( '\n' );
                 vertext = fdata.substr( 0, eofl );
                 fdata = fdata.substr( eofl );
                 fshader << vertext << "\n" << defines.str() << fdata;
-                vfs->write_file( Filename( "generated_" + shader_name + ".frag.glsl" ), fshader.str(), true );
+                //vfs->write_file( Filename( "generated_" + shader_name + ".frag.glsl" ), fshader.str(), true );
         }
         
         PT( Shader ) shader = Shader::make( Shader::SL_GLSL, vshader.str(), fshader.str(), gshader.str() );
@@ -351,7 +359,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         spec->_generated_shaders[permutations] = attr;
 #endif
 
-        shattr = apply_material_inputs( shattr, bspmat );
+        //shattr = apply_material_inputs( shattr, bspmat );
         attr = DCAST( ShaderAttrib, shattr );
 
         synthesize_collector.stop();

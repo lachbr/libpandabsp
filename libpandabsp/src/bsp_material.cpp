@@ -74,7 +74,7 @@ TextureStage *TextureStages::get_spheremap()
 
 TextureStage *TextureStages::get_cubemap()
 {
-        return get( "cubemap" );
+        return get( "cubemap_tex" );
 }
 
 TextureStage *TextureStages::get_heightmap()
@@ -98,136 +98,126 @@ TextureStage *TextureStages::get_glowmap()
 }
 
 //====================================================================//
+//====================================================================//
 
-Materials::matmap_t Materials::_materials;
-LightMutex Materials::_lock;
+#include "viftokenizer.h"
+#include "vifparser.h"
+#include <virtualFileSystem.h>
 
-Material *Materials::get( Material *mat )
+NotifyCategoryDef( bspmaterial, "" );
+
+TypeHandle BSPMaterial::_type_handle;
+
+BSPMaterial::materialcache_t BSPMaterial::_material_cache;
+
+const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
 {
-        LightMutexHolder holder( _lock );
-        CPT( Material ) cpttemp = mat;
-
-        auto itr = _materials.find( cpttemp );
-        if ( itr == _materials.end() )
+        int idx = _material_cache.find( file );
+        if ( idx != -1 )
         {
-                PT( Material ) newmat = nullptr;
-                if ( mat->is_exact_type( Material::get_class_type() ) )
-                {
-                        newmat = new Material( *mat );
-                }
-                else if ( mat->is_exact_type( BSPMaterial::get_class_type() ) )
-                {
-                        newmat = new BSPMaterial( *DCAST( BSPMaterial, mat ) );
-                }
-
-                nassertr( newmat != nullptr, nullptr );
-
-                itr = _materials.insert( matmap_t::value_type( newmat, mat ) ).first;
+                // We've already loaded this material file.
+                return _material_cache.get_data( idx );
         }
-#if 0
-        else
+        
+        VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
+        if ( !vfs->exists( file ) )
         {
-                if ( *( *itr ).first != *( *itr ).second )
-                {
-                        // The pointer no longer matches its original value.  Save a new one.
-                        ( *itr ).second = mat;
-                }
+                bspmaterial_cat.warning()
+                        << "Could not find material file " << file.get_fullpath() << "\n";
+                return nullptr;
         }
-#endif
 
-        return ( *itr ).second;
+        bspmaterial_cat.info()
+                << "Loading material " << file.get_fullpath() << "\n";
+
+        PT( BSPMaterial ) mat = new BSPMaterial;
+        mat->_file = file;
+
+        string mat_data = vfs->read_file( file, true );
+        TokenVec toks = tokenizer( mat_data );
+        Parser p( toks );
+
+        Object obj = p._base_objects[0];
+        mat->set_shader( obj.name ); // ->VertexLitGeneric<- {...}
+        pvector<Property> props = p.get_properties( obj );
+        for ( size_t i = 0; i < props.size(); i++ )
+        {
+                const Property &prop = props[i];
+                mat->set_keyvalue( prop.name, prop.value ); // "$basetexture"   "phase_3/maps/desat_shirt_1.jpg"
+        }
+        mat->_has_env_cubemap = ( mat->has_keyvalue( "$envmap" ) && mat->get_keyvalue( "$envmap" ) == "env_cubemap" );
+
+        _material_cache[file] = mat;
+
+        return mat;
 }
 
 //====================================================================//
 
-TypeHandle BSPMaterial::_type_handle;
+TypeHandle BSPMaterialAttrib::_type_handle;
+int BSPMaterialAttrib::_attrib_slot;
 
-/**
- * Sets the name of the shader that this material will invoke.
- * Ex: "VertexLitGeneric", "LightmappedGeneric", "Water"
- */
-void BSPMaterial::set_shader( const std::string &shader_name )
+CPT( RenderAttrib ) BSPMaterialAttrib::make( const BSPMaterial *mat )
 {
-        _shader_name = shader_name;
+        PT( BSPMaterialAttrib ) bma = new BSPMaterialAttrib;
+        bma->_mat = mat;
+        return return_new( bma );
+}
+
+CPT( RenderAttrib ) BSPMaterialAttrib::make_default()
+{
+        PT( BSPMaterial ) mat = new BSPMaterial;
+        PT( BSPMaterialAttrib ) bma = new BSPMaterialAttrib;
+        bma->_mat = mat;
+        return return_new( bma );
 }
 
 /**
- * Adds a new input to the shader that runs for this material.
+ * BSPMaterials are compared solely by their source filename.
+ * We could also compare all of the keyvalues, but whatever.
+ * You shouldn't really be creating BSPMaterials on the fly,
+ * they should always be in a file.
  */
-void BSPMaterial::set_shader_input( const ShaderInput &input )
+int BSPMaterialAttrib::compare_to_impl( const RenderAttrib *other ) const
 {
-        _shader_inputs.push_back( input );
+        const BSPMaterialAttrib *bma = (const BSPMaterialAttrib *)other;
+
+        return _mat - bma->_mat;
 }
 
-size_t BSPMaterial::get_hash_impl() const
+size_t BSPMaterialAttrib::get_hash_impl() const
 {
-        size_t hash = Material::get_hash_impl();
-
-        hash = string_hash::add_hash( hash, _shader_name );
-        for ( size_t i = 0; i < _shader_inputs.size(); i++ )
-        {
-                hash = _shader_inputs[i].add_hash( hash );
-        }
-
+        size_t hash = 0;
+        hash = pointer_hash::add_hash( hash, _mat );
         return hash;
 }
 
-int BSPMaterial::compare_to_impl( const Material *mother ) const
+void BSPMaterialAttrib::register_with_read_factory()
 {
-        const BSPMaterial *other = (const BSPMaterial *)mother;
-        int mat_result = Material::compare_to_impl( mother );
-        if ( mat_result != 0 )
-        {
-                return mat_result;
-        }
-
-        if ( _shader_name != other->_shader_name )
-        {
-                return _shader_name.compare( other->_shader_name );
-        }
-
-        if ( _shader_inputs.size() != other->_shader_inputs.size() )
-        {
-                return _shader_inputs.size() < other->_shader_inputs.size() ? -1 : 1;
-        }
-        for ( size_t i = 0; i < _shader_inputs.size(); i++ )
-        {
-                if ( _shader_inputs[i] != other->_shader_inputs[i] )
-                {
-                        return _shader_inputs[i] < other->_shader_inputs[i] ? -1 : 1;
-                }
-        }
-
-        // equal
-        return 0;
+        BamReader::get_factory()->register_factory( get_class_type(), make_from_bam );
 }
 
-//=====================================================================
-//======================== BAM STUFF ==================================
-
-void BSPMaterial::register_with_read_factory()
+void BSPMaterialAttrib::write_datagram( BamWriter *manager, Datagram &dg )
 {
-        BamReader::get_factory()->register_factory( get_class_type(), make_BSPMaterial );
+        RenderAttrib::write_datagram( manager, dg );
+        dg.add_string( _mat->get_file().get_fullpath() );
 }
 
-void BSPMaterial::write_datagram( BamWriter *manager, Datagram &me )
+TypedWritable *BSPMaterialAttrib::make_from_bam( const FactoryParams &params )
 {
-        Material::write_datagram( manager, me );
-        me.add_string( _shader_name );
-}
-
-TypedWritable *BSPMaterial::make_BSPMaterial( const FactoryParams &params )
-{
-        BSPMaterial *mat = new BSPMaterial;
+        BSPMaterialAttrib *bma = new BSPMaterialAttrib;
         DatagramIterator scan;
         BamReader *manager;
+
         parse_params( params, scan, manager );
-        mat->fillin( scan, manager );
-        return mat;
+        bma->fillin( scan, manager );
+
+        return bma;
 }
 
-void BSPMaterial::fillin( DatagramIterator &scan, BamReader *manager )
+void BSPMaterialAttrib::fillin( DatagramIterator &scan, BamReader *manager )
 {
-        Material::fillin( scan, manager );
-        set_shader( scan.get_string() );
+        RenderAttrib::fillin( scan, manager );
+
+        _mat = BSPMaterial::get_from_file( scan.get_string() );
 }

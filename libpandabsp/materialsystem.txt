@@ -1,0 +1,27 @@
+material file:
+
+VertexLitGeneric
+{
+    "$basetexture"      "phase_3/maps/desat_shirt_1.jpg"
+    "$envmap"           "env_cubemap"
+    "$phong"            "1"
+}
+
+BSPMaterial class:
+    - read material file
+    - store shader name of material
+    - store keyvalues for material shader
+    - cache by material filename
+    
+BSPMaterialAttrib class:
+    - applied to nodes/states
+    - store a BSPMaterial pointer
+    
+ShaderSpec class:
+    - derived class for each shader name
+    - stores base shader files and source
+    
+    - sets up permutations for shader
+        - parses keyvalues of BSPMaterial (cached by pointer)
+        - loads up required textures, etc
+        - sets shader inputs, properties for shader

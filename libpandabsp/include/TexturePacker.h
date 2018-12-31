@@ -2,6 +2,8 @@
 
 #define TEXTURE_PACKER_H
 
+#include <dtoolbase_cc.h>
+
 /*!
 **
 ** Copyright (c) 2009 by John W. Ratcliff mailto:jratcliffscarab@gmail.com
@@ -77,32 +79,93 @@
 // Step #10 : Iterate through the results and copy your textures to a single large texture-atlas.
 //              This code does not do the image copying, that is done by your own application.
 
-namespace TEXTURE_PACKER
+class PackResult
 {
-
-        class TexturePacker
+public:
+        INLINE PackResult( int width, int height, int unused_area ) :
+                _width( width ),
+                _height( height ),
+                _unused_area( unused_area )
         {
-        public:
-                virtual int   getTextureCount( void ) = 0;
-                virtual void  setTextureCount( int tcount ) = 0; // number of textures to consider..
-                virtual void  addTexture( int wid, int hit ) = 0; // add textures 0 - n
+        }
 
-                virtual bool  wouldTextureFit( int wid, int hit,
-                                               bool forcePowerOfTwo, bool onePixelBorder,
-                                               int max_wid, int max_hit ) = 0;
+PUBLISHED:
+        INLINE int get_width() const
+        {
+                return _width;
+        }
+        INLINE int get_height() const
+        {
+                return _height;
+        }
+        INLINE int get_unused_area() const
+        {
+                return _unused_area;
+        }
 
-                virtual void addNewTexture( int wid, int hit ) = 0;
+private:
+        int _width;
+        int _height;
+        int _unused_area;
+};
 
-                virtual int packTextures( int &width, int &height, bool forcePowerOfTwo, bool onePixelBorder ) = 0;  // pack the textures, the return code is the amount of wasted/unused area.
+class TextureLocation
+{
+public:
+        INLINE TextureLocation( bool rotated, int x, int y, int wid, int hit ) :
+                _x( x ), _y( y ), _wid( wid ), _hit( hit ), _rotated( rotated )
+        {
+        }
 
-                virtual bool  getTextureLocation( int index, int &x, int &y, int &wid, int &hit ) = 0; // returns true if the texture has been rotated 90 degrees
+PUBLISHED:
+        INLINE int get_x() const
+        {
+                return _x;
+        }
+        INLINE int get_y() const
+        {
+                return _y;
+        }
+        INLINE int get_width() const
+        {
+                return _wid;
+        }
+        INLINE int get_height() const
+        {
+                return _hit;
+        }
+        INLINE bool get_rotated() const
+        {
+                return _rotated;
+        }
 
-        };
+private:
+        int _x;
+        int _y;
+        int _wid;
+        int _hit;
+        bool _rotated;
+};
 
+class TexturePacker
+{
+PUBLISHED:
+        virtual int   getTextureCount( void ) = 0;
+        virtual void  setTextureCount( int tcount ) = 0; // number of textures to consider..
+        virtual void  addTexture( int wid, int hit ) = 0; // add textures 0 - n
 
-        TexturePacker * createTexturePacker( void );
-        void            releaseTexturePacker( TexturePacker *tp );
+        virtual bool  wouldTextureFit( int wid, int hit,
+                                        bool forcePowerOfTwo, bool onePixelBorder,
+                                        int max_wid, int max_hit ) = 0;
 
-}; // end the texture packer namespace
+        virtual void addNewTexture( int wid, int hit ) = 0;
+
+        virtual PackResult packTextures( bool forcePowerOfTwo, bool onePixelBorder ) = 0;  // pack the textures, the return code is the amount of wasted/unused area.
+
+        virtual TextureLocation  getTextureLocation( int index ) = 0; // returns true if the texture has been rotated 90 degrees
+
+        static TexturePacker *createTexturePacker( void );
+        static void releaseTexturePacker( TexturePacker *tp );
+};
 
 #endif

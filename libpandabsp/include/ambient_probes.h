@@ -24,9 +24,12 @@
 #include <unordered_map>
 #include <bitset>
 
+#include "../kdtree/KDTree.h"
+
 class BSPLoader;
 struct dleafambientindex_t;
 struct dleafambientlighting_t;
+class cubemap_t;
 
 enum
 {
@@ -36,7 +39,7 @@ enum
         LIGHTTYPE_SPOT          = 3,
 };
 
-struct ambientprobe_t
+struct ambientprobe_t : public ReferenceCount
 {
         int leaf;
         LPoint3 pos;
@@ -84,6 +87,9 @@ struct nodeshaderinput_t : public ReferenceCount
         UpdateSeq node_sequence;
 
         ambientprobe_t *amb_probe;
+        cubemap_t *cubemap;
+        PT( Texture ) cubemap_tex;
+        bool cubemap_changed;
         pvector<light_t *> locallights;
         int sky_idx;
         std::bitset<0xFFF> occluded_lights;
@@ -116,6 +122,9 @@ struct nodeshaderinput_t : public ReferenceCount
                 light_data2 = PTA_LMatrix4f::empty_array( MAX_TOTAL_LIGHTS );
                 light_ids = PTA_int::empty_array( MAX_TOTAL_LIGHTS );
                 amb_probe = nullptr;
+                cubemap = nullptr;
+                cubemap_tex = new Texture( "cubemap_image" );
+                cubemap_tex->clear_image();
                 sky_idx = -1;
                 active_lights = 0;
 
@@ -130,7 +139,8 @@ struct nodeshaderinput_t : public ReferenceCount
                 locallights( other.locallights ),
                 sky_idx( other.sky_idx ),
                 active_lights( other.active_lights ),
-                occluded_lights( other.occluded_lights )
+                occluded_lights( other.occluded_lights ),
+                cubemap_tex( other.cubemap_tex )
         {
                 //ambient_cube = PTA_LVecBase3::empty_array( 6 );
                 //light_count = PTA_int::empty_array( 1 );
@@ -161,7 +171,34 @@ public:
 
         PT( nodeshaderinput_t ) update_node( PandaNode *node, const TransformState *net_ts );
 
+        void load_cubemaps();
+
+        template<class T>
+        T find_closest_in_kdtree( KDTree *tree, const LPoint3 &pos,
+                                  const pvector<T> &items );
+
+        template<class T>
+        T find_closest_n_in_kdtree( KDTree *tree, const LPoint3 &pos,
+                                  const pvector<T> &items, int n );
+
         void cleanup();
+
+        INLINE KDTree *get_light_kdtree() const
+        {
+                return _light_kdtree;
+        }
+        INLINE KDTree *get_envmap_kdtree() const
+        {
+                return _envmap_kdtree;
+        }
+        INLINE KDTree *get_probe_kdtree() const
+        {
+                return _probe_kdtree;
+        }
+        INLINE const pvector<PT( cubemap_t )> &get_cubemaps()
+        {
+                return _cubemaps;
+        }
 
 public:
         void consider_garbage_collect();
@@ -169,7 +206,6 @@ public:
         void xform_lights( const TransformState *cam_trans );
 
 private:
-        INLINE ambientprobe_t *find_closest_sample( int leaf_id, const LPoint3 &pos );
         INLINE bool is_sky_visible( const LPoint3 &point );
         INLINE bool is_light_visible( const LPoint3 &point, const light_t *light );
 
@@ -181,11 +217,16 @@ private:
         // NodePaths to be influenced by the ambient probes.
         SimpleHashMap<WPT( PandaNode ), CPT( TransformState )> _pos_cache;
         SimpleHashMap<WPT( PandaNode ), PT( nodeshaderinput_t )> _node_data;
-        SimpleHashMap<int, pvector<ambientprobe_t>, int_hash> _probes;
+        SimpleHashMap<int, pvector<PT( ambientprobe_t )>, int_hash> _probes;
         pvector<ambientprobe_t *> _all_probes;
         pvector<PT( light_t )> _all_lights;
+        pvector<PT( cubemap_t )> _cubemaps;
         pvector<pvector<light_t *>> _light_pvs;
         light_t *_sunlight;
+
+        PT( KDTree ) _light_kdtree;
+        PT( KDTree ) _probe_kdtree;
+        PT( KDTree ) _envmap_kdtree;
 
         NodePath _vis_root;
 

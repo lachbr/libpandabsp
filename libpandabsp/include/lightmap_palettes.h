@@ -59,7 +59,7 @@ struct Palette
 {
         pvector<LightmapSource *> sources;
         PNMImage palette_img[NUM_BUMP_VECTS + 1];
-        TEXTURE_PACKER::TexturePacker *packer;
+        TexturePacker *packer;
         Palette()
         {
                 for ( int i = 0; i < NUM_BUMP_VECTS + 1; i++ )

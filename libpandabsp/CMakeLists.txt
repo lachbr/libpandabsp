@@ -1,5 +1,7 @@
 file (GLOB SRCS "src/*.cpp")
 file (GLOB HEADERS "include/*.h")
+file (GLOB KD_SRCS "kdtree/*.cpp")
+file (GLOB KD_HDRS "kdtree/*.h")
 
 file (GLOB CM_SRCS "../../panda_hl_bsp_tools/common/*.cpp")
 file (GLOB CM_INC "../../panda_hl_bsp_tools/common/*.h")
@@ -8,6 +10,8 @@ file (GLOB SSE_INC "../../panda_hl_bsp_tools/common/mathlib/*.h")
 
 source_group("Header Files" FILES ${HEADERS})
 source_group("Source Files" FILES ${SRCS})
+source_group("Source Files\\kdtree" FILES ${KD_SRCS})
+source_group("Header Files\\kdtree" FILES ${KD_HDRS})
 source_group("Header Files\\common" FILES ${CM_INC})
 source_group("Source Files\\common" FILES ${CM_SRCS})
 source_group("Source Files\\common\\mathlib" FILES ${SSE_SRCS})
@@ -25,7 +29,7 @@ link_directories(${P3BSP_PANDA3D_DIR}/lib ${P3BSP_PANDA3D_DIR}/python/libs ../vi
 
 add_definitions(-DNOMINMAX -DBUILDING_LIBPANDABSP -DWITHIN_PANDA -DCOMPILER_MSVC64 -DVERSION_64BIT -DDOUBLEVEC_T -DSYSTEM_WIN32 -DSTDC_HEADERS -DCIO)
 
-add_library(libpandabsp SHARED ${SRCS} ${HEADERS} ${CM_INC} ${CM_SRCS} ${SSE_INC} ${SSE_SRCS})
+add_library(libpandabsp SHARED ${SRCS} ${HEADERS} ${CM_INC} ${CM_SRCS} ${SSE_INC} ${SSE_SRCS} ${KD_SRCS} ${KD_HDRS})
 
 set(bsp_suff .pyd CACHE STRING "Extension of output file")
 set(bsp_out bsp CACHE STRING "Name of output file")

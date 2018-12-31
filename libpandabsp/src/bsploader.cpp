@@ -17,6 +17,7 @@
 #include "mathlib.h"
 #include "viftokenizer.h"
 #include "bsp_material.h"
+#include "cubemaps.h"
 
 #include <array>
 #include <bitset>
@@ -89,7 +90,8 @@ TypeHandle BSPFaceAttrib::_type_handle;
 int BSPFaceAttrib::_attrib_slot;
 
 INLINE BSPFaceAttrib::BSPFaceAttrib() :
-        RenderAttrib()
+        RenderAttrib(),
+        _ignore_pvs( false )
 {
 }
 
@@ -113,6 +115,13 @@ CPT( RenderAttrib ) BSPFaceAttrib::make( const string &face_material, int face_t
         BSPFaceAttrib *attrib = new BSPFaceAttrib;
         attrib->_material = face_material;
         attrib->_face_type = face_type;
+        return return_new( attrib );
+}
+
+CPT( RenderAttrib ) BSPFaceAttrib::make_ignore_pvs()
+{
+        BSPFaceAttrib *attrib = new BSPFaceAttrib;
+        attrib->_ignore_pvs = true;
         return return_new( attrib );
 }
 
@@ -434,59 +443,28 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
         }
 #endif
 
-        v->set_uv( "basetexture", df_uv );
+        v->set_uv( df_uv );
         v->set_uv( "lightmap", lm_uv );
 
         return v;
 }
 
-PT( Texture ) BSPLoader::try_load_texref( texref_t *tref )
+CPT( BSPMaterial ) BSPLoader::try_load_texref( texref_t *tref )
 {
-        if ( _texref_textures.find( tref ) != _texref_textures.end() )
+        if ( _texref_materials.find( tref ) != _texref_materials.end() )
         {
-                return _texref_textures[tref];
+                return _texref_materials[tref];
         }
 
         string name = tref->name;
 
-	PT( Texture ) tex = nullptr;
-
-	size_t ext_idx = name.find_last_of( "." );
-	string basename = name.substr( 0, ext_idx );
-	string alpha_file = basename + "_a.rgb";
-        Filename alpha_filename = Filename::from_os_specific( alpha_file );
-	if ( VirtualFileSystem::get_global_ptr()->exists( alpha_filename ) )
-	{
-		// A corresponding alpha file exists for this texture, load that up as well.
-                bspfile_cat.info()
-                        << "Found corresponding alpha file " << alpha_filename.get_fullpath()
-                        << " for texture " << name << "\n";
-		tex = TexturePool::load_texture( name, alpha_filename );
-	}
-	else
-	{
-		// Just load the texture.
-		tex = TexturePool::load_texture( name );
-	}
-
-        // Now check for a material file.
-        Filename mat_filename = Filename::from_os_specific( basename + ".mat" );
-        if ( VirtualFileSystem::get_global_ptr()->exists( mat_filename ) )
-        {
-                string mat_data = VirtualFileSystem::get_global_ptr()->read_file( mat_filename, true );
-
-                TokenVec toks = tokenizer( mat_data );
-                Parser p( toks );
-                _texref_materials[tref] = p;
-                bspfile_cat.info()
-                        << "Found material file for texref " << tref->name << "\n";
-        }
+        CPT( BSPMaterial ) tex = BSPMaterial::get_from_file( name );
 
         if ( tex != nullptr )
         {
                 bspfile_cat.info()
                         << "Loaded texref " << tref->name << "\n";
-                _texref_textures[tref] = tex;
+                _texref_materials[tref] = tex;
                 return tex;
         }
 
@@ -831,59 +809,28 @@ void BSPLoader::make_faces()
 
                         bool skip = false;
 
-                        string envmap = "phase_14/maps/envmap001a.png";
-                        float envmap_shininess = -1;
-                        bool mat_lightmapped = true;
-                        bool mat_normalmap = false;
-                        string normalmapfile = "";
-
-                        PT( Texture ) tex = try_load_texref( texref );
-                        string texture_name = texref->name;
-                        string material = "default";
-                        string shader = DEFAULT_BRUSH_SHADER;
-                        if ( _texref_materials.find( texref ) != _texref_materials.end() )
+                        //std::cout << "Loading material " << std::string(texref->name) << std::endl;
+                        CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string(texref->name) );
+                        bool mat_normalmap = bspmat->has_keyvalue( "$bumpmap" );
+                        string surfaceprop = "default";
+                        if ( bspmat->has_keyvalue( "$surfaceprop" ) )
                         {
-                                bspfile_cat.info()
-                                        << "Material properties for " << texref->name << ":\n";
-                                Parser *p = &_texref_materials[texref];
-                                Object obj = p->_base_objects[0];
-                                shader = obj.name;
-                                pvector<Property> props = p->get_properties( obj );
-                                for ( size_t i = 0; i < props.size(); i++ )
-                                {
-                                        Property *prop = &props[i];
-                                        if ( prop->name == "$surfaceprop" )
-                                        {
-                                                material = prop->value;
-                                        }
-                                        else if ( prop->name == "$envmap" )
-                                        {
-                                                envmap = prop->value;
-                                        }
-                                        else if ( prop->name == "$envmap_shininess" )
-                                        {
-                                                envmap_shininess = atof( prop->value.c_str() );
-                                        }
-                                        else if ( prop->name == "$lightmapped" )
-                                        {
-                                                mat_lightmapped = (bool)atoi( prop->value.c_str() );
-                                        }
-                                        else if ( prop->name == "$normalmap" )
-                                        {
-                                                mat_normalmap = true;
-                                                normalmapfile = prop->value;
-                                        }
-                                        
-                                        bspfile_cat.info()
-                                                << "\t" << prop->name << "\t:\t" << prop->value << "\n";
-                                }
-
+                                surfaceprop = bspmat->get_keyvalue( "$surfaceprop" );
                         }
-                        transform( texture_name.begin(), texture_name.end(), texture_name.begin(), tolower );
 
-                        bool has_lighting = ( face->lightofs != -1 && _want_lightmaps ) && !skip && mat_lightmapped;
+                        bool has_lighting = ( face->lightofs != -1 && _want_lightmaps ) && !skip && bspmat->get_shader() == "LightmappedGeneric";
+                        if ( has_lighting &&
+                             bspmat->has_keyvalue( "$lightmapped" ) &&
+                             atoi( bspmat->get_keyvalue( "$lightmapped" ).c_str() ) == 0 )
+                        {
+                                has_lighting = false;
+                        }
+                                
                         bool has_texture = !skip;
 
+                        // this is just so we can retrieve the width and height of the texture
+                        // for brush face texcoords, it's poopy
+                        PT( Texture ) tex = TexturePool::load_texture( bspmat->get_keyvalue( "$basetexture" ) );
 
                         LightmapPaletteDirectory::LightmapFacePaletteEntry *lmfaceentry = _lightmap_dir.face_index[facenum];
 
@@ -939,6 +886,8 @@ void BSPLoader::make_faces()
                         ld.faceentry = lmfaceentry;
 
                         LNormald poly_normal( 0 );
+                        LVertexd centroid( 0 );
+                        int verts = 0;
 
                         int last_edge = face->firstedge + face->numedges;
                         int first_edge = face->firstedge;
@@ -972,6 +921,8 @@ void BSPLoader::make_faces()
                                                 v->set_normal( normal );
                                                 vpool->add_vertex( v );
                                                 poly->add_vertex( v );
+                                                centroid += v->get_pos3();
+                                                verts++;
                                         }
                                 }
                                 else
@@ -983,6 +934,8 @@ void BSPLoader::make_faces()
                                                 v->set_normal( normal );
                                                 vpool->add_vertex( v );
                                                 poly->add_vertex( v );
+                                                centroid += v->get_pos3();
+                                                verts++;
                                         }
                                 }
                         }
@@ -991,6 +944,8 @@ void BSPLoader::make_faces()
                         data->remove_invalid_primitives( true );
 
                         poly_normal /= face->numedges;
+
+                        centroid /= verts;
 
                         int face_type = BSPFaceAttrib::FACETYPE_WALL;
 
@@ -1012,14 +967,9 @@ void BSPLoader::make_faces()
 
                         NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
 
-                        if ( has_texture )
-                        {
-                                faceroot.set_texture( TextureStages::get_basetexture(), tex );
-                        }
-
                         if ( has_lighting )
                         {
-                                if ( face->bumped_lightmap && mat_normalmap )
+                                if ( face->bumped_lightmap && bspmat->has_keyvalue( "$bumpmap" ) )
                                 {
                                         faceroot.set_texture( TextureStages::get_bumped_lightmap(),
                                                                 lmfaceentry->palette->palette_tex );
@@ -1030,31 +980,29 @@ void BSPLoader::make_faces()
                                                               lmfaceentry->palette->palette_tex );
                                 }
                         }
-                        if ( mat_normalmap )
-                        {
-                                PT( Texture ) nmtex = TexturePool::load_texture( normalmapfile );
-                                faceroot.set_texture( TextureStages::get_normalmap(), nmtex );
-                        }
 
                         faceroot.wrt_reparent_to( modelroot );
-                        if ( Texture::has_alpha( tex->get_format() ) )
+
+                        if ( bspmat->has_keyvalue( "$envmap" ) )
                         {
-                                faceroot.set_transparency( TransparencyAttrib::M_alpha, 1 );
+                                PT( Texture ) etex = nullptr;
+                                std::string envmap = bspmat->get_keyvalue( "$envmap" );
+                                if ( envmap == "env_cubemap" )
+                                {
+                                        // material wants us to use a cubemap_tex embedded in the level.
+                                        // find the closest one to the center of the face.
+                                        cubemap_t *cm = find_closest_cubemap(
+                                                LPoint3( centroid[0], centroid[1], centroid[2] ) );
+                                        if ( cm )
+                                        {
+                                                std::cout << "Face has env_cubemap" << std::endl;
+                                                faceroot.set_texture( TextureStages::get_cubemap(),
+                                                                      cm->cubemap_tex );
+                                        }
+                                }
                         }
 
-                        PT( BSPMaterial ) face_mat = new BSPMaterial;
-                        face_mat->set_shader( shader );
-
-                        if ( envmap_shininess > 0.0 )
-                        {
-                                PT( Texture ) etex = TexturePool::load_texture( envmap );
-                                etex->set_wrap_u( SamplerState::WM_repeat );
-                                etex->set_wrap_v( SamplerState::WM_repeat );
-                                faceroot.set_texture( TextureStages::get_spheremap(), etex );
-                                face_mat->set_shininess( envmap_shininess );
-                        }
-
-                        faceroot.set_material( Materials::get( face_mat ) );
+                        faceroot.set_attrib( BSPMaterialAttrib::make( bspmat ) );
 
                         NodePathCollection gn_npc = faceroot.find_all_matches( "**/+GeomNode" );
                         for ( int i = 0; i < gn_npc.get_num_paths(); i++ )
@@ -1065,7 +1013,7 @@ void BSPLoader::make_faces()
                                 {
                                         PT( Geom ) geom = gn->modify_geom( j );
                                         geom->set_bounds_type( BoundingVolume::BT_box );
-                                        CPT( RenderAttrib ) bca = BSPFaceAttrib::make( material, face_type );
+                                        CPT( RenderAttrib ) bca = BSPFaceAttrib::make( surfaceprop, face_type );
                                         CPT( RenderState ) old_state = gn->get_geom_state( j );
                                         CPT( RenderState ) new_state = old_state->add_attrib( bca, 1 );
 
@@ -1822,7 +1770,7 @@ void BSPLoader::setup_shadowcam()
         state.set_light_off( 10 );
         state.set_fog_off( 10 );
         state.set_material_off( 10 );
-        state.set_attrib( IgnorePVSAttrib::make(), 10 );
+        state.set_attrib( BSPFaceAttrib::make_ignore_pvs(), 10 );
         state.set_color( _shadow_color, 10 );
 
         cam->set_initial_state( state.get_state() );
@@ -1830,7 +1778,7 @@ void BSPLoader::setup_shadowcam()
         _render.hide( _shadowcam_mask );
 
         _shadowcam = _camera.attach_new_node( cam );
-        _shadowcam.set_attrib( IgnorePVSAttrib::make(), 1 );
+        _shadowcam.set_attrib( BSPFaceAttrib::make_ignore_pvs(), 1 );
         _shadowcam.set_pos( _shadowcam_pos );
         _shadowcam.look_at( 0, 0, 0 );
         _shadowcam.set_compass( _render );
@@ -1927,6 +1875,8 @@ bool BSPLoader::read( const Filename &file )
         memcpy( buffer, data.c_str(), length );
         _bspdata = LoadBSPImage( (dheader_t *)buffer );
 
+        _map_file = file;
+
         ParseEntities(_bspdata);
 
         _leaf_aabb_lock.acquire();
@@ -1957,6 +1907,9 @@ bool BSPLoader::read( const Filename &file )
 
         if ( !_ai )
         {
+                std::cout << "load_cubemaps" << std::endl;
+                load_cubemaps();
+
                 LightmapPalettizer lmp( this );
                 _lightmap_dir = lmp.palettize_lightmaps();
 
@@ -2212,6 +2165,99 @@ void BSPLoader::add_dynamic_node( const NodePath &node )
         _explicit_dynamic_nodes.push_back( WeakNodePath( node ) );
 }
 
+cubemap_t *BSPLoader::find_closest_cubemap( const LPoint3 &pos )
+{
+        return _amb_probe_mgr.find_closest_in_kdtree( _amb_probe_mgr.get_envmap_kdtree(), pos, _amb_probe_mgr.get_cubemaps() );
+}
+
+void BSPLoader::load_cubemaps()
+{
+        _amb_probe_mgr.load_cubemaps();
+}
+
+void BSPLoader::build_cubemaps()
+{
+        if ( !_active_level || !_bspdata )
+                return;
+
+        bspfile_cat.info()
+                << "Building cubemaps...\n";
+
+        _bspdata->cubemapdata.clear();
+
+        // make the camera that will render the 6 faces of each cubemap_tex
+        PT( Camera ) cam = new Camera( "cubemap_cam" );
+        PT( PerspectiveLens ) lens = new PerspectiveLens;
+        lens->set_fov( 90, 90 );
+        cam->set_lens( lens );
+        NodePath camnp = _result.attach_new_node( cam );
+
+        PT( GraphicsOutput ) buf;
+        PT( DisplayRegion ) dr;
+        PNMImage img;
+        dcubemap_t *cm;
+
+        static const LVector3 dirs[6] = {
+                
+                LVector3( -90, 0, 90 ),  // right
+                LVector3( 90, 0, -90 ),   // left
+                LVector3( 0, 0, 0 ),    // forward
+                LVector3( 180, 0, 180 ),  // back
+                LVector3( 0, 90, 0 ),   // up
+                LVector3( 0, -90, 0 ),   // down
+                
+        };
+
+        for ( size_t i = 0; i < _bspdata->cubemaps.size(); i++ )
+        {
+                cm = &_bspdata->cubemaps[i];
+
+                buf = _win->make_texture_buffer( "cubemap_buf", cm->size, cm->size );
+                dr = buf->make_display_region();
+                dr->set_camera( camnp );
+
+                camnp.set_pos( cm->pos[0] / 16.0, cm->pos[1] / 16.0, cm->pos[2] / 16.0 );
+
+                for ( int j = 0; j < 6; j++ )
+                {
+                        img.clear();
+
+                        camnp.set_hpr( dirs[j] );
+
+                        _win->get_engine()->open_windows();
+                        _win->get_engine()->render_frame();
+                        _win->get_engine()->render_frame();
+                        _win->get_engine()->sync_frame();
+
+                        buf->get_screenshot( img );
+                        
+                        // save out the cubemap_tex face
+                        cm->imgofs[j] = _bspdata->cubemapdata.size();
+                        for ( int y = 0; y < img.get_y_size(); y++ )
+                        {
+                                for ( int x = 0; x < img.get_x_size(); x++ )
+                                {
+                                        LRGBColor col = img.get_xel( x, y );
+                                        colorrgbexp32_t out;
+                                        VectorToColorRGBExp32( col, out );
+                                        _bspdata->cubemapdata.push_back( out );
+                                }
+                        }
+                }
+
+                _win->remove_display_region( dr );
+                _win->get_engine()->remove_window( buf );
+        }
+
+        // save bsp file
+        bspfile_cat.info()
+                << "Saving BSP file...\n";
+        WriteBSPFile( _bspdata, _map_file.to_os_specific().c_str() );
+        bspfile_cat.info()
+                << "Done.\n";
+        
+}
+
 void BSPLoader::cleanup()
 {
         if ( _active_level )
@@ -2253,6 +2299,10 @@ void BSPLoader::cleanup()
         }
 
         _active_level = false;
+
+        _map_file = Filename();
+
+        _cubemaps.clear();
 
         _amb_probe_mgr.cleanup();
 

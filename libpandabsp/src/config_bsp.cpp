@@ -30,7 +30,7 @@ void init_libpandabsp()
 
 	BSPFaceAttrib::init_type();
         //WorldGeometryAttrib::init_type();
-        IgnorePVSAttrib::init_type();
+        //IgnorePVSAttrib::init_type();
 	CBaseEntity::init_type();
         CPointEntity::init_type();
 	CBrushEntity::init_type();
@@ -43,7 +43,8 @@ void init_libpandabsp()
         PSSMShaderGenerator::init_type();
 
         BSPMaterial::init_type();
-        BSPMaterial::register_with_read_factory();
+        BSPMaterialAttrib::init_type();
+        BSPMaterialAttrib::register_with_read_factory();
 
         ShaderSpec::init_type();
 }

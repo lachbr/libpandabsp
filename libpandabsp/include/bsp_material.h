@@ -14,6 +14,7 @@
 #include <shaderInput.h>
 #include <pmap.h>
 #include <textureStage.h>
+#include <renderAttrib.h>
 
 /**
  * This simple interface maintains a single TextureStage object for each unique name.
@@ -49,74 +50,85 @@ private:
         static tspool_t _stage_pool;
 };
 
-class Materials
-{
-PUBLISHED:
-        static Material *get( Material *mat );
-
-private:
-        static LightMutex _lock;
-
-        // We store a map of CPT(Material) to PT(Material).  These are two
-        // equivalent structures, but different pointers.  The first pointer never
-        // leaves this class.  If the second pointer changes value, we'll notice it
-        // and return a new one.
-        typedef pmap< CPT( Material ), PT( Material ), indirect_compare_to<const Material *> > matmap_t;
-        static matmap_t _materials;
-};
-
 #define DEFAULT_SHADER "VertexLitGeneric"
 
-class BSPMaterial : public Material
+NotifyCategoryDeclNoExport(bspmaterial);
+
+class BSPMaterial : public TypedReferenceCount
 {
 PUBLISHED:
-        INLINE explicit BSPMaterial( const std::string &name = "" ) :
-                Material( name ),
-                _shader_name( DEFAULT_SHADER )
+        INLINE explicit BSPMaterial( const std::string &name = DEFAULT_SHADER ) :
+                TypedReferenceCount(),
+                _has_env_cubemap( false ),
+                _cached_env_cubemap( false ),
+                _shader_name( name )
         {
         }
 
         INLINE BSPMaterial( const BSPMaterial &copy ) :
-                Material( copy ),
+                TypedReferenceCount( copy ),
                 _shader_name( copy._shader_name ),
-                _shader_inputs( copy._shader_inputs )
+                _shader_keyvalues( copy._shader_keyvalues ),
+                _file( copy._file ),
+                _has_env_cubemap( copy._has_env_cubemap ),
+                _cached_env_cubemap (copy._cached_env_cubemap )
         {
         }
 
         INLINE void operator = ( const BSPMaterial &copy )
         {
-                Material::operator = ( copy );
+               TypedReferenceCount::operator = ( copy );
                 _shader_name = copy._shader_name;
-                _shader_inputs = copy._shader_inputs;
+                _shader_keyvalues = copy._shader_keyvalues;
+                _file = copy._file;
+                _has_env_cubemap = copy._has_env_cubemap;
+                _cached_env_cubemap = copy._cached_env_cubemap;
         }
 
+        INLINE void set_keyvalue( const std::string &key, const std::string &value )
+        {
+                _shader_keyvalues[key] = value;
+        }
+        INLINE std::string get_keyvalue( const std::string &key ) const
+        {
+                return _shader_keyvalues.get_data( _shader_keyvalues.find( key ) );
+        }
 
-        void set_shader( const std::string &shader_name );
+        INLINE void set_shader( const std::string &shader_name )
+        {
+                _shader_name = shader_name;
+        }
         INLINE std::string get_shader() const
         {
                 return _shader_name;
         }
 
-        void set_shader_input( const ShaderInput &input );
-        INLINE const pvector<ShaderInput> &get_shader_inputs() const
+        INLINE Filename get_file() const
         {
-                return _shader_inputs;
+                return _file;
         }
 
-        virtual int compare_to_impl(const Material *other) const;
-        virtual size_t get_hash_impl() const;
+        INLINE bool has_keyvalue( const std::string &key ) const
+        {
+                return _shader_keyvalues.find( key ) != -1;
+        }
+
+        INLINE bool has_env_cubemap() const
+        {
+                return _has_env_cubemap;
+        }
+
+        static const BSPMaterial *get_from_file( const Filename &file );
 
 private:
+        Filename _file;
         std::string _shader_name;
-        pvector<ShaderInput> _shader_inputs;
+        bool _has_env_cubemap;
+        bool _cached_env_cubemap;
+        SimpleHashMap<std::string, std::string, string_hash> _shader_keyvalues;
 
-public:
-        static void register_with_read_factory();
-        virtual void write_datagram( BamWriter *manager, Datagram &me );
-
-protected:
-        static TypedWritable *make_BSPMaterial( const FactoryParams &params );
-        void fillin( DatagramIterator &scan, BamReader *manager );
+        typedef SimpleHashMap<std::string, CPT( BSPMaterial ), string_hash> materialcache_t;
+        static materialcache_t _material_cache;
 
 public:
         static TypeHandle get_class_type()
@@ -125,9 +137,9 @@ public:
         }
         static void init_type()
         {
-                Material::init_type();
+                TypedReferenceCount::init_type();
                 register_type( _type_handle, "BSPMaterial",
-                               Material::get_class_type() );
+                               TypedReferenceCount::get_class_type() );
         }
         virtual TypeHandle get_type() const
         {
@@ -137,6 +149,75 @@ public:
 
 private:
         static TypeHandle _type_handle;
+};
+
+class BSPMaterialAttrib : public RenderAttrib
+{
+private:
+        INLINE BSPMaterialAttrib() :
+                RenderAttrib(),
+                _mat( nullptr )
+        {
+        }
+
+PUBLISHED:
+
+        static CPT( RenderAttrib ) make( const BSPMaterial *mat );
+        static CPT( RenderAttrib ) make_default();
+
+        INLINE const BSPMaterial *get_material() const
+        {
+                return _mat;
+        }
+
+private:
+        const BSPMaterial *_mat;
+
+public:
+        static void register_with_read_factory();
+        virtual void write_datagram( BamWriter *manager, Datagram &dg );
+
+protected:
+        virtual int compare_to_impl( const RenderAttrib *other ) const;
+        virtual size_t get_hash_impl() const;
+        static TypedWritable *make_from_bam( const FactoryParams &params );
+        void fillin( DatagramIterator &scan, BamReader *manager );
+
+PUBLISHED:
+        static int get_class_slot()
+        {
+                return _attrib_slot;
+        }
+        virtual int get_slot() const
+        {
+                return get_class_slot();
+        }
+        MAKE_PROPERTY( class_slot, get_class_slot );
+
+public:
+        static TypeHandle get_class_type()
+        {
+                return _type_handle;
+        }
+        static void init_type()
+        {
+                RenderAttrib::init_type();
+                register_type( _type_handle, "BSPMaterialAttrib",
+                               RenderAttrib::get_class_type() );
+                _attrib_slot = register_slot( _type_handle, 100, new BSPMaterialAttrib );
+        }
+        virtual TypeHandle get_type() const
+        {
+                return get_class_type();
+        }
+        virtual TypeHandle force_init_type()
+        {
+                init_type(); return get_class_type();
+        }
+
+private:
+        static TypeHandle _type_handle;
+        static int _attrib_slot;
 };
 
 #endif // BSP_MATERIAL_H

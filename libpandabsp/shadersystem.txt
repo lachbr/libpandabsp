@@ -1,0 +1,23 @@
+Shader/Materials system
+
+BSPMaterial: holds a list of key->value pairs and a shader name, used to configure the shader, cached by Filename
+BSPMaterialAttrib: stored on nodes, holds a BSPMaterial
+
+===============================================================================================================================
+ShaderFeature: defines a group of configurable variables for a particular shader feature (phong, bumpmap, etc),
+			   parses the key->value pairs on a BSPMaterial to fill in the variables, cached by BSPMaterial pointer,
+			   also adds the necessary permutations and ShaderInputs
+example:
+	PhongFeature: phongexponent, phongboost, phongtint
+===============================================================================================================================
+ShaderConfig: defines a list of configurable ShaderFeatures for a particular shader
+example:
+	LMGConfig: EnvmapFeature, BaseTextureFeature, AlphaFeature, BumpmapFeature, DetailFeature
+===============================================================================================================================
+ShaderSpec: one instance per shader,
+			each time a shader needs to be generated,
+			the ShaderSpec will look at the RenderState and ShaderConfig,
+			and generate a list of permutations and ShaderInputs to supply
+			to the generated shader
+example:
+	LightmappedGenericSpec

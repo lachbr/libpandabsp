@@ -87,7 +87,7 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
 
         pvector<Palette> result_vec;
         Palette pal;
-        pal.packer = TEXTURE_PACKER::createTexturePacker();
+        pal.packer = TexturePacker::createTexturePacker();
         result_vec.push_back( pal );
 
         // First step, build sources.
@@ -141,7 +141,7 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
                 {
                         // We need to make a new palette for this lightmap, it won't fit in the current ones.
                         Palette newpal;
-                        newpal.packer = TEXTURE_PACKER::createTexturePacker();
+                        newpal.packer = TexturePacker::createTexturePacker();
                         newpal.packer->addNewTexture( face->lightmap_size[0] + 1, face->lightmap_size[1] + 1 );
                         newpal.sources.push_back( &_sources[i] );
                         result_vec.push_back( newpal );
@@ -159,7 +159,9 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
         {
                 Palette *pal = &result_vec[i];
                 int width, height;
-                pal->packer->packTextures( width, height, true, false );
+                PackResult presult = pal->packer->packTextures( true, false );
+                width = presult.get_width();
+                height = presult.get_height();
 
                 PT( LightmapPaletteDirectory::LightmapPaletteEntry ) entry = new LightmapPaletteDirectory::LightmapPaletteEntry;
 
@@ -178,7 +180,13 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
                 {
                         LightmapSource *src = pal->sources[j];
                         int xshift, yshift, lmwidth, lmheight;
-                        bool rotated = pal->packer->getTextureLocation( j, xshift, yshift, lmwidth, lmheight );
+                        bool rotated;
+                        TextureLocation tloc = pal->packer->getTextureLocation( j );
+                        xshift = tloc.get_x();
+                        yshift = tloc.get_y();
+                        lmwidth = tloc.get_width();
+                        lmheight = tloc.get_height();
+                        rotated = tloc.get_rotated();
 
                         PT( LightmapPaletteDirectory::LightmapFacePaletteEntry ) face_entry = new LightmapPaletteDirectory::LightmapFacePaletteEntry;
                         face_entry->palette = entry;
@@ -232,7 +240,7 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
 
                 dir.entries.push_back( entry );
 
-                TEXTURE_PACKER::releaseTexturePacker( pal->packer );
+                TexturePacker::releaseTexturePacker( pal->packer );
                 pal->packer = nullptr;
         }
 

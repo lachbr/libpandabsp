@@ -43,9 +43,11 @@ static PStatCollector copystate_collector               ( "AmbientProbes:UpdateN
 static PStatCollector addlights_collector               ( "AmbientProbes:UpdateNodes:AddLights" );
 static PStatCollector fadelights_collector              ( "AmbientProbes:UpdateNodes:FadeLights" );
 static PStatCollector xformlight_collector( "AmbientProbes:XformLight" );
+static PStatCollector loadcubemap_collector( "AmbientProbes:UpdateNodes:LoadCubemap" );
+static PStatCollector findcubemap_collector( "AmbientProbes:UpdateNodes:FindCubemap" );
 
-static LineSegs dbg_trace_segs;
-static NodePath dbg_trace_np( "dbg_trace" );
+//static LineSegs dbg_trace_segs;
+//static NodePath dbg_trace_np( "dbg_trace" );
 
 static ConfigVariableBool cfg_lightaverage
 ( "light-average", true, "Activates/deactivate light averaging" );
@@ -64,7 +66,10 @@ static light_t *dummy_light = new light_t;
 
 AmbientProbeManager::AmbientProbeManager() :
         _loader( nullptr ),
-        _sunlight( nullptr )
+        _sunlight( nullptr ),
+        _light_kdtree( nullptr ),
+        _probe_kdtree( nullptr ),
+        _envmap_kdtree( nullptr )
 {
         dummy_light->id = -1;
         dummy_light->leaf = 0;
@@ -73,7 +78,10 @@ AmbientProbeManager::AmbientProbeManager() :
 
 AmbientProbeManager::AmbientProbeManager( BSPLoader *loader ) :
         _loader( loader ),
-        _sunlight( nullptr )
+        _sunlight( nullptr ),
+        _light_kdtree( nullptr ),
+        _probe_kdtree( nullptr ),
+        _envmap_kdtree( nullptr )
 {
 }
 
@@ -116,6 +124,9 @@ void AmbientProbeManager::process_ambient_probes()
         _light_pvs.clear();
         _light_pvs.resize( _loader->_bspdata->dmodels[0].visleafs + 1 );
         _all_lights.clear();
+
+        _light_kdtree = new KDTree( 3 );
+        vector<vector<double>> light_points;
 
         // Build light data structures
         for ( int entnum = 0; entnum < _loader->_bspdata->numentities; entnum++ )
@@ -205,10 +216,18 @@ void AmbientProbeManager::process_ambient_probes()
                         _all_lights.push_back( light );
                         if ( light->type == LIGHTTYPE_SUN )
                         {
+                                // don't put the sun in the k-d tree
                                 _sunlight = light;
+                        }
+                        else
+                        {
+                                // add the light into our k-d tree
+                                light_points.push_back( { light->pos[0], light->pos[1], light->pos[2] } );
                         }
                 }
         }
+
+        _light_kdtree->build( light_points );
 
         // Build light PVS
         for ( size_t lightnum = 0; lightnum < _all_lights.size(); lightnum++ )
@@ -217,31 +236,34 @@ void AmbientProbeManager::process_ambient_probes()
                 for ( int leafnum = 0; leafnum < _loader->_bspdata->dmodels[0].visleafs + 1; leafnum++ )
                 {
                         if ( light->type != LIGHTTYPE_SUN &&
-                             _loader->is_cluster_visible(light->leaf, leafnum) )
+                             _loader->is_cluster_visible( light->leaf, leafnum ) )
                         {
                                 _light_pvs[leafnum].push_back( light );
                         }
                 }
         }
 
+        _probe_kdtree = new KDTree( 3 );
+        vector<vector<double>> probe_points;
+
         for ( size_t i = 0; i < _loader->_bspdata->leafambientindex.size(); i++ )
         {
                 dleafambientindex_t *ambidx = &_loader->_bspdata->leafambientindex[i];
                 dleaf_t *leaf = _loader->_bspdata->dleafs + i;
-                _probes[i] = pvector<ambientprobe_t>();
+                _probes[i] = pvector<PT( ambientprobe_t )>();
                 for ( int j = 0; j < ambidx->num_ambient_samples; j++ )
                 {
                         dleafambientlighting_t *light = &_loader->_bspdata->leafambientlighting[ambidx->first_ambient_sample + j];
-                        ambientprobe_t probe;
-                        probe.leaf = i;
-                        probe.pos = LPoint3( RemapValClamped( light->x, 0, 255, leaf->mins[0], leaf->maxs[0] ),
+                        PT( ambientprobe_t ) probe = new ambientprobe_t;
+                        probe->leaf = i;
+                        probe->pos = LPoint3( RemapValClamped( light->x, 0, 255, leaf->mins[0], leaf->maxs[0] ),
                                              RemapValClamped( light->y, 0, 255, leaf->mins[1], leaf->maxs[1] ),
                                              RemapValClamped( light->z, 0, 255, leaf->mins[2], leaf->maxs[2] ) );
-                        probe.pos /= 16.0;
-                        probe.cube = PTA_LVecBase3::empty_array( 6 );
+                        probe->pos /= 16.0;
+                        probe->cube = PTA_LVecBase3::empty_array( 6 );
                         for ( int k = 0; k < 6; k++ )
                         {
-                                probe.cube.set_element( k, color_shift_pixel( &light->cube.color[k], _loader->_gamma ) );
+                                probe->cube.set_element( k, color_shift_pixel( &light->cube.color[k], _loader->_gamma ) );
                         }
 #ifdef VISUALIZE_AMBPROBES
                         PT( TextNode ) tn = new TextNode( "visText" );
@@ -258,8 +280,70 @@ void AmbientProbeManager::process_ambient_probes()
                         probe.visnode = smiley;
 #endif
                         _probes[i].push_back( probe );
+
+                        // insert probe into the k-d tree so we can find them quickly
+                        probe_points.push_back( { probe->pos[0], probe->pos[1], probe->pos[2] } );
+                        _all_probes.push_back( probe );
                 }
         }
+        _probe_kdtree->build( probe_points );
+}
+
+void AmbientProbeManager::load_cubemaps()
+{
+        std::cout << _loader->_bspdata->cubemaps.size() << " cubemaps " << std::endl;
+        _envmap_kdtree = new KDTree( 3 );
+        vector<vector<double>> envmap_points;
+        for ( size_t i = 0; i < _loader->_bspdata->cubemaps.size(); i++ )
+        {
+                dcubemap_t *dcm = &_loader->_bspdata->cubemaps[i];
+                PT( cubemap_t ) cm = new cubemap_t;
+                cm->pos = LVector3( dcm->pos[0] / 16.0, dcm->pos[1] / 16.0, dcm->pos[2] / 16.0 );
+                cm->leaf = _loader->find_leaf( cm->pos );
+                cm->size = dcm->size;
+
+                // insert into k-d tree
+                envmap_points.push_back( { cm->pos[0], cm->pos[1], cm->pos[2] } );
+
+                cm->cubemap_tex = new Texture( "cubemap_tex" );
+                cm->cubemap_tex->setup_cube_map( dcm->size, Texture::T_unsigned_byte, Texture::F_rgb );
+                cm->cubemap_tex->set_wrap_u( SamplerState::WM_clamp );
+                cm->cubemap_tex->set_wrap_v( SamplerState::WM_clamp );
+                cm->cubemap_tex->set_keep_ram_image( true );
+
+                for ( int j = 0; j < 6; j++ ) // for each side in the cubemap_tex
+                {
+                        if ( dcm->imgofs[j] == -1 )
+                        {
+                                std::cout << "\tNo image on side " << j << std::endl;
+                                continue;
+                        }
+
+                        int xel = 0;
+
+                        PNMImage img( dcm->size, dcm->size );
+                        img.fill( 0 );
+
+                        for ( int y = 0; y < dcm->size; y++ )
+                        {
+                                for ( int x = 0; x < dcm->size; x++ )
+                                {
+                                        colorrgbexp32_t *col = &_loader->_bspdata->cubemapdata[dcm->imgofs[j] + xel];
+                                        LVector3 vcol;
+                                        ColorRGBExp32ToVector( *col, vcol );
+                                        img.set_xel( x, y, vcol );
+                                        xel++;
+                                }
+                        }
+
+                        cm->cubemap_tex->load( img, j, 0 );
+                        cm->cubemap_images[j] = img;
+                }
+
+                _cubemaps.push_back( cm );
+        }
+
+        _envmap_kdtree->build( envmap_points );
 }
 
 INLINE bool AmbientProbeManager::is_sky_visible( const LPoint3 &point )
@@ -362,6 +446,8 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
                 return nullptr;
         }
 
+        input->cubemap_changed = false;
+
         // Is it even necessary to update anything?
         CPT( TransformState ) prev_trans = _pos_cache[node];
         LVector3 pos_delta( 0 );
@@ -374,7 +460,7 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
                 _pos_cache[node] = curr_trans;
         }
 
-        bool pos_changed = pos_delta.length() >= EQUAL_EPSILON || new_instance;
+        bool pos_changed = pos_delta.length_squared() >= EQUAL_EPSILON || new_instance;
 
         double now = ClockObject::get_global_clock()->get_frame_time();
         float dt = now - input->lighting_time;
@@ -392,14 +478,15 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
         LPoint3 curr_net = curr_trans->get_pos();
         int leaf_id = _loader->find_leaf( curr_net );
 
-        update_ac_collector.start();
         if ( pos_changed )
         {
                 // Update ambient cube
                 if ( _probes[leaf_id].size() > 0 )
                 {
-                        ambientprobe_t *sample = find_closest_sample( leaf_id, curr_net );
+                        update_ac_collector.start();
+                        ambientprobe_t *sample = find_closest_in_kdtree( _probe_kdtree, curr_net, _all_probes );
                         input->amb_probe = sample;
+                        update_ac_collector.stop();
 
 #ifdef VISUALIZE_AMBPROBES
                         std::cout << "Box colors:" << std::endl;
@@ -418,10 +505,29 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
 #endif
                 }
 
+                // Update envmap
+                if ( _cubemaps.size() > 0 )
+                {
+                        findcubemap_collector.start();
+                        cubemap_t *cm = find_closest_in_kdtree( _envmap_kdtree, curr_net, _cubemaps );
+                        findcubemap_collector.stop();
+                        if ( cm && cm != input->cubemap )
+                        {
+                                loadcubemap_collector.start();
+                                input->cubemap = cm;
+                                input->cubemap_tex->setup_cube_map( cm->size, Texture::T_unsigned_byte, Texture::F_rgb );
+                                input->cubemap_tex->set_ram_image( cm->cubemap_tex->get_ram_image(),
+                                                                   cm->cubemap_tex->get_ram_image_compression(),
+                                                                   cm->cubemap_tex->get_ram_image_size() );
+                                input->cubemap_changed = true;
+                                loadcubemap_collector.stop();
+                        }
+                        
+                }
+
                 // Cache the last position.
                 _pos_cache[node] = curr_trans;
         }
-        update_ac_collector.stop();
 
         interp_ac_collector.start();
         if ( input->amb_probe )
@@ -450,7 +556,7 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
                 // Sort local lights from closest to furthest distance from node, we will choose the two closest lights.
                 std::sort( locallights.begin(), locallights.end(), [curr_net]( const light_t *a, const light_t *b )
                 {
-                        return ( a->pos - curr_net ).length() < ( b->pos - curr_net ).length();
+                        return ( a->pos - curr_net ).length_squared() < ( b->pos - curr_net ).length_squared();
                 } );
 
                 int sky_idx = -1;
@@ -474,8 +580,21 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
         memset( match, 0, sizeof( int ) * MAX_TOTAL_LIGHTS );
 
         copystate_collector.start();
-        nodeshaderinput_t oldstate( input );
-        oldstate.local_object();
+        //========= brute force low level copy of all the old inputs ==========//
+        int old_lightcount[1];
+        memcpy( old_lightcount, input->light_count.p(), sizeof( int ) );
+        
+        int old_lightids[MAX_TOTAL_LIGHTS];
+        memcpy( old_lightids, input->light_ids.p(), sizeof( int ) * input->light_ids.size() );
+
+        int old_lighttype[MAX_TOTAL_LIGHTS];
+        memcpy( old_lighttype, input->light_type.p(), sizeof( int ) * input->light_type.size() );
+
+        LMatrix4 old_lightdata[MAX_TOTAL_LIGHTS];
+        memcpy( old_lightdata, input->light_data.p(), sizeof( LMatrix4 ) * input->light_data.size() );
+
+        int old_activelights = input->active_lights;
+        /////////////////////////////////////////////////////////////////////////
         // light count, light ids, light data, activelights, light_type
         copystate_collector.stop();
 
@@ -520,14 +639,14 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
                 LVector3 interp_light( 0 );
 
                 // Check for the same light in the old state to interpolate the color.
-                for ( size_t j = 0; j < oldstate.light_count[0]; j++ )
+                for ( size_t j = 0; j < old_lightcount[0]; j++ )
                 {
-                        if ( oldstate.light_ids[j] == light->id )
+                        if ( old_lightids[j] == light->id )
                         {
                                 // This light also existed in the old state.
                                 // Interpolate the color.
-                                LVector3 oldcolor = LMatrix4( oldstate.light_data[j] ).get_row3( 3 );
-                                if ( j < oldstate.active_lights )
+                                LVector3 oldcolor = LMatrix4( old_lightdata[j] ).get_row3( 3 );
+                                if ( j < old_activelights )
                                 {
                                         // Only record a match if this light was
                                         // also active in the old state.
@@ -553,13 +672,13 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
 
         fadelights_collector.start();
         // Fade out any lights that were removed in the new state
-        for ( size_t i = 0; i < oldstate.light_count[0]; i++ )
+        for ( size_t i = 0; i < old_lightcount[0]; i++ )
         {
                 if ( match[i] == 1 )
                 {
                         continue;
                 }
-                LVector3 color = LMatrix4( oldstate.light_data[i] ).get_row3( 3 );
+                LVector3 color = LMatrix4( old_lightdata[i] ).get_row3( 3 );
                 if ( color.length_squared() < 1.0 )
                 {
                         continue;
@@ -572,12 +691,12 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
 
                 LVector3 new_color = color * atten_factor;
 
-                input->light_type[lights_updated] = oldstate.light_type[i];
+                input->light_type[lights_updated] = old_lighttype[i];
                 // Pack the light data into a 4x4 matrix.
-                LMatrix4f data = oldstate.light_data[i];
+                LMatrix4f data = old_lightdata[i];
                 data.set_row( 3, new_color );
                 input->light_data[lights_updated] = data;
-                input->light_ids[lights_updated] = oldstate.light_ids[i];
+                input->light_ids[lights_updated] = old_lightids[i];
 
                 lights_updated++;
         }
@@ -606,12 +725,12 @@ INLINE void xform_light( light_t *light, const LMatrix4 &cam_mat )
  */
 void AmbientProbeManager::xform_lights( const TransformState *cam_trans )
 {
-        if ( dbg_trace_np.is_empty() )
-        {
-                dbg_trace_np = _loader->_render.attach_new_node( dbg_trace_segs.create() );
-                dbg_trace_np.set_shader_off();
-                dbg_trace_segs.reset();
-        }
+        //if ( dbg_trace_np.is_empty() )
+        //{
+        //        dbg_trace_np = _loader->_render.attach_new_node( dbg_trace_segs.create() );
+        //        dbg_trace_np.set_shader_off();
+        //        dbg_trace_segs.reset();
+        //}
         
         
 
@@ -634,31 +753,29 @@ void AmbientProbeManager::xform_lights( const TransformState *cam_trans )
         }
 }
 
-INLINE ambientprobe_t *AmbientProbeManager::find_closest_sample( int leaf_id, const LPoint3 &pos )
+template<class T>
+T AmbientProbeManager::find_closest_in_kdtree( KDTree *tree, const LPoint3 &pos,
+                                               const pvector<T> &items )
 {
-        pvector<ambientprobe_t> &probes = _probes[leaf_id];
-        pvector<ambientprobe_t *> samples;
-        samples.resize( probes.size() );
-        for ( int i = 0; i < probes.size(); i++ )
-        {
-                samples[i] = &probes[i];
-        }
+        if ( !tree )
+                return nullptr;
 
-        std::sort( samples.begin(), samples.end(), [pos]( const ambientprobe_t *a, const ambientprobe_t *b )
-        {
-                return ( a->pos - pos ).length() < ( b->pos - pos ).length();
-        } );
-
-        return samples[0];
+        std::vector<double> data = { pos[0], pos[1], pos[2] };
+        auto res = tree->query( data );
+        return items[res.first];
 }
 
 void AmbientProbeManager::cleanup()
 {
         _sunlight = nullptr;
+        _probe_kdtree = nullptr;
+        _light_kdtree = nullptr;
+        _envmap_kdtree = nullptr;
         _pos_cache.clear();
         _node_data.clear();
         _probes.clear();
         _all_probes.clear();
         _light_pvs.clear();
         _all_lights.clear();
+        _cubemaps.clear();
 }

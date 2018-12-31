@@ -11,6 +11,7 @@
 #define BSPLOADER_H
 
 #include "config_bsp.h"
+#include "bsp_material.h"
 
 #include <filename.h>
 #include <lvector3.h>
@@ -32,6 +33,7 @@
 #include "lightmap_palettes.h"
 #include "ambient_probes.h"
 #include "vifparser.h"
+#include "cubemaps.h"
 
 NotifyCategoryDeclNoExport(bspfile);
 
@@ -87,9 +89,14 @@ PUBLISHED:
 
 	static CPT( RenderAttrib ) make( const string &face_material, int face_type );
 	static CPT( RenderAttrib ) make_default();
+        static CPT( RenderAttrib ) make_ignore_pvs();
 
 	INLINE string get_material() const;
         INLINE int get_face_type() const;
+        INLINE bool get_ignore_pvs() const
+        {
+                return _ignore_pvs;
+        }
 
 public:
 	virtual bool has_cull_callback() const;
@@ -100,6 +107,7 @@ public:
 private:
 	string _material;
         int _face_type;
+        bool _ignore_pvs;
 
 PUBLISHED:
 	static int get_class_slot()
@@ -165,6 +173,13 @@ PUBLISHED:
         void set_texture_contents_file( const Filename &file );
         void set_wireframe( bool flag );
         INLINE bool get_wireframe() const;
+
+        INLINE NodePath get_camera() const
+        {
+                return _camera;
+        }
+
+        void build_cubemaps();
 
         void setup_shadowcam();
 
@@ -251,6 +266,7 @@ private:
         void make_faces_ai();
 	void load_entities();
         void load_static_props();
+        void load_cubemaps();
 
 	void read_materials_file();
 
@@ -262,13 +278,15 @@ private:
 
 	LTexCoord get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool lightmap = false ) const;
 
-        PT( Texture ) try_load_texref( texref_t *tref );
+        CPT( BSPMaterial ) try_load_texref( texref_t *tref );
         
 
         PT( EggVertex ) make_vertex( EggVertexPool *vpool, EggPolygon *poly,
                                      dedge_t *edge, texinfo_t *texinfo,
                                      dface_t *face, int k, FaceLightmapData *ld, Texture *tex );
         PT( EggVertex ) make_vertex_ai( EggVertexPool *vpool, EggPolygon *poly, dedge_t *edge, int k );
+
+        cubemap_t *find_closest_cubemap( const LPoint3 &pos );
 
         void update();
         static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
@@ -305,6 +323,7 @@ private:
 	pvector<BoundingBox *> _visible_leaf_bboxs;
         pvector<int> _visible_leafs;
 	int _curr_leaf_idx;
+        Filename _map_file;
 
         // for purely client-sided, non networked entities
         //
@@ -326,8 +345,7 @@ private:
 
         pvector<WeakNodePath> _explicit_dynamic_nodes;
 
-        pmap<texref_t *, PT( Texture )> _texref_textures;
-        pmap<texref_t *, Parser> _texref_materials;
+        pmap<texref_t *, CPT( BSPMaterial )> _texref_materials;
         vector<uint8_t *> _leaf_pvs;
 	pvector<NodePath> _leaf_visnp;
 	pvector<PT( BoundingBox )> _leaf_bboxs;
@@ -342,6 +360,7 @@ private:
 	pvector<PT( CBaseEntity )> _class_entities;
         LightmapPaletteDirectory _lightmap_dir;
         AmbientProbeManager _amb_probe_mgr;
+        pvector<cubemap_t> _cubemaps;
 	
         PT( GenericAsyncTask ) _update_task;
         UpdateSeq _generated_shader_seq;
