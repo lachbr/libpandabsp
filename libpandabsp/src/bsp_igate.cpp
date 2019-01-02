@@ -304,13 +304,6 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_Namable;
 extern struct Dtool_PyTypedObject Dtool_Namable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
 #endif
-// TypedReferenceCount
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_TypedReferenceCount;
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
-#endif
 // ReferenceCount
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_ReferenceCount;
@@ -318,12 +311,12 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_ReferenceCount;
 extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
 #endif
-// TypedWritableReferenceCount
+// TypedReferenceCount
 #ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_TypedWritableReferenceCount;
+static struct Dtool_PyTypedObject *Dtool_Ptr_TypedReferenceCount;
 #else
-extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
+extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
 #endif
 // TypedWritable
 #ifndef LINK_ALL_STATIC
@@ -331,6 +324,13 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_TypedWritable;
 #else
 extern struct Dtool_PyTypedObject Dtool_TypedWritable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedWritable;
+#endif
+// TypedWritableReferenceCount
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_TypedWritableReferenceCount;
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
 #endif
 // LVector3f
 #ifndef LINK_ALL_STATIC
@@ -345,19 +345,6 @@ extern struct Dtool_PyTypedObject Dtool_LVector3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
 extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
 #endif
-// LVecBase4f
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_LVecBase4f;
-inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
-  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
-extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
-#endif
 // LPoint3f
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_LPoint3f;
@@ -370,6 +357,19 @@ inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced)
 extern struct Dtool_PyTypedObject Dtool_LPoint3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
 extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
+#endif
+// LVecBase4f
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_LVecBase4f;
+inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
+  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
+extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
 #endif
 // BitMask< uint32_t, 32 >
 #ifndef LINK_ALL_STATIC
@@ -447,13 +447,6 @@ static struct Dtool_PyTypedObject *Dtool_Ptr_CullTraverser;
 extern struct Dtool_PyTypedObject Dtool_CullTraverser;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_CullTraverser = &Dtool_CullTraverser;
 #endif
-// GraphicsStateGuardian
-#ifndef LINK_ALL_STATIC
-static struct Dtool_PyTypedObject *Dtool_Ptr_GraphicsStateGuardian;
-#else
-extern struct Dtool_PyTypedObject Dtool_GraphicsStateGuardian;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsStateGuardian = &Dtool_GraphicsStateGuardian;
-#endif
 // ShaderGenerator
 #ifndef LINK_ALL_STATIC
 static struct Dtool_PyTypedObject *Dtool_Ptr_ShaderGenerator;
@@ -472,6 +465,13 @@ extern struct Dtool_PyTypedObject Dtool_ShaderGenerator;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderGenerator = &Dtool_ShaderGenerator;
 extern bool Dtool_ConstCoerce_ShaderGenerator(PyObject *args, CPT(ShaderGenerator) &coerced);
 extern bool Dtool_Coerce_ShaderGenerator(PyObject *args, PT(ShaderGenerator) &coerced);
+#endif
+// GraphicsStateGuardian
+#ifndef LINK_ALL_STATIC
+static struct Dtool_PyTypedObject *Dtool_Ptr_GraphicsStateGuardian;
+#else
+extern struct Dtool_PyTypedObject Dtool_GraphicsStateGuardian;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsStateGuardian = &Dtool_GraphicsStateGuardian;
 #endif
 // BoundingBox
 #ifndef LINK_ALL_STATIC
@@ -5157,6 +5157,19 @@ static PyObject *Dtool_BSPLoader_find_leaf_151(PyObject *self, PyObject *arg) {
     return nullptr;
   }
   {
+    // -2 inline int BSPLoader::find_leaf(LPoint3 const &pos)
+    LPoint3 const *arg_this = nullptr;
+    DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_LPoint3f);
+    if (arg_this != nullptr) {
+      int return_value = (*local_this).find_leaf(*arg_this);
+      if (Dtool_CheckErrorOccurred()) {
+        return nullptr;
+      }
+      return Dtool_WrapValue(return_value);
+    }
+  }
+
+  {
     // -2 inline int BSPLoader::find_leaf(NodePath const &np)
     NodePath const *arg_this = nullptr;
     DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_NodePath);
@@ -5169,7 +5182,6 @@ static PyObject *Dtool_BSPLoader_find_leaf_151(PyObject *self, PyObject *arg) {
     }
   }
 
-  // No coercion possible: inline int BSPLoader::find_leaf(NodePath const &np)
   {
     // -2 inline int BSPLoader::find_leaf(LPoint3 const &pos)
     LPoint3f arg_local;
@@ -5183,8 +5195,10 @@ static PyObject *Dtool_BSPLoader_find_leaf_151(PyObject *self, PyObject *arg) {
     }
   }
 
+  // No coercion possible: inline int BSPLoader::find_leaf(NodePath const &np)
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
+      "find_leaf(const BSPLoader self, const LPoint3f pos)\n"
       "find_leaf(const BSPLoader self, const NodePath np)\n");
   }
   return nullptr;
@@ -5193,6 +5207,7 @@ static PyObject *Dtool_BSPLoader_find_leaf_151(PyObject *self, PyObject *arg) {
 #ifndef NDEBUG
 static const char *Dtool_BSPLoader_find_leaf_151_comment =
   "C++ Interface:\n"
+  "find_leaf(const BSPLoader self, const LPoint3f pos)\n"
   "find_leaf(const BSPLoader self, const NodePath np)\n";
 #else
 static const char *Dtool_BSPLoader_find_leaf_151_comment = nullptr;
@@ -7032,31 +7047,57 @@ static void *Dtool_DowncastInterface_ShaderPermutations(void *from_this, Dtool_P
  */
 /**
  * Python function wrapper for:
- * void ShaderSpec::read_shader_files(void)
+ * void ShaderSpec::read_shader_files(Filename const &vert_file, Filename const &pixel_file, Filename const &geom_file)
  */
-static PyObject *Dtool_ShaderSpec_read_shader_files_202(PyObject *self, PyObject *) {
+static PyObject *Dtool_ShaderSpec_read_shader_files_200(PyObject *self, PyObject *args, PyObject *kwds) {
   ShaderSpec *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_ShaderSpec, (void **)&local_this, "ShaderSpec.read_shader_files")) {
     return nullptr;
   }
-  // 1-void ShaderSpec::read_shader_files(void)
-  (*local_this).read_shader_files();
-  return Dtool_Return_None();
+  // 1-void ShaderSpec::read_shader_files(Filename const &vert_file, Filename const &pixel_file, Filename const &geom_file)
+  PyObject *param1;
+  PyObject *param2;
+  PyObject *param3;
+  static const char *keyword_list[] = {"vert_file", "pixel_file", "geom_file", nullptr};
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "OOO:read_shader_files", (char **)keyword_list, &param1, &param2, &param3)) {
+    Filename param1_local;
+    Filename const *param1_this = Dtool_Coerce_Filename(param1, param1_local);
+    if (!(param1_this != nullptr)) {
+      return Dtool_Raise_ArgTypeError(param1, 1, "ShaderSpec.read_shader_files", "Filename");
+    }
+    Filename param2_local;
+    Filename const *param2_this = Dtool_Coerce_Filename(param2, param2_local);
+    if (!(param2_this != nullptr)) {
+      return Dtool_Raise_ArgTypeError(param2, 2, "ShaderSpec.read_shader_files", "Filename");
+    }
+    Filename param3_local;
+    Filename const *param3_this = Dtool_Coerce_Filename(param3, param3_local);
+    if (!(param3_this != nullptr)) {
+      return Dtool_Raise_ArgTypeError(param3, 3, "ShaderSpec.read_shader_files", "Filename");
+    }
+    (*local_this).read_shader_files(*param1_this, *param2_this, *param3_this);
+    return Dtool_Return_None();
+  }
+  if (!_PyErr_OCCURRED()) {
+    return Dtool_Raise_BadArgumentsError(
+      "read_shader_files(const ShaderSpec self, const Filename vert_file, const Filename pixel_file, const Filename geom_file)\n");
+  }
+  return nullptr;
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderSpec_read_shader_files_202_comment =
+static const char *Dtool_ShaderSpec_read_shader_files_200_comment =
   "C++ Interface:\n"
-  "read_shader_files(const ShaderSpec self)\n";
+  "read_shader_files(const ShaderSpec self, const Filename vert_file, const Filename pixel_file, const Filename geom_file)\n";
 #else
-static const char *Dtool_ShaderSpec_read_shader_files_202_comment = nullptr;
+static const char *Dtool_ShaderSpec_read_shader_files_200_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * static TypeHandle ShaderSpec::get_class_type(void)
  */
-static PyObject *Dtool_ShaderSpec_get_class_type_203(PyObject *, PyObject *) {
+static PyObject *Dtool_ShaderSpec_get_class_type_201(PyObject *, PyObject *) {
   // 1-static TypeHandle ShaderSpec::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(ShaderSpec::get_class_type());
   if (return_value == nullptr) {
@@ -7070,18 +7111,18 @@ static PyObject *Dtool_ShaderSpec_get_class_type_203(PyObject *, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderSpec_get_class_type_203_comment =
+static const char *Dtool_ShaderSpec_get_class_type_201_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_ShaderSpec_get_class_type_203_comment = nullptr;
+static const char *Dtool_ShaderSpec_get_class_type_201_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * ReferenceCount *ShaderSpec::upcast_to_ReferenceCount(void)
  */
-static PyObject *Dtool_ShaderSpec_upcast_to_ReferenceCount_197(PyObject *self, PyObject *) {
+static PyObject *Dtool_ShaderSpec_upcast_to_ReferenceCount_195(PyObject *self, PyObject *) {
   ShaderSpec *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_ShaderSpec, (void **)&local_this, "ShaderSpec.upcast_to_ReferenceCount")) {
     return nullptr;
@@ -7097,20 +7138,20 @@ static PyObject *Dtool_ShaderSpec_upcast_to_ReferenceCount_197(PyObject *self, P
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderSpec_upcast_to_ReferenceCount_197_comment =
+static const char *Dtool_ShaderSpec_upcast_to_ReferenceCount_195_comment =
   "C++ Interface:\n"
   "upcast_to_ReferenceCount(const ShaderSpec self)\n"
   "\n"
   "upcast from ShaderSpec to ReferenceCount";
 #else
-static const char *Dtool_ShaderSpec_upcast_to_ReferenceCount_197_comment = nullptr;
+static const char *Dtool_ShaderSpec_upcast_to_ReferenceCount_195_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * Namable *ShaderSpec::upcast_to_Namable(void)
  */
-static PyObject *Dtool_ShaderSpec_upcast_to_Namable_200(PyObject *self, PyObject *) {
+static PyObject *Dtool_ShaderSpec_upcast_to_Namable_198(PyObject *self, PyObject *) {
   ShaderSpec *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_ShaderSpec, (void **)&local_this, "ShaderSpec.upcast_to_Namable")) {
     return nullptr;
@@ -7124,13 +7165,13 @@ static PyObject *Dtool_ShaderSpec_upcast_to_Namable_200(PyObject *self, PyObject
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderSpec_upcast_to_Namable_200_comment =
+static const char *Dtool_ShaderSpec_upcast_to_Namable_198_comment =
   "C++ Interface:\n"
   "upcast_to_Namable(const ShaderSpec self)\n"
   "\n"
   "upcast from ShaderSpec to Namable";
 #else
-static const char *Dtool_ShaderSpec_upcast_to_Namable_200_comment = nullptr;
+static const char *Dtool_ShaderSpec_upcast_to_Namable_198_comment = nullptr;
 #endif
 
 static int Dtool_Init_ShaderSpec(PyObject *self, PyObject *args, PyObject *kwds) {
@@ -7206,7 +7247,7 @@ static void *Dtool_DowncastInterface_ShaderSpec(void *from_this, Dtool_PyTypedOb
  * Python function wrapper for:
  * void PSSMShaderGenerator::set_sun_light(NodePath const &np)
  */
-static PyObject *Dtool_PSSMShaderGenerator_set_sun_light_209(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_PSSMShaderGenerator_set_sun_light_207(PyObject *self, PyObject *arg) {
   PSSMShaderGenerator *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_PSSMShaderGenerator, (void **)&local_this, "PSSMShaderGenerator.set_sun_light")) {
     return nullptr;
@@ -7225,18 +7266,18 @@ static PyObject *Dtool_PSSMShaderGenerator_set_sun_light_209(PyObject *self, PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_PSSMShaderGenerator_set_sun_light_209_comment =
+static const char *Dtool_PSSMShaderGenerator_set_sun_light_207_comment =
   "C++ Interface:\n"
   "set_sun_light(const PSSMShaderGenerator self, const NodePath np)\n";
 #else
-static const char *Dtool_PSSMShaderGenerator_set_sun_light_209_comment = nullptr;
+static const char *Dtool_PSSMShaderGenerator_set_sun_light_207_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void PSSMShaderGenerator::start_update(void)
  */
-static PyObject *Dtool_PSSMShaderGenerator_start_update_210(PyObject *self, PyObject *) {
+static PyObject *Dtool_PSSMShaderGenerator_start_update_208(PyObject *self, PyObject *) {
   PSSMShaderGenerator *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_PSSMShaderGenerator, (void **)&local_this, "PSSMShaderGenerator.start_update")) {
     return nullptr;
@@ -7247,18 +7288,18 @@ static PyObject *Dtool_PSSMShaderGenerator_start_update_210(PyObject *self, PyOb
 }
 
 #ifndef NDEBUG
-static const char *Dtool_PSSMShaderGenerator_start_update_210_comment =
+static const char *Dtool_PSSMShaderGenerator_start_update_208_comment =
   "C++ Interface:\n"
   "start_update(const PSSMShaderGenerator self)\n";
 #else
-static const char *Dtool_PSSMShaderGenerator_start_update_210_comment = nullptr;
+static const char *Dtool_PSSMShaderGenerator_start_update_208_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void PSSMShaderGenerator::add_shader(PointerTo< ShaderSpec > spec)
  */
-static PyObject *Dtool_PSSMShaderGenerator_add_shader_211(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_PSSMShaderGenerator_add_shader_209(PyObject *self, PyObject *arg) {
   PSSMShaderGenerator *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_PSSMShaderGenerator, (void **)&local_this, "PSSMShaderGenerator.add_shader")) {
     return nullptr;
@@ -7278,18 +7319,18 @@ static PyObject *Dtool_PSSMShaderGenerator_add_shader_211(PyObject *self, PyObje
 }
 
 #ifndef NDEBUG
-static const char *Dtool_PSSMShaderGenerator_add_shader_211_comment =
+static const char *Dtool_PSSMShaderGenerator_add_shader_209_comment =
   "C++ Interface:\n"
   "add_shader(const PSSMShaderGenerator self, ShaderSpec spec)\n";
 #else
-static const char *Dtool_PSSMShaderGenerator_add_shader_211_comment = nullptr;
+static const char *Dtool_PSSMShaderGenerator_add_shader_209_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline bool PSSMShaderGenerator::has_shadow_sunlight(void) const
  */
-static PyObject *Dtool_PSSMShaderGenerator_has_shadow_sunlight_212(PyObject *self, PyObject *) {
+static PyObject *Dtool_PSSMShaderGenerator_has_shadow_sunlight_210(PyObject *self, PyObject *) {
   PSSMShaderGenerator *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_PSSMShaderGenerator)) {
     return nullptr;
@@ -7300,18 +7341,18 @@ static PyObject *Dtool_PSSMShaderGenerator_has_shadow_sunlight_212(PyObject *sel
 }
 
 #ifndef NDEBUG
-static const char *Dtool_PSSMShaderGenerator_has_shadow_sunlight_212_comment =
+static const char *Dtool_PSSMShaderGenerator_has_shadow_sunlight_210_comment =
   "C++ Interface:\n"
   "has_shadow_sunlight(PSSMShaderGenerator self)\n";
 #else
-static const char *Dtool_PSSMShaderGenerator_has_shadow_sunlight_212_comment = nullptr;
+static const char *Dtool_PSSMShaderGenerator_has_shadow_sunlight_210_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline Texture *PSSMShaderGenerator::get_pssm_array_texture(void) const
  */
-static PyObject *Dtool_PSSMShaderGenerator_get_pssm_array_texture_213(PyObject *self, PyObject *) {
+static PyObject *Dtool_PSSMShaderGenerator_get_pssm_array_texture_211(PyObject *self, PyObject *) {
   PSSMShaderGenerator *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_PSSMShaderGenerator)) {
     return nullptr;
@@ -7336,18 +7377,18 @@ static PyObject *Dtool_PSSMShaderGenerator_get_pssm_array_texture_213(PyObject *
 }
 
 #ifndef NDEBUG
-static const char *Dtool_PSSMShaderGenerator_get_pssm_array_texture_213_comment =
+static const char *Dtool_PSSMShaderGenerator_get_pssm_array_texture_211_comment =
   "C++ Interface:\n"
   "get_pssm_array_texture(PSSMShaderGenerator self)\n";
 #else
-static const char *Dtool_PSSMShaderGenerator_get_pssm_array_texture_213_comment = nullptr;
+static const char *Dtool_PSSMShaderGenerator_get_pssm_array_texture_211_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * static TypeHandle PSSMShaderGenerator::get_class_type(void)
  */
-static PyObject *Dtool_PSSMShaderGenerator_get_class_type_215(PyObject *, PyObject *) {
+static PyObject *Dtool_PSSMShaderGenerator_get_class_type_213(PyObject *, PyObject *) {
   // 1-static TypeHandle PSSMShaderGenerator::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(PSSMShaderGenerator::get_class_type());
   if (return_value == nullptr) {
@@ -7361,11 +7402,11 @@ static PyObject *Dtool_PSSMShaderGenerator_get_class_type_215(PyObject *, PyObje
 }
 
 #ifndef NDEBUG
-static const char *Dtool_PSSMShaderGenerator_get_class_type_215_comment =
+static const char *Dtool_PSSMShaderGenerator_get_class_type_213_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_PSSMShaderGenerator_get_class_type_215_comment = nullptr;
+static const char *Dtool_PSSMShaderGenerator_get_class_type_213_comment = nullptr;
 #endif
 
 /**
@@ -11275,40 +11316,6 @@ static PyObject *Dtool_RichCompare_ShaderPermutations(PyObject *self, PyObject *
   }
 
   switch (op) {
-  case Py_EQ:
-    {
-      // 1-bool ShaderPermutations::operator ==(ShaderPermutations const &other) const
-      ShaderPermutations const *arg_this = nullptr;
-      DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_ShaderPermutations);
-      if (arg_this != nullptr) {
-        bool return_value = (*(const ShaderPermutations*)local_this).operator ==(*arg_this);
-#ifndef NDEBUG
-        Notify *notify = Notify::ptr();
-        if (UNLIKELY(notify->has_assert_failed())) {
-          return Dtool_Raise_AssertionError();
-        }
-#endif
-        return Dtool_WrapValue(return_value);
-      }
-      break;
-    }
-  case Py_NE:
-    {
-      // 1-bool ShaderPermutations::operator !=(ShaderPermutations const &other) const
-      ShaderPermutations const *arg_this = nullptr;
-      DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_ShaderPermutations);
-      if (arg_this != nullptr) {
-        bool return_value = (*(const ShaderPermutations*)local_this).operator !=(*arg_this);
-#ifndef NDEBUG
-        Notify *notify = Notify::ptr();
-        if (UNLIKELY(notify->has_assert_failed())) {
-          return Dtool_Raise_AssertionError();
-        }
-#endif
-        return Dtool_WrapValue(return_value);
-      }
-      break;
-    }
   case Py_LT:
     {
       // 1-bool ShaderPermutations::operator <(ShaderPermutations const &other) const
@@ -11420,7 +11427,13 @@ struct Dtool_PyTypedObject Dtool_ShaderPermutations = {
     nullptr,
     nullptr, // tp_as_buffer
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_CHECKTYPES,
-    nullptr, // tp_doc
+#ifdef NDEBUG
+    0,
+#else
+    "/**\n"
+    " * Represents a list of #defines and variable inputs to a shader that is being generated.\n"
+    " */",
+#endif
     nullptr, // tp_traverse
     nullptr, // tp_clear
     &Dtool_RichCompare_ShaderPermutations,
@@ -11483,14 +11496,14 @@ static void Dtool_PyModuleClassInit_ShaderPermutations(PyObject *module) {
  * Python method tables for ShaderSpec (ShaderSpec)
  */
 static PyMethodDef Dtool_Methods_ShaderSpec[] = {
-  {"read_shader_files", &Dtool_ShaderSpec_read_shader_files_202, METH_NOARGS, (const char *)Dtool_ShaderSpec_read_shader_files_202_comment},
-  {"readShaderFiles", &Dtool_ShaderSpec_read_shader_files_202, METH_NOARGS, (const char *)Dtool_ShaderSpec_read_shader_files_202_comment},
-  {"get_class_type", &Dtool_ShaderSpec_get_class_type_203, METH_NOARGS | METH_STATIC, (const char *)Dtool_ShaderSpec_get_class_type_203_comment},
-  {"getClassType", &Dtool_ShaderSpec_get_class_type_203, METH_NOARGS | METH_STATIC, (const char *)Dtool_ShaderSpec_get_class_type_203_comment},
-  {"upcast_to_ReferenceCount", &Dtool_ShaderSpec_upcast_to_ReferenceCount_197, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_ReferenceCount_197_comment},
-  {"upcastToReferenceCount", &Dtool_ShaderSpec_upcast_to_ReferenceCount_197, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_ReferenceCount_197_comment},
-  {"upcast_to_Namable", &Dtool_ShaderSpec_upcast_to_Namable_200, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_Namable_200_comment},
-  {"upcastToNamable", &Dtool_ShaderSpec_upcast_to_Namable_200, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_Namable_200_comment},
+  {"read_shader_files", (PyCFunction) &Dtool_ShaderSpec_read_shader_files_200, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderSpec_read_shader_files_200_comment},
+  {"readShaderFiles", (PyCFunction) &Dtool_ShaderSpec_read_shader_files_200, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderSpec_read_shader_files_200_comment},
+  {"get_class_type", &Dtool_ShaderSpec_get_class_type_201, METH_NOARGS | METH_STATIC, (const char *)Dtool_ShaderSpec_get_class_type_201_comment},
+  {"getClassType", &Dtool_ShaderSpec_get_class_type_201, METH_NOARGS | METH_STATIC, (const char *)Dtool_ShaderSpec_get_class_type_201_comment},
+  {"upcast_to_ReferenceCount", &Dtool_ShaderSpec_upcast_to_ReferenceCount_195, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_ReferenceCount_195_comment},
+  {"upcastToReferenceCount", &Dtool_ShaderSpec_upcast_to_ReferenceCount_195, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_ReferenceCount_195_comment},
+  {"upcast_to_Namable", &Dtool_ShaderSpec_upcast_to_Namable_198, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_Namable_198_comment},
+  {"upcastToNamable", &Dtool_ShaderSpec_upcast_to_Namable_198, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_Namable_198_comment},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -11694,18 +11707,18 @@ static void Dtool_PyModuleClassInit_ShaderSpec(PyObject *module) {
  * Python method tables for PSSMShaderGenerator (PSSMShaderGenerator)
  */
 static PyMethodDef Dtool_Methods_PSSMShaderGenerator[] = {
-  {"set_sun_light", &Dtool_PSSMShaderGenerator_set_sun_light_209, METH_O, (const char *)Dtool_PSSMShaderGenerator_set_sun_light_209_comment},
-  {"setSunLight", &Dtool_PSSMShaderGenerator_set_sun_light_209, METH_O, (const char *)Dtool_PSSMShaderGenerator_set_sun_light_209_comment},
-  {"start_update", &Dtool_PSSMShaderGenerator_start_update_210, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_start_update_210_comment},
-  {"startUpdate", &Dtool_PSSMShaderGenerator_start_update_210, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_start_update_210_comment},
-  {"add_shader", &Dtool_PSSMShaderGenerator_add_shader_211, METH_O, (const char *)Dtool_PSSMShaderGenerator_add_shader_211_comment},
-  {"addShader", &Dtool_PSSMShaderGenerator_add_shader_211, METH_O, (const char *)Dtool_PSSMShaderGenerator_add_shader_211_comment},
-  {"has_shadow_sunlight", &Dtool_PSSMShaderGenerator_has_shadow_sunlight_212, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_has_shadow_sunlight_212_comment},
-  {"hasShadowSunlight", &Dtool_PSSMShaderGenerator_has_shadow_sunlight_212, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_has_shadow_sunlight_212_comment},
-  {"get_pssm_array_texture", &Dtool_PSSMShaderGenerator_get_pssm_array_texture_213, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_get_pssm_array_texture_213_comment},
-  {"getPssmArrayTexture", &Dtool_PSSMShaderGenerator_get_pssm_array_texture_213, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_get_pssm_array_texture_213_comment},
-  {"get_class_type", &Dtool_PSSMShaderGenerator_get_class_type_215, METH_NOARGS | METH_STATIC, (const char *)Dtool_PSSMShaderGenerator_get_class_type_215_comment},
-  {"getClassType", &Dtool_PSSMShaderGenerator_get_class_type_215, METH_NOARGS | METH_STATIC, (const char *)Dtool_PSSMShaderGenerator_get_class_type_215_comment},
+  {"set_sun_light", &Dtool_PSSMShaderGenerator_set_sun_light_207, METH_O, (const char *)Dtool_PSSMShaderGenerator_set_sun_light_207_comment},
+  {"setSunLight", &Dtool_PSSMShaderGenerator_set_sun_light_207, METH_O, (const char *)Dtool_PSSMShaderGenerator_set_sun_light_207_comment},
+  {"start_update", &Dtool_PSSMShaderGenerator_start_update_208, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_start_update_208_comment},
+  {"startUpdate", &Dtool_PSSMShaderGenerator_start_update_208, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_start_update_208_comment},
+  {"add_shader", &Dtool_PSSMShaderGenerator_add_shader_209, METH_O, (const char *)Dtool_PSSMShaderGenerator_add_shader_209_comment},
+  {"addShader", &Dtool_PSSMShaderGenerator_add_shader_209, METH_O, (const char *)Dtool_PSSMShaderGenerator_add_shader_209_comment},
+  {"has_shadow_sunlight", &Dtool_PSSMShaderGenerator_has_shadow_sunlight_210, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_has_shadow_sunlight_210_comment},
+  {"hasShadowSunlight", &Dtool_PSSMShaderGenerator_has_shadow_sunlight_210, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_has_shadow_sunlight_210_comment},
+  {"get_pssm_array_texture", &Dtool_PSSMShaderGenerator_get_pssm_array_texture_211, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_get_pssm_array_texture_211_comment},
+  {"getPssmArrayTexture", &Dtool_PSSMShaderGenerator_get_pssm_array_texture_211, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_get_pssm_array_texture_211_comment},
+  {"get_class_type", &Dtool_PSSMShaderGenerator_get_class_type_213, METH_NOARGS | METH_STATIC, (const char *)Dtool_PSSMShaderGenerator_get_class_type_213_comment},
+  {"getClassType", &Dtool_PSSMShaderGenerator_get_class_type_213, METH_NOARGS | METH_STATIC, (const char *)Dtool_PSSMShaderGenerator_get_class_type_213_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -12560,13 +12573,13 @@ void Dtool_bsp_ResolveExternals() {
   Dtool_Ptr_Filename = LookupRuntimeTypedClass(Filename::get_class_type());
   Dtool_Ptr_TypedObject = LookupRuntimeTypedClass(TypedObject::get_class_type());
   Dtool_Ptr_Namable = LookupRuntimeTypedClass(Namable::get_class_type());
-  Dtool_Ptr_TypedReferenceCount = LookupRuntimeTypedClass(TypedReferenceCount::get_class_type());
   Dtool_Ptr_ReferenceCount = LookupRuntimeTypedClass(ReferenceCount::get_class_type());
-  Dtool_Ptr_TypedWritableReferenceCount = LookupRuntimeTypedClass(TypedWritableReferenceCount::get_class_type());
+  Dtool_Ptr_TypedReferenceCount = LookupRuntimeTypedClass(TypedReferenceCount::get_class_type());
   Dtool_Ptr_TypedWritable = LookupRuntimeTypedClass(TypedWritable::get_class_type());
+  Dtool_Ptr_TypedWritableReferenceCount = LookupRuntimeTypedClass(TypedWritableReferenceCount::get_class_type());
   Dtool_Ptr_LVector3f = LookupRuntimeTypedClass(LVector3f::get_class_type());
-  Dtool_Ptr_LVecBase4f = LookupRuntimeTypedClass(LVecBase4f::get_class_type());
   Dtool_Ptr_LPoint3f = LookupRuntimeTypedClass(LPoint3f::get_class_type());
+  Dtool_Ptr_LVecBase4f = LookupRuntimeTypedClass(LVecBase4f::get_class_type());
   Dtool_Ptr_BitMask_uint32_t_32 = LookupRuntimeTypedClass(BitMask< uint32_t, 32 >::get_class_type());
   Dtool_Ptr_GeometricBoundingVolume = LookupRuntimeTypedClass(GeometricBoundingVolume::get_class_type());
   Dtool_Ptr_Texture = LookupRuntimeTypedClass(Texture::get_class_type());
@@ -12577,8 +12590,8 @@ void Dtool_bsp_ResolveExternals() {
   Dtool_Ptr_PandaNode = LookupRuntimeTypedClass(PandaNode::get_class_type());
   Dtool_Ptr_NodePath = LookupRuntimeTypedClass(NodePath::get_class_type());
   Dtool_Ptr_CullTraverser = LookupRuntimeTypedClass(CullTraverser::get_class_type());
-  Dtool_Ptr_GraphicsStateGuardian = LookupRuntimeTypedClass(GraphicsStateGuardian::get_class_type());
   Dtool_Ptr_ShaderGenerator = LookupRuntimeTypedClass(ShaderGenerator::get_class_type());
+  Dtool_Ptr_GraphicsStateGuardian = LookupRuntimeTypedClass(GraphicsStateGuardian::get_class_type());
   Dtool_Ptr_BoundingBox = LookupRuntimeTypedClass(BoundingBox::get_class_type());
   Dtool_Ptr_GraphicsWindow = LookupRuntimeTypedClass(GraphicsWindow::get_class_type());
   Dtool_Ptr_ModelNode = LookupRuntimeTypedClass(ModelNode::get_class_type());
@@ -12666,7 +12679,7 @@ static PyMethodDef python_simple_funcs[] = {
 
 struct LibraryDef bsp_moddef = {python_simple_funcs};
 static InterrogateModuleDef _in_module_def = {
-  1546216971,  /* file_identifier */
+  1546374035,  /* file_identifier */
   "bsp",  /* library_name */
   "t5GT",  /* library_hash_name */
   "bsp",  /* module_name */
@@ -12676,7 +12689,7 @@ static InterrogateModuleDef _in_module_def = {
   nullptr,  /* fptrs */
   0,  /* num_fptrs */
   1,  /* first_index */
-  539  /* next_index */
+  535  /* next_index */
 };
 
 Configure(_in_configure_bsp);

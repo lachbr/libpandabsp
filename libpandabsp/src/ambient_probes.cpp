@@ -46,9 +46,6 @@ static PStatCollector xformlight_collector( "AmbientProbes:XformLight" );
 static PStatCollector loadcubemap_collector( "AmbientProbes:UpdateNodes:LoadCubemap" );
 static PStatCollector findcubemap_collector( "AmbientProbes:UpdateNodes:FindCubemap" );
 
-//static LineSegs dbg_trace_segs;
-//static NodePath dbg_trace_np( "dbg_trace" );
-
 static ConfigVariableBool cfg_lightaverage
 ( "light-average", true, "Activates/deactivate light averaging" );
 
@@ -725,15 +722,6 @@ INLINE void xform_light( light_t *light, const LMatrix4 &cam_mat )
  */
 void AmbientProbeManager::xform_lights( const TransformState *cam_trans )
 {
-        //if ( dbg_trace_np.is_empty() )
-        //{
-        //        dbg_trace_np = _loader->_render.attach_new_node( dbg_trace_segs.create() );
-        //        dbg_trace_np.set_shader_off();
-        //        dbg_trace_segs.reset();
-        //}
-        
-        
-
         PStatTimer timer( xformlight_collector );
 
         LMatrix4 cam_mat = cam_trans->get_mat();

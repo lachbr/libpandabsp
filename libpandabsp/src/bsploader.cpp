@@ -809,14 +809,9 @@ void BSPLoader::make_faces()
 
                         bool skip = false;
 
-                        //std::cout << "Loading material " << std::string(texref->name) << std::endl;
-                        CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string(texref->name) );
+                        CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
                         bool mat_normalmap = bspmat->has_keyvalue( "$bumpmap" );
-                        string surfaceprop = "default";
-                        if ( bspmat->has_keyvalue( "$surfaceprop" ) )
-                        {
-                                surfaceprop = bspmat->get_keyvalue( "$surfaceprop" );
-                        }
+                        string surfaceprop = bspmat->get_surface_prop();
 
                         bool has_lighting = ( face->lightofs != -1 && _want_lightmaps ) && !skip && bspmat->get_shader() == "LightmappedGeneric";
                         if ( has_lighting &&
@@ -2190,6 +2185,7 @@ void BSPLoader::build_cubemaps()
         PT( PerspectiveLens ) lens = new PerspectiveLens;
         lens->set_fov( 90, 90 );
         cam->set_lens( lens );
+        cam->set_scene( _result );
         NodePath camnp = _result.attach_new_node( cam );
 
         PT( GraphicsOutput ) buf;

@@ -28,6 +28,9 @@ public:
         int flags;
 };
 
+/**
+ * Represents a list of #defines and variable inputs to a shader that is being generated.
+ */
 class ShaderPermutations
 {
 public:
@@ -71,39 +74,6 @@ PUBLISHED:
         void add_flag( int flag )
         {
                 flags.push_back( flag );
-        }
-
-        bool operator ==( const ShaderPermutations &other ) const
-        {
-                if ( permutations.size() != other.permutations.size() )
-                {
-                        return false;
-                }
-                std::cout << "Checking if permutations equal" << std::endl;
-                auto itr = permutations.begin();
-                auto itr2 = other.permutations.begin();
-                for ( ; itr != permutations.end(); itr++, itr2++ )
-                {
-                        if ( itr->first != itr2->first )
-                        {
-                                return false;
-                        }
-                        if ( itr->second != itr2->second )
-                        {
-                                return false;
-                        }
-                }
-                std::cout << "Permutations are equal" << std::endl;
-                //if ( inputs != other.inputs )
-                //{
-                //        return false;
-                //}
-                return flags == other.flags;
-        }
-
-        bool operator !=( const ShaderPermutations &other ) const
-        {
-                return !operator == ( other );
         }
 
         bool operator < ( const ShaderPermutations &other ) const
@@ -167,11 +137,28 @@ PUBLISHED:
  */
 class ShaderSpec : public ReferenceCount, public Namable
 {
+public:
+        struct ShaderSource
+        {
+                Filename filename;
+                std::string full_source;
+                std::string before_defines;
+                std::string after_defines;
+                bool has;
+
+                INLINE ShaderSource() :
+                        has( false )
+                {
+                }
+
+                void read( const Filename &f );
+        };
 PUBLISHED:
         ShaderSpec( const std::string &name, const Filename &vert_file,
                     const Filename &pixel_file, const Filename &geom_file = "" );
 
-        void read_shader_files();
+        void read_shader_files( const Filename &vert_file,
+                                const Filename &pixel_file, const Filename &geom_file );
 
 public:
         virtual ShaderPermutations setup_permutations( const BSPMaterial *mat, const RenderState *state,
@@ -188,15 +175,9 @@ public:
         typedef pmap<ShaderPermutations, CPT( ShaderAttrib )> GeneratedShaders;
         GeneratedShaders _generated_shaders;
         
-        Filename _vertex_file;
-        Filename _pixel_file;
-        Filename _geom_file;
-        std::string _vertex_source;
-        std::string _pixel_source;
-        std::string _geom_source;
-        bool _has_vertex;
-        bool _has_pixel;
-        bool _has_geom;
+        ShaderSource _vertex;
+        ShaderSource _pixel;
+        ShaderSource _geom;
 
         static TypeHandle get_class_type()
         {

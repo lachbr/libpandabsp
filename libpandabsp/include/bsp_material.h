@@ -61,7 +61,8 @@ PUBLISHED:
                 TypedReferenceCount(),
                 _has_env_cubemap( false ),
                 _cached_env_cubemap( false ),
-                _shader_name( name )
+                _shader_name( name ),
+                _surfaceprop( "default" )
         {
         }
 
@@ -71,7 +72,8 @@ PUBLISHED:
                 _shader_keyvalues( copy._shader_keyvalues ),
                 _file( copy._file ),
                 _has_env_cubemap( copy._has_env_cubemap ),
-                _cached_env_cubemap (copy._cached_env_cubemap )
+                _cached_env_cubemap( copy._cached_env_cubemap ),
+                _surfaceprop( copy._surfaceprop )
         {
         }
 
@@ -83,6 +85,7 @@ PUBLISHED:
                 _file = copy._file;
                 _has_env_cubemap = copy._has_env_cubemap;
                 _cached_env_cubemap = copy._cached_env_cubemap;
+                _surfaceprop = copy._surfaceprop;
         }
 
         INLINE void set_keyvalue( const std::string &key, const std::string &value )
@@ -118,6 +121,11 @@ PUBLISHED:
                 return _has_env_cubemap;
         }
 
+        INLINE std::string get_surface_prop() const
+        {
+                return _surfaceprop;
+        }
+
         static const BSPMaterial *get_from_file( const Filename &file );
 
 private:
@@ -125,6 +133,7 @@ private:
         std::string _shader_name;
         bool _has_env_cubemap;
         bool _cached_env_cubemap;
+        std::string _surfaceprop;
         SimpleHashMap<std::string, std::string, string_hash> _shader_keyvalues;
 
         typedef SimpleHashMap<std::string, CPT( BSPMaterial ), string_hash> materialcache_t;

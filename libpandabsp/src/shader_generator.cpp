@@ -190,22 +190,6 @@ AsyncTask::DoneStatus PSSMShaderGenerator::update_pssm( GenericAsyncTask *task, 
         return AsyncTask::DS_cont;
 }
 
-INLINE CPT( RenderAttrib ) apply_material_inputs( CPT( RenderAttrib ) shattr, BSPMaterial *bspmat )
-{
-        if ( bspmat != nullptr )
-        {
-                // Materials can also provide their own shader inputs.
-                // Material inputs can override shader spec inputs.
-                //const pvector<ShaderInput> &mat_inps = bspmat->get_shader_inputs();
-                //size_t num_matinps = mat_inps.size();
-                //for ( size_t i = 0; i < num_matinps; i++ )
-                //{
-                //        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( mat_inps[i] );
-                //}
-        }
-        return shattr;
-}
-
 CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *rs,
                                                             const GeomVertexAnimationSpec &anim,
                                                             nodeshaderinput_t *bsp_node_input )
@@ -290,7 +274,6 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                 if ( itr != spec->_generated_shaders.end() )
                 {
                         CPT( RenderAttrib ) shattr = itr->second;
-                        //shattr = apply_material_inputs( shattr, mat );
 
                         lookup_collector.stop();
                         return DCAST( ShaderAttrib, shattr );
@@ -300,42 +283,32 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         
         synthesize_collector.start();
 
-        //VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
         stringstream defines;
         for ( auto itr = permutations.permutations.begin(); itr != permutations.permutations.end(); ++itr )
         {
                 defines << "#define " << itr->first << " " << itr->second << "\n";
         }
 
-        size_t eofl;
-        string vertext;
         stringstream vshader, gshader, fshader;
 
-        if ( spec->_has_vertex )
+        // Slip the defines into the shader source.
+        if ( spec->_vertex.has )
         {
-                string vdata = spec->_vertex_source;
-                eofl = vdata.find_first_of( '\n' );
-                vertext = vdata.substr( 0, eofl );
-                vdata = vdata.substr( eofl );
-                vshader << vertext << "\n" << defines.str() << vdata;
-                //vfs->write_file( Filename( "generated_" + shader_name + ".vert.glsl" ), vshader.str(), true );
+                vshader << spec->_vertex.before_defines
+                        << "\n" << defines.str()
+                        << spec->_vertex.after_defines;
         }
-        if ( spec->_has_geom )
+        if ( spec->_geom.has )
         {
-                string gdata = spec->_geom_source;
-                eofl = gdata.find_first_of( '\n' );
-                vertext = gdata.substr( 0, eofl );
-                gdata = gdata.substr( eofl );
-                gshader << vertext << "\n" << defines.str() << gdata;
+                gshader << spec->_geom.before_defines
+                        << "\n" << defines.str()
+                        << spec->_geom.after_defines;
         }
-        if ( spec->_has_pixel )
+        if ( spec->_pixel.has )
         {
-                string fdata = spec->_pixel_source;
-                eofl = fdata.find_first_of( '\n' );
-                vertext = fdata.substr( 0, eofl );
-                fdata = fdata.substr( eofl );
-                fshader << vertext << "\n" << defines.str() << fdata;
-                //vfs->write_file( Filename( "generated_" + shader_name + ".frag.glsl" ), fshader.str(), true );
+                fshader << spec->_pixel.before_defines
+                        << "\n" << defines.str()
+                        << spec->_pixel.after_defines;
         }
         
         PT( Shader ) shader = Shader::make( Shader::SL_GLSL, vshader.str(), fshader.str(), gshader.str() );
@@ -343,7 +316,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         nassertr( shader != nullptr, nullptr );
 
         CPT( RenderAttrib ) shattr = ShaderAttrib::make( shader );
-        // Add any inputs from the shader spec.
+        // Add any inputs from the permutations.
         for ( auto itr = permutations.inputs.begin(); itr != permutations.inputs.end(); itr++ )
         {
                 shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( itr->second.input );
@@ -355,12 +328,8 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         }
         
         CPT( ShaderAttrib ) attr = DCAST( ShaderAttrib, shattr );
-#if 1
-        spec->_generated_shaders[permutations] = attr;
-#endif
 
-        //shattr = apply_material_inputs( shattr, bspmat );
-        attr = DCAST( ShaderAttrib, shattr );
+        spec->_generated_shaders[permutations] = attr;
 
         synthesize_collector.stop();
 

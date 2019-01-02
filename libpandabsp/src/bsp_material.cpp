@@ -122,7 +122,7 @@ const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
         VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
         if ( !vfs->exists( file ) )
         {
-                bspmaterial_cat.warning()
+                bspmaterial_cat.error()
                         << "Could not find material file " << file.get_fullpath() << "\n";
                 return nullptr;
         }
@@ -146,6 +146,8 @@ const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
                 mat->set_keyvalue( prop.name, prop.value ); // "$basetexture"   "phase_3/maps/desat_shirt_1.jpg"
         }
         mat->_has_env_cubemap = ( mat->has_keyvalue( "$envmap" ) && mat->get_keyvalue( "$envmap" ) == "env_cubemap" );
+        if ( mat->has_keyvalue( "$surfaceprop" ) )
+                mat->_surfaceprop = mat->get_keyvalue( "$surfaceprop" );
 
         _material_cache[file] = mat;
 

@@ -13,6 +13,30 @@
 
 #include <virtualFileSystem.h>
 
+void ShaderSpec::ShaderSource::read( const Filename &file )
+{
+        VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
+        filename = file;
+        if ( !filename.empty() )
+        {
+                if ( vfs->exists( filename ) )
+                {
+                        full_source = vfs->read_file( filename, true );
+
+                        size_t end_of_first_line = full_source.find_first_of( '\n' );
+                        before_defines = full_source.substr( 0, end_of_first_line );
+                        after_defines = full_source.substr( end_of_first_line );
+
+                        has = true;
+                }
+                else
+                {
+                        std::cout << "Couldn't find shader source file "
+                                << filename.get_fullpath() << std::endl;
+                }
+        }
+}
+
 static ConfigVariableInt parallax_mapping_samples
 ( "parallax-mapping-samples", 3,
   PRC_DESC( "Sets the amount of samples to use in the parallax mapping "
@@ -29,57 +53,19 @@ TypeHandle ShaderSpec::_type_handle;
 ShaderSpec::ShaderSpec( const std::string &name, const Filename &vert_file,
                         const Filename &pixel_file, const Filename &geom_file ) :
         ReferenceCount(),
-        Namable( name ),
-        _vertex_file( vert_file ),
-        _pixel_file( pixel_file ),
-        _geom_file( geom_file ),
-        _has_vertex(false ),
-        _has_pixel(false),
-        _has_geom(false)
+        Namable( name )
 {
-        read_shader_files();
+        read_shader_files( vert_file, pixel_file, geom_file );
 }
 
-void ShaderSpec::read_shader_files()
+void ShaderSpec::read_shader_files( const Filename &vert_file,
+                                    const Filename &pixel_file,
+                                    const Filename &geom_file )
 {
-        VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
         // load up and store the source of the shaders
-        if ( !_vertex_file.empty() )
-        {
-                if ( vfs->exists( _vertex_file ) )
-                {
-                        _vertex_source = vfs->read_file( _vertex_file, true );
-                        _has_vertex = true;
-                }
-                else
-                {
-                        std::cout << "Can't find vertex shader file " << _vertex_file << std::endl;
-                }
-        }
-        if ( !_pixel_file.empty() )
-        {
-                if ( vfs->exists( _pixel_file ) )
-                {
-                        _pixel_source = vfs->read_file( _pixel_file, true );
-                        _has_pixel = true;
-                }
-                else
-                {
-                        std::cout << "Can't find pixel shader file " << _pixel_file << std::endl;
-                }
-        }
-        if ( !_geom_file.empty() )
-        {
-                if ( vfs->exists( _geom_file ) )
-                {
-                        _geom_source = vfs->read_file( _geom_file, true );
-                        _has_geom = true;
-                }
-                else
-                {
-                        std::cout << "Can't find geometry shader file " << _geom_file << std::endl;
-                }
-        }        
+        _vertex.read( vert_file );
+        _pixel.read( pixel_file );
+        _geom.read( geom_file );
 }
 
 ShaderConfig *ShaderSpec::get_shader_config( const BSPMaterial *mat )

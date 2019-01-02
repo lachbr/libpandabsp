@@ -28,7 +28,6 @@ static PStatCollector pvs_node_xform_collector( "Cull:BSP:Node_LeafBoundsXForm" 
 static PStatCollector addfordraw_collector( "Cull:BSP:AddForDraw" );
 static PStatCollector findgeomshader_collector( "Cull:BSP:FindGeomShader" );
 static PStatCollector ambientprobe_nodes_collector( "BSP Dynamic Nodes" );
-static PStatCollector applyenvmap_collector( "Cull:BSP:ApplyCubeMaps" );
 static PStatCollector applyshaderattrib_collector( "Cull:BSP:ApplyShaderAttrib" );
 static PStatCollector makecullable_geomnode_collector( "Cull:BSP:AddForDraw:MakeCullableObject" );
 
@@ -89,9 +88,14 @@ void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsgb
                         CPT( RenderAttrib ) generated_shader = nullptr;
                         findgeomshader_collector.start();
                         int itr = loader->_geom_shader_cache.find( _geom );
+                        std::cout << _geom << std::endl;
                         findgeomshader_collector.stop();
                         if ( itr == -1 || _state->_generated_shader == nullptr )
                         {
+                                if ( itr == -1 )
+                                {
+                                        std::cout << "Generating shader for geom" << std::endl;
+                                }
                                 GeomVertexAnimationSpec spec;
 
                                 // Currently we overload this flag to request vertex animation for the
@@ -112,30 +116,6 @@ void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsgb
                         }
 
                         nassertv( generated_shader != nullptr );
-
-                        //applyenvmap_collector.start();
-                        // this is extremely hacky, we have to update the cubemap_tex sampler
-                        //if ( _bsp_node_input && _bsp_node_input->cubemap_tex )
-                        //{
-                        //        const BSPMaterialAttrib *bma;
-                        //        _state->get_attrib_def( bma );
-
-                        //        const BSPMaterial *mat = bma->get_material();
-
-                        //        if ( mat &&
-                        //             mat->has_env_cubemap() )
-                        //        {
-
-                                        //std::cout << "update cubemap_tex sampler " << _bsp_node_input->cubemap_tex->cubemap_tex << std::endl;
-                                        // update cubemap_tex sampler 
-                        //                generated_shader = DCAST( ShaderAttrib, generated_shader )->set_shader_input(
-                        //                        ShaderInput( "envmapSampler", _bsp_node_input->cubemap_tex->cubemap_tex ) );
-                                        //loader->_geom_shader_cache[_geom] = generated_shader;
-                        //        }
-
-                                
-                        //}
-                        //applyenvmap_collector.stop();
 
                         // Cache the shader on the old state
                         _state->_generated_shader = generated_shader;
