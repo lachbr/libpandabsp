@@ -10,6 +10,8 @@
 #ifndef BSP_MATERIAL_H
 #define BSP_MATERIAL_H
 
+#include "config_bsp.h"
+
 #include <material.h>
 #include <shaderInput.h>
 #include <pmap.h>
@@ -54,7 +56,7 @@ private:
 
 NotifyCategoryDeclNoExport(bspmaterial);
 
-class BSPMaterial : public TypedReferenceCount
+class EXPCL_PANDABSP BSPMaterial : public TypedReferenceCount
 {
 PUBLISHED:
         INLINE explicit BSPMaterial( const std::string &name = DEFAULT_SHADER ) :
@@ -160,7 +162,7 @@ private:
         static TypeHandle _type_handle;
 };
 
-class BSPMaterialAttrib : public RenderAttrib
+class EXPCL_PANDABSP BSPMaterialAttrib : public RenderAttrib
 {
 private:
         INLINE BSPMaterialAttrib() :
