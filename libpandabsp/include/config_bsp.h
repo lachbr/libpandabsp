@@ -42,6 +42,8 @@ public:\
 #define TypeDef(classname)\
 TypeHandle classname::_type_handle;
 
+#ifndef CPPPARSER
 extern EXPCL_PANDABSP void init_libpandabsp();
+#endif
 
 #endif // CONFIG_BSP_H

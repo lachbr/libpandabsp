@@ -56,7 +56,11 @@ private:
 
 NotifyCategoryDeclNoExport(bspmaterial);
 
+#ifdef CPPPARSER
+class BSPMaterial : public TypedReferenceCount
+#else
 class EXPCL_PANDABSP BSPMaterial : public TypedReferenceCount
+#endif
 {
 PUBLISHED:
         INLINE explicit BSPMaterial( const std::string &name = DEFAULT_SHADER ) :
@@ -162,7 +166,11 @@ private:
         static TypeHandle _type_handle;
 };
 
+#ifdef CPPPARSER
+class BSPMaterialAttrib : public RenderAttrib
+#else
 class EXPCL_PANDABSP BSPMaterialAttrib : public RenderAttrib
+#endif
 {
 private:
         INLINE BSPMaterialAttrib() :
