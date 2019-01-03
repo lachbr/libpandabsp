@@ -87,7 +87,6 @@ ShaderPermutations LightmappedGenericSpec::setup_permutations( const BSPMaterial
                           !conf->envmap.envmap_texture &&
                           conf->envmap.has_feature )
                 {
-                        std::cout << "Adding envmapSampler" << std::endl;
                         result.add_input( ShaderInput( "envmapSampler", tex ) );
                 }
         }

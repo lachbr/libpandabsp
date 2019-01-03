@@ -233,8 +233,6 @@ void find_min_max_extents( LVecBase3 &min_extent, LVecBase3 &max_extent, const L
                 if ( proj_point.get_y() > max_extent.get_z() ) max_extent.set_z( proj_point.get_y() );
                 if ( proj_point.get_y() < min_extent.get_z() ) min_extent.set_z( proj_point.get_y() );
         }
-
-        //std::cout << min_extent << ", " << max_extent << std::endl;
 }
 
 /**

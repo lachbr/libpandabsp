@@ -14,6 +14,7 @@
 #include "shader_generator.h"
 #include "bsp_material.h"
 #include "shader_spec.h"
+#include "aux_data_attrib.h"
 
 ConfigureDef( config_bsp );
 ConfigureFn( config_bsp )
@@ -43,6 +44,8 @@ void init_libpandabsp()
         BSPMaterial::init_type();
         BSPMaterialAttrib::init_type();
         BSPMaterialAttrib::register_with_read_factory();
+
+        AuxDataAttrib::init_type();
 
         ShaderSpec::init_type();
 }

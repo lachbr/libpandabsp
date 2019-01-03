@@ -31,7 +31,7 @@ extern ConfigVariableDouble softness_factor;
 
 NotifyCategoryDeclNoExport(bspShaderGenerator);
 
-struct nodeshaderinput_t;
+class nodeshaderinput_t;
 
 class PSSMShaderGenerator : public ShaderGenerator
 {
@@ -40,12 +40,6 @@ PUBLISHED:
 
         virtual CPT( ShaderAttrib ) synthesize_shader( const RenderState *rs,
                                                        const GeomVertexAnimationSpec &anim );
-
-        // This is important because in BSP levels, we must know the GeomNode that is associated with
-        // each render state. We need to apply the appropriate shader inputs for updating
-        // with local light sources and ambient cube.
-        CPT( ShaderAttrib ) synthesize_shader( const RenderState *rs, const GeomVertexAnimationSpec &anim,
-                                               nodeshaderinput_t *bsp_node_input );
 
         void set_sun_light( const NodePath &np );
 

@@ -33,6 +33,9 @@
 #include <bitset>
 
 #include "bsp_trace.h"
+#include "aux_data_attrib.h"
+
+TypeDef( nodeshaderinput_t );
 
 static PStatCollector updatenode_collector              ( "AmbientProbes:UpdateNodes" );
 static PStatCollector finddata_collector                ( "AmbientProbes:UpdateNodes:FindNodeData" );
@@ -60,6 +63,41 @@ using std::sin;
 //#define VISUALIZE_AMBPROBES
 
 static light_t *dummy_light = new light_t;
+
+struct nodecallbackdata_t
+{
+        PandaNode *node;
+        WeakReferenceList *list;
+        AmbientProbeManager *mgr;
+};
+
+class NodeWeakCallback : public WeakPointerCallback
+{
+PUBLISHED:
+        virtual void wp_callback( void *pointer );
+};
+
+void NodeWeakCallback::wp_callback( void *pointer )
+{
+        nodecallbackdata_t *data = (nodecallbackdata_t *)pointer;
+
+        MutexHolder holder( data->mgr->_cache_mutex );
+
+        int itr = data->mgr->_node_data.find( data->node );
+        if ( itr != -1 )
+        {
+                data->mgr->_node_data.remove_element( itr );
+        }
+
+        itr = data->mgr->_pos_cache.find( data->node );
+        if ( itr != -1 )
+        {
+                data->mgr->_pos_cache.remove_element( itr );
+        }
+
+        delete data;
+        delete this;
+}
 
 AmbientProbeManager::AmbientProbeManager() :
         _loader( nullptr ),
@@ -368,47 +406,12 @@ INLINE bool AmbientProbeManager::is_light_visible( const LPoint3 &point, const l
         return !trace.has_hit();
 }
 
-INLINE void AmbientProbeManager::garbage_collect_cache()
-{
-        for ( size_t i = 0; i < _pos_cache.size(); )
-        {
-                if ( _pos_cache.get_key( i ).was_deleted() )
-                {
-                        _pos_cache.remove_element( i++ );
-                }
-                else
-                {
-                        i++;
-                }
-        }
-
-        for ( size_t i = 0; i < _node_data.size(); )
-        {
-                if ( _node_data.get_key( i ).was_deleted() )
-                {
-                        _node_data.remove_element( i++ );
-                }
-                else
-                {
-                        i++;
-                }
-        }
-}
-
-void AmbientProbeManager::consider_garbage_collect()
-{
-        double now = ClockObject::get_global_clock()->get_frame_time();
-        if ( now - _last_garbage_collect_time >= GARBAGECOLLECT_TIME )
-        {
-                garbage_collect_cache();
-                _last_garbage_collect_time = now;
-        }
-}
-
-PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
-                                                          const TransformState *curr_trans )
+const RenderState *AmbientProbeManager::update_node( PandaNode *node,
+                                                     const TransformState *curr_trans )
 {
         PStatTimer timer( updatenode_collector );
+
+        MutexHolder holder( _cache_mutex );
 
         if ( !node || !curr_trans )
         {
@@ -417,23 +420,35 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
 
         finddata_collector.start();
         bool new_instance = false;
-        if ( _node_data.find( node ) == -1 )
+
+        int itr = _node_data.find( node );
+        if ( itr == -1 )
         {
                 // This is a new node we have encountered.
                 new_instance = true;
         }
 
-        PT( nodeshaderinput_t ) input;
+        PT( nodeshaderinput_t ) input = nullptr;
         if ( new_instance )
         {
                 input = new nodeshaderinput_t;
                 input->node_sequence = _node_sequence++;
+                input->state_with_input = RenderState::make( AuxDataAttrib::make( input ) );
                 _node_data[node] = input;
                 _pos_cache[node] = curr_trans;
+
+                // Add a callback to remove this node from our cache when the reference count
+                // reaches zero.
+                WeakReferenceList *ref = node->weak_ref();
+                nodecallbackdata_t *ncd = new nodecallbackdata_t;
+                ncd->mgr = this;
+                ncd->node = node;
+                ncd->list = ref;
+                ref->add_callback( new NodeWeakCallback, ncd );
         }
         else
         {
-                input = _node_data[node];
+                input = _node_data.get_data( itr );
         }
 
         finddata_collector.stop();
@@ -701,7 +716,7 @@ PT( nodeshaderinput_t ) AmbientProbeManager::update_node( PandaNode *node,
 
         input->light_count[0] = lights_updated;
 
-        return input;
+        return input->state_with_input;
 }
 
 INLINE void xform_light( light_t *light, const LMatrix4 &cam_mat )
@@ -755,6 +770,8 @@ T AmbientProbeManager::find_closest_in_kdtree( KDTree *tree, const LPoint3 &pos,
 
 void AmbientProbeManager::cleanup()
 {
+        MutexHolder holder( _cache_mutex );
+
         _sunlight = nullptr;
         _probe_kdtree = nullptr;
         _light_kdtree = nullptr;

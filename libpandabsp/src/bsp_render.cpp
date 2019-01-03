@@ -20,6 +20,7 @@
 #include <bitset>
 
 #include "shader_generator.h"
+#include "aux_data_attrib.h"
 
 static PStatCollector pvs_test_geom_collector( "Cull:BSP:AddForDraw:Geom_LeafBoundsIntersect" );
 static PStatCollector pvs_test_node_collector( "Cull:BSP:Node_LeafBoundsIntersect" );
@@ -31,108 +32,8 @@ static PStatCollector ambientprobe_nodes_collector( "BSP Dynamic Nodes" );
 static PStatCollector applyshaderattrib_collector( "Cull:BSP:ApplyShaderAttrib" );
 static PStatCollector makecullable_geomnode_collector( "Cull:BSP:AddForDraw:MakeCullableObject" );
 
-class BSPCullTraverserData : public CullTraverserData
-{
-PUBLISHED:
-        INLINE BSPCullTraverserData( const CullTraverserData &parent,
-                                     nodeshaderinput_t *inp,
-                                     PandaNode *child ) :
-                CullTraverserData( parent, child ),
-                _inp( inp )
-        {
-        }
-
-        INLINE BSPCullTraverserData( const CullTraverserData &copy ) :
-                CullTraverserData( copy ),
-                _inp( nullptr )
-        {
-        }
-
-        INLINE nodeshaderinput_t *get_input() const
-        {
-                return _inp;
-        }
-
-private:
-        nodeshaderinput_t *_inp;
-};
-
 static ConfigVariableColor dynamic_wf_color( "bsp-dynamic-wireframe-color", LColor( 0, 1.0, 1.0, 1.0 ) );
 static ConfigVariableColor brush_wf_color( "bsp-brush-wireframe-color", LColor( 231 / 255.0, 129 / 255.0, 129 / 255.0, 1.0 ) );
-
-CullableObject *BSPCullableObject::make_copy()
-{
-        return new BSPCullableObject( *this );
-}
-
-void BSPCullableObject::ensure_generated_shader( GraphicsStateGuardianBase *gsgbase )
-{
-#if 1
-        GraphicsStateGuardian *gsg = DCAST( GraphicsStateGuardian, gsgbase );
-        ShaderGenerator *shgen = gsg->get_shader_generator();
-        if ( shgen == nullptr )
-        {
-                return;
-        }
-        if ( shgen->is_of_type( PSSMShaderGenerator::get_class_type() ) )
-        {
-                PSSMShaderGenerator *pshgen = DCAST( PSSMShaderGenerator, shgen );
-
-                const ShaderAttrib *shader_attrib;
-                _state->get_attrib_def( shader_attrib );
-
-                if ( shader_attrib->auto_shader() )
-                {
-                        BSPLoader *loader = BSPLoader::get_global_ptr();
-
-                        CPT( RenderAttrib ) generated_shader = nullptr;
-                        findgeomshader_collector.start();
-                        int itr = loader->_geom_shader_cache.find( _geom );
-                        std::cout << _geom << std::endl;
-                        findgeomshader_collector.stop();
-                        if ( itr == -1 || _state->_generated_shader == nullptr )
-                        {
-                                if ( itr == -1 )
-                                {
-                                        std::cout << "Generating shader for geom" << std::endl;
-                                }
-                                GeomVertexAnimationSpec spec;
-
-                                // Currently we overload this flag to request vertex animation for the
-                                // shader generator.
-                                if ( shader_attrib->get_flag( ShaderAttrib::F_hardware_skinning ) )
-                                {
-                                        spec.set_hardware( 4, true );
-                                }
-
-                                // Cache the generated ShaderAttrib on the shader state.
-                                generated_shader = pshgen->synthesize_shader( _state, spec, _bsp_node_input );
-                                generated_shader = DCAST( ShaderAttrib, generated_shader )->set_flag( BSPSHADERFLAG_AUTO, true );
-                                loader->_geom_shader_cache[_geom] = generated_shader;
-                        }
-                        else
-                        {
-                                generated_shader = loader->_geom_shader_cache.get_data( itr );
-                        }
-
-                        nassertv( generated_shader != nullptr );
-
-                        // Cache the shader on the old state
-                        _state->_generated_shader = generated_shader;
-
-                        // Now make a unique attrib, avoids composition cache.
-                        // The composition cache will unify states and result in shared bsp node inputs,
-                        // which is bad.
-                        applyshaderattrib_collector.start();
-                        _state = _state->set_attrib( generated_shader );
-                        applyshaderattrib_collector.stop();
-                        _state->_generated_shader = generated_shader;
-                        
-                }
-
-        }
-#endif
-}
 
 TypeDef( BSPCullTraverser );
 
@@ -203,7 +104,7 @@ INLINE bool geom_cull_test( CPT( Geom ) geom, CPT( RenderState ) state, CullTrav
         return true;
 }
 
-INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTraverserData &data, nodeshaderinput_t *shinput )
+INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTraverserData &data )
 {
         BSPLoader *loader = _loader;
 
@@ -275,8 +176,8 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                 }
 
                 makecullable_geomnode_collector.start();
-                BSPCullableObject *object =
-                        new BSPCullableObject( std::move( geom ), std::move( state ), internal_transform, shinput );
+                CullableObject *object =
+                        new CullableObject( std::move( geom ), std::move( state ), internal_transform );
                 get_cull_handler()->record_object( object, this );
                 makecullable_geomnode_collector.stop();
                 _geoms_pcollector.add_level( 1 );
@@ -291,15 +192,11 @@ static PStatCollector wsp_trav_collector( "Cull:BSP:WorldSpawn:TraverseLeafs" );
 static PStatCollector wsp_geom_traverse_collector( "Cull:BSP:WorldSpawn:TraverseLeafGeoms" );
 static PStatCollector wsp_make_cullableobject_collector( "Cull:BSP:WorldSpawn:MakeCullableObject" );
 
-void BSPCullTraverser::traverse_below( CullTraverserData &cdata )
+void BSPCullTraverser::traverse_below( CullTraverserData &data )
 {
-        BSPCullTraverserData &data = (BSPCullTraverserData &)cdata;
-
         _nodes_pcollector.add_level( 1 );
         PandaNodePipelineReader *node_reader = data.node_reader();
         PandaNode *node = data.node();
-
-        PT( nodeshaderinput_t ) shinput = data.get_input();
 
         bool keep_going = true;
 
@@ -417,7 +314,11 @@ void BSPCullTraverser::traverse_below( CullTraverserData &cdata )
                         if ( !disabled )
                         {
                                 // Update the node's ambient probe stuff:
-                                shinput = _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ) );
+                                const RenderState *input_state = _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ) );
+                                if ( input_state )
+                                {
+                                        data._state = data._state->compose( input_state );
+                                }
                                 ambientprobe_nodes_collector.add_level( 1 );
                         }
                 }
@@ -426,7 +327,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &cdata )
                         // HACKHACK:
                         // Needed to test the individual Geoms against the PVS.
                         addfordraw_collector.start();
-                        add_geomnode_for_draw( DCAST( GeomNode, node ), data, shinput );
+                        add_geomnode_for_draw( DCAST( GeomNode, node ), data );
                         addfordraw_collector.stop();
                 }
                 else
@@ -449,7 +350,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &cdata )
         {
                 for ( int i = 0; i < num_children; ++i )
                 {
-                        BSPCullTraverserData next_data( data, shinput, children.get_child( i ) );
+                        CullTraverserData next_data( data, children.get_child( i ) );
                         do_traverse( next_data );
                 }
         }
@@ -458,7 +359,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &cdata )
                 int i = node->get_first_visible_child();
                 while ( i < num_children )
                 {
-                        BSPCullTraverserData next_data( data, shinput, children.get_child( i ) );
+                        CullTraverserData next_data( data, children.get_child( i ) );
                         do_traverse( next_data );
                         i = node->get_next_visible_child( i );
                 }
@@ -504,10 +405,8 @@ bool BSPRender::cull_callback( CullTraverser *trav, CullTraverserData &data )
 
                 BSPCullTraverser bsp_trav( trav, _loader );
                 bsp_trav.local_object();
-                bsp_trav.traverse_below( BSPCullTraverserData( data ) );
+                bsp_trav.traverse_below( data );
                 bsp_trav.end_traverse();
-
-                loader->_amb_probe_mgr.consider_garbage_collect();
 
                 // No need for CullTraverser to go further down this node,
                 // the BSPCullTraverser has already handled it.

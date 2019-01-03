@@ -12,6 +12,7 @@
 #include "bsp_material.h"
 #include "ambient_probes.h"
 #include "cubemaps.h"
+#include "aux_data_attrib.h"
 
 #include <pStatTimer.h>
 #include <config_pgraphnodes.h>
@@ -190,30 +191,35 @@ AsyncTask::DoneStatus PSSMShaderGenerator::update_pssm( GenericAsyncTask *task, 
         return AsyncTask::DS_cont;
 }
 
-CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *rs,
-                                                            const GeomVertexAnimationSpec &anim,
-                                                            nodeshaderinput_t *bsp_node_input )
+CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib ) shattr )
 {
-        CPT( ShaderAttrib ) shattr = synthesize_shader( rs, anim );
+        bool inputs_supplied = false;
 
-        if ( bsp_node_input != nullptr )
+        const AuxDataAttrib *ada;
+        rs->get_attrib_def( ada );
+        if ( ada->has_data() )
         {
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightCount", bsp_node_input->light_count ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData", bsp_node_input->light_data ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData2", bsp_node_input->light_data2 ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightTypes", bsp_node_input->light_type ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambientCube", bsp_node_input->ambient_cube ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "envmapSampler", bsp_node_input->cubemap_tex ) ) );
+                if ( ada->get_data()->is_exact_type( nodeshaderinput_t::get_class_type() ) )
+                {
+                        nodeshaderinput_t *bsp_node_input = DCAST( nodeshaderinput_t, ada->get_data() );
+                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightCount", bsp_node_input->light_count ) );
+                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightData", bsp_node_input->light_data ) );
+                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightData2", bsp_node_input->light_data2 ) );
+                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightTypes", bsp_node_input->light_type ) );
+                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "ambientCube", bsp_node_input->ambient_cube ) );
+                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "envmapSampler", bsp_node_input->cubemap_tex ) );
+                        inputs_supplied = true;
+                }
         }
-        else
+        if ( !inputs_supplied )
         {
                 // Fill in default empty values so we don't crash.
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightCount", PTA_int::empty_array( 1 ) ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightData2", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "lightTypes", PTA_int::empty_array( MAX_TOTAL_LIGHTS ) ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ) ) );
-                shattr = DCAST( ShaderAttrib, shattr->set_shader_input( ShaderInput( "envmapSampler", get_identity_cubemap() ) ) );
+                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightCount", PTA_int::empty_array( 1 ) ) );
+                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightData", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ) );
+                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightData2", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ) );
+                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightTypes", PTA_int::empty_array( MAX_TOTAL_LIGHTS ) ) );
+                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ) );
+                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "envmapSampler", get_identity_cubemap() ) );
         }
 
         return shattr;
@@ -222,7 +228,6 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
 CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *rs,
                                                             const GeomVertexAnimationSpec &anim )
 {
-
         findmatshader_collector.start();
 
         // First figure out which shader to use.
@@ -274,6 +279,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                 if ( itr != spec->_generated_shaders.end() )
                 {
                         CPT( RenderAttrib ) shattr = itr->second;
+                        shattr = apply_node_inputs( rs, shattr );
 
                         lookup_collector.stop();
                         return DCAST( ShaderAttrib, shattr );
@@ -316,6 +322,9 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         nassertr( shader != nullptr, nullptr );
 
         CPT( RenderAttrib ) shattr = ShaderAttrib::make( shader );
+
+        shattr = apply_node_inputs( rs, shattr );
+
         // Add any inputs from the permutations.
         for ( auto itr = permutations.inputs.begin(); itr != permutations.inputs.end(); itr++ )
         {

@@ -26,6 +26,8 @@
 
 #include "../kdtree/KDTree.h"
 
+#include "config_bsp.h"
+
 class BSPLoader;
 struct dleafambientindex_t;
 struct dleafambientlighting_t;
@@ -72,8 +74,11 @@ struct light_t : public ReferenceCount
 #define LIGHTING_UNINITIALIZED -1
 
 #ifndef CPPPARSER
-struct nodeshaderinput_t : public ReferenceCount
+class nodeshaderinput_t : public TypedReferenceCount
 {
+        TypeDecl( nodeshaderinput_t, TypedReferenceCount );
+
+public:
         PTA_LVecBase3 ambient_cube;
 
         PTA_int light_count;
@@ -94,6 +99,8 @@ struct nodeshaderinput_t : public ReferenceCount
         int sky_idx;
         std::bitset<0xFFF> occluded_lights;
 
+        CPT( RenderState ) state_with_input;
+
         int active_lights;
 
         INLINE void copy_needed( const nodeshaderinput_t *other )
@@ -106,13 +113,13 @@ struct nodeshaderinput_t : public ReferenceCount
         }
 
         INLINE nodeshaderinput_t( const nodeshaderinput_t *other ) :
-                ReferenceCount()
+                TypedReferenceCount()
         {
                 copy_needed( other );
         }
 
         nodeshaderinput_t() :
-                ReferenceCount()
+                TypedReferenceCount()
         {
                 ambient_cube = PTA_LVecBase3::empty_array( 6 );
 
@@ -123,6 +130,7 @@ struct nodeshaderinput_t : public ReferenceCount
                 light_ids = PTA_int::empty_array( MAX_TOTAL_LIGHTS );
                 amb_probe = nullptr;
                 cubemap = nullptr;
+                state_with_input = nullptr;
                 cubemap_tex = new Texture( "cubemap_image" );
                 cubemap_tex->clear_image();
                 sky_idx = -1;
@@ -132,7 +140,7 @@ struct nodeshaderinput_t : public ReferenceCount
         }
 
         nodeshaderinput_t( const nodeshaderinput_t &other ) :
-                ReferenceCount(),
+                TypedReferenceCount(),
                 lighting_time( other.lighting_time ),
                 node_sequence( other.node_sequence ),
                 amb_probe( other.amb_probe ),
@@ -140,7 +148,8 @@ struct nodeshaderinput_t : public ReferenceCount
                 sky_idx( other.sky_idx ),
                 active_lights( other.active_lights ),
                 occluded_lights( other.occluded_lights ),
-                cubemap_tex( other.cubemap_tex )
+                cubemap_tex( other.cubemap_tex ),
+                state_with_input( other.state_with_input )
         {
                 //ambient_cube = PTA_LVecBase3::empty_array( 6 );
                 //light_count = PTA_int::empty_array( 1 );
@@ -158,7 +167,7 @@ struct nodeshaderinput_t : public ReferenceCount
         }
 };
 #else
-struct nodeshaderinput_t;
+class nodeshaderinput_t;
 #endif
 
 class AmbientProbeManager
@@ -169,7 +178,7 @@ public:
 
         void process_ambient_probes();
 
-        PT( nodeshaderinput_t ) update_node( PandaNode *node, const TransformState *net_ts );
+        const RenderState *update_node( PandaNode *node, const TransformState *net_ts );
 
         void load_cubemaps();
 
@@ -201,7 +210,6 @@ public:
         }
 
 public:
-        void consider_garbage_collect();
 
         void xform_lights( const TransformState *cam_trans );
 
@@ -209,14 +217,12 @@ private:
         INLINE bool is_sky_visible( const LPoint3 &point );
         INLINE bool is_light_visible( const LPoint3 &point, const light_t *light );
 
-        INLINE void garbage_collect_cache();
-
 private:
         BSPLoader *_loader;
 
         // NodePaths to be influenced by the ambient probes.
-        SimpleHashMap<WPT( PandaNode ), CPT( TransformState )> _pos_cache;
-        SimpleHashMap<WPT( PandaNode ), PT( nodeshaderinput_t )> _node_data;
+        SimpleHashMap<PandaNode *, CPT( TransformState ), pointer_hash> _pos_cache;
+        SimpleHashMap<PandaNode *, PT( nodeshaderinput_t ), pointer_hash> _node_data;
         SimpleHashMap<int, pvector<PT( ambientprobe_t )>, int_hash> _probes;
         pvector<ambientprobe_t *> _all_probes;
         pvector<PT( light_t )> _all_lights;
@@ -233,6 +239,11 @@ private:
         UpdateSeq _node_sequence;
 
         double _last_garbage_collect_time;
+
+        Mutex _cache_mutex;
+
+public:
+        friend class NodeWeakCallback;
 };
 
 #endif // AMBIENT_PROBES_H

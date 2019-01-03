@@ -990,7 +990,6 @@ void BSPLoader::make_faces()
                                                 LPoint3( centroid[0], centroid[1], centroid[2] ) );
                                         if ( cm )
                                         {
-                                                std::cout << "Face has env_cubemap" << std::endl;
                                                 faceroot.set_texture( TextureStages::get_cubemap(),
                                                                       cm->cubemap_tex );
                                         }
@@ -1902,7 +1901,6 @@ bool BSPLoader::read( const Filename &file )
 
         if ( !_ai )
         {
-                std::cout << "load_cubemaps" << std::endl;
                 load_cubemaps();
 
                 LightmapPalettizer lmp( this );
@@ -2256,43 +2254,6 @@ void BSPLoader::build_cubemaps()
 
 void BSPLoader::cleanup()
 {
-        if ( _active_level )
-        {
-                // Cleanup any shaders we generated on the Geom states.
-
-                if ( !_render.is_empty() )
-                {
-                        NodePathCollection npc = _render.find_all_matches( "**/+GeomNode" );
-
-                        for ( size_t i = 0; i < _explicit_dynamic_nodes.size(); i++ )
-                        {
-                                if ( _explicit_dynamic_nodes[i].was_deleted() )
-                                {
-                                        continue;
-                                }
-
-                                npc.add_paths_from( _explicit_dynamic_nodes[i].get_node_path().find_all_matches( "**/+GeomNode" ) );
-                        }
-
-                        for ( int i = 0; i < npc.get_num_paths(); i++ )
-                        {
-                                PT( GeomNode ) gn = DCAST( GeomNode, npc[i].node() );
-                                for ( int j = 0; j < gn->get_num_geoms(); j++ )
-                                {
-                                        CPT( RenderState ) state = gn->get_geom_state( j );
-                                        const ShaderAttrib *geom_shattr;
-                                        state->get_attrib_def( geom_shattr );
-                                        if ( ( geom_shattr->auto_shader() && geom_shattr->get_flag( BSPSHADERFLAG_AUTO ) ) )
-                                        {
-                                                // We generated a shader for this Geom, remove it.
-                                                state = state->remove_attrib( ShaderAttrib::get_class_slot() );
-                                                state->_generated_shader = nullptr;
-                                                gn->set_geom_state( j, state );
-                                        }
-                                }
-                        }
-                }
-        }
 
         _active_level = false;
 
