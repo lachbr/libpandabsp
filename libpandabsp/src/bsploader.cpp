@@ -513,8 +513,10 @@ void BSPLoader::make_faces_ai()
                         dface_t *face = _bspdata->dfaces + facenum;
                         texinfo_t *texinfo = &_bspdata->texinfo[face->texinfo];
                         texref_t *texref = &_bspdata->dtexrefs[texinfo->texref];
-                        contents_t contents = GetTextureContents( texref->name );
-                        if ( contents == CONTENTS_NULL )
+
+                        CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
+                        contents_t contents = ContentsFromName( bspmat->get_contents().c_str() );
+                        if ( contents == CONTENTS_SKY || contents == CONTENTS_NULL )
                         {
                                 continue;
                         }
@@ -800,16 +802,16 @@ void BSPLoader::make_faces()
                         texinfo_t *texinfo = &_bspdata->texinfo[face->texinfo];
 
                         texref_t *texref = &_bspdata->dtexrefs[texinfo->texref];
-                        contents_t contents = GetTextureContents( texref->name );
-                        if ( contents == CONTENTS_SKY )
+
+                        CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
+                        contents_t contents = ContentsFromName( bspmat->get_contents().c_str() );
+                        if ( contents == CONTENTS_SKY || contents == CONTENTS_NULL )
                         {
-                                // We don't render sky brushes.
                                 continue;
                         }
 
                         bool skip = false;
 
-                        CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
                         bool mat_normalmap = bspmat->has_keyvalue( "$bumpmap" );
                         string surfaceprop = bspmat->get_surface_prop();
 
@@ -1155,6 +1157,7 @@ void BSPLoader::load_static_props()
                 PT( BSPProp ) propnode = new BSPProp( prop->name );
                 propnode->set_preserve_transform( ModelNode::PT_local );
                 NodePath propnp = _result.attach_new_node( propnode );
+                propnp.set_shader_auto();
                 PT( PandaNode ) proproot = Loader::get_global_ptr()->load_sync( prop->name );
                 if ( proproot == nullptr )
                 {
@@ -1328,18 +1331,14 @@ void BSPLoader::load_static_props()
                         }
 
                         // since this prop has static lighting applied to the vertices
-                        // ignore any shaders, dynamic lights, or materials.
+                        // ignore any dynamic lights.
                         // also make sure the vertex colors are rendered.
-                        propnp.set_shader_off( 1 );
                         propnp.set_light_off( 1 );
-                        propnp.set_material_off( 1 );
                         propnp.set_attrib( ColorAttrib::make_vertex(), 2 );
                 }
                 else if ( prop->flags & STATICPROPFLAGS_NOLIGHTING )
                 {
-                        propnp.set_shader_off( 1 );
                         propnp.set_light_off( 1 );
-                        propnp.set_material_off( 1 );
                 }
 
 #ifdef CIO
@@ -2716,9 +2715,4 @@ INLINE CBaseEntity *BSPLoader::get_c_entity( const int entnum ) const
         }
 
         return nullptr;
-}
-
-void BSPLoader::set_texture_contents_file( const Filename &file )
-{
-        SetTextureContentsFile( file.get_fullpath().c_str() );
 }

@@ -8,23 +8,10 @@ extern const struct LibraryDef bsp_moddef;
 extern void Dtool_bsp_RegisterTypes();
 extern void Dtool_bsp_BuildInstants(PyObject *module);
 
-#if PY_MAJOR_VERSION >= 3 || !defined(NDEBUG)
-#ifdef _WIN32
-extern "C" __declspec(dllexport) PyObject *PyInit_bsp();
-#elif __GNUC__ >= 4
-extern "C" __attribute__((visibility("default"))) PyObject *PyInit_bsp();
+#if PY_MAJOR_VERSION >= 3
+extern "C" EXPORT_CLASS PyObject *PyInit_bsp();
 #else
-extern "C" PyObject *PyInit_bsp();
-#endif
-#endif
-#if PY_MAJOR_VERSION < 3 || !defined(NDEBUG)
-#ifdef _WIN32
-extern "C" __declspec(dllexport) void initbsp();
-#elif __GNUC__ >= 4
-extern "C" __attribute__((visibility("default"))) void initbsp();
-#else
-extern "C" void initbsp();
-#endif
+extern "C" EXPORT_CLASS void initbsp();
 #endif
 
 #if PY_MAJOR_VERSION >= 3
@@ -50,11 +37,6 @@ PyObject *PyInit_bsp() {
   return module;
 }
 
-#ifndef NDEBUG
-void initbsp() {
-  PyErr_SetString(PyExc_ImportError, "bsp was compiled for Python " PY_VERSION ", which is incompatible with Python 2");
-}
-#endif
 #else  // Python 2 case
 
 void initbsp() {
@@ -68,13 +50,6 @@ void initbsp() {
     Dtool_bsp_BuildInstants(module);
   }
 }
-
-#ifndef NDEBUG
-PyObject *PyInit_bsp() {
-  PyErr_SetString(PyExc_ImportError, "bsp was compiled for Python " PY_VERSION ", which is incompatible with Python 3");
-  return nullptr;
-}
-#endif
 #endif
 
 #line 1 "dtool/src/interrogatedb/py_panda.cxx"

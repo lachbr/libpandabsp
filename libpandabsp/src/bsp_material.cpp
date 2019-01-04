@@ -148,6 +148,8 @@ const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
         mat->_has_env_cubemap = ( mat->has_keyvalue( "$envmap" ) && mat->get_keyvalue( "$envmap" ) == "env_cubemap" );
         if ( mat->has_keyvalue( "$surfaceprop" ) )
                 mat->_surfaceprop = mat->get_keyvalue( "$surfaceprop" );
+        if ( mat->has_keyvalue( "$contents" ) )
+                mat->_contents = mat->get_keyvalue( "$contents" );
 
         _material_cache[file] = mat;
 

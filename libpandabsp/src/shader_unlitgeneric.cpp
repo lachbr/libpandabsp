@@ -38,6 +38,7 @@ ShaderPermutations UnlitGenericSpec::setup_permutations( const BSPMaterial *mat,
         conf->basetexture.add_permutations( result );
         conf->alpha.add_permutations( result );
 
+        add_color( rs, result );
         add_fog( rs, result );
 
         return result;

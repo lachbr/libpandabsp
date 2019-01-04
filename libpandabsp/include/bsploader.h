@@ -170,7 +170,6 @@ PUBLISHED:
 	void set_physics_type( int type );
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
-        void set_texture_contents_file( const Filename &file );
         void set_wireframe( bool flag );
         INLINE bool get_wireframe() const;
 

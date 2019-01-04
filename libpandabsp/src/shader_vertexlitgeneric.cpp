@@ -176,22 +176,7 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                 result.add_permutation( "CALC_PRIMARY_ALPHA" );
         }
 
-        // Determine whether or not vertex colors or flat colors are present.
-        const ColorAttrib *color;
-        rs->get_attrib_def( color );
-        ColorAttrib::Type ctype = color->get_color_type();
-        if ( ctype != ColorAttrib::T_off )
-        {
-                result.add_permutation( "NEED_COLOR" );
-                if ( ctype == ColorAttrib::T_flat )
-                {
-                        result.add_permutation( "COLOR_FLAT" );
-                }
-                else if ( ctype == ColorAttrib::T_vertex )
-                {
-                        result.add_permutation( "COLOR_VERTEX" );
-                }
-        }
+        add_color( rs, result );
 
         BSPLoader *bsploader = BSPLoader::get_global_ptr();
 

@@ -105,4 +105,26 @@ void ShaderSpec::add_fog( const RenderState *rs, ShaderPermutations &perms )
         }
 }
 
+#include <colorAttrib.h>
+
+void ShaderSpec::add_color( const RenderState *rs, ShaderPermutations &perms )
+{
+        // Determine whether or not vertex colors or flat colors are present.
+        const ColorAttrib *color;
+        rs->get_attrib_def( color );
+        ColorAttrib::Type ctype = color->get_color_type();
+        if ( ctype != ColorAttrib::T_off )
+        {
+                perms.add_permutation( "NEED_COLOR" );
+                if ( ctype == ColorAttrib::T_flat )
+                {
+                        perms.add_permutation( "COLOR_FLAT" );
+                }
+                else if ( ctype == ColorAttrib::T_vertex )
+                {
+                        perms.add_permutation( "COLOR_VERTEX" );
+                }
+        }
+}
+
 //=================================================================================================

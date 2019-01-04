@@ -1,4 +1,4 @@
-1546529836
+1546562324
 3 3
 3 bsp 4 t5GT 3 bsp 
 187
@@ -93,317 +93,317 @@ inline bool BSPMaterial::has_env_cubemap(void) const;
 61
 inline std::string BSPMaterial::get_surface_prop(void) const;
 
-200 13 get_from_file 0 4 366 26 BSPMaterial::get_from_file 0 1 25 0
+200 12 get_contents 0 4 366 25 BSPMaterial::get_contents 0 1 25 0
+57
+inline std::string BSPMaterial::get_contents(void) const;
+
+201 13 get_from_file 0 4 366 26 BSPMaterial::get_from_file 0 1 26 0
 75
 static BSPMaterial const *BSPMaterial::get_from_file(Filename const &file);
 
-201 14 get_class_type 0 4 366 27 BSPMaterial::get_class_type 0 1 26 0
+202 14 get_class_type 0 4 366 27 BSPMaterial::get_class_type 0 1 27 0
 52
 static TypeHandle BSPMaterial::get_class_type(void);
 
-202 12 ~BSPMaterial 0 4 366 25 BSPMaterial::~BSPMaterial 0 0 0
+203 12 ~BSPMaterial 0 4 366 25 BSPMaterial::~BSPMaterial 0 0 0
 32
 BSPMaterial::~BSPMaterial(void);
 
-203 4 make 0 4 368 23 BSPMaterialAttrib::make 0 1 27 0
+204 4 make 0 4 368 23 BSPMaterialAttrib::make 0 1 28 0
 86
 static ConstPointerTo< RenderAttrib > BSPMaterialAttrib::make(BSPMaterial const *mat);
 
-204 12 make_default 0 4 368 31 BSPMaterialAttrib::make_default 0 1 28 0
+205 12 make_default 0 4 368 31 BSPMaterialAttrib::make_default 0 1 29 0
 76
 static ConstPointerTo< RenderAttrib > BSPMaterialAttrib::make_default(void);
 
-205 12 get_material 0 4 368 31 BSPMaterialAttrib::get_material 0 1 29 0
+206 12 get_material 0 4 368 31 BSPMaterialAttrib::get_material 0 1 30 0
 70
 inline BSPMaterial const *BSPMaterialAttrib::get_material(void) const;
 
-206 14 get_class_slot 0 4 368 33 BSPMaterialAttrib::get_class_slot 0 1 30 0
+207 14 get_class_slot 0 4 368 33 BSPMaterialAttrib::get_class_slot 0 1 31 0
 51
 static int BSPMaterialAttrib::get_class_slot(void);
 
-207 14 get_class_type 0 4 368 33 BSPMaterialAttrib::get_class_type 0 1 31 0
+208 14 get_class_type 0 4 368 33 BSPMaterialAttrib::get_class_type 0 1 32 0
 58
 static TypeHandle BSPMaterialAttrib::get_class_type(void);
 
-208 18 ~BSPMaterialAttrib 0 4 368 37 BSPMaterialAttrib::~BSPMaterialAttrib 0 0 0
+209 18 ~BSPMaterialAttrib 0 4 368 37 BSPMaterialAttrib::~BSPMaterialAttrib 0 0 0
 44
 BSPMaterialAttrib::~BSPMaterialAttrib(void);
 
-209 14 get_class_type 0 4 371 27 CBaseEntity::get_class_type 0 1 34 0
+210 14 get_class_type 0 4 371 27 CBaseEntity::get_class_type 0 1 35 0
 52
 static TypeHandle CBaseEntity::get_class_type(void);
 
-210 11 CBaseEntity 0 4 371 24 CBaseEntity::CBaseEntity 0 2 32 33 0
+211 11 CBaseEntity 0 4 371 24 CBaseEntity::CBaseEntity 0 2 33 34 0
 95
 CBaseEntity::CBaseEntity(void);
 inline CBaseEntity::CBaseEntity(CBaseEntity const &) = default;
 
-211 10 get_entnum 0 4 371 23 CBaseEntity::get_entnum 0 1 35 0
+212 10 get_entnum 0 4 371 23 CBaseEntity::get_entnum 0 1 36 0
 40
 int CBaseEntity::get_entnum(void) const;
 
-212 10 get_loader 0 4 371 23 CBaseEntity::get_loader 0 1 36 0
+213 10 get_loader 0 4 371 23 CBaseEntity::get_loader 0 1 37 0
 47
 BSPLoader *CBaseEntity::get_loader(void) const;
 
-213 12 ~CBaseEntity 0 4 371 25 CBaseEntity::~CBaseEntity 0 0 0
+214 12 ~CBaseEntity 0 4 371 25 CBaseEntity::~CBaseEntity 0 0 0
 32
 CBaseEntity::~CBaseEntity(void);
 
-214 14 get_class_type 0 4 372 28 CPointEntity::get_class_type 0 1 39 0
+215 14 get_class_type 0 4 372 28 CPointEntity::get_class_type 0 1 40 0
 53
 static TypeHandle CPointEntity::get_class_type(void);
 
-215 12 CPointEntity 0 4 372 26 CPointEntity::CPointEntity 0 2 37 38 0
+216 12 CPointEntity 0 4 372 26 CPointEntity::CPointEntity 0 2 38 39 0
 100
 CPointEntity::CPointEntity(void);
 inline CPointEntity::CPointEntity(CPointEntity const &) = default;
 
-216 10 get_origin 0 4 372 24 CPointEntity::get_origin 0 1 40 0
+217 10 get_origin 0 4 372 24 CPointEntity::get_origin 0 1 41 0
 45
 LPoint3 CPointEntity::get_origin(void) const;
 
-217 10 get_angles 0 4 372 24 CPointEntity::get_angles 0 1 41 0
+218 10 get_angles 0 4 372 24 CPointEntity::get_angles 0 1 42 0
 46
 LVector3 CPointEntity::get_angles(void) const;
 
-218 13 ~CPointEntity 0 4 372 27 CPointEntity::~CPointEntity 0 0 0
+219 13 ~CPointEntity 0 4 372 27 CPointEntity::~CPointEntity 0 0 0
 34
 CPointEntity::~CPointEntity(void);
 
-219 14 get_class_type 0 4 373 29 CBoundsEntity::get_class_type 0 1 44 0
+220 14 get_class_type 0 4 373 29 CBoundsEntity::get_class_type 0 1 45 0
 54
 static TypeHandle CBoundsEntity::get_class_type(void);
 
-220 13 CBoundsEntity 0 4 373 28 CBoundsEntity::CBoundsEntity 0 2 42 43 0
+221 13 CBoundsEntity 0 4 373 28 CBoundsEntity::CBoundsEntity 0 2 43 44 0
 105
 CBoundsEntity::CBoundsEntity(void);
 inline CBoundsEntity::CBoundsEntity(CBoundsEntity const &) = default;
 
-221 10 get_bounds 0 4 373 25 CBoundsEntity::get_bounds 0 1 45 0
+222 10 get_bounds 0 4 373 25 CBoundsEntity::get_bounds 0 1 46 0
 51
 BoundingBox *CBoundsEntity::get_bounds(void) const;
 
-222 9 is_inside 0 4 373 24 CBoundsEntity::is_inside 0 1 46 0
+223 9 is_inside 0 4 373 24 CBoundsEntity::is_inside 0 1 47 0
 63
 inline bool CBoundsEntity::is_inside(LPoint3 const &pos) const;
 
-223 13 fillin_bounds 0 4 373 28 CBoundsEntity::fillin_bounds 0 1 47 0
+224 13 fillin_bounds 0 4 373 28 CBoundsEntity::fillin_bounds 0 1 48 0
 64
 void CBoundsEntity::fillin_bounds(LPoint3 &mins, LPoint3 &maxs);
 
-224 14 ~CBoundsEntity 0 4 373 29 CBoundsEntity::~CBoundsEntity 0 0 0
+225 14 ~CBoundsEntity 0 4 373 29 CBoundsEntity::~CBoundsEntity 0 0 0
 36
 CBoundsEntity::~CBoundsEntity(void);
 
-225 14 get_class_type 0 4 374 28 CBrushEntity::get_class_type 0 1 50 0
+226 14 get_class_type 0 4 374 28 CBrushEntity::get_class_type 0 1 51 0
 53
 static TypeHandle CBrushEntity::get_class_type(void);
 
-226 12 CBrushEntity 0 4 374 26 CBrushEntity::CBrushEntity 0 2 48 49 0
+227 12 CBrushEntity 0 4 374 26 CBrushEntity::CBrushEntity 0 2 49 50 0
 100
 CBrushEntity::CBrushEntity(void);
 inline CBrushEntity::CBrushEntity(CBrushEntity const &) = default;
 
-227 12 get_modelnum 0 4 374 26 CBrushEntity::get_modelnum 0 1 51 0
+228 12 get_modelnum 0 4 374 26 CBrushEntity::get_modelnum 0 1 52 0
 43
 int CBrushEntity::get_modelnum(void) const;
 
-228 12 get_model_np 0 4 374 26 CBrushEntity::get_model_np 0 1 52 0
+229 12 get_model_np 0 4 374 26 CBrushEntity::get_model_np 0 1 53 0
 48
 NodePath CBrushEntity::get_model_np(void) const;
 
-229 16 get_model_bounds 0 4 374 30 CBrushEntity::get_model_bounds 0 1 53 0
+230 16 get_model_bounds 0 4 374 30 CBrushEntity::get_model_bounds 0 1 54 0
 66
 void CBrushEntity::get_model_bounds(LPoint3 &mins, LPoint3 &maxs);
 
-230 13 ~CBrushEntity 0 4 374 27 CBrushEntity::~CBrushEntity 0 0 0
+231 13 ~CBrushEntity 0 4 374 27 CBrushEntity::~CBrushEntity 0 0 0
 34
 CBrushEntity::~CBrushEntity(void);
 
-231 9 get_width 0 4 375 21 PackResult::get_width 0 1 55 0
+232 9 get_width 0 4 375 21 PackResult::get_width 0 1 56 0
 45
 inline int PackResult::get_width(void) const;
 
-232 10 get_height 0 4 375 22 PackResult::get_height 0 1 56 0
+233 10 get_height 0 4 375 22 PackResult::get_height 0 1 57 0
 46
 inline int PackResult::get_height(void) const;
 
-233 15 get_unused_area 0 4 375 27 PackResult::get_unused_area 0 1 57 0
+234 15 get_unused_area 0 4 375 27 PackResult::get_unused_area 0 1 58 0
 51
 inline int PackResult::get_unused_area(void) const;
 
-234 10 PackResult 0 4 375 22 PackResult::PackResult 0 1 54 0
+235 10 PackResult 0 4 375 22 PackResult::PackResult 0 1 55 0
 60
 inline PackResult::PackResult(PackResult const &) = default;
 
-235 11 ~PackResult 0 4 375 23 PackResult::~PackResult 0 0 0
+236 11 ~PackResult 0 4 375 23 PackResult::~PackResult 0 0 0
 30
 PackResult::~PackResult(void);
 
-236 5 get_x 0 4 376 22 TextureLocation::get_x 0 1 59 0
+237 5 get_x 0 4 376 22 TextureLocation::get_x 0 1 60 0
 46
 inline int TextureLocation::get_x(void) const;
 
-237 5 get_y 0 4 376 22 TextureLocation::get_y 0 1 60 0
+238 5 get_y 0 4 376 22 TextureLocation::get_y 0 1 61 0
 46
 inline int TextureLocation::get_y(void) const;
 
-238 9 get_width 0 4 376 26 TextureLocation::get_width 0 1 61 0
+239 9 get_width 0 4 376 26 TextureLocation::get_width 0 1 62 0
 50
 inline int TextureLocation::get_width(void) const;
 
-239 10 get_height 0 4 376 27 TextureLocation::get_height 0 1 62 0
+240 10 get_height 0 4 376 27 TextureLocation::get_height 0 1 63 0
 51
 inline int TextureLocation::get_height(void) const;
 
-240 11 get_rotated 0 4 376 28 TextureLocation::get_rotated 0 1 63 0
+241 11 get_rotated 0 4 376 28 TextureLocation::get_rotated 0 1 64 0
 53
 inline bool TextureLocation::get_rotated(void) const;
 
-241 15 TextureLocation 0 4 376 32 TextureLocation::TextureLocation 0 1 58 0
+242 15 TextureLocation 0 4 376 32 TextureLocation::TextureLocation 0 1 59 0
 75
 inline TextureLocation::TextureLocation(TextureLocation const &) = default;
 
-242 16 ~TextureLocation 0 4 376 33 TextureLocation::~TextureLocation 0 0 0
+243 16 ~TextureLocation 0 4 376 33 TextureLocation::~TextureLocation 0 0 0
 40
 TextureLocation::~TextureLocation(void);
 
-243 15 getTextureCount 0 6 377 30 TexturePacker::getTextureCount 0 1 64 0
+244 15 getTextureCount 0 6 377 30 TexturePacker::getTextureCount 0 1 65 0
 53
 virtual int TexturePacker::getTextureCount(void) = 0;
 
-244 15 setTextureCount 0 6 377 30 TexturePacker::setTextureCount 0 1 65 35
+245 15 setTextureCount 0 6 377 30 TexturePacker::setTextureCount 0 1 66 35
 // number of textures to consider..
 60
 virtual void TexturePacker::setTextureCount(int tcount) = 0;
 
-245 10 addTexture 0 6 377 25 TexturePacker::addTexture 0 1 66 21
+246 10 addTexture 0 6 377 25 TexturePacker::addTexture 0 1 67 21
 // add textures 0 - n
 61
 virtual void TexturePacker::addTexture(int wid, int hit) = 0;
 
-246 15 wouldTextureFit 0 6 377 30 TexturePacker::wouldTextureFit 0 1 67 0
+247 15 wouldTextureFit 0 6 377 30 TexturePacker::wouldTextureFit 0 1 68 0
 135
 virtual bool TexturePacker::wouldTextureFit(int wid, int hit, bool forcePowerOfTwo, bool onePixelBorder, int max_wid, int max_hit) = 0;
 
-247 13 addNewTexture 0 6 377 28 TexturePacker::addNewTexture 0 1 68 0
+248 13 addNewTexture 0 6 377 28 TexturePacker::addNewTexture 0 1 69 0
 64
 virtual void TexturePacker::addNewTexture(int wid, int hit) = 0;
 
-248 12 packTextures 0 6 377 27 TexturePacker::packTextures 0 1 69 74
+249 12 packTextures 0 6 377 27 TexturePacker::packTextures 0 1 70 74
 // pack the textures, the return code is the amount of wasted/unused area.
 94
 virtual PackResult TexturePacker::packTextures(bool forcePowerOfTwo, bool onePixelBorder) = 0;
 
-249 18 getTextureLocation 0 6 377 33 TexturePacker::getTextureLocation 0 1 70 58
+250 18 getTextureLocation 0 6 377 33 TexturePacker::getTextureLocation 0 1 71 58
 // returns true if the texture has been rotated 90 degrees
 73
 virtual TextureLocation TexturePacker::getTextureLocation(int index) = 0;
 
-250 19 createTexturePacker 0 4 377 34 TexturePacker::createTexturePacker 0 1 71 0
+251 19 createTexturePacker 0 4 377 34 TexturePacker::createTexturePacker 0 1 72 0
 63
 static TexturePacker *TexturePacker::createTexturePacker(void);
 
-251 20 releaseTexturePacker 0 4 377 35 TexturePacker::releaseTexturePacker 0 1 72 0
+252 20 releaseTexturePacker 0 4 377 35 TexturePacker::releaseTexturePacker 0 1 73 0
 67
 static void TexturePacker::releaseTexturePacker(TexturePacker *tp);
 
-252 14 ~TexturePacker 0 4 377 29 TexturePacker::~TexturePacker 0 0 0
+253 14 ~TexturePacker 0 4 377 29 TexturePacker::~TexturePacker 0 0 0
 36
 TexturePacker::~TexturePacker(void);
 
-253 4 make 0 4 378 19 BSPFaceAttrib::make 0 1 73 0
+254 4 make 0 4 378 19 BSPFaceAttrib::make 0 1 74 0
 107
 static ConstPointerTo< RenderAttrib > BSPFaceAttrib::make(std::string const &face_material, int face_type);
 
-254 12 make_default 0 4 378 27 BSPFaceAttrib::make_default 0 1 74 0
+255 12 make_default 0 4 378 27 BSPFaceAttrib::make_default 0 1 75 0
 72
 static ConstPointerTo< RenderAttrib > BSPFaceAttrib::make_default(void);
 
-255 15 make_ignore_pvs 0 4 378 30 BSPFaceAttrib::make_ignore_pvs 0 1 75 0
+256 15 make_ignore_pvs 0 4 378 30 BSPFaceAttrib::make_ignore_pvs 0 1 76 0
 75
 static ConstPointerTo< RenderAttrib > BSPFaceAttrib::make_ignore_pvs(void);
 
-256 12 get_material 0 4 378 27 BSPFaceAttrib::get_material 0 1 76 0
+257 12 get_material 0 4 378 27 BSPFaceAttrib::get_material 0 1 77 0
 59
 inline std::string BSPFaceAttrib::get_material(void) const;
 
-257 13 get_face_type 0 4 378 28 BSPFaceAttrib::get_face_type 0 1 77 0
+258 13 get_face_type 0 4 378 28 BSPFaceAttrib::get_face_type 0 1 78 0
 52
 inline int BSPFaceAttrib::get_face_type(void) const;
 
-258 14 get_ignore_pvs 0 4 378 29 BSPFaceAttrib::get_ignore_pvs 0 1 78 0
+259 14 get_ignore_pvs 0 4 378 29 BSPFaceAttrib::get_ignore_pvs 0 1 79 0
 54
 inline bool BSPFaceAttrib::get_ignore_pvs(void) const;
 
-259 14 get_class_slot 0 4 378 29 BSPFaceAttrib::get_class_slot 0 1 79 0
+260 14 get_class_slot 0 4 378 29 BSPFaceAttrib::get_class_slot 0 1 80 0
 47
 static int BSPFaceAttrib::get_class_slot(void);
 
-260 14 get_class_type 0 4 378 29 BSPFaceAttrib::get_class_type 0 1 80 0
+261 14 get_class_type 0 4 378 29 BSPFaceAttrib::get_class_type 0 1 81 0
 54
 static TypeHandle BSPFaceAttrib::get_class_type(void);
 
-261 14 ~BSPFaceAttrib 0 4 378 29 BSPFaceAttrib::~BSPFaceAttrib 0 0 0
+262 14 ~BSPFaceAttrib 0 4 378 29 BSPFaceAttrib::~BSPFaceAttrib 0 0 0
 36
 BSPFaceAttrib::~BSPFaceAttrib(void);
 
-262 9 BSPLoader 0 4 380 20 BSPLoader::BSPLoader 0 1 81 0
+263 9 BSPLoader 0 4 380 20 BSPLoader::BSPLoader 0 1 82 0
 27
 BSPLoader::BSPLoader(void);
 
-263 4 read 0 4 380 15 BSPLoader::read 0 1 82 0
+264 4 read 0 4 380 15 BSPLoader::read 0 1 83 0
 43
 bool BSPLoader::read(Filename const &file);
 
-264 16 do_optimizations 0 4 380 27 BSPLoader::do_optimizations 0 1 83 0
+265 16 do_optimizations 0 4 380 27 BSPLoader::do_optimizations 0 1 84 0
 39
 void BSPLoader::do_optimizations(void);
 
-265 9 set_gamma 0 4 380 20 BSPLoader::set_gamma 0 1 84 0
+266 9 set_gamma 0 4 380 20 BSPLoader::set_gamma 0 1 85 0
 65
 void BSPLoader::set_gamma(PN_stdfloat gamma, int overbright = 1);
 
-266 9 get_gamma 0 4 380 20 BSPLoader::get_gamma 0 1 85 0
+267 9 get_gamma 0 4 380 20 BSPLoader::get_gamma 0 1 86 0
 52
 inline PN_stdfloat BSPLoader::get_gamma(void) const;
 
-267 7 set_win 0 4 380 18 BSPLoader::set_win 0 1 86 0
+268 7 set_win 0 4 380 18 BSPLoader::set_win 0 1 87 0
 45
 void BSPLoader::set_win(GraphicsWindow *win);
 
-268 10 set_camera 0 4 380 21 BSPLoader::set_camera 0 1 87 0
+269 10 set_camera 0 4 380 21 BSPLoader::set_camera 0 1 88 0
 51
 void BSPLoader::set_camera(NodePath const &camera);
 
-269 10 set_render 0 4 380 21 BSPLoader::set_render 0 1 88 0
+270 10 set_render 0 4 380 21 BSPLoader::set_render 0 1 89 0
 51
 void BSPLoader::set_render(NodePath const &render);
 
-270 19 set_want_visibility 0 4 380 30 BSPLoader::set_want_visibility 0 1 89 0
+271 19 set_want_visibility 0 4 380 30 BSPLoader::set_want_visibility 0 1 90 0
 47
 void BSPLoader::set_want_visibility(bool flag);
 
-271 18 set_want_lightmaps 0 4 380 29 BSPLoader::set_want_lightmaps 0 1 90 0
+272 18 set_want_lightmaps 0 4 380 29 BSPLoader::set_want_lightmaps 0 1 91 0
 46
 void BSPLoader::set_want_lightmaps(bool flag);
 
-272 16 set_physics_type 0 4 380 27 BSPLoader::set_physics_type 0 1 91 0
+273 16 set_physics_type 0 4 380 27 BSPLoader::set_physics_type 0 1 92 0
 43
 void BSPLoader::set_physics_type(int type);
 
-273 19 set_visualize_leafs 0 4 380 30 BSPLoader::set_visualize_leafs 0 1 92 0
+274 19 set_visualize_leafs 0 4 380 30 BSPLoader::set_visualize_leafs 0 1 93 0
 47
 void BSPLoader::set_visualize_leafs(bool flag);
 
-274 18 set_materials_file 0 4 380 29 BSPLoader::set_materials_file 0 1 93 0
+275 18 set_materials_file 0 4 380 29 BSPLoader::set_materials_file 0 1 94 0
 57
 void BSPLoader::set_materials_file(Filename const &file);
-
-275 25 set_texture_contents_file 0 4 380 36 BSPLoader::set_texture_contents_file 0 1 94 0
-64
-void BSPLoader::set_texture_contents_file(Filename const &file);
 
 276 13 set_wireframe 0 4 380 24 BSPLoader::set_wireframe 0 1 95 0
 41
@@ -787,9 +787,9 @@ UnlitGenericSpec::~UnlitGenericSpec(void);
 11 0 0 7 9 404 0 0 0 0 
 12 0 0 7 10 404 0 0 0 0 
 13 0 0 7 11 404 0 0 0 0 
-14 0 0 7 16 407 202 0 0 1 4 copy 1 405  
-15 0 0 7 16 407 202 0 0 1 4 name 1 403  
-16 0 0 7 17 407 202 0 0 2 4 this 3 407  4 copy 1 405  
+14 0 0 7 16 407 203 0 0 1 4 copy 1 405  
+15 0 0 7 16 407 203 0 0 1 4 name 1 403  
+16 0 0 7 17 407 203 0 0 2 4 this 3 407  4 copy 1 405  
 17 0 0 4 18 408 0 0 0 3 4 this 3 407  3 key 1 403  5 value 1 403  
 18 0 0 6 19 403 0 0 0 2 4 this 3 405  3 key 1 403  
 19 0 0 4 20 408 0 0 0 2 4 this 3 407  11 shader_name 1 403  
@@ -798,75 +798,75 @@ UnlitGenericSpec::~UnlitGenericSpec(void);
 22 0 0 6 23 411 0 0 0 2 4 this 3 405  3 key 1 403  
 23 0 0 6 24 411 0 0 0 1 4 this 3 405  
 24 0 0 6 25 403 0 0 0 1 4 this 3 405  
-25 0 0 7 26 405 0 0 0 1 4 file 1 412  
-26 0 0 7 27 415 0 0 0 0 
-27 0 0 7 31 417 0 0 0 1 3 mat 1 405  
-28 0 0 7 32 417 0 0 0 0 
-29 0 0 7 33 405 0 0 0 1 4 this 3 418  
-30 0 0 6 34 370 0 0 0 0 
-31 0 0 7 37 415 0 0 0 0 
-32 0 0 7 41 420 213 0 0 0 
-33 0 0 7 41 420 213 0 0 1 6 param0 0 421  
-34 0 0 7 40 415 0 0 0 0 
-35 0 0 6 42 370 0 0 0 1 4 this 3 421  
-36 0 0 6 43 423 0 0 0 1 4 this 3 421  
-37 0 0 7 47 424 218 0 0 0 
-38 0 0 7 47 424 218 0 0 1 6 param0 0 425  
-39 0 0 7 46 415 0 0 0 0 
-40 0 0 7 48 429 0 0 0 1 4 this 3 425  
-41 0 0 7 49 432 0 0 0 1 4 this 3 425  
-42 0 0 7 53 433 224 0 0 0 
-43 0 0 7 53 433 224 0 0 1 6 param0 0 434  
-44 0 0 7 52 415 0 0 0 0 
-45 0 0 7 54 437 0 0 0 1 4 this 3 434  
-46 0 0 6 55 411 0 0 0 2 4 this 3 434  3 pos 1 438  
-47 0 0 4 56 408 0 0 0 3 4 this 3 433  4 mins 1 429  4 maxs 1 429  
-48 0 0 7 60 440 230 0 0 0 
-49 0 0 7 60 440 230 0 0 1 6 param0 0 441  
-50 0 0 7 59 415 0 0 0 0 
-51 0 0 6 61 370 0 0 0 1 4 this 3 441  
-52 0 0 7 62 444 0 0 0 1 4 this 3 441  
-53 0 0 4 63 408 0 0 0 3 4 this 3 440  4 mins 1 429  4 maxs 1 429  
-54 0 0 7 69 447 235 0 0 1 6 param0 0 445  
-55 0 0 6 66 370 0 0 0 1 4 this 3 445  
+25 0 0 6 26 403 0 0 0 1 4 this 3 405  
+26 0 0 7 27 405 0 0 0 1 4 file 1 412  
+27 0 0 7 28 415 0 0 0 0 
+28 0 0 7 32 417 0 0 0 1 3 mat 1 405  
+29 0 0 7 33 417 0 0 0 0 
+30 0 0 7 34 405 0 0 0 1 4 this 3 418  
+31 0 0 6 35 370 0 0 0 0 
+32 0 0 7 38 415 0 0 0 0 
+33 0 0 7 42 420 214 0 0 0 
+34 0 0 7 42 420 214 0 0 1 6 param0 0 421  
+35 0 0 7 41 415 0 0 0 0 
+36 0 0 6 43 370 0 0 0 1 4 this 3 421  
+37 0 0 6 44 423 0 0 0 1 4 this 3 421  
+38 0 0 7 48 424 219 0 0 0 
+39 0 0 7 48 424 219 0 0 1 6 param0 0 425  
+40 0 0 7 47 415 0 0 0 0 
+41 0 0 7 49 429 0 0 0 1 4 this 3 425  
+42 0 0 7 50 432 0 0 0 1 4 this 3 425  
+43 0 0 7 54 433 225 0 0 0 
+44 0 0 7 54 433 225 0 0 1 6 param0 0 434  
+45 0 0 7 53 415 0 0 0 0 
+46 0 0 7 55 437 0 0 0 1 4 this 3 434  
+47 0 0 6 56 411 0 0 0 2 4 this 3 434  3 pos 1 438  
+48 0 0 4 57 408 0 0 0 3 4 this 3 433  4 mins 1 429  4 maxs 1 429  
+49 0 0 7 61 440 231 0 0 0 
+50 0 0 7 61 440 231 0 0 1 6 param0 0 441  
+51 0 0 7 60 415 0 0 0 0 
+52 0 0 6 62 370 0 0 0 1 4 this 3 441  
+53 0 0 7 63 444 0 0 0 1 4 this 3 441  
+54 0 0 4 64 408 0 0 0 3 4 this 3 440  4 mins 1 429  4 maxs 1 429  
+55 0 0 7 70 447 236 0 0 1 6 param0 0 445  
 56 0 0 6 67 370 0 0 0 1 4 this 3 445  
 57 0 0 6 68 370 0 0 0 1 4 this 3 445  
-58 0 0 7 77 450 242 0 0 1 6 param0 0 448  
-59 0 0 6 72 370 0 0 0 1 4 this 3 448  
+58 0 0 6 69 370 0 0 0 1 4 this 3 445  
+59 0 0 7 78 450 243 0 0 1 6 param0 0 448  
 60 0 0 6 73 370 0 0 0 1 4 this 3 448  
 61 0 0 6 74 370 0 0 0 1 4 this 3 448  
 62 0 0 6 75 370 0 0 0 1 4 this 3 448  
-63 0 0 6 76 411 0 0 0 1 4 this 3 448  
-64 0 0 6 80 370 0 0 0 1 4 this 3 451  
-65 0 0 4 81 408 0 0 35 // number of textures to consider.. 2 4 this 3 451  6 tcount 1 370  
-66 0 0 4 82 408 0 0 21 // add textures 0 - n 3 4 this 3 451  3 wid 1 370  3 hit 1 370  
-67 0 0 6 83 411 0 0 0 7 4 this 3 451  3 wid 1 370  3 hit 1 370  15 forcePowerOfTwo 1 411  14 onePixelBorder 1 411  7 max_wid 1 370  7 max_hit 1 370  
-68 0 0 4 84 408 0 0 0 3 4 this 3 451  3 wid 1 370  3 hit 1 370  
-69 0 0 7 85 447 235 0 74 // pack the textures, the return code is the amount of wasted/unused area. 3 4 this 3 451  15 forcePowerOfTwo 1 411  14 onePixelBorder 1 411  
-70 0 0 7 86 450 242 0 58 // returns true if the texture has been rotated 90 degrees 2 4 this 3 451  5 index 1 370  
-71 0 0 6 87 451 0 0 0 0 
-72 0 0 4 88 408 0 0 0 1 2 tp 1 451  
-73 0 0 7 92 417 0 0 0 2 13 face_material 1 403  9 face_type 1 370  
-74 0 0 7 93 417 0 0 0 0 
+63 0 0 6 76 370 0 0 0 1 4 this 3 448  
+64 0 0 6 77 411 0 0 0 1 4 this 3 448  
+65 0 0 6 81 370 0 0 0 1 4 this 3 451  
+66 0 0 4 82 408 0 0 35 // number of textures to consider.. 2 4 this 3 451  6 tcount 1 370  
+67 0 0 4 83 408 0 0 21 // add textures 0 - n 3 4 this 3 451  3 wid 1 370  3 hit 1 370  
+68 0 0 6 84 411 0 0 0 7 4 this 3 451  3 wid 1 370  3 hit 1 370  15 forcePowerOfTwo 1 411  14 onePixelBorder 1 411  7 max_wid 1 370  7 max_hit 1 370  
+69 0 0 4 85 408 0 0 0 3 4 this 3 451  3 wid 1 370  3 hit 1 370  
+70 0 0 7 86 447 236 0 74 // pack the textures, the return code is the amount of wasted/unused area. 3 4 this 3 451  15 forcePowerOfTwo 1 411  14 onePixelBorder 1 411  
+71 0 0 7 87 450 243 0 58 // returns true if the texture has been rotated 90 degrees 2 4 this 3 451  5 index 1 370  
+72 0 0 6 88 451 0 0 0 0 
+73 0 0 4 89 408 0 0 0 1 2 tp 1 451  
+74 0 0 7 93 417 0 0 0 2 13 face_material 1 403  9 face_type 1 370  
 75 0 0 7 94 417 0 0 0 0 
-76 0 0 6 95 403 0 0 0 1 4 this 3 452  
-77 0 0 6 96 370 0 0 0 1 4 this 3 452  
-78 0 0 6 97 411 0 0 0 1 4 this 3 452  
-79 0 0 6 98 370 0 0 0 0 
-80 0 0 7 100 415 0 0 0 0 
-81 0 0 7 103 423 321 0 0 0 
-82 0 0 6 104 411 0 0 0 2 4 this 3 423  4 file 1 412  
-83 0 0 4 105 408 0 0 0 1 4 this 3 423  
-84 0 0 4 106 408 0 0 0 3 4 this 3 423  5 gamma 1 454  10 overbright 1 370  
-85 0 0 6 107 454 0 0 0 1 4 this 3 456  
-86 0 0 4 108 408 0 0 0 2 4 this 3 423  3 win 1 458  
-87 0 0 4 109 408 0 0 0 2 4 this 3 423  6 camera 1 460  
-88 0 0 4 110 408 0 0 0 2 4 this 3 423  6 render 1 460  
-89 0 0 4 111 408 0 0 0 2 4 this 3 423  4 flag 1 411  
+76 0 0 7 95 417 0 0 0 0 
+77 0 0 6 96 403 0 0 0 1 4 this 3 452  
+78 0 0 6 97 370 0 0 0 1 4 this 3 452  
+79 0 0 6 98 411 0 0 0 1 4 this 3 452  
+80 0 0 6 99 370 0 0 0 0 
+81 0 0 7 101 415 0 0 0 0 
+82 0 0 7 104 423 321 0 0 0 
+83 0 0 6 105 411 0 0 0 2 4 this 3 423  4 file 1 412  
+84 0 0 4 106 408 0 0 0 1 4 this 3 423  
+85 0 0 4 107 408 0 0 0 3 4 this 3 423  5 gamma 1 454  10 overbright 1 370  
+86 0 0 6 108 454 0 0 0 1 4 this 3 456  
+87 0 0 4 109 408 0 0 0 2 4 this 3 423  3 win 1 458  
+88 0 0 4 110 408 0 0 0 2 4 this 3 423  6 camera 1 460  
+89 0 0 4 111 408 0 0 0 2 4 this 3 423  6 render 1 460  
 90 0 0 4 112 408 0 0 0 2 4 this 3 423  4 flag 1 411  
-91 0 0 4 113 408 0 0 0 2 4 this 3 423  4 type 1 370  
-92 0 0 4 114 408 0 0 0 2 4 this 3 423  4 flag 1 411  
-93 0 0 4 115 408 0 0 0 2 4 this 3 423  4 file 1 412  
+91 0 0 4 113 408 0 0 0 2 4 this 3 423  4 flag 1 411  
+92 0 0 4 114 408 0 0 0 2 4 this 3 423  4 type 1 370  
+93 0 0 4 115 408 0 0 0 2 4 this 3 423  4 flag 1 411  
 94 0 0 4 116 408 0 0 0 2 4 this 3 423  4 file 1 412  
 95 0 0 4 117 408 0 0 0 2 4 this 3 423  4 flag 1 411  
 96 0 0 6 118 411 0 0 0 1 4 this 3 456  
@@ -902,7 +902,7 @@ UnlitGenericSpec::~UnlitGenericSpec(void);
 126 0 0 7 148 480 0 0 0 4 4 this 3 456  6 entnum 1 370  3 key 1 403  5 scale 1 411  
 127 0 0 7 149 444 0 0 0 2 4 this 3 456  6 entnum 1 370  
 128 0 0 7 150 444 0 0 0 2 4 this 3 456  8 modelnum 1 370  
-129 0 0 7 151 420 213 0 0 2 4 this 3 456  6 entnum 1 479  
+129 0 0 7 151 420 214 0 0 2 4 this 3 456  6 entnum 1 479  
 130 0 0 6 152 370 0 0 0 2 4 this 3 423  3 pos 1 438  
 131 0 0 6 152 370 0 0 0 2 4 this 3 423  2 np 1 460  
 132 0 0 6 153 370 0 0 0 2 4 this 3 423  3 pos 1 438  
@@ -967,7 +967,7 @@ UnlitGenericSpec::~UnlitGenericSpec(void);
  * will know that the texture you supplied is to be treated as a normal map.
  */
 
-366 11 BSPMaterial 0 141313 11 BSPMaterial 11 BSPMaterial 0 0 0 1 190 202 0 11 191 192 193 194 195 196 197 198 199 200 201 0 0 1 0 367 0 0 0 0 0
+366 11 BSPMaterial 0 141313 11 BSPMaterial 11 BSPMaterial 0 0 0 1 190 203 0 12 191 192 193 194 195 196 197 198 199 200 201 202 0 0 1 0 367 0 0 0 0 0
 
 367 19 TypedReferenceCount 0 2048 19 TypedReferenceCount 19 TypedReferenceCount 0 0 0 0 0 0 0 0 0 0 0 0 410
 /**
@@ -980,7 +980,7 @@ UnlitGenericSpec::~UnlitGenericSpec(void);
  * See also TypedObject for detailed instructions.
  */
 
-368 17 BSPMaterialAttrib 0 141313 17 BSPMaterialAttrib 17 BSPMaterialAttrib 0 0 0 0 208 1 522 5 203 204 205 206 207 0 0 1 0 369 0 0 0 0 0
+368 17 BSPMaterialAttrib 0 141313 17 BSPMaterialAttrib 17 BSPMaterialAttrib 0 0 0 0 209 1 522 5 204 205 206 207 208 0 0 1 0 369 0 0 0 0 0
 
 369 12 RenderAttrib 0 2048 12 RenderAttrib 12 RenderAttrib 0 0 0 0 0 0 0 0 0 0 0 0 1074
 /**
@@ -1005,25 +1005,25 @@ UnlitGenericSpec::~UnlitGenericSpec(void);
 
 370 3 int 0 8194 3 int 3 int 0 1 0 0 0 0 0 0 0 0 0 0 0
 
-371 11 CBaseEntity 0 141313 11 CBaseEntity 11 CBaseEntity 0 0 0 1 210 213 0 3 209 211 212 0 0 1 0 367 0 0 0 0 0
+371 11 CBaseEntity 0 141313 11 CBaseEntity 11 CBaseEntity 0 0 0 1 211 214 0 3 210 212 213 0 0 1 0 367 0 0 0 0 0
 
-372 12 CPointEntity 0 141313 12 CPointEntity 12 CPointEntity 0 0 0 1 215 218 0 3 214 216 217 0 0 1 0 371 0 0 0 0 0
+372 12 CPointEntity 0 141313 12 CPointEntity 12 CPointEntity 0 0 0 1 216 219 0 3 215 217 218 0 0 1 0 371 0 0 0 0 0
 
-373 13 CBoundsEntity 0 141313 13 CBoundsEntity 13 CBoundsEntity 0 0 0 1 220 224 0 4 219 221 222 223 0 0 1 0 371 0 0 0 0 219
+373 13 CBoundsEntity 0 141313 13 CBoundsEntity 13 CBoundsEntity 0 0 0 1 221 225 0 4 220 222 223 224 0 0 1 0 371 0 0 0 0 219
 /**
  * A flavor of a brush entity (but doesn't inherit from CBrushEntity) which uses the brush only to describe
  * the bounds. Useful for triggers or water, because we don't actually care about the brush's geometry.
  */
 
-374 12 CBrushEntity 0 141313 12 CBrushEntity 12 CBrushEntity 0 0 0 1 226 230 0 4 225 227 228 229 0 0 1 0 371 0 0 0 0 0
+374 12 CBrushEntity 0 141313 12 CBrushEntity 12 CBrushEntity 0 0 0 1 227 231 0 4 226 228 229 230 0 0 1 0 371 0 0 0 0 0
 
-375 10 PackResult 0 141313 10 PackResult 10 PackResult 0 0 0 1 234 235 0 3 231 232 233 0 0 0 0 0 0
+375 10 PackResult 0 141313 10 PackResult 10 PackResult 0 0 0 1 235 236 0 3 232 233 234 0 0 0 0 0 0
 
-376 15 TextureLocation 0 141313 15 TextureLocation 15 TextureLocation 0 0 0 1 241 242 0 5 236 237 238 239 240 0 0 0 0 0 0
+376 15 TextureLocation 0 141313 15 TextureLocation 15 TextureLocation 0 0 0 1 242 243 0 5 237 238 239 240 241 0 0 0 0 0 0
 
-377 13 TexturePacker 0 141313 13 TexturePacker 13 TexturePacker 0 0 0 0 252 0 9 243 244 245 246 247 248 249 250 251 0 0 0 0 0 0
+377 13 TexturePacker 0 141313 13 TexturePacker 13 TexturePacker 0 0 0 0 253 0 9 244 245 246 247 248 249 250 251 252 0 0 0 0 0 0
 
-378 13 BSPFaceAttrib 0 141313 13 BSPFaceAttrib 13 BSPFaceAttrib 0 0 0 0 261 1 523 8 253 254 255 256 257 258 259 260 0 0 1 0 369 0 0 0 1 379 193
+378 13 BSPFaceAttrib 0 141313 13 BSPFaceAttrib 13 BSPFaceAttrib 0 0 0 0 262 1 523 8 254 255 256 257 258 259 260 261 0 0 1 0 369 0 0 0 1 379 193
 /**
  * An attribute applied to each face Geom from a BSP file.
  * All it does right now is indicate the material of the face
@@ -1034,7 +1034,7 @@ UnlitGenericSpec::~UnlitGenericSpec(void);
 0 14 FACETYPE_FLOOR 29 BSPFaceAttrib::FACETYPE_FLOOR 0
 1 0 0
 
-380 9 BSPLoader 0 141313 9 BSPLoader 9 BSPLoader 0 0 0 1 262 321 0 58 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 0 0 0 0 1 381 58
+380 9 BSPLoader 0 141313 9 BSPLoader 9 BSPLoader 0 0 0 1 263 321 0 57 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 0 0 0 0 1 381 58
 /**
  * Loads and handles the operations of PBSP files.
  */
@@ -1515,8 +1515,8 @@ UnlitGenericSpec::~UnlitGenericSpec(void);
 
 0
 2
-522 10 class_slot 0 2 370 206 0 0 0 0 0 0 0 29 BSPMaterialAttrib::class_slot 0
+522 10 class_slot 0 2 370 207 0 0 0 0 0 0 0 29 BSPMaterialAttrib::class_slot 0
 
-523 10 class_slot 0 2 370 259 0 0 0 0 0 0 0 25 BSPFaceAttrib::class_slot 0
+523 10 class_slot 0 2 370 260 0 0 0 0 0 0 0 25 BSPFaceAttrib::class_slot 0
 
 0

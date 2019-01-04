@@ -21,6 +21,8 @@ public:
         PNMImage cubemap_images[6];
         int leaf;
         int size;
+
+        bool has_full_cubemap;
 };
 
 #endif // BSP_CUBEMAPS_H

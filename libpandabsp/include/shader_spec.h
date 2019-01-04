@@ -169,6 +169,7 @@ public:
         virtual PT( ShaderConfig ) make_new_config() = 0;
 
         static void add_fog( const RenderState *rs, ShaderPermutations &perms );
+        static void add_color( const RenderState *rs, ShaderPermutations &perms );
 
         typedef SimpleHashMap<const BSPMaterial *, PT( ShaderConfig ), pointer_hash> ConfigCache;
         ConfigCache _config_cache;
