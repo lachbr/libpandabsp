@@ -290,6 +290,8 @@ if (MSVC)
     add_definitions("/arch:SSE2")
   endif()
 
+  set(OPTIMIZE "3")
+
   # Different optimization settings
   if (OPTIMIZE STREQUAL "1")
     add_definitions("/MDd /Zi /RTCs /GS /DRN_DEBUG")
@@ -369,6 +371,7 @@ endif()
 # Define the module name
 add_definitions("/DPB_MODULE=${PROJECT_NAME}")
 add_definitions("/DPB_CFG_MODULE=${PROJECT_NAME}")
+add_definitions(-DBUILDING_PANDARN)
 
 # Collect sources for compiling
 #file(GLOB_RECURSE SOURCES source/*.cpp source/*.cxx source/*.I source/*.hpp source/*.h source/*.cc source/*.c)
