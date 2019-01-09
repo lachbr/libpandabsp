@@ -64,6 +64,7 @@ ConfigVariableBool want_pssm( "want-pssm", false );
 ConfigVariableDouble depth_bias( "pssm-shadow-depth-bias", 0.001 );
 ConfigVariableDouble normal_offset_scale( "pssm-normal-offset-scale", 1.0 );
 ConfigVariableDouble softness_factor( "pssm-softness-factor", 1.0 );
+ConfigVariableBool cache_shaders( "pssm-cache-shaders", true );
 
 TypeHandle PSSMShaderGenerator::_type_handle;
 
@@ -202,24 +203,30 @@ CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib 
                 if ( ada->get_data()->is_exact_type( nodeshaderinput_t::get_class_type() ) )
                 {
                         nodeshaderinput_t *bsp_node_input = DCAST( nodeshaderinput_t, ada->get_data() );
-                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightCount", bsp_node_input->light_count ) );
-                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightData", bsp_node_input->light_data ) );
-                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightData2", bsp_node_input->light_data2 ) );
-                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightTypes", bsp_node_input->light_type ) );
-                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "ambientCube", bsp_node_input->ambient_cube ) );
-                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "envmapSampler", bsp_node_input->cubemap_tex ) );
+                        shattr = DCAST( ShaderAttrib, shattr )->set_shader_inputs(
+                                {
+                                        ShaderInput( "lightCount", bsp_node_input->light_count ),
+                                        ShaderInput( "lightData", bsp_node_input->light_data ),
+                                        ShaderInput( "lightData2", bsp_node_input->light_data2 ),
+                                        ShaderInput( "lightTypes", bsp_node_input->light_type ),
+                                        ShaderInput( "ambientCube", bsp_node_input->ambient_cube ),
+                                        ShaderInput( "envmapSampler", new Texture )
+                                } );
                         inputs_supplied = true;
                 }
         }
         if ( !inputs_supplied )
         {
                 // Fill in default empty values so we don't crash.
-                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightCount", PTA_int::empty_array( 1 ) ) );
-                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightData", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ) );
-                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightData2", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ) );
-                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "lightTypes", PTA_int::empty_array( MAX_TOTAL_LIGHTS ) ) );
-                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ) );
-                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "envmapSampler", get_identity_cubemap() ) );
+                shattr = DCAST( ShaderAttrib, shattr )->set_shader_inputs(
+                        {
+                                ShaderInput( "lightCount", PTA_int::empty_array( 1 ) ),
+                                ShaderInput( "lightData", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ),
+                                ShaderInput( "lightData2", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ),
+                                ShaderInput( "lightTypes", PTA_int::empty_array( MAX_TOTAL_LIGHTS ) ),
+                                ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ),
+                                ShaderInput( "envmapSampler", get_identity_cubemap() )
+                        } );
         }
 
         return shattr;
@@ -274,17 +281,19 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
 
                 spec = _shaders[shader_name];
                 permutations = spec->setup_permutations( mat, rs, anim, this );
-#if 1
-                auto itr = spec->_generated_shaders.find( permutations );
-                if ( itr != spec->_generated_shaders.end() )
-                {
-                        CPT( RenderAttrib ) shattr = itr->second;
-                        shattr = apply_node_inputs( rs, shattr );
 
-                        lookup_collector.stop();
-                        return DCAST( ShaderAttrib, shattr );
+                if ( cache_shaders )
+                {
+                        auto itr = spec->_generated_shaders.find( permutations );
+                        if ( itr != spec->_generated_shaders.end() )
+                        {
+                                CPT( ShaderAttrib ) shattr = itr->second;
+                                shattr = DCAST( ShaderAttrib, apply_node_inputs( rs, shattr ) );
+
+                                return shattr;
+                        }
                 }
-#endif
+                
         }
         
         synthesize_collector.start();
@@ -323,13 +332,15 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
 
         CPT( RenderAttrib ) shattr = ShaderAttrib::make( shader );
 
-        shattr = apply_node_inputs( rs, shattr );
-
         // Add any inputs from the permutations.
+        pvector<ShaderInput> perm_inputs;
+        perm_inputs.reserve( permutations.inputs.size() );
         for ( auto itr = permutations.inputs.begin(); itr != permutations.inputs.end(); itr++ )
         {
-                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( itr->second.input );
+                perm_inputs.push_back( itr->second.input );
         }
+        shattr = DCAST( ShaderAttrib, shattr )->set_shader_inputs( perm_inputs );
+
         // Also any flags.
         for ( size_t i = 0; i < permutations.flags.size(); i++ )
         {
@@ -338,7 +349,11 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         
         CPT( ShaderAttrib ) attr = DCAST( ShaderAttrib, shattr );
 
-        spec->_generated_shaders[permutations] = attr;
+        if ( cache_shaders )
+                spec->_generated_shaders[permutations] = attr;
+
+        shattr = apply_node_inputs( rs, shattr );
+        attr = DCAST( ShaderAttrib, shattr );
 
         synthesize_collector.stop();
 

@@ -262,7 +262,10 @@ void AmbientProbeManager::process_ambient_probes()
                 }
         }
 
-        _light_kdtree->build( light_points );
+        if ( light_points.size() )
+        {
+                _light_kdtree->build( light_points );
+        }
 
         // Build light PVS
         for ( size_t lightnum = 0; lightnum < _all_lights.size(); lightnum++ )
@@ -321,7 +324,11 @@ void AmbientProbeManager::process_ambient_probes()
                         _all_probes.push_back( probe );
                 }
         }
-        _probe_kdtree->build( probe_points );
+
+        if ( probe_points.size() )
+        {
+                _probe_kdtree->build( probe_points );
+        }
 }
 
 void AmbientProbeManager::load_cubemaps()
@@ -380,7 +387,10 @@ void AmbientProbeManager::load_cubemaps()
                 _cubemaps.push_back( cm );
         }
 
-        _envmap_kdtree->build( envmap_points );
+        if ( envmap_points.size() )
+        {
+                _envmap_kdtree->build( envmap_points );
+        }      
 }
 
 INLINE bool AmbientProbeManager::is_sky_visible( const LPoint3 &point )
@@ -733,7 +743,6 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                 }
                 fadelights_collector.stop();
         }
-        
 
         input->light_count[0] = lights_updated;
 

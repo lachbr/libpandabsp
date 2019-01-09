@@ -314,7 +314,8 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                         if ( !disabled )
                         {
                                 // Update the node's ambient probe stuff:
-                                const RenderState *input_state = _loader->_amb_probe_mgr.update_node( node, data.get_net_transform( this ) );
+                                const RenderState *input_state = _loader->_amb_probe_mgr.update_node(
+                                        node, data.get_net_transform( this ) );
                                 if ( input_state )
                                 {
                                         data._state = data._state->compose( input_state );
