@@ -304,32 +304,32 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_Namable (imports[2].type)
   {"TypedObject", nullptr},
 #define Dtool_Ptr_TypedObject (imports[3].type)
-  {"ReferenceCount", nullptr},
-#define Dtool_Ptr_ReferenceCount (imports[4].type)
   {"TypedReferenceCount", nullptr},
-#define Dtool_Ptr_TypedReferenceCount (imports[5].type)
+#define Dtool_Ptr_TypedReferenceCount (imports[4].type)
+  {"ReferenceCount", nullptr},
+#define Dtool_Ptr_ReferenceCount (imports[5].type)
   {"TypedWritableReferenceCount", nullptr},
 #define Dtool_Ptr_TypedWritableReferenceCount (imports[6].type)
   {"TypedWritable", nullptr},
 #define Dtool_Ptr_TypedWritable (imports[7].type)
-  {"LPoint3f", nullptr},
-#define Dtool_Ptr_LPoint3f (imports[8].type)
+  {"LVecBase4f", nullptr},
+#define Dtool_Ptr_LVecBase4f (imports[8].type)
   {"LVector3f", nullptr},
 #define Dtool_Ptr_LVector3f (imports[9].type)
-  {"LVecBase4f", nullptr},
-#define Dtool_Ptr_LVecBase4f (imports[10].type)
+  {"LPoint3f", nullptr},
+#define Dtool_Ptr_LPoint3f (imports[10].type)
   {"BitMask< uint32_t, 32 >", nullptr},
 #define Dtool_Ptr_BitMask_uint32_t_32 (imports[11].type)
   {"GeometricBoundingVolume", nullptr},
 #define Dtool_Ptr_GeometricBoundingVolume (imports[12].type)
   {"Texture", nullptr},
 #define Dtool_Ptr_Texture (imports[13].type)
-  {"RenderAttrib", nullptr},
-#define Dtool_Ptr_RenderAttrib (imports[14].type)
   {"ShaderInput", nullptr},
-#define Dtool_Ptr_ShaderInput (imports[15].type)
+#define Dtool_Ptr_ShaderInput (imports[14].type)
   {"TextureStage", nullptr},
-#define Dtool_Ptr_TextureStage (imports[16].type)
+#define Dtool_Ptr_TextureStage (imports[15].type)
+  {"RenderAttrib", nullptr},
+#define Dtool_Ptr_RenderAttrib (imports[16].type)
   {"TransformState", nullptr},
 #define Dtool_Ptr_TransformState (imports[17].type)
   {"PandaNode", nullptr},
@@ -388,17 +388,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
 extern struct Dtool_PyTypedObject Dtool_TypedObject;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedObject = &Dtool_TypedObject;
 #endif
-// ReferenceCount
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
-#endif
 // TypedReferenceCount
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
+#endif
+// ReferenceCount
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
 #endif
 // TypedWritableReferenceCount
 #ifndef LINK_ALL_STATIC
@@ -412,17 +412,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount =
 extern struct Dtool_PyTypedObject Dtool_TypedWritable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedWritable;
 #endif
-// LPoint3f
+// LVecBase4f
 #ifndef LINK_ALL_STATIC
-inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
-  nassertr(Dtool_Ptr_LPoint3f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LPoint3f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LPoint3f *(*)(PyObject *, LPoint3f &))Dtool_Ptr_LPoint3f->_Dtool_Coerce)(args, coerced);
+inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
+  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
 }
 #else
-extern struct Dtool_PyTypedObject Dtool_LPoint3f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
-extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
+extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
+extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
 #endif
 // LVector3f
 #ifndef LINK_ALL_STATIC
@@ -436,17 +436,17 @@ extern struct Dtool_PyTypedObject Dtool_LVector3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
 extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
 #endif
-// LVecBase4f
+// LPoint3f
 #ifndef LINK_ALL_STATIC
-inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
-  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
+inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
+  nassertr(Dtool_Ptr_LPoint3f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LPoint3f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LPoint3f *(*)(PyObject *, LPoint3f &))Dtool_Ptr_LPoint3f->_Dtool_Coerce)(args, coerced);
 }
 #else
-extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
-extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
+extern struct Dtool_PyTypedObject Dtool_LPoint3f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
+extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
 #endif
 // BitMask< uint32_t, 32 >
 #ifndef LINK_ALL_STATIC
@@ -472,12 +472,6 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dt
 extern struct Dtool_PyTypedObject Dtool_Texture;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Texture = &Dtool_Texture;
 #endif
-// RenderAttrib
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
-#endif
 // ShaderInput
 #ifndef LINK_ALL_STATIC
 #else
@@ -489,6 +483,12 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderInput = &Dtool_ShaderIn
 #else
 extern struct Dtool_PyTypedObject Dtool_TextureStage;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TextureStage = &Dtool_TextureStage;
+#endif
+// RenderAttrib
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
 #endif
 // TransformState
 #ifndef LINK_ALL_STATIC
@@ -5237,6 +5237,19 @@ static PyObject *Dtool_BSPLoader_find_leaf_152(PyObject *self, PyObject *arg) {
     return nullptr;
   }
   {
+    // -2 inline int BSPLoader::find_leaf(LPoint3 const &pos)
+    LPoint3 const *arg_this = nullptr;
+    DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_LPoint3f);
+    if (arg_this != nullptr) {
+      int return_value = (*local_this).find_leaf(*arg_this);
+      if (Dtool_CheckErrorOccurred()) {
+        return nullptr;
+      }
+      return Dtool_WrapValue(return_value);
+    }
+  }
+
+  {
     // -2 inline int BSPLoader::find_leaf(NodePath const &np)
     NodePath const *arg_this = nullptr;
     DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_NodePath);
@@ -5249,7 +5262,6 @@ static PyObject *Dtool_BSPLoader_find_leaf_152(PyObject *self, PyObject *arg) {
     }
   }
 
-  // No coercion possible: inline int BSPLoader::find_leaf(NodePath const &np)
   {
     // -2 inline int BSPLoader::find_leaf(LPoint3 const &pos)
     LPoint3f arg_local;
@@ -5263,8 +5275,10 @@ static PyObject *Dtool_BSPLoader_find_leaf_152(PyObject *self, PyObject *arg) {
     }
   }
 
+  // No coercion possible: inline int BSPLoader::find_leaf(NodePath const &np)
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
+      "find_leaf(const BSPLoader self, const LPoint3f pos)\n"
       "find_leaf(const BSPLoader self, const NodePath np)\n");
   }
   return nullptr;
@@ -5273,6 +5287,7 @@ static PyObject *Dtool_BSPLoader_find_leaf_152(PyObject *self, PyObject *arg) {
 #ifndef NDEBUG
 static const char *Dtool_BSPLoader_find_leaf_152_comment =
   "C++ Interface:\n"
+  "find_leaf(const BSPLoader self, const LPoint3f pos)\n"
   "find_leaf(const BSPLoader self, const NodePath np)\n";
 #else
 static const char *Dtool_BSPLoader_find_leaf_152_comment = nullptr;
@@ -7451,9 +7466,41 @@ static const char *Dtool_PSSMShaderGenerator_get_pssm_array_texture_211_comment 
 
 /**
  * Python function wrapper for:
+ * static Texture *PSSMShaderGenerator::get_identity_cubemap(void)
+ */
+static PyObject *Dtool_PSSMShaderGenerator_get_identity_cubemap_213(PyObject *, PyObject *) {
+  // 1-static Texture *PSSMShaderGenerator::get_identity_cubemap(void)
+  Texture *return_value = PSSMShaderGenerator::get_identity_cubemap();
+  if (return_value != nullptr) {
+    return_value->ref();
+  }
+  if (Dtool_CheckErrorOccurred()) {
+    if (return_value != nullptr) {
+      unref_delete(return_value);
+    }
+    return nullptr;
+  }
+  if (return_value == nullptr) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  } else {
+    return DTool_CreatePyInstanceTyped((void *)return_value, *Dtool_Ptr_Texture, true, false, return_value->as_typed_object()->get_type_index());
+  }
+}
+
+#ifndef NDEBUG
+static const char *Dtool_PSSMShaderGenerator_get_identity_cubemap_213_comment =
+  "C++ Interface:\n"
+  "get_identity_cubemap()\n";
+#else
+static const char *Dtool_PSSMShaderGenerator_get_identity_cubemap_213_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
  * static TypeHandle PSSMShaderGenerator::get_class_type(void)
  */
-static PyObject *Dtool_PSSMShaderGenerator_get_class_type_213(PyObject *, PyObject *) {
+static PyObject *Dtool_PSSMShaderGenerator_get_class_type_214(PyObject *, PyObject *) {
   // 1-static TypeHandle PSSMShaderGenerator::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(PSSMShaderGenerator::get_class_type());
   if (return_value == nullptr) {
@@ -7467,11 +7514,11 @@ static PyObject *Dtool_PSSMShaderGenerator_get_class_type_213(PyObject *, PyObje
 }
 
 #ifndef NDEBUG
-static const char *Dtool_PSSMShaderGenerator_get_class_type_213_comment =
+static const char *Dtool_PSSMShaderGenerator_get_class_type_214_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_PSSMShaderGenerator_get_class_type_213_comment = nullptr;
+static const char *Dtool_PSSMShaderGenerator_get_class_type_214_comment = nullptr;
 #endif
 
 /**
@@ -11784,8 +11831,10 @@ static PyMethodDef Dtool_Methods_PSSMShaderGenerator[] = {
   {"hasShadowSunlight", &Dtool_PSSMShaderGenerator_has_shadow_sunlight_210, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_has_shadow_sunlight_210_comment},
   {"get_pssm_array_texture", &Dtool_PSSMShaderGenerator_get_pssm_array_texture_211, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_get_pssm_array_texture_211_comment},
   {"getPssmArrayTexture", &Dtool_PSSMShaderGenerator_get_pssm_array_texture_211, METH_NOARGS, (const char *)Dtool_PSSMShaderGenerator_get_pssm_array_texture_211_comment},
-  {"get_class_type", &Dtool_PSSMShaderGenerator_get_class_type_213, METH_NOARGS | METH_STATIC, (const char *)Dtool_PSSMShaderGenerator_get_class_type_213_comment},
-  {"getClassType", &Dtool_PSSMShaderGenerator_get_class_type_213, METH_NOARGS | METH_STATIC, (const char *)Dtool_PSSMShaderGenerator_get_class_type_213_comment},
+  {"get_identity_cubemap", &Dtool_PSSMShaderGenerator_get_identity_cubemap_213, METH_NOARGS | METH_STATIC, (const char *)Dtool_PSSMShaderGenerator_get_identity_cubemap_213_comment},
+  {"getIdentityCubemap", &Dtool_PSSMShaderGenerator_get_identity_cubemap_213, METH_NOARGS | METH_STATIC, (const char *)Dtool_PSSMShaderGenerator_get_identity_cubemap_213_comment},
+  {"get_class_type", &Dtool_PSSMShaderGenerator_get_class_type_214, METH_NOARGS | METH_STATIC, (const char *)Dtool_PSSMShaderGenerator_get_class_type_214_comment},
+  {"getClassType", &Dtool_PSSMShaderGenerator_get_class_type_214, METH_NOARGS | METH_STATIC, (const char *)Dtool_PSSMShaderGenerator_get_class_type_214_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -12735,7 +12784,7 @@ extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, nullp
 extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, imports};
 #endif
 static InterrogateModuleDef _in_module_def = {
-  1547010505,  /* file_identifier */
+  1547069653,  /* file_identifier */
   "bsp",  /* library_name */
   "t5GT",  /* library_hash_name */
   "bsp",  /* module_name */
@@ -12745,7 +12794,7 @@ static InterrogateModuleDef _in_module_def = {
   nullptr,  /* fptrs */
   0,  /* num_fptrs */
   1,  /* first_index */
-  524  /* next_index */
+  526  /* next_index */
 };
 
 Configure(_in_configure_bsp);

@@ -60,6 +60,8 @@ PUBLISHED:
                 return _pssm_rig;
         }
 
+        static Texture *get_identity_cubemap();
+
 private:
         struct SplitShadowMap
         {
@@ -85,6 +87,8 @@ private:
         LVector3 _sun_vector;
         NodePath _camera;
         NodePath _render;
+
+        static PT( Texture ) _identity_cubemap;
 
 public:
         static TypeHandle get_class_type()

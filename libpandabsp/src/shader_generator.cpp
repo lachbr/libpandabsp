@@ -46,18 +46,6 @@ static PStatCollector findmatshader_collector( "*:Munge:PSSMShaderGen:FindMatSha
 static PStatCollector lookup_collector( "*:Munge:PSSMShaderGen:Lookup" );
 static PStatCollector synthesize_collector( "*:Munge:PSSMShaderGen:Synthesize" );
 
-static PT( Texture ) identity_cubemap = nullptr;
-static Texture *get_identity_cubemap()
-{
-        if ( !identity_cubemap )
-        {
-                identity_cubemap = new Texture( "cubemap_identity" );
-                identity_cubemap->setup_cube_map();
-        }
-
-        return identity_cubemap;
-}
-
 ConfigVariableInt pssm_splits( "pssm-splits", 3 );
 ConfigVariableInt pssm_size( "pssm-size", 1024 );
 ConfigVariableBool want_pssm( "want-pssm", false );
@@ -67,6 +55,7 @@ ConfigVariableDouble softness_factor( "pssm-softness-factor", 1.0 );
 ConfigVariableBool cache_shaders( "pssm-cache-shaders", true );
 
 TypeHandle PSSMShaderGenerator::_type_handle;
+PT( Texture ) PSSMShaderGenerator::_identity_cubemap = nullptr;
 
 NotifyCategoryDef( bspShaderGenerator, "" );
 
@@ -210,7 +199,7 @@ CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib 
                                         ShaderInput( "lightData2", bsp_node_input->light_data2 ),
                                         ShaderInput( "lightTypes", bsp_node_input->light_type ),
                                         ShaderInput( "ambientCube", bsp_node_input->ambient_cube ),
-                                        ShaderInput( "envmapSampler", new Texture )
+                                        ShaderInput( "envmapSampler", bsp_node_input->cubemap_tex )
                                 } );
                         inputs_supplied = true;
                 }
@@ -225,7 +214,7 @@ CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib 
                                 ShaderInput( "lightData2", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ),
                                 ShaderInput( "lightTypes", PTA_int::empty_array( MAX_TOTAL_LIGHTS ) ),
                                 ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ),
-                                ShaderInput( "envmapSampler", get_identity_cubemap() )
+                                ShaderInput( "envmapSampler", PSSMShaderGenerator::get_identity_cubemap() )
                         } );
         }
 
@@ -358,4 +347,14 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         synthesize_collector.stop();
 
         return attr;
+}
+
+Texture *PSSMShaderGenerator::get_identity_cubemap()
+{
+        if ( !_identity_cubemap )
+        {
+                _identity_cubemap = TexturePool::load_cube_map( "phase_14/maps/defaultcubemap/defaultcubemap_#.jpg" );
+        }
+
+        return _identity_cubemap;
 }
