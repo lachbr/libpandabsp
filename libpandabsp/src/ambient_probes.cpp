@@ -171,7 +171,7 @@ void AmbientProbeManager::process_ambient_probes()
                 if ( !strncmp( classname, "light", 5 ) )
                 {
                         PT( light_t ) light = new light_t;
-                        light->id = entnum;
+                        light->id = (int)_all_lights.size();
 
                         vec3_t pos;
                         GetVectorForKey( ent, "origin", pos );
@@ -447,6 +447,26 @@ INLINE bool AmbientProbeManager::is_light_visible( const LPoint3 &point, const l
         return !trace.has_hit();
 }
 
+INLINE LMatrix4 pack_lightdata( const light_t *light )
+{
+        return LMatrix4( light->eye_pos, light->eye_direction, light->falloff, light->color );
+}
+
+INLINE LMatrix4 pack_lightdata2( const light_t *light )
+{
+        return LMatrix4( light->falloff2, light->falloff3, 0, 0 );
+}
+
+INLINE void apply_lightdatas( int n, const light_t *light, nodeshaderinput_t *input, const LMatrix4 &data, bool active )
+{
+        input->light_ids[n] = light->id;
+        input->light_type[n] = light->type;
+        input->light_data[n] = data;
+        input->light_data2[n] = pack_lightdata2( light );
+        if ( active )
+                input->active_lights++;
+}
+
 const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                                                      const TransformState *curr_trans )
 {
@@ -636,7 +656,6 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
 
         int old_lightcount[1];
         int old_lightids[MAX_TOTAL_LIGHTS];
-        int old_lighttype[MAX_TOTAL_LIGHTS];
         LMatrix4 old_lightdata[MAX_TOTAL_LIGHTS];
         int old_activelights;
 
@@ -649,7 +668,6 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                 
                 memcpy( old_lightcount, input->light_count.p(), sizeof( int ) );
                 memcpy( old_lightids, input->light_ids.p(), sizeof( int ) * input->light_ids.size() );
-                memcpy( old_lighttype, input->light_type.p(), sizeof( int ) * input->light_type.size() );
                 memcpy( old_lightdata, input->light_data.p(), sizeof( LMatrix4 ) * input->light_data.size() );
                 old_activelights = input->active_lights;
                 
@@ -657,7 +675,6 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
 
                 copystate_collector.stop();
         }
-        
 
         input->active_lights = 0;
 
@@ -685,18 +702,6 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                         continue;
                 }
 
-                input->light_type[lights_updated] = light->type;
-
-                // Pack the light data into a 4x4 matrix.
-                LMatrix4f data;
-                data.set_row( 0, light->eye_pos );
-                data.set_row( 1, light->eye_direction );
-                data.set_row( 2, light->falloff );
-                data.set_row( 3, light->color );
-                LMatrix4 data2;
-                data2.set_row( 0, light->falloff2 );
-                data2.set_row( 1, light->falloff3 );
-
                 LVector3 interp_light( 0 );
 
                 if ( average_lighting )
@@ -721,6 +726,9 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                         }
                 }
 
+                // Pack the light data into a 4x4 matrix.
+                LMatrix4 data = pack_lightdata( light );
+
                 LVector3 delta( 0 );
                 if ( average_lighting )
                 {
@@ -729,10 +737,7 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                 }
                 data.set_row( 3, light->color - delta );
 
-                input->light_data[lights_updated] = data;
-                input->light_data2[lights_updated] = data2;
-                input->light_ids[lights_updated] = light->id;
-                input->active_lights++;
+                apply_lightdatas( lights_updated, light, input, data, true );
 
                 lights_updated++;
         }
@@ -748,7 +753,9 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                         {
                                 continue;
                         }
-                        LVector3 color = LMatrix4( old_lightdata[i] ).get_row3( 3 );
+
+                        LMatrix4 data = old_lightdata[i];
+                        LVector3 color = data.get_row3( 3 );
                         if ( color.length_squared() < 1.0 )
                         {
                                 continue;
@@ -759,14 +766,12 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                                 break;
                         }
 
-                        LVector3 new_color = color * atten_factor;
+                        light_t *oldlight = _all_lights[old_lightids[i]];
 
-                        input->light_type[lights_updated] = old_lighttype[i];
-                        // Pack the light data into a 4x4 matrix.
-                        LMatrix4f data = old_lightdata[i];
+                        LVector3 new_color = color * atten_factor;
                         data.set_row( 3, new_color );
-                        input->light_data[lights_updated] = data;
-                        input->light_ids[lights_updated] = old_lightids[i];
+
+                        apply_lightdatas( lights_updated, oldlight, input, data, false );
 
                         lights_updated++;
                 }
