@@ -192,17 +192,20 @@ public:
 
         void cleanup();
 
-        INLINE KDTree *get_light_kdtree() const
-        {
-                return _light_kdtree;
-        }
+        //INLINE KDTree *get_light_kdtree() const
+        //{
+        //        return _light_kdtree;
+        //}
         INLINE KDTree *get_envmap_kdtree() const
         {
                 return _envmap_kdtree;
         }
-        INLINE KDTree *get_probe_kdtree() const
+        INLINE KDTree *get_probe_kdtree( int leaf ) const
         {
-                return _probe_kdtree;
+                int itr = _probe_kdtrees.find( leaf );
+                if ( itr == -1 )
+                        return nullptr;
+                return _probe_kdtrees.get_data( itr );
         }
         INLINE const pvector<PT( cubemap_t )> &get_cubemaps()
         {
@@ -224,14 +227,14 @@ private:
         SimpleHashMap<PandaNode *, CPT( TransformState ), pointer_hash> _pos_cache;
         SimpleHashMap<PandaNode *, PT( nodeshaderinput_t ), pointer_hash> _node_data;
         SimpleHashMap<int, pvector<PT( ambientprobe_t )>, int_hash> _probes;
+        SimpleHashMap<int, PT( KDTree ), int_hash> _probe_kdtrees;
         pvector<ambientprobe_t *> _all_probes;
         pvector<PT( light_t )> _all_lights;
         pvector<PT( cubemap_t )> _cubemaps;
         pvector<pvector<light_t *>> _light_pvs;
         light_t *_sunlight;
 
-        PT( KDTree ) _light_kdtree;
-        PT( KDTree ) _probe_kdtree;
+       // PT( KDTree ) _light_kdtree;
         PT( KDTree ) _envmap_kdtree;
 
         NodePath _vis_root;

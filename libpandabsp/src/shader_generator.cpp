@@ -207,15 +207,21 @@ CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib 
         if ( !inputs_supplied )
         {
                 // Fill in default empty values so we don't crash.
-                shattr = DCAST( ShaderAttrib, shattr )->set_shader_inputs(
-                        {
+                pvector<ShaderInput> inputs = {
                                 ShaderInput( "lightCount", PTA_int::empty_array( 1 ) ),
                                 ShaderInput( "lightData", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ),
                                 ShaderInput( "lightData2", PTA_LMatrix4::empty_array( MAX_TOTAL_LIGHTS ) ),
                                 ShaderInput( "lightTypes", PTA_int::empty_array( MAX_TOTAL_LIGHTS ) ),
-                                ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) ),
-                                ShaderInput( "envmapSampler", PSSMShaderGenerator::get_identity_cubemap() )
-                        } );
+                                ShaderInput( "ambientCube", PTA_LVecBase3::empty_array( 6 ) )
+                };
+                // Do we have an envmap sampler already?
+                if ( DCAST( ShaderAttrib, shattr )->get_shader_input( "envmapSampler" ) == ShaderInput::get_blank() )
+                {
+                        // Nope, give it the default envmap
+                        inputs.push_back( ShaderInput( "envmapSampler", PSSMShaderGenerator::get_identity_cubemap() ) );
+                }
+
+                shattr = DCAST( ShaderAttrib, shattr )->set_shader_inputs( inputs );
         }
 
         return shattr;

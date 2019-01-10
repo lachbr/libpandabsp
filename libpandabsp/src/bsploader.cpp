@@ -2159,6 +2159,9 @@ void BSPLoader::add_dynamic_node( const NodePath &node )
 
 cubemap_t *BSPLoader::find_closest_cubemap( const LPoint3 &pos )
 {
+        if ( !_amb_probe_mgr.get_cubemaps().size() )
+                return nullptr;
+
         return _amb_probe_mgr.find_closest_in_kdtree( _amb_probe_mgr.get_envmap_kdtree(), pos, _amb_probe_mgr.get_cubemaps() );
 }
 

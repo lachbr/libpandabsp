@@ -102,6 +102,7 @@ public:
                 phong_boost( 1.0 ),
                 phong_fresnel_ranges( 0.0, 0.5, 1.0 ),
                 phong_albedo_tint( false ),
+                phong_mask_texture( nullptr ),
                 phong_tint( 1.0, 1.0, 1.0 )
         {
         }
@@ -112,6 +113,7 @@ public:
         // phong
         float phong_exponent;
         PT( Texture ) phong_exponent_texture;
+        PT( Texture ) phong_mask_texture;
         float phong_boost;
         LVector3 phong_fresnel_ranges;
         bool phong_albedo_tint;

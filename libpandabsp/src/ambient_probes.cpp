@@ -102,8 +102,8 @@ void NodeWeakCallback::wp_callback( void *pointer )
 AmbientProbeManager::AmbientProbeManager() :
         _loader( nullptr ),
         _sunlight( nullptr ),
-        _light_kdtree( nullptr ),
-        _probe_kdtree( nullptr ),
+        //_light_kdtree( nullptr ),
+        //_probe_kdtree( nullptr ),
         _envmap_kdtree( nullptr )
 {
         dummy_light->id = -1;
@@ -114,8 +114,8 @@ AmbientProbeManager::AmbientProbeManager() :
 AmbientProbeManager::AmbientProbeManager( BSPLoader *loader ) :
         _loader( loader ),
         _sunlight( nullptr ),
-        _light_kdtree( nullptr ),
-        _probe_kdtree( nullptr ),
+        //_light_kdtree( nullptr ),
+        //_probe_kdtree( nullptr ),
         _envmap_kdtree( nullptr )
 {
 }
@@ -160,8 +160,8 @@ void AmbientProbeManager::process_ambient_probes()
         _light_pvs.resize( _loader->_bspdata->dmodels[0].visleafs + 1 );
         _all_lights.clear();
 
-        _light_kdtree = new KDTree( 3 );
-        vector<vector<double>> light_points;
+        //_light_kdtree = new KDTree( 3 );
+        //vector<vector<double>> light_points;
 
         // Build light data structures
         for ( int entnum = 0; entnum < _loader->_bspdata->numentities; entnum++ )
@@ -249,23 +249,23 @@ void AmbientProbeManager::process_ambient_probes()
                         }
 
                         _all_lights.push_back( light );
-                        if ( light->type == LIGHTTYPE_SUN )
-                        {
-                                // don't put the sun in the k-d tree
-                                _sunlight = light;
-                        }
-                        else
-                        {
-                                // add the light into our k-d tree
-                                light_points.push_back( { light->pos[0], light->pos[1], light->pos[2] } );
-                        }
+                        //if ( light->type == LIGHTTYPE_SUN )
+                        //{
+                        //        // don't put the sun in the k-d tree
+                        //        _sunlight = light;
+                        //}
+                        //else
+                        //{
+                        //        // add the light into our k-d tree
+                        //        light_points.push_back( { light->pos[0], light->pos[1], light->pos[2] } );
+                        //}
                 }
         }
 
-        if ( light_points.size() )
-        {
-                _light_kdtree->build( light_points );
-        }
+        //if ( light_points.size() )
+        //{
+        //        _light_kdtree->build( light_points );
+        //}
 
         // Build light PVS
         for ( size_t lightnum = 0; lightnum < _all_lights.size(); lightnum++ )
@@ -281,14 +281,15 @@ void AmbientProbeManager::process_ambient_probes()
                 }
         }
 
-        _probe_kdtree = new KDTree( 3 );
-        vector<vector<double>> probe_points;
-
         for ( size_t i = 0; i < _loader->_bspdata->leafambientindex.size(); i++ )
         {
                 dleafambientindex_t *ambidx = &_loader->_bspdata->leafambientindex[i];
                 dleaf_t *leaf = _loader->_bspdata->dleafs + i;
                 _probes[i] = pvector<PT( ambientprobe_t )>();
+
+                _probe_kdtrees[i] = new KDTree( 3 );
+                vector<vector<double>> probe_points;
+
                 for ( int j = 0; j < ambidx->num_ambient_samples; j++ )
                 {
                         dleafambientlighting_t *light = &_loader->_bspdata->leafambientlighting[ambidx->first_ambient_sample + j];
@@ -298,6 +299,19 @@ void AmbientProbeManager::process_ambient_probes()
                                              RemapValClamped( light->y, 0, 255, leaf->mins[1], leaf->maxs[1] ),
                                              RemapValClamped( light->z, 0, 255, leaf->mins[2], leaf->maxs[2] ) );
                         probe->pos /= 16.0;
+
+                        bool match = false;
+                        for ( size_t k = 0; k < _probes[i].size(); k++ )
+                        {
+                                if ( _probes[i][k]->pos == probe->pos )
+                                {
+                                        match = true;
+                                        break;
+                                }
+                        }
+                        if ( match )
+                                continue;
+
                         probe->cube = PTA_LVecBase3::empty_array( 6 );
                         for ( int k = 0; k < 6; k++ )
                         {
@@ -323,12 +337,14 @@ void AmbientProbeManager::process_ambient_probes()
                         probe_points.push_back( { probe->pos[0], probe->pos[1], probe->pos[2] } );
                         _all_probes.push_back( probe );
                 }
+
+                if ( probe_points.size() )
+                {
+                        _probe_kdtrees[i]->build( probe_points );
+                }
         }
 
-        if ( probe_points.size() )
-        {
-                _probe_kdtree->build( probe_points );
-        }
+        
 }
 
 void AmbientProbeManager::load_cubemaps()
@@ -341,6 +357,19 @@ void AmbientProbeManager::load_cubemaps()
                 dcubemap_t *dcm = &_loader->_bspdata->cubemaps[i];
                 PT( cubemap_t ) cm = new cubemap_t;
                 cm->pos = LVector3( dcm->pos[0] / 16.0, dcm->pos[1] / 16.0, dcm->pos[2] / 16.0 );
+
+                bool match = false;
+                for ( size_t j = 0; j < _cubemaps.size(); j++ )
+                {
+                        if ( _cubemaps[j]->pos == cm->pos )
+                        {
+                                match = true;
+                                break;
+                        }
+                }
+                if ( match )
+                        continue;
+
                 cm->leaf = _loader->find_leaf( cm->pos );
                 cm->size = dcm->size;
                 cm->has_full_cubemap = true;
@@ -510,7 +539,7 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                 if ( _probes[leaf_id].size() > 0 )
                 {
                         update_ac_collector.start();
-                        ambientprobe_t *sample = find_closest_in_kdtree( _probe_kdtree, curr_net, _all_probes );
+                        ambientprobe_t *sample = find_closest_in_kdtree( get_probe_kdtree( leaf_id ), curr_net, _probes[leaf_id] );
                         input->amb_probe = sample;
                         update_ac_collector.stop();
 
@@ -803,11 +832,12 @@ void AmbientProbeManager::cleanup()
         MutexHolder holder( _cache_mutex );
 
         _sunlight = nullptr;
-        _probe_kdtree = nullptr;
-        _light_kdtree = nullptr;
+        //_probe_kdtree = nullptr;
+        //_light_kdtree = nullptr;
         _envmap_kdtree = nullptr;
         _pos_cache.clear();
         _node_data.clear();
+        _probe_kdtrees.clear();
         _probes.clear();
         _all_probes.clear();
         _light_pvs.clear();

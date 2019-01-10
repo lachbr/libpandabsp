@@ -58,6 +58,13 @@ void PhongFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shader
                                 phong_tint = Parser::to_3f
                                 ( mat->get_keyvalue( "$phongtint" ) );
                         }
+
+                        if ( mat->has_keyvalue( "$phongmask" ) )
+                        {
+                                phong_mask_texture = TexturePool::load_texture(
+                                        mat->get_keyvalue( "$phongmask" )
+                                );
+                        }
                 }
         }
 }
@@ -87,6 +94,12 @@ void PhongFeature::add_permutations( ShaderPermutations &perms )
                 }
 
                 perms.add_input( ShaderInput( "phongTint", phong_tint ) );
+
+                if ( phong_mask_texture )
+                {
+                        perms.add_permutation( "PHONG_MASK" );
+                        perms.add_input( ShaderInput( "phongMaskSampler", phong_mask_texture ) );
+                }
                 
         }
 }
@@ -204,7 +217,7 @@ void EnvmapFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shade
 
 void EnvmapFeature::add_permutations( ShaderPermutations &perms )
 {
-        if ( has_feature )
+        if ( has_feature && ConfigVariableBool( "mat_envmaps", true ) )
         {
                 perms.add_permutation( "ENVMAP" );
 
