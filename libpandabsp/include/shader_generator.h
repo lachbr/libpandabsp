@@ -27,7 +27,7 @@ extern ConfigVariableDouble depth_bias;
 extern ConfigVariableDouble normal_offset_scale;
 extern ConfigVariableDouble softness_factor;
 
-#define DEFAULT_SHADER "VertexLitGeneric"
+#define DEFAULT_SHADER "UnlitNoMat"
 
 NotifyCategoryDeclNoExport(bspShaderGenerator);
 

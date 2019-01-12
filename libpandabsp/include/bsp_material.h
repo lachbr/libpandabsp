@@ -52,8 +52,6 @@ private:
         static tspool_t _stage_pool;
 };
 
-#define DEFAULT_SHADER "VertexLitGeneric"
-
 NotifyCategoryDeclNoExport(bspmaterial);
 
 #ifdef CPPPARSER
@@ -63,7 +61,7 @@ class EXPCL_PANDABSP BSPMaterial : public TypedReferenceCount
 #endif
 {
 PUBLISHED:
-        INLINE explicit BSPMaterial( const std::string &name = DEFAULT_SHADER ) :
+        INLINE explicit BSPMaterial( const std::string &name = "material" ) :
                 TypedReferenceCount(),
                 _has_env_cubemap( false ),
                 _cached_env_cubemap( false ),

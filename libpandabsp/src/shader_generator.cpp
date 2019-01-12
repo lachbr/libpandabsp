@@ -124,6 +124,7 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 state = state->set_attrib( shattr, 1 );
                 state = state->set_attrib( AntialiasAttrib::make( AntialiasAttrib::M_off ), 1 );
                 state = state->set_attrib( TransparencyAttrib::make( TransparencyAttrib::M_dual ), 1 );
+                state = state->set_attrib( CullFaceAttrib::make_reverse(), 1 );
                 
                 Camera *cam = DCAST( Camera, _pssm_rig->get_camera( 0 ).node() );
                 cam->set_initial_state( state );
@@ -233,18 +234,16 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         findmatshader_collector.start();
 
         // First figure out which shader to use.
-        // VertexLitGeneric by default, unless specified by a Material.
+        // UnlitNoMat by default, unless specified by a Material.
         std::string shader_name = DEFAULT_SHADER;
 
         const BSPMaterialAttrib *mattr;
         rs->get_attrib_def( mattr );
         const BSPMaterial *mat = mattr->get_material();
-        if ( !mat )
+        if ( mat )
         {
-                return DCAST( ShaderAttrib, ShaderAttrib::make_default() );
+                shader_name = mat->get_shader();
         }
-
-        shader_name = mat->get_shader();
 
         if ( _shaders.find( shader_name ) == _shaders.end() )
         {
@@ -263,7 +262,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                         << msg.str();
 
                 findmatshader_collector.stop();
-                return nullptr;
+                return DCAST( ShaderAttrib, ShaderAttrib::make_default() );
         }
 
         findmatshader_collector.stop();
