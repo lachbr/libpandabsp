@@ -53,6 +53,7 @@ ConfigVariableDouble depth_bias( "pssm-shadow-depth-bias", 0.001 );
 ConfigVariableDouble normal_offset_scale( "pssm-normal-offset-scale", 1.0 );
 ConfigVariableDouble softness_factor( "pssm-softness-factor", 1.0 );
 ConfigVariableBool cache_shaders( "pssm-cache-shaders", true );
+ConfigVariableBool normal_offset_uv_space( "pssm-normal-offset-uv-space", true );
 
 TypeHandle PSSMShaderGenerator::_type_handle;
 PT( Texture ) PSSMShaderGenerator::_identity_cubemap = nullptr;

@@ -26,6 +26,7 @@ extern ConfigVariableBool want_pssm;
 extern ConfigVariableDouble depth_bias;
 extern ConfigVariableDouble normal_offset_scale;
 extern ConfigVariableDouble softness_factor;
+extern ConfigVariableBool normal_offset_uv_space;
 
 #define DEFAULT_SHADER "UnlitNoMat"
 
