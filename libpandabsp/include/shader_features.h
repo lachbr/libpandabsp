@@ -17,19 +17,6 @@ class BSPMaterial;
 class ShaderConfig;
 class ShaderPermutations;
 
-enum shaderfeatureflags_t
-{
-        SF_BASETEXTURE,
-        SF_ALPHA,
-        SF_TRANSLUCENT,
-        SF_HALFLAMBERT,
-        SF_LIGHTWARP,
-        SF_PHONG,
-        SF_ENVMAP,
-        SF_DETAIL,
-        SF_BUMPMAP,
-};
-
 class ShaderFeature
 {
 public:
@@ -81,9 +68,8 @@ class HalfLambertFeature : public ShaderFeature
 public:
         INLINE HalfLambertFeature()
                 : ShaderFeature(),
-                halflambert( true )
+                halflambert( false )
         {
-                has_feature = true;
         }
 
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
@@ -118,6 +104,23 @@ public:
         LVector3 phong_fresnel_ranges;
         bool phong_albedo_tint;
         LVector3 phong_tint;
+};
+
+class RimLightFeature : public ShaderFeature
+{
+public:
+        INLINE RimLightFeature() :
+                ShaderFeature(),
+                boost( 4.0 ),
+                exponent( 2.0 )
+        {
+        }
+
+        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
+        virtual void add_permutations( ShaderPermutations &perms );
+
+        float boost;
+        float exponent;
 };
 
 class EnvmapFeature : public ShaderFeature

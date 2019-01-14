@@ -22,7 +22,6 @@ void PhongFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shader
         {
                 if ( atoi( mat->get_keyvalue( "$phong" ).c_str() ) )
                 {
-                        conf->flags |= SF_PHONG;
                         has_feature = true;
 
                         if ( mat->has_keyvalue( "$phongexponent" ) )
@@ -106,11 +105,39 @@ void PhongFeature::add_permutations( ShaderPermutations &perms )
 
 //==============================================================================================//
 
+void RimLightFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+{
+        if ( mat->has_keyvalue( "$rimlight" ) &&
+                (bool)atoi( mat->get_keyvalue( "$rimlight" ).c_str() ) )
+        {
+                has_feature = true;
+
+                if ( mat->has_keyvalue( "$rimlightboost" ) )
+                {
+                        boost = atof( mat->get_keyvalue( "$rimlightboost" ).c_str() );
+                }
+                if ( mat->has_keyvalue( "$rimlightexponent" ) )
+                {
+                        exponent = atof( mat->get_keyvalue( "$rimlightexponent" ).c_str() );
+                }
+        }
+}
+
+void RimLightFeature::add_permutations( ShaderPermutations &perms )
+{
+        if ( has_feature && ConfigVariableBool( "mat_rimlight", true ) )
+        {
+                perms.add_permutation( "RIMLIGHT" );
+                perms.add_input( ShaderInput( "rimlightParams", LVector2( boost, exponent ) ) );
+        }
+}
+
+//==============================================================================================//
+
 void BaseTextureFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
 {
         if ( mat->has_keyvalue( "$basetexture" ) )
         {
-                conf->flags |= SF_BASETEXTURE;
                 has_feature = true;
 
                 if ( mat->has_keyvalue( "$basetexture_alpha" ) )
@@ -147,7 +174,6 @@ void AlphaFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shader
                 alpha = atof( mat->get_keyvalue( "$alpha" ).c_str() );
 
                 has_feature = true;
-                conf->flags |= SF_ALPHA;
         }
         else if ( mat->has_keyvalue( "$translucent" ) )
         {
@@ -155,7 +181,6 @@ void AlphaFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shader
                         atoi( mat->get_keyvalue( "$translucent" ).c_str() );
 
                 has_feature = true;
-                conf->flags |= SF_TRANSLUCENT;
         }
 }
 
@@ -182,7 +207,6 @@ void EnvmapFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shade
 {
         if ( mat->has_keyvalue( "$envmap" ) )
         {
-                conf->flags |= SF_ENVMAP;
                 has_feature = true;
 
                 std::string envmap = mat->get_keyvalue( "$envmap" );
@@ -246,7 +270,6 @@ void DetailFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shade
 {
         if ( mat->has_keyvalue( "$detail" ) )
         {
-                conf->flags |= SF_DETAIL;
                 has_feature = true;
 
                 detail_texture = TexturePool::load_texture( mat->get_keyvalue( "$detail" ) );
@@ -283,10 +306,6 @@ void DetailFeature::add_permutations( ShaderPermutations &perms )
 
 void HalfLambertFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
 {
-        // it's on by default, unless turned off
-
-        bool off = false;
-
         if ( mat->has_keyvalue( "$halflambert" ) )
         {
                 if ( atoi( mat->get_keyvalue( "$halflambert" ).c_str() ) )
@@ -298,12 +317,8 @@ void HalfLambertFeature::parse_from_material_keyvalues( const BSPMaterial *mat, 
                 {
                         has_feature = false;
                         halflambert = false;
-                        off = true;
                 }
         }
-
-        if ( !off )
-                conf->flags |= SF_HALFLAMBERT;
 }
 
 void HalfLambertFeature::add_permutations( ShaderPermutations &perms )
@@ -321,7 +336,6 @@ void BumpmapFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shad
         if ( mat->has_keyvalue( "$bumpmap" ) )
         {
                 has_feature = true;
-                conf->flags |= SF_BUMPMAP;
 
                 bump_tex = TexturePool::load_texture( mat->get_keyvalue( "$bumpmap" ) );
         }
@@ -343,9 +357,10 @@ void LightwarpFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Sh
         if ( mat->has_keyvalue( "$lightwarp" ) )
         {
                 has_feature = true;
-                conf->flags |= SF_LIGHTWARP;
 
                 lightwarp_tex = TexturePool::load_texture( mat->get_keyvalue( "$lightwarp" ) );
+                lightwarp_tex->set_wrap_u( SamplerState::WM_clamp );
+                lightwarp_tex->set_wrap_v( SamplerState::WM_clamp );
         }
 }
 

@@ -25,6 +25,7 @@ public:
         AlphaFeature alpha;
         HalfLambertFeature halflambert;
         LightwarpFeature lightwarp;
+        RimLightFeature rimlight;
 
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat );
 };

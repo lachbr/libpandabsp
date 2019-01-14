@@ -39,6 +39,7 @@ void VLGShaderConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
         detail.parse_from_material_keyvalues( mat, this );
         bumpmap.parse_from_material_keyvalues( mat, this );
         lightwarp.parse_from_material_keyvalues( mat, this );
+        rimlight.parse_from_material_keyvalues( mat, this );
 }
 
 VertexLitGenericSpec::VertexLitGenericSpec() :
@@ -70,36 +71,43 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         conf->halflambert.add_permutations( result );
         conf->phong.add_permutations( result );
         conf->lightwarp.add_permutations( result );
+        conf->rimlight.add_permutations( result );
 
         bool disable_alpha_write = false;
         bool calc_primary_alpha = false;
 
         bool need_tbn = false;
         bool need_world_position = false;
+        bool need_world_normal = false;
+        bool need_world_vec = false;
         bool need_eye_vec = false;
         bool need_eye_position = false;
-        bool need_world_normal = false;
         bool need_eye_normal = false;
 
-        if ( conf->flags & SF_ENVMAP )
+        if ( conf->envmap.has_feature )
         {
                 need_eye_vec = true;
                 need_world_normal = true;
                 need_world_position = true;
+                need_world_vec = true;
                 need_eye_normal = true;
         }
-        if ( conf->flags & SF_BUMPMAP )
+        if ( conf->bumpmap.has_feature )
         {
                 need_tbn = true;
                 need_eye_normal = true;
         }
-        if ( conf->flags & SF_PHONG )
+        if ( conf->phong.has_feature )
         {
                 need_eye_vec = true;
                 need_eye_normal = true;
                 need_eye_position = true;
         }
-                
+        if ( conf->rimlight.has_feature )
+        {
+                need_world_normal = true;
+                need_world_vec = true;
+        }
 
         // verify_enforce_attrib_lock();
         const AuxBitplaneAttrib *aux_bitplane;
@@ -127,8 +135,7 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         if ( transparency->get_mode() == TransparencyAttrib::M_alpha ||
              transparency->get_mode() == TransparencyAttrib::M_premultiplied_alpha ||
              transparency->get_mode() == TransparencyAttrib::M_dual ||
-             conf->flags & SF_ALPHA ||
-             conf->flags & SF_TRANSLUCENT )
+             conf->alpha.has_feature )
         {
                 have_alpha_blend = true;
         }
@@ -197,7 +204,6 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                         std::stringstream ss;
                         ss << num_lights;
                         result.permutations["NUM_LIGHTS"] = ss.str();
-                        result.add_permutation( "HAVE_SEPARATE_AMBIENT" );
 
                         if ( generator->has_shadow_sunlight() )
                         {
@@ -325,6 +331,9 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                 }
         }
 
+        if ( need_world_vec )
+                need_world_position = true;
+
         if ( need_tbn )
         {
                 result.add_permutation( "NEED_TBN" );
@@ -350,6 +359,8 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         }
         if ( need_eye_vec )
                 result.add_permutation( "NEED_EYE_VEC" );
+        if ( need_world_vec )
+                result.add_permutation( "NEED_WORLD_VEC" );
 
         // Done!
         return result;

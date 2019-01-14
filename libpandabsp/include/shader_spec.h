@@ -24,8 +24,6 @@ class ShaderConfig : public ReferenceCount
 {
 public:
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat ) = 0;
-
-        int flags;
 };
 
 /**
