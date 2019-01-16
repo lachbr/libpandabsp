@@ -182,14 +182,25 @@ class EXPCL_PANDABSP BSPMaterialAttrib : public RenderAttrib
 private:
         INLINE BSPMaterialAttrib() :
                 RenderAttrib(),
-                _mat( nullptr )
+                _mat( nullptr ),
+                _has_override_shader( false )
         {
         }
 
 PUBLISHED:
 
         static CPT( RenderAttrib ) make( const BSPMaterial *mat );
+        static CPT( RenderAttrib ) make_override_shader( const BSPMaterial *mat );
         static CPT( RenderAttrib ) make_default();
+
+        INLINE std::string get_override_shader() const
+        {
+                return _override_shader;
+        }
+        INLINE bool has_override_shader() const
+        {
+                return _has_override_shader;
+        }
 
         INLINE const BSPMaterial *get_material() const
         {
@@ -198,12 +209,16 @@ PUBLISHED:
 
 private:
         const BSPMaterial *_mat;
+        bool _has_override_shader;
+        std::string _override_shader;
 
 public:
         static void register_with_read_factory();
         virtual void write_datagram( BamWriter *manager, Datagram &dg );
 
 protected:
+        virtual CPT( RenderAttrib ) compose_impl( const RenderAttrib *other ) const;
+        virtual CPT( RenderAttrib ) invert_compose_impl( const RenderAttrib *other ) const;
         virtual int compare_to_impl( const RenderAttrib *other ) const;
         virtual size_t get_hash_impl() const;
         static TypedWritable *make_from_bam( const FactoryParams &params );

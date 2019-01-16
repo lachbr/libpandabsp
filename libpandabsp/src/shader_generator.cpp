@@ -39,6 +39,8 @@
 #include <alphaTestAttrib.h>
 #include <colorBlendAttrib.h>
 #include <clipPlaneAttrib.h>
+#include <colorScaleAttrib.h>
+#include <cullBinAttrib.h>
 
 using namespace std;
 
@@ -86,12 +88,12 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
         {
                 _pssm_rig->reparent_to( _render );
                 _pssm_split_texture_array = new Texture( "pssmSplitTextureArray" );
-                _pssm_split_texture_array->setup_2d_texture_array( pssm_size, pssm_size, pssm_splits, Texture::T_float, Texture::F_depth_component32 );
+                _pssm_split_texture_array->setup_2d_texture_array( pssm_size, pssm_size, pssm_splits, Texture::T_float, Texture::F_depth_component );
                 _pssm_split_texture_array->set_clear_color( LVecBase4( 1.0 ) );
                 _pssm_split_texture_array->set_wrap_u( SamplerState::WM_clamp );
                 _pssm_split_texture_array->set_wrap_v( SamplerState::WM_clamp );
                 _pssm_split_texture_array->set_border_color( LColor( 1.0 ) );
-                _pssm_split_texture_array->set_minfilter( SamplerState::FT_linear_mipmap_linear );
+                _pssm_split_texture_array->set_minfilter( SamplerState::FT_linear );
                 _pssm_split_texture_array->set_magfilter( SamplerState::FT_linear );
 
                 // Setup the buffer that this split shadow map will be rendered into.
@@ -108,24 +110,28 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 // render to the individual textures in the array in a single render pass using geometry
                 // shader cloning.
                 _pssm_layered_buffer->add_render_texture( _pssm_split_texture_array, GraphicsOutput::RTM_bind_layered,
-                                                GraphicsOutput::RTP_depth );
+                                                          GraphicsOutput::RTP_depth );
 
                 CPT( RenderState ) state = RenderState::make_empty();
-                // Apply a default texture in case a state the camera sees doesn't have one.
-                //state = state->set_attrib( TextureAttrib::make( TexturePool::load_texture( "phase_14/maps/white.jpg" ) ) );
-                state = state->set_attrib( LightAttrib::make_all_off(), 1 );
-                state = state->set_attrib( MaterialAttrib::make_off(), 1 );
+                state = state->set_attrib( LightAttrib::make_all_off(), 10 );
+                state = state->set_attrib( MaterialAttrib::make_off(), 10 );
+                state = state->set_attrib( FogAttrib::make_off(), 10 );
+                state = state->set_attrib( ColorAttrib::make_off(), 10 );
+                state = state->set_attrib( ColorScaleAttrib::make_off(), 10 );
+                state = state->set_attrib( AntialiasAttrib::make( AntialiasAttrib::M_off ), 10 );
+                state = state->set_attrib( TextureAttrib::make_all_off(), 10 );
+                state = state->set_attrib( ColorBlendAttrib::make_off(), 10 );
+                state = state->set_attrib( CullBinAttrib::make_default(), 10 );
+                state = state->set_attrib( TransparencyAttrib::make( (TransparencyAttrib::Mode)TransparencyAttrib::M_off ), 10 );
+                state = state->set_attrib( CullFaceAttrib::make( CullFaceAttrib::M_cull_none ), 10 );
 
-                CPT( RenderAttrib ) shattr = ShaderAttrib::make(
-                        Shader::load( Shader::SL_GLSL,
-                                      "phase_14/models/shaders/pssm_camera.vert.glsl",
-                                      "phase_14/models/shaders/pssm_camera.frag.glsl",
-                                      "phase_14/models/shaders/pssm_camera.geom.glsl" ) );
-                shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( ShaderInput( "split_mvps", _pssm_rig->get_mvp_array() ) );
-                state = state->set_attrib( shattr, 1 );
-                state = state->set_attrib( AntialiasAttrib::make( AntialiasAttrib::M_off ), 1 );
-                state = state->set_attrib( TransparencyAttrib::make( TransparencyAttrib::M_dual ), 1 );
-                state = state->set_attrib( CullFaceAttrib::make_reverse(), 1 );
+                // Automatically generate shaders for the shadow scene using the CSMRender shader.
+                CPT( RenderAttrib ) shattr = ShaderAttrib::make();
+                shattr = DCAST( ShaderAttrib, shattr )->set_shader_auto();
+                state = state->set_attrib( shattr, 10 );
+                state = state->set_attrib( BSPMaterialAttrib::make_override_shader( BSPMaterial::get_from_file(
+                        "resources/phase_14/materials/csm_shadow.mat"
+                ) ) );
                 
                 Camera *cam = DCAST( Camera, _pssm_rig->get_camera( 0 ).node() );
                 cam->set_initial_state( state );
@@ -177,7 +183,16 @@ AsyncTask::DoneStatus PSSMShaderGenerator::update_pssm( GenericAsyncTask *task, 
                         self->_has_shadow_sunlight = false;
                         return AsyncTask::DS_cont;
                 }
-                self->_pssm_rig->update( self->_camera, self->_sun_vector );
+
+                DirectionalLight *dlight = DCAST( DirectionalLight, self->_sunlight.node() );
+                PT( GeometricBoundingVolume ) bounds = dlight->get_lens()->make_bounds()->as_geometric_bounding_volume();
+
+                // move from local space into camera space
+                LMatrix4 inv_cammat = NodePath( self->_camera ).get_transform(
+                        self->_sunlight.get_node_path() )->get_mat();
+                bounds->xform( inv_cammat );
+
+                self->_pssm_rig->update( self->_camera, self->_sun_vector, bounds );
         }
         
         return AsyncTask::DS_cont;
@@ -241,8 +256,15 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         const BSPMaterialAttrib *mattr;
         rs->get_attrib_def( mattr );
         const BSPMaterial *mat = mattr->get_material();
-        if ( mat )
+        if ( mattr->has_override_shader() )
         {
+                // the attrib wants us to use this shader,
+                // not the one referenced by the material
+                shader_name = mattr->get_override_shader();
+        }
+        else if ( mat )
+        {
+                // no overrided shader, use the one specified on the material
                 shader_name = mat->get_shader();
         }
 

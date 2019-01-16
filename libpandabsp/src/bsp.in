@@ -1,972 +1,996 @@
-1547246503
+1547501329
 3 3
 3 bsp 4 t5GT 3 bsp 
-190
-180 3 get 0 4 370 18 TextureStages::get 0 2 3 4 0
+195
+184 3 get 0 4 379 18 TextureStages::get 0 2 3 4 0
 159
 static TextureStage *TextureStages::get(std::string const &name);
 static TextureStage *TextureStages::get(std::string const &name, std::string const &uv_name);
 
-181 15 get_basetexture 0 4 370 30 TextureStages::get_basetexture 0 1 5 0
+185 15 get_basetexture 0 4 379 30 TextureStages::get_basetexture 0 1 5 0
 58
 static TextureStage *TextureStages::get_basetexture(void);
 
-182 12 get_lightmap 0 4 370 27 TextureStages::get_lightmap 0 1 6 0
+186 12 get_lightmap 0 4 379 27 TextureStages::get_lightmap 0 1 6 0
 55
 static TextureStage *TextureStages::get_lightmap(void);
 
-183 19 get_bumped_lightmap 0 4 370 34 TextureStages::get_bumped_lightmap 0 1 7 0
+187 19 get_bumped_lightmap 0 4 379 34 TextureStages::get_bumped_lightmap 0 1 7 0
 62
 static TextureStage *TextureStages::get_bumped_lightmap(void);
 
-184 13 get_spheremap 0 4 370 28 TextureStages::get_spheremap 0 1 8 0
+188 13 get_spheremap 0 4 379 28 TextureStages::get_spheremap 0 1 8 0
 56
 static TextureStage *TextureStages::get_spheremap(void);
 
-185 11 get_cubemap 0 4 370 26 TextureStages::get_cubemap 0 1 9 0
+189 11 get_cubemap 0 4 379 26 TextureStages::get_cubemap 0 1 9 0
 54
 static TextureStage *TextureStages::get_cubemap(void);
 
-186 13 get_normalmap 0 4 370 28 TextureStages::get_normalmap 0 1 10 0
+190 13 get_normalmap 0 4 379 28 TextureStages::get_normalmap 0 1 10 0
 56
 static TextureStage *TextureStages::get_normalmap(void);
 
-187 13 get_heightmap 0 4 370 28 TextureStages::get_heightmap 0 1 11 0
+191 13 get_heightmap 0 4 379 28 TextureStages::get_heightmap 0 1 11 0
 56
 static TextureStage *TextureStages::get_heightmap(void);
 
-188 12 get_glossmap 0 4 370 27 TextureStages::get_glossmap 0 1 12 0
+192 12 get_glossmap 0 4 379 27 TextureStages::get_glossmap 0 1 12 0
 55
 static TextureStage *TextureStages::get_glossmap(void);
 
-189 11 get_glowmap 0 4 370 26 TextureStages::get_glowmap 0 1 13 0
+193 11 get_glowmap 0 4 379 26 TextureStages::get_glowmap 0 1 13 0
 54
 static TextureStage *TextureStages::get_glowmap(void);
 
-190 13 TextureStages 0 4 370 28 TextureStages::TextureStages 0 2 1 2 0
+194 13 TextureStages 0 4 379 28 TextureStages::TextureStages 0 2 1 2 0
 122
 inline TextureStages::TextureStages(void) = default;
 inline TextureStages::TextureStages(TextureStages const &) = default;
 
-191 14 ~TextureStages 0 4 370 29 TextureStages::~TextureStages 0 0 0
+195 14 ~TextureStages 0 4 379 29 TextureStages::~TextureStages 0 0 0
 36
 TextureStages::~TextureStages(void);
 
-192 11 BSPMaterial 0 4 371 24 BSPMaterial::BSPMaterial 0 2 14 15 0
+196 11 BSPMaterial 0 4 380 24 BSPMaterial::BSPMaterial 0 2 14 15 0
 137
 inline explicit BSPMaterial::BSPMaterial(std::string const &name = "material");
 inline BSPMaterial::BSPMaterial(BSPMaterial const &copy);
 
-193 10 operator = 0 4 371 23 BSPMaterial::operator = 0 1 16 0
+197 10 operator = 0 4 380 23 BSPMaterial::operator = 0 1 16 0
 61
 inline void BSPMaterial::operator =(BSPMaterial const &copy);
 
-194 12 set_keyvalue 0 4 371 25 BSPMaterial::set_keyvalue 0 1 17 0
+198 12 set_keyvalue 0 4 380 25 BSPMaterial::set_keyvalue 0 1 17 0
 88
 inline void BSPMaterial::set_keyvalue(std::string const &key, std::string const &value);
 
-195 12 get_keyvalue 0 4 371 25 BSPMaterial::get_keyvalue 0 1 18 0
+199 12 get_keyvalue 0 4 380 25 BSPMaterial::get_keyvalue 0 1 18 0
 75
 inline std::string BSPMaterial::get_keyvalue(std::string const &key) const;
 
-196 10 set_shader 0 4 371 23 BSPMaterial::set_shader 0 1 19 0
+200 10 set_shader 0 4 380 23 BSPMaterial::set_shader 0 1 19 0
 68
 inline void BSPMaterial::set_shader(std::string const &shader_name);
 
-197 10 get_shader 0 4 371 23 BSPMaterial::get_shader 0 1 20 0
+201 10 get_shader 0 4 380 23 BSPMaterial::get_shader 0 1 20 0
 55
 inline std::string BSPMaterial::get_shader(void) const;
 
-198 8 get_file 0 4 371 21 BSPMaterial::get_file 0 1 21 0
+202 8 get_file 0 4 380 21 BSPMaterial::get_file 0 1 21 0
 50
 inline Filename BSPMaterial::get_file(void) const;
 
-199 12 has_keyvalue 0 4 371 25 BSPMaterial::has_keyvalue 0 1 22 0
+203 12 has_keyvalue 0 4 380 25 BSPMaterial::has_keyvalue 0 1 22 0
 68
 inline bool BSPMaterial::has_keyvalue(std::string const &key) const;
 
-200 15 has_env_cubemap 0 4 371 28 BSPMaterial::has_env_cubemap 0 1 23 0
+204 15 has_env_cubemap 0 4 380 28 BSPMaterial::has_env_cubemap 0 1 23 0
 53
 inline bool BSPMaterial::has_env_cubemap(void) const;
 
-201 16 get_surface_prop 0 4 371 29 BSPMaterial::get_surface_prop 0 1 24 0
+205 16 get_surface_prop 0 4 380 29 BSPMaterial::get_surface_prop 0 1 24 0
 61
 inline std::string BSPMaterial::get_surface_prop(void) const;
 
-202 12 get_contents 0 4 371 25 BSPMaterial::get_contents 0 1 25 0
+206 12 get_contents 0 4 380 25 BSPMaterial::get_contents 0 1 25 0
 57
 inline std::string BSPMaterial::get_contents(void) const;
 
-203 13 get_from_file 0 4 371 26 BSPMaterial::get_from_file 0 1 26 0
+207 13 get_from_file 0 4 380 26 BSPMaterial::get_from_file 0 1 26 0
 75
 static BSPMaterial const *BSPMaterial::get_from_file(Filename const &file);
 
-204 14 get_class_type 0 4 371 27 BSPMaterial::get_class_type 0 1 27 0
+208 14 get_class_type 0 4 380 27 BSPMaterial::get_class_type 0 1 27 0
 52
 static TypeHandle BSPMaterial::get_class_type(void);
 
-205 12 ~BSPMaterial 0 4 371 25 BSPMaterial::~BSPMaterial 0 0 0
+209 12 ~BSPMaterial 0 4 380 25 BSPMaterial::~BSPMaterial 0 0 0
 32
 BSPMaterial::~BSPMaterial(void);
 
-206 4 make 0 4 373 23 BSPMaterialAttrib::make 0 1 28 0
+210 4 make 0 4 382 23 BSPMaterialAttrib::make 0 1 28 0
 86
 static ConstPointerTo< RenderAttrib > BSPMaterialAttrib::make(BSPMaterial const *mat);
 
-207 12 make_default 0 4 373 31 BSPMaterialAttrib::make_default 0 1 29 0
+211 20 make_override_shader 0 4 382 39 BSPMaterialAttrib::make_override_shader 0 1 29 0
+102
+static ConstPointerTo< RenderAttrib > BSPMaterialAttrib::make_override_shader(BSPMaterial const *mat);
+
+212 12 make_default 0 4 382 31 BSPMaterialAttrib::make_default 0 1 30 0
 76
 static ConstPointerTo< RenderAttrib > BSPMaterialAttrib::make_default(void);
 
-208 12 get_material 0 4 373 31 BSPMaterialAttrib::get_material 0 1 30 0
+213 19 get_override_shader 0 4 382 38 BSPMaterialAttrib::get_override_shader 0 1 31 0
+70
+inline std::string BSPMaterialAttrib::get_override_shader(void) const;
+
+214 19 has_override_shader 0 4 382 38 BSPMaterialAttrib::has_override_shader 0 1 32 0
+63
+inline bool BSPMaterialAttrib::has_override_shader(void) const;
+
+215 12 get_material 0 4 382 31 BSPMaterialAttrib::get_material 0 1 33 0
 70
 inline BSPMaterial const *BSPMaterialAttrib::get_material(void) const;
 
-209 14 get_class_slot 0 4 373 33 BSPMaterialAttrib::get_class_slot 0 1 31 0
+216 14 get_class_slot 0 4 382 33 BSPMaterialAttrib::get_class_slot 0 1 34 0
 51
 static int BSPMaterialAttrib::get_class_slot(void);
 
-210 14 get_class_type 0 4 373 33 BSPMaterialAttrib::get_class_type 0 1 32 0
+217 14 get_class_type 0 4 382 33 BSPMaterialAttrib::get_class_type 0 1 35 0
 58
 static TypeHandle BSPMaterialAttrib::get_class_type(void);
 
-211 18 ~BSPMaterialAttrib 0 4 373 37 BSPMaterialAttrib::~BSPMaterialAttrib 0 0 0
+218 18 ~BSPMaterialAttrib 0 4 382 37 BSPMaterialAttrib::~BSPMaterialAttrib 0 0 0
 44
 BSPMaterialAttrib::~BSPMaterialAttrib(void);
 
-212 14 get_class_type 0 4 376 27 CBaseEntity::get_class_type 0 1 35 0
+219 14 get_class_type 0 4 385 27 CBaseEntity::get_class_type 0 1 38 0
 52
 static TypeHandle CBaseEntity::get_class_type(void);
 
-213 11 CBaseEntity 0 4 376 24 CBaseEntity::CBaseEntity 0 2 33 34 0
+220 11 CBaseEntity 0 4 385 24 CBaseEntity::CBaseEntity 0 2 36 37 0
 95
 CBaseEntity::CBaseEntity(void);
 inline CBaseEntity::CBaseEntity(CBaseEntity const &) = default;
 
-214 10 get_entnum 0 4 376 23 CBaseEntity::get_entnum 0 1 36 0
+221 10 get_entnum 0 4 385 23 CBaseEntity::get_entnum 0 1 39 0
 40
 int CBaseEntity::get_entnum(void) const;
 
-215 10 get_loader 0 4 376 23 CBaseEntity::get_loader 0 1 37 0
+222 10 get_loader 0 4 385 23 CBaseEntity::get_loader 0 1 40 0
 47
 BSPLoader *CBaseEntity::get_loader(void) const;
 
-216 12 ~CBaseEntity 0 4 376 25 CBaseEntity::~CBaseEntity 0 0 0
+223 12 ~CBaseEntity 0 4 385 25 CBaseEntity::~CBaseEntity 0 0 0
 32
 CBaseEntity::~CBaseEntity(void);
 
-217 14 get_class_type 0 4 377 28 CPointEntity::get_class_type 0 1 40 0
+224 14 get_class_type 0 4 386 28 CPointEntity::get_class_type 0 1 43 0
 53
 static TypeHandle CPointEntity::get_class_type(void);
 
-218 12 CPointEntity 0 4 377 26 CPointEntity::CPointEntity 0 2 38 39 0
+225 12 CPointEntity 0 4 386 26 CPointEntity::CPointEntity 0 2 41 42 0
 100
 CPointEntity::CPointEntity(void);
 inline CPointEntity::CPointEntity(CPointEntity const &) = default;
 
-219 10 get_origin 0 4 377 24 CPointEntity::get_origin 0 1 41 0
+226 10 get_origin 0 4 386 24 CPointEntity::get_origin 0 1 44 0
 45
 LPoint3 CPointEntity::get_origin(void) const;
 
-220 10 get_angles 0 4 377 24 CPointEntity::get_angles 0 1 42 0
+227 10 get_angles 0 4 386 24 CPointEntity::get_angles 0 1 45 0
 46
 LVector3 CPointEntity::get_angles(void) const;
 
-221 13 ~CPointEntity 0 4 377 27 CPointEntity::~CPointEntity 0 0 0
+228 13 ~CPointEntity 0 4 386 27 CPointEntity::~CPointEntity 0 0 0
 34
 CPointEntity::~CPointEntity(void);
 
-222 14 get_class_type 0 4 378 29 CBoundsEntity::get_class_type 0 1 45 0
+229 14 get_class_type 0 4 387 29 CBoundsEntity::get_class_type 0 1 48 0
 54
 static TypeHandle CBoundsEntity::get_class_type(void);
 
-223 13 CBoundsEntity 0 4 378 28 CBoundsEntity::CBoundsEntity 0 2 43 44 0
+230 13 CBoundsEntity 0 4 387 28 CBoundsEntity::CBoundsEntity 0 2 46 47 0
 105
 CBoundsEntity::CBoundsEntity(void);
 inline CBoundsEntity::CBoundsEntity(CBoundsEntity const &) = default;
 
-224 10 get_bounds 0 4 378 25 CBoundsEntity::get_bounds 0 1 46 0
+231 10 get_bounds 0 4 387 25 CBoundsEntity::get_bounds 0 1 49 0
 51
 BoundingBox *CBoundsEntity::get_bounds(void) const;
 
-225 9 is_inside 0 4 378 24 CBoundsEntity::is_inside 0 1 47 0
+232 9 is_inside 0 4 387 24 CBoundsEntity::is_inside 0 1 50 0
 63
 inline bool CBoundsEntity::is_inside(LPoint3 const &pos) const;
 
-226 13 fillin_bounds 0 4 378 28 CBoundsEntity::fillin_bounds 0 1 48 0
+233 13 fillin_bounds 0 4 387 28 CBoundsEntity::fillin_bounds 0 1 51 0
 64
 void CBoundsEntity::fillin_bounds(LPoint3 &mins, LPoint3 &maxs);
 
-227 14 ~CBoundsEntity 0 4 378 29 CBoundsEntity::~CBoundsEntity 0 0 0
+234 14 ~CBoundsEntity 0 4 387 29 CBoundsEntity::~CBoundsEntity 0 0 0
 36
 CBoundsEntity::~CBoundsEntity(void);
 
-228 14 get_class_type 0 4 379 28 CBrushEntity::get_class_type 0 1 51 0
+235 14 get_class_type 0 4 388 28 CBrushEntity::get_class_type 0 1 54 0
 53
 static TypeHandle CBrushEntity::get_class_type(void);
 
-229 12 CBrushEntity 0 4 379 26 CBrushEntity::CBrushEntity 0 2 49 50 0
+236 12 CBrushEntity 0 4 388 26 CBrushEntity::CBrushEntity 0 2 52 53 0
 100
 CBrushEntity::CBrushEntity(void);
 inline CBrushEntity::CBrushEntity(CBrushEntity const &) = default;
 
-230 12 get_modelnum 0 4 379 26 CBrushEntity::get_modelnum 0 1 52 0
+237 12 get_modelnum 0 4 388 26 CBrushEntity::get_modelnum 0 1 55 0
 43
 int CBrushEntity::get_modelnum(void) const;
 
-231 12 get_model_np 0 4 379 26 CBrushEntity::get_model_np 0 1 53 0
+238 12 get_model_np 0 4 388 26 CBrushEntity::get_model_np 0 1 56 0
 48
 NodePath CBrushEntity::get_model_np(void) const;
 
-232 16 get_model_bounds 0 4 379 30 CBrushEntity::get_model_bounds 0 1 54 0
+239 16 get_model_bounds 0 4 388 30 CBrushEntity::get_model_bounds 0 1 57 0
 66
 void CBrushEntity::get_model_bounds(LPoint3 &mins, LPoint3 &maxs);
 
-233 13 ~CBrushEntity 0 4 379 27 CBrushEntity::~CBrushEntity 0 0 0
+240 13 ~CBrushEntity 0 4 388 27 CBrushEntity::~CBrushEntity 0 0 0
 34
 CBrushEntity::~CBrushEntity(void);
 
-234 9 get_width 0 4 380 21 PackResult::get_width 0 1 56 0
+241 9 get_width 0 4 389 21 PackResult::get_width 0 1 59 0
 45
 inline int PackResult::get_width(void) const;
 
-235 10 get_height 0 4 380 22 PackResult::get_height 0 1 57 0
+242 10 get_height 0 4 389 22 PackResult::get_height 0 1 60 0
 46
 inline int PackResult::get_height(void) const;
 
-236 15 get_unused_area 0 4 380 27 PackResult::get_unused_area 0 1 58 0
+243 15 get_unused_area 0 4 389 27 PackResult::get_unused_area 0 1 61 0
 51
 inline int PackResult::get_unused_area(void) const;
 
-237 10 PackResult 0 4 380 22 PackResult::PackResult 0 1 55 0
+244 10 PackResult 0 4 389 22 PackResult::PackResult 0 1 58 0
 60
 inline PackResult::PackResult(PackResult const &) = default;
 
-238 11 ~PackResult 0 4 380 23 PackResult::~PackResult 0 0 0
+245 11 ~PackResult 0 4 389 23 PackResult::~PackResult 0 0 0
 30
 PackResult::~PackResult(void);
 
-239 5 get_x 0 4 381 22 TextureLocation::get_x 0 1 60 0
+246 5 get_x 0 4 390 22 TextureLocation::get_x 0 1 63 0
 46
 inline int TextureLocation::get_x(void) const;
 
-240 5 get_y 0 4 381 22 TextureLocation::get_y 0 1 61 0
+247 5 get_y 0 4 390 22 TextureLocation::get_y 0 1 64 0
 46
 inline int TextureLocation::get_y(void) const;
 
-241 9 get_width 0 4 381 26 TextureLocation::get_width 0 1 62 0
+248 9 get_width 0 4 390 26 TextureLocation::get_width 0 1 65 0
 50
 inline int TextureLocation::get_width(void) const;
 
-242 10 get_height 0 4 381 27 TextureLocation::get_height 0 1 63 0
+249 10 get_height 0 4 390 27 TextureLocation::get_height 0 1 66 0
 51
 inline int TextureLocation::get_height(void) const;
 
-243 11 get_rotated 0 4 381 28 TextureLocation::get_rotated 0 1 64 0
+250 11 get_rotated 0 4 390 28 TextureLocation::get_rotated 0 1 67 0
 53
 inline bool TextureLocation::get_rotated(void) const;
 
-244 15 TextureLocation 0 4 381 32 TextureLocation::TextureLocation 0 1 59 0
+251 15 TextureLocation 0 4 390 32 TextureLocation::TextureLocation 0 1 62 0
 75
 inline TextureLocation::TextureLocation(TextureLocation const &) = default;
 
-245 16 ~TextureLocation 0 4 381 33 TextureLocation::~TextureLocation 0 0 0
+252 16 ~TextureLocation 0 4 390 33 TextureLocation::~TextureLocation 0 0 0
 40
 TextureLocation::~TextureLocation(void);
 
-246 15 getTextureCount 0 6 382 30 TexturePacker::getTextureCount 0 1 65 0
+253 15 getTextureCount 0 6 391 30 TexturePacker::getTextureCount 0 1 68 0
 53
 virtual int TexturePacker::getTextureCount(void) = 0;
 
-247 15 setTextureCount 0 6 382 30 TexturePacker::setTextureCount 0 1 66 35
+254 15 setTextureCount 0 6 391 30 TexturePacker::setTextureCount 0 1 69 35
 // number of textures to consider..
 60
 virtual void TexturePacker::setTextureCount(int tcount) = 0;
 
-248 10 addTexture 0 6 382 25 TexturePacker::addTexture 0 1 67 21
+255 10 addTexture 0 6 391 25 TexturePacker::addTexture 0 1 70 21
 // add textures 0 - n
 61
 virtual void TexturePacker::addTexture(int wid, int hit) = 0;
 
-249 15 wouldTextureFit 0 6 382 30 TexturePacker::wouldTextureFit 0 1 68 0
+256 15 wouldTextureFit 0 6 391 30 TexturePacker::wouldTextureFit 0 1 71 0
 135
 virtual bool TexturePacker::wouldTextureFit(int wid, int hit, bool forcePowerOfTwo, bool onePixelBorder, int max_wid, int max_hit) = 0;
 
-250 13 addNewTexture 0 6 382 28 TexturePacker::addNewTexture 0 1 69 0
+257 13 addNewTexture 0 6 391 28 TexturePacker::addNewTexture 0 1 72 0
 64
 virtual void TexturePacker::addNewTexture(int wid, int hit) = 0;
 
-251 12 packTextures 0 6 382 27 TexturePacker::packTextures 0 1 70 74
+258 12 packTextures 0 6 391 27 TexturePacker::packTextures 0 1 73 74
 // pack the textures, the return code is the amount of wasted/unused area.
 94
 virtual PackResult TexturePacker::packTextures(bool forcePowerOfTwo, bool onePixelBorder) = 0;
 
-252 18 getTextureLocation 0 6 382 33 TexturePacker::getTextureLocation 0 1 71 58
+259 18 getTextureLocation 0 6 391 33 TexturePacker::getTextureLocation 0 1 74 58
 // returns true if the texture has been rotated 90 degrees
 73
 virtual TextureLocation TexturePacker::getTextureLocation(int index) = 0;
 
-253 19 createTexturePacker 0 4 382 34 TexturePacker::createTexturePacker 0 1 72 0
+260 19 createTexturePacker 0 4 391 34 TexturePacker::createTexturePacker 0 1 75 0
 63
 static TexturePacker *TexturePacker::createTexturePacker(void);
 
-254 20 releaseTexturePacker 0 4 382 35 TexturePacker::releaseTexturePacker 0 1 73 0
+261 20 releaseTexturePacker 0 4 391 35 TexturePacker::releaseTexturePacker 0 1 76 0
 67
 static void TexturePacker::releaseTexturePacker(TexturePacker *tp);
 
-255 14 ~TexturePacker 0 4 382 29 TexturePacker::~TexturePacker 0 0 0
+262 14 ~TexturePacker 0 4 391 29 TexturePacker::~TexturePacker 0 0 0
 36
 TexturePacker::~TexturePacker(void);
 
-256 4 make 0 4 383 19 BSPFaceAttrib::make 0 1 74 0
+263 4 make 0 4 392 19 BSPFaceAttrib::make 0 1 77 0
 107
 static ConstPointerTo< RenderAttrib > BSPFaceAttrib::make(std::string const &face_material, int face_type);
 
-257 12 make_default 0 4 383 27 BSPFaceAttrib::make_default 0 1 75 0
+264 12 make_default 0 4 392 27 BSPFaceAttrib::make_default 0 1 78 0
 72
 static ConstPointerTo< RenderAttrib > BSPFaceAttrib::make_default(void);
 
-258 15 make_ignore_pvs 0 4 383 30 BSPFaceAttrib::make_ignore_pvs 0 1 76 0
+265 15 make_ignore_pvs 0 4 392 30 BSPFaceAttrib::make_ignore_pvs 0 1 79 0
 75
 static ConstPointerTo< RenderAttrib > BSPFaceAttrib::make_ignore_pvs(void);
 
-259 12 get_material 0 4 383 27 BSPFaceAttrib::get_material 0 1 77 0
+266 12 get_material 0 4 392 27 BSPFaceAttrib::get_material 0 1 80 0
 59
 inline std::string BSPFaceAttrib::get_material(void) const;
 
-260 13 get_face_type 0 4 383 28 BSPFaceAttrib::get_face_type 0 1 78 0
+267 13 get_face_type 0 4 392 28 BSPFaceAttrib::get_face_type 0 1 81 0
 52
 inline int BSPFaceAttrib::get_face_type(void) const;
 
-261 14 get_ignore_pvs 0 4 383 29 BSPFaceAttrib::get_ignore_pvs 0 1 79 0
+268 14 get_ignore_pvs 0 4 392 29 BSPFaceAttrib::get_ignore_pvs 0 1 82 0
 54
 inline bool BSPFaceAttrib::get_ignore_pvs(void) const;
 
-262 14 get_class_slot 0 4 383 29 BSPFaceAttrib::get_class_slot 0 1 80 0
+269 14 get_class_slot 0 4 392 29 BSPFaceAttrib::get_class_slot 0 1 83 0
 47
 static int BSPFaceAttrib::get_class_slot(void);
 
-263 14 get_class_type 0 4 383 29 BSPFaceAttrib::get_class_type 0 1 81 0
+270 14 get_class_type 0 4 392 29 BSPFaceAttrib::get_class_type 0 1 84 0
 54
 static TypeHandle BSPFaceAttrib::get_class_type(void);
 
-264 14 ~BSPFaceAttrib 0 4 383 29 BSPFaceAttrib::~BSPFaceAttrib 0 0 0
+271 14 ~BSPFaceAttrib 0 4 392 29 BSPFaceAttrib::~BSPFaceAttrib 0 0 0
 36
 BSPFaceAttrib::~BSPFaceAttrib(void);
 
-265 9 BSPLoader 0 4 385 20 BSPLoader::BSPLoader 0 1 82 0
+272 9 BSPLoader 0 4 394 20 BSPLoader::BSPLoader 0 1 85 0
 27
 BSPLoader::BSPLoader(void);
 
-266 4 read 0 4 385 15 BSPLoader::read 0 1 83 0
+273 4 read 0 4 394 15 BSPLoader::read 0 1 86 0
 43
 bool BSPLoader::read(Filename const &file);
 
-267 16 do_optimizations 0 4 385 27 BSPLoader::do_optimizations 0 1 84 0
+274 16 do_optimizations 0 4 394 27 BSPLoader::do_optimizations 0 1 87 0
 39
 void BSPLoader::do_optimizations(void);
 
-268 9 set_gamma 0 4 385 20 BSPLoader::set_gamma 0 1 85 0
+275 9 set_gamma 0 4 394 20 BSPLoader::set_gamma 0 1 88 0
 65
 void BSPLoader::set_gamma(PN_stdfloat gamma, int overbright = 1);
 
-269 9 get_gamma 0 4 385 20 BSPLoader::get_gamma 0 1 86 0
+276 9 get_gamma 0 4 394 20 BSPLoader::get_gamma 0 1 89 0
 52
 inline PN_stdfloat BSPLoader::get_gamma(void) const;
 
-270 7 set_win 0 4 385 18 BSPLoader::set_win 0 1 87 0
+277 7 set_win 0 4 394 18 BSPLoader::set_win 0 1 90 0
 45
 void BSPLoader::set_win(GraphicsWindow *win);
 
-271 10 set_camera 0 4 385 21 BSPLoader::set_camera 0 1 88 0
+278 10 set_camera 0 4 394 21 BSPLoader::set_camera 0 1 91 0
 51
 void BSPLoader::set_camera(NodePath const &camera);
 
-272 10 set_render 0 4 385 21 BSPLoader::set_render 0 1 89 0
+279 10 set_render 0 4 394 21 BSPLoader::set_render 0 1 92 0
 51
 void BSPLoader::set_render(NodePath const &render);
 
-273 19 set_want_visibility 0 4 385 30 BSPLoader::set_want_visibility 0 1 90 0
+280 19 set_want_visibility 0 4 394 30 BSPLoader::set_want_visibility 0 1 93 0
 47
 void BSPLoader::set_want_visibility(bool flag);
 
-274 18 set_want_lightmaps 0 4 385 29 BSPLoader::set_want_lightmaps 0 1 91 0
+281 18 set_want_lightmaps 0 4 394 29 BSPLoader::set_want_lightmaps 0 1 94 0
 46
 void BSPLoader::set_want_lightmaps(bool flag);
 
-275 16 set_physics_type 0 4 385 27 BSPLoader::set_physics_type 0 1 92 0
+282 16 set_physics_type 0 4 394 27 BSPLoader::set_physics_type 0 1 95 0
 43
 void BSPLoader::set_physics_type(int type);
 
-276 19 set_visualize_leafs 0 4 385 30 BSPLoader::set_visualize_leafs 0 1 93 0
+283 19 set_visualize_leafs 0 4 394 30 BSPLoader::set_visualize_leafs 0 1 96 0
 47
 void BSPLoader::set_visualize_leafs(bool flag);
 
-277 18 set_materials_file 0 4 385 29 BSPLoader::set_materials_file 0 1 94 0
+284 18 set_materials_file 0 4 394 29 BSPLoader::set_materials_file 0 1 97 0
 57
 void BSPLoader::set_materials_file(Filename const &file);
 
-278 13 set_wireframe 0 4 385 24 BSPLoader::set_wireframe 0 1 95 0
+285 13 set_wireframe 0 4 394 24 BSPLoader::set_wireframe 0 1 98 0
 41
 void BSPLoader::set_wireframe(bool flag);
 
-279 13 get_wireframe 0 4 385 24 BSPLoader::get_wireframe 0 1 96 0
+286 13 get_wireframe 0 4 394 24 BSPLoader::get_wireframe 0 1 99 0
 49
 inline bool BSPLoader::get_wireframe(void) const;
 
-280 10 get_camera 0 4 385 21 BSPLoader::get_camera 0 1 97 0
+287 10 get_camera 0 4 394 21 BSPLoader::get_camera 0 1 100 0
 50
 inline NodePath BSPLoader::get_camera(void) const;
 
-281 14 build_cubemaps 0 4 385 25 BSPLoader::build_cubemaps 0 1 98 0
+288 14 build_cubemaps 0 4 394 25 BSPLoader::build_cubemaps 0 1 101 0
 37
 void BSPLoader::build_cubemaps(void);
 
-282 15 setup_shadowcam 0 4 385 26 BSPLoader::setup_shadowcam 0 1 99 0
+289 15 setup_shadowcam 0 4 394 26 BSPLoader::setup_shadowcam 0 1 102 0
 38
 void BSPLoader::setup_shadowcam(void);
 
-283 16 add_dynamic_node 0 4 385 27 BSPLoader::add_dynamic_node 0 1 100 0
+290 16 add_dynamic_node 0 4 394 27 BSPLoader::add_dynamic_node 0 1 103 0
 55
 void BSPLoader::add_dynamic_node(NodePath const &node);
 
-284 16 set_want_shadows 0 4 385 27 BSPLoader::set_want_shadows 0 1 101 0
+291 16 set_want_shadows 0 4 394 27 BSPLoader::set_want_shadows 0 1 104 0
 44
 void BSPLoader::set_want_shadows(bool flag);
 
-285 18 set_shadow_cam_pos 0 4 385 29 BSPLoader::set_shadow_cam_pos 0 1 102 0
+292 18 set_shadow_cam_pos 0 4 394 29 BSPLoader::set_shadow_cam_pos 0 1 105 0
 55
 void BSPLoader::set_shadow_cam_pos(LPoint3 const &pos);
 
-286 22 set_shadow_cam_bitmask 0 4 385 33 BSPLoader::set_shadow_cam_bitmask 0 1 103 0
+293 22 set_shadow_cam_bitmask 0 4 394 33 BSPLoader::set_shadow_cam_bitmask 0 1 106 0
 62
 void BSPLoader::set_shadow_cam_bitmask(BitMask32 const &mask);
 
-287 16 set_shadow_color 0 4 385 27 BSPLoader::set_shadow_color 0 1 104 0
+294 16 set_shadow_color 0 4 394 27 BSPLoader::set_shadow_color 0 1 107 0
 54
 void BSPLoader::set_shadow_color(LColor const &color);
 
-288 21 set_shadow_resolution 0 4 385 32 BSPLoader::set_shadow_resolution 0 1 105 0
+295 21 set_shadow_resolution 0 4 394 32 BSPLoader::set_shadow_resolution 0 1 108 0
 65
 void BSPLoader::set_shadow_resolution(int filmsize, int texsize);
 
-289 12 cast_shadows 0 4 385 23 BSPLoader::cast_shadows 0 1 106 0
+296 12 cast_shadows 0 4 394 23 BSPLoader::cast_shadows 0 1 109 0
 45
 void BSPLoader::cast_shadows(NodePath &node);
 
-290 14 get_shadow_tex 0 4 385 25 BSPLoader::get_shadow_tex 0 1 107 0
+297 14 get_shadow_tex 0 4 394 25 BSPLoader::get_shadow_tex 0 1 110 0
 47
 Texture *BSPLoader::get_shadow_tex(void) const;
 
-291 16 extract_modelnum 0 4 385 27 BSPLoader::extract_modelnum 0 1 108 0
+298 16 extract_modelnum 0 4 394 27 BSPLoader::extract_modelnum 0 1 111 0
 51
 inline int BSPLoader::extract_modelnum(int entnum);
 
-292 16 get_model_bounds 0 4 385 27 BSPLoader::get_model_bounds 0 1 109 0
+299 16 get_model_bounds 0 4 394 27 BSPLoader::get_model_bounds 0 1 112 0
 84
 inline void BSPLoader::get_model_bounds(int modelnum, LPoint3 &mins, LPoint3 &maxs);
 
-293 28 set_server_entity_dispatcher 0 4 385 39 BSPLoader::set_server_entity_dispatcher 0 1 110 0
+300 28 set_server_entity_dispatcher 0 4 394 39 BSPLoader::set_server_entity_dispatcher 0 1 113 0
 67
 void BSPLoader::set_server_entity_dispatcher(PyObject *dispatcher);
 
-294 27 link_server_entity_to_class 0 4 385 38 BSPLoader::link_server_entity_to_class 0 1 111 0
+301 27 link_server_entity_to_class 0 4 394 38 BSPLoader::link_server_entity_to_class 0 1 114 0
 89
 void BSPLoader::link_server_entity_to_class(std::string const &name, PyTypeObject *type);
 
-295 6 set_ai 0 4 385 17 BSPLoader::set_ai 0 1 112 0
+302 6 set_ai 0 4 394 17 BSPLoader::set_ai 0 1 115 0
 32
 void BSPLoader::set_ai(bool ai);
 
-296 5 is_ai 0 4 385 16 BSPLoader::is_ai 0 1 113 0
+303 5 is_ai 0 4 394 16 BSPLoader::is_ai 0 1 116 0
 41
 inline bool BSPLoader::is_ai(void) const;
 
-297 19 update_dynamic_node 0 4 385 30 BSPLoader::update_dynamic_node 0 1 114 0
+304 19 update_dynamic_node 0 4 394 30 BSPLoader::update_dynamic_node 0 1 117 0
 58
 void BSPLoader::update_dynamic_node(NodePath const &node);
 
-298 10 trace_line 0 4 385 21 BSPLoader::trace_line 0 1 115 0
+305 10 trace_line 0 4 394 21 BSPLoader::trace_line 0 1 118 0
 69
 bool BSPLoader::trace_line(LPoint3 const &start, LPoint3 const &end);
 
-299 20 link_entity_to_class 0 4 385 31 BSPLoader::link_entity_to_class 0 1 116 0
+306 20 link_entity_to_class 0 4 394 31 BSPLoader::link_entity_to_class 0 1 119 0
 85
 void BSPLoader::link_entity_to_class(std::string const &entname, PyTypeObject *type);
 
-300 28 get_py_entity_by_target_name 0 4 385 39 BSPLoader::get_py_entity_by_target_name 0 1 117 0
+307 28 get_py_entity_by_target_name 0 4 394 39 BSPLoader::get_py_entity_by_target_name 0 1 120 0
 87
 PyObject *BSPLoader::get_py_entity_by_target_name(std::string const &targetname) const;
 
-301 17 find_all_entities 0 4 385 28 BSPLoader::find_all_entities 0 1 118 0
+308 17 find_all_entities 0 4 394 28 BSPLoader::find_all_entities 0 1 121 0
 69
 PyObject *BSPLoader::find_all_entities(std::string const &classname);
 
-302 20 get_entity_keyvalues 0 4 385 31 BSPLoader::get_entity_keyvalues 0 1 119 0
+309 20 get_entity_keyvalues 0 4 394 31 BSPLoader::get_entity_keyvalues 0 1 122 0
 71
 void BSPLoader::get_entity_keyvalues(PyObject *list, int const entnum);
 
-303 18 link_cent_to_pyent 0 4 385 29 BSPLoader::link_cent_to_pyent 0 1 120 0
+310 18 link_cent_to_pyent 0 4 394 29 BSPLoader::link_cent_to_pyent 0 1 123 0
 63
 void BSPLoader::link_cent_to_pyent(int entum, PyObject *pyent);
 
-304 16 get_num_entities 0 4 385 27 BSPLoader::get_num_entities 0 1 121 0
+311 16 get_num_entities 0 4 394 27 BSPLoader::get_num_entities 0 1 124 0
 44
 int BSPLoader::get_num_entities(void) const;
 
-305 16 get_entity_value 0 4 385 27 BSPLoader::get_entity_value 0 1 122 0
+312 16 get_entity_value 0 4 394 27 BSPLoader::get_entity_value 0 1 125 0
 75
 std::string BSPLoader::get_entity_value(int entnum, char const *key) const;
 
-306 22 get_entity_value_float 0 4 385 33 BSPLoader::get_entity_value_float 0 1 123 0
+313 22 get_entity_value_float 0 4 394 33 BSPLoader::get_entity_value_float 0 1 126 0
 75
 float BSPLoader::get_entity_value_float(int entnum, char const *key) const;
 
-307 20 get_entity_value_int 0 4 385 31 BSPLoader::get_entity_value_int 0 1 124 0
+314 20 get_entity_value_int 0 4 394 31 BSPLoader::get_entity_value_int 0 1 127 0
 71
 int BSPLoader::get_entity_value_int(int entnum, char const *key) const;
 
-308 23 get_entity_value_vector 0 4 385 34 BSPLoader::get_entity_value_vector 0 1 125 0
+315 23 get_entity_value_vector 0 4 394 34 BSPLoader::get_entity_value_vector 0 1 128 0
 79
 LVector3 BSPLoader::get_entity_value_vector(int entnum, char const *key) const;
 
-309 22 get_entity_value_color 0 4 385 33 BSPLoader::get_entity_value_color 0 1 126 0
+316 22 get_entity_value_color 0 4 394 33 BSPLoader::get_entity_value_color 0 1 129 0
 95
 LColor BSPLoader::get_entity_value_color(int entnum, char const *key, bool scale = true) const;
 
-310 10 get_entity 0 4 385 21 BSPLoader::get_entity 0 1 127 0
+317 10 get_entity 0 4 394 21 BSPLoader::get_entity 0 1 130 0
 49
 NodePath BSPLoader::get_entity(int entnum) const;
 
-311 9 get_model 0 4 385 20 BSPLoader::get_model 0 1 128 0
+318 9 get_model 0 4 394 20 BSPLoader::get_model 0 1 131 0
 50
 NodePath BSPLoader::get_model(int modelnum) const;
 
-312 12 get_c_entity 0 4 385 23 BSPLoader::get_c_entity 0 1 129 0
+319 12 get_c_entity 0 4 394 23 BSPLoader::get_c_entity 0 1 132 0
 68
 inline CBaseEntity *BSPLoader::get_c_entity(int const entnum) const;
 
-313 9 find_leaf 0 4 385 20 BSPLoader::find_leaf 0 2 130 131 0
+320 9 find_leaf 0 4 394 20 BSPLoader::find_leaf 0 2 133 134 0
 105
 inline int BSPLoader::find_leaf(NodePath const &np);
 inline int BSPLoader::find_leaf(LPoint3 const &pos);
 
-314 9 find_node 0 4 385 20 BSPLoader::find_node 0 1 132 0
+321 9 find_node 0 4 394 20 BSPLoader::find_node 0 1 135 0
 52
 inline int BSPLoader::find_node(LPoint3 const &pos);
 
-315 18 is_cluster_visible 0 4 385 29 BSPLoader::is_cluster_visible 0 1 133 0
+322 18 is_cluster_visible 0 4 394 29 BSPLoader::is_cluster_visible 0 1 136 0
 79
 inline bool BSPLoader::is_cluster_visible(int curr_cluster, int cluster) const;
 
-316 15 pvs_bounds_test 0 4 385 26 BSPLoader::pvs_bounds_test 0 1 134 0
+323 15 pvs_bounds_test 0 4 394 26 BSPLoader::pvs_bounds_test 0 1 137 0
 78
 inline bool BSPLoader::pvs_bounds_test(GeometricBoundingVolume const *bounds);
 
-317 15 make_net_bounds 0 4 385 26 BSPLoader::make_net_bounds 0 1 135 0
+324 15 make_net_bounds 0 4 394 26 BSPLoader::make_net_bounds 0 1 138 0
 154
 inline ConstPointerTo< GeometricBoundingVolume > BSPLoader::make_net_bounds(TransformState const *net_transform, GeometricBoundingVolume const *original);
 
-318 16 has_active_level 0 4 385 27 BSPLoader::has_active_level 0 1 136 0
+325 16 has_active_level 0 4 394 27 BSPLoader::has_active_level 0 1 139 0
 52
 inline bool BSPLoader::has_active_level(void) const;
 
-319 14 has_visibility 0 4 385 25 BSPLoader::has_visibility 0 1 137 0
+326 14 has_visibility 0 4 394 25 BSPLoader::has_visibility 0 1 140 0
 50
 inline bool BSPLoader::has_visibility(void) const;
 
-320 7 cleanup 0 4 385 18 BSPLoader::cleanup 0 1 138 0
+327 7 cleanup 0 4 394 18 BSPLoader::cleanup 0 1 141 0
 30
 void BSPLoader::cleanup(void);
 
-321 10 get_result 0 4 385 21 BSPLoader::get_result 0 1 139 0
+328 10 get_result 0 4 394 21 BSPLoader::get_result 0 1 142 0
 43
 NodePath BSPLoader::get_result(void) const;
 
-322 14 get_global_ptr 0 4 385 25 BSPLoader::get_global_ptr 0 1 140 0
+329 14 get_global_ptr 0 4 394 25 BSPLoader::get_global_ptr 0 1 143 0
 50
 static BSPLoader *BSPLoader::get_global_ptr(void);
 
-323 10 ~BSPLoader 0 4 385 21 BSPLoader::~BSPLoader 0 0 0
+330 10 ~BSPLoader 0 4 394 21 BSPLoader::~BSPLoader 0 0 0
 28
 BSPLoader::~BSPLoader(void);
 
-324 14 get_class_type 0 4 387 32 BSPCullTraverser::get_class_type 0 1 143 0
+331 14 get_class_type 0 4 396 32 BSPCullTraverser::get_class_type 0 1 146 0
 57
 static TypeHandle BSPCullTraverser::get_class_type(void);
 
-325 16 BSPCullTraverser 0 4 387 34 BSPCullTraverser::BSPCullTraverser 0 2 141 142 0
+332 16 BSPCullTraverser 0 4 396 34 BSPCullTraverser::BSPCullTraverser 0 2 144 145 0
 154
 BSPCullTraverser::BSPCullTraverser(CullTraverser *trav, BSPLoader *loader);
 inline BSPCullTraverser::BSPCullTraverser(BSPCullTraverser const &) = default;
 
-326 17 ~BSPCullTraverser 0 4 387 35 BSPCullTraverser::~BSPCullTraverser 0 0 0
+333 17 ~BSPCullTraverser 0 4 396 35 BSPCullTraverser::~BSPCullTraverser 0 0 0
 42
 BSPCullTraverser::~BSPCullTraverser(void);
 
-327 14 get_class_type 0 4 389 25 BSPRender::get_class_type 0 1 146 0
+334 14 get_class_type 0 4 398 25 BSPRender::get_class_type 0 1 149 0
 50
 static TypeHandle BSPRender::get_class_type(void);
 
-328 9 BSPRender 0 4 389 20 BSPRender::BSPRender 0 2 144 145 0
+335 9 BSPRender 0 4 398 20 BSPRender::BSPRender 0 2 147 148 0
 123
 BSPRender::BSPRender(std::string const &name, BSPLoader *loader);
 inline BSPRender::BSPRender(BSPRender const &) = default;
 
-329 10 ~BSPRender 0 4 389 21 BSPRender::~BSPRender 0 0 0
+336 10 ~BSPRender 0 4 398 21 BSPRender::~BSPRender 0 0 0
 28
 BSPRender::~BSPRender(void);
 
-330 14 get_class_type 0 4 391 23 BSPRoot::get_class_type 0 1 149 0
+337 14 get_class_type 0 4 400 23 BSPRoot::get_class_type 0 1 152 0
 48
 static TypeHandle BSPRoot::get_class_type(void);
 
-331 7 BSPRoot 0 4 391 16 BSPRoot::BSPRoot 0 2 147 148 0
+338 7 BSPRoot 0 4 400 16 BSPRoot::BSPRoot 0 2 150 151 0
 94
 BSPRoot::BSPRoot(std::string const &name);
 inline BSPRoot::BSPRoot(BSPRoot const &) = default;
 
-332 8 ~BSPRoot 0 4 391 17 BSPRoot::~BSPRoot 0 0 0
+339 8 ~BSPRoot 0 4 400 17 BSPRoot::~BSPRoot 0 0 0
 24
 BSPRoot::~BSPRoot(void);
 
-333 14 get_class_type 0 4 392 23 BSPProp::get_class_type 0 1 152 0
+340 14 get_class_type 0 4 401 23 BSPProp::get_class_type 0 1 155 0
 48
 static TypeHandle BSPProp::get_class_type(void);
 
-334 7 BSPProp 0 4 392 16 BSPProp::BSPProp 0 2 150 151 0
+341 7 BSPProp 0 4 401 16 BSPProp::BSPProp 0 2 153 154 0
 94
 BSPProp::BSPProp(std::string const &name);
 inline BSPProp::BSPProp(BSPProp const &) = default;
 
-335 8 ~BSPProp 0 4 392 17 BSPProp::~BSPProp 0 0 0
+342 8 ~BSPProp 0 4 401 17 BSPProp::~BSPProp 0 0 0
 24
 BSPProp::~BSPProp(void);
 
-336 14 get_class_type 0 4 394 24 BSPModel::get_class_type 0 1 155 0
+343 14 get_class_type 0 4 403 24 BSPModel::get_class_type 0 1 158 0
 49
 static TypeHandle BSPModel::get_class_type(void);
 
-337 8 BSPModel 0 4 394 18 BSPModel::BSPModel 0 2 153 154 0
+344 8 BSPModel 0 4 403 18 BSPModel::BSPModel 0 2 156 157 0
 99
 BSPModel::BSPModel(std::string const &name);
 inline BSPModel::BSPModel(BSPModel const &) = default;
 
-338 9 ~BSPModel 0 4 394 19 BSPModel::~BSPModel 0 0 0
+345 9 ~BSPModel 0 4 403 19 BSPModel::~BSPModel 0 0 0
 26
 BSPModel::~BSPModel(void);
 
-339 15 add_permutation 0 4 395 35 ShaderPermutations::add_permutation 0 1 158 0
+346 15 add_permutation 0 4 404 35 ShaderPermutations::add_permutation 0 1 161 0
 97
 void ShaderPermutations::add_permutation(std::string const &key, std::string const &value = "1");
 
-340 9 add_input 0 4 395 29 ShaderPermutations::add_input 0 1 159 0
+347 9 add_input 0 4 404 29 ShaderPermutations::add_input 0 1 162 0
 82
 void ShaderPermutations::add_input(ShaderInput const &inp, bool important = true);
 
-341 8 add_flag 0 4 395 28 ShaderPermutations::add_flag 0 1 160 0
+348 8 add_flag 0 4 404 28 ShaderPermutations::add_flag 0 1 163 0
 44
 void ShaderPermutations::add_flag(int flag);
 
-342 10 operator < 0 4 395 30 ShaderPermutations::operator < 0 1 161 0
+349 10 operator < 0 4 404 30 ShaderPermutations::operator < 0 1 164 0
 75
 bool ShaderPermutations::operator <(ShaderPermutations const &other) const;
 
-343 18 ShaderPermutations 0 4 395 38 ShaderPermutations::ShaderPermutations 0 2 156 157 0
+350 18 ShaderPermutations 0 4 404 38 ShaderPermutations::ShaderPermutations 0 2 159 160 0
 147
 inline ShaderPermutations::ShaderPermutations(void) = default;
 inline ShaderPermutations::ShaderPermutations(ShaderPermutations const &) = default;
 
-344 19 ~ShaderPermutations 0 4 395 39 ShaderPermutations::~ShaderPermutations 0 0 0
+351 19 ~ShaderPermutations 0 4 404 39 ShaderPermutations::~ShaderPermutations 0 0 0
 46
 ShaderPermutations::~ShaderPermutations(void);
 
-345 24 upcast_to_ReferenceCount 0 12 396 36 ShaderSpec::upcast_to_ReferenceCount 0 1 164 40
+352 24 upcast_to_ReferenceCount 0 12 405 36 ShaderSpec::upcast_to_ReferenceCount 0 1 167 40
 upcast from ShaderSpec to ReferenceCount
 59
 ReferenceCount *ShaderSpec::upcast_to_ReferenceCount(void);
 
-346 22 downcast_to_ShaderSpec 0 12 397 38 ReferenceCount::downcast_to_ShaderSpec 0 0 42
+353 22 downcast_to_ShaderSpec 0 12 406 38 ReferenceCount::downcast_to_ShaderSpec 0 0 42
 downcast from ReferenceCount to ShaderSpec
 57
 ShaderSpec *ReferenceCount::downcast_to_ShaderSpec(void);
 
-347 17 upcast_to_Namable 0 12 396 29 ShaderSpec::upcast_to_Namable 0 1 165 33
+354 17 upcast_to_Namable 0 12 405 29 ShaderSpec::upcast_to_Namable 0 1 168 33
 upcast from ShaderSpec to Namable
 45
 Namable *ShaderSpec::upcast_to_Namable(void);
 
-348 22 downcast_to_ShaderSpec 0 12 398 31 Namable::downcast_to_ShaderSpec 0 0 35
+355 22 downcast_to_ShaderSpec 0 12 407 31 Namable::downcast_to_ShaderSpec 0 0 35
 downcast from Namable to ShaderSpec
 50
 ShaderSpec *Namable::downcast_to_ShaderSpec(void);
 
-349 17 read_shader_files 0 4 396 29 ShaderSpec::read_shader_files 0 1 162 0
+356 17 read_shader_files 0 4 405 29 ShaderSpec::read_shader_files 0 1 165 0
 117
 void ShaderSpec::read_shader_files(Filename const &vert_file, Filename const &pixel_file, Filename const &geom_file);
 
-350 14 get_class_type 0 4 396 26 ShaderSpec::get_class_type 0 1 163 0
+357 14 get_class_type 0 4 405 26 ShaderSpec::get_class_type 0 1 166 0
 51
 static TypeHandle ShaderSpec::get_class_type(void);
 
-351 11 ~ShaderSpec 0 4 396 23 ShaderSpec::~ShaderSpec 0 0 0
+358 11 ~ShaderSpec 0 4 405 23 ShaderSpec::~ShaderSpec 0 0 0
 30
 ShaderSpec::~ShaderSpec(void);
 
-352 19 PSSMShaderGenerator 0 4 399 40 PSSMShaderGenerator::PSSMShaderGenerator 0 2 166 167 0
+359 19 PSSMShaderGenerator 0 4 408 40 PSSMShaderGenerator::PSSMShaderGenerator 0 2 169 170 0
 205
 PSSMShaderGenerator::PSSMShaderGenerator(GraphicsStateGuardian *gsg, NodePath const &camera, NodePath const &render);
 inline PSSMShaderGenerator::PSSMShaderGenerator(PSSMShaderGenerator const &) = default;
 
-353 13 set_sun_light 0 4 399 34 PSSMShaderGenerator::set_sun_light 0 1 168 0
+360 13 set_sun_light 0 4 408 34 PSSMShaderGenerator::set_sun_light 0 1 171 0
 60
 void PSSMShaderGenerator::set_sun_light(NodePath const &np);
 
-354 12 start_update 0 4 399 33 PSSMShaderGenerator::start_update 0 1 169 0
+361 12 start_update 0 4 408 33 PSSMShaderGenerator::start_update 0 1 172 0
 45
 void PSSMShaderGenerator::start_update(void);
 
-355 10 add_shader 0 4 399 31 PSSMShaderGenerator::add_shader 0 1 170 0
+362 10 add_shader 0 4 408 31 PSSMShaderGenerator::add_shader 0 1 173 0
 67
 void PSSMShaderGenerator::add_shader(PointerTo< ShaderSpec > spec);
 
-356 19 has_shadow_sunlight 0 4 399 40 PSSMShaderGenerator::has_shadow_sunlight 0 1 171 0
+363 19 has_shadow_sunlight 0 4 408 40 PSSMShaderGenerator::has_shadow_sunlight 0 1 174 0
 65
 inline bool PSSMShaderGenerator::has_shadow_sunlight(void) const;
 
-357 22 get_pssm_array_texture 0 4 399 43 PSSMShaderGenerator::get_pssm_array_texture 0 1 172 0
+364 22 get_pssm_array_texture 0 4 408 43 PSSMShaderGenerator::get_pssm_array_texture 0 1 175 0
 72
 inline Texture *PSSMShaderGenerator::get_pssm_array_texture(void) const;
 
-358 12 get_pssm_rig 0 4 399 33 PSSMShaderGenerator::get_pssm_rig 0 1 173 0
+365 12 get_pssm_rig 0 4 408 33 PSSMShaderGenerator::get_pssm_rig 0 1 176 0
 68
 inline PSSMCameraRig *PSSMShaderGenerator::get_pssm_rig(void) const;
 
-359 20 get_identity_cubemap 0 4 399 41 PSSMShaderGenerator::get_identity_cubemap 0 1 174 0
+366 20 get_identity_cubemap 0 4 408 41 PSSMShaderGenerator::get_identity_cubemap 0 1 177 0
 64
 static Texture *PSSMShaderGenerator::get_identity_cubemap(void);
 
-360 14 get_class_type 0 4 399 35 PSSMShaderGenerator::get_class_type 0 1 175 0
+367 14 get_class_type 0 4 408 35 PSSMShaderGenerator::get_class_type 0 1 178 0
 60
 static TypeHandle PSSMShaderGenerator::get_class_type(void);
 
-361 20 ~PSSMShaderGenerator 0 4 399 41 PSSMShaderGenerator::~PSSMShaderGenerator 0 0 0
+368 20 ~PSSMShaderGenerator 0 4 408 41 PSSMShaderGenerator::~PSSMShaderGenerator 0 0 0
 48
 PSSMShaderGenerator::~PSSMShaderGenerator(void);
 
-362 20 VertexLitGenericSpec 0 4 401 42 VertexLitGenericSpec::VertexLitGenericSpec 0 1 176 0
+369 20 VertexLitGenericSpec 0 4 410 42 VertexLitGenericSpec::VertexLitGenericSpec 0 1 179 0
 49
 VertexLitGenericSpec::VertexLitGenericSpec(void);
 
-363 21 ~VertexLitGenericSpec 0 4 401 43 VertexLitGenericSpec::~VertexLitGenericSpec 0 0 0
+370 21 ~VertexLitGenericSpec 0 4 410 43 VertexLitGenericSpec::~VertexLitGenericSpec 0 0 0
 50
 VertexLitGenericSpec::~VertexLitGenericSpec(void);
 
-364 22 LightmappedGenericSpec 0 4 402 46 LightmappedGenericSpec::LightmappedGenericSpec 0 1 177 0
+371 22 LightmappedGenericSpec 0 4 411 46 LightmappedGenericSpec::LightmappedGenericSpec 0 1 180 0
 53
 LightmappedGenericSpec::LightmappedGenericSpec(void);
 
-365 23 ~LightmappedGenericSpec 0 4 402 47 LightmappedGenericSpec::~LightmappedGenericSpec 0 0 0
+372 23 ~LightmappedGenericSpec 0 4 411 47 LightmappedGenericSpec::~LightmappedGenericSpec 0 0 0
 54
 LightmappedGenericSpec::~LightmappedGenericSpec(void);
 
-366 16 UnlitGenericSpec 0 4 403 34 UnlitGenericSpec::UnlitGenericSpec 0 1 178 0
+373 16 UnlitGenericSpec 0 4 412 34 UnlitGenericSpec::UnlitGenericSpec 0 1 181 0
 41
 UnlitGenericSpec::UnlitGenericSpec(void);
 
-367 17 ~UnlitGenericSpec 0 4 403 35 UnlitGenericSpec::~UnlitGenericSpec 0 0 0
+374 17 ~UnlitGenericSpec 0 4 412 35 UnlitGenericSpec::~UnlitGenericSpec 0 0 0
 42
 UnlitGenericSpec::~UnlitGenericSpec(void);
 
-368 14 UnlitNoMatSpec 0 4 404 30 UnlitNoMatSpec::UnlitNoMatSpec 0 1 179 0
+375 14 UnlitNoMatSpec 0 4 413 30 UnlitNoMatSpec::UnlitNoMatSpec 0 1 182 0
 37
 UnlitNoMatSpec::UnlitNoMatSpec(void);
 
-369 15 ~UnlitNoMatSpec 0 4 404 31 UnlitNoMatSpec::~UnlitNoMatSpec 0 0 0
+376 15 ~UnlitNoMatSpec 0 4 413 31 UnlitNoMatSpec::~UnlitNoMatSpec 0 0 0
 38
 UnlitNoMatSpec::~UnlitNoMatSpec(void);
 
-179
-1 0 0 7 12 405 191 0 0 0 
-2 0 0 7 12 405 191 0 0 1 6 param0 0 406  
-3 0 0 7 2 410 0 0 0 1 4 name 1 409  
-4 0 0 7 2 410 0 0 0 2 4 name 1 409  7 uv_name 1 409  
-5 0 0 7 3 410 0 0 0 0 
-6 0 0 7 4 410 0 0 0 0 
-7 0 0 7 5 410 0 0 0 0 
-8 0 0 7 6 410 0 0 0 0 
-9 0 0 7 7 410 0 0 0 0 
-10 0 0 7 8 410 0 0 0 0 
-11 0 0 7 9 410 0 0 0 0 
-12 0 0 7 10 410 0 0 0 0 
-13 0 0 7 11 410 0 0 0 0 
-14 0 0 7 16 413 205 0 0 1 4 copy 1 411  
-15 0 0 7 16 413 205 0 0 1 4 name 1 409  
-16 0 0 7 17 413 205 0 0 2 4 this 3 413  4 copy 1 411  
-17 0 0 4 18 414 0 0 0 3 4 this 3 413  3 key 1 409  5 value 1 409  
-18 0 0 6 19 409 0 0 0 2 4 this 3 411  3 key 1 409  
-19 0 0 4 20 414 0 0 0 2 4 this 3 413  11 shader_name 1 409  
-20 0 0 6 21 409 0 0 0 1 4 this 3 411  
-21 0 0 7 22 416 0 0 0 1 4 this 3 411  
-22 0 0 6 23 417 0 0 0 2 4 this 3 411  3 key 1 409  
-23 0 0 6 24 417 0 0 0 1 4 this 3 411  
-24 0 0 6 25 409 0 0 0 1 4 this 3 411  
-25 0 0 6 26 409 0 0 0 1 4 this 3 411  
-26 0 0 7 27 411 0 0 0 1 4 file 1 418  
-27 0 0 7 28 421 0 0 0 0 
-28 0 0 7 32 423 0 0 0 1 3 mat 1 411  
-29 0 0 7 33 423 0 0 0 0 
-30 0 0 7 34 411 0 0 0 1 4 this 3 424  
-31 0 0 6 35 375 0 0 0 0 
-32 0 0 7 38 421 0 0 0 0 
-33 0 0 7 42 426 216 0 0 0 
-34 0 0 7 42 426 216 0 0 1 6 param0 0 427  
-35 0 0 7 41 421 0 0 0 0 
-36 0 0 6 43 375 0 0 0 1 4 this 3 427  
-37 0 0 6 44 429 0 0 0 1 4 this 3 427  
-38 0 0 7 48 430 221 0 0 0 
-39 0 0 7 48 430 221 0 0 1 6 param0 0 431  
-40 0 0 7 47 421 0 0 0 0 
-41 0 0 7 49 435 0 0 0 1 4 this 3 431  
-42 0 0 7 50 438 0 0 0 1 4 this 3 431  
-43 0 0 7 54 439 227 0 0 0 
-44 0 0 7 54 439 227 0 0 1 6 param0 0 440  
-45 0 0 7 53 421 0 0 0 0 
-46 0 0 7 55 443 0 0 0 1 4 this 3 440  
-47 0 0 6 56 417 0 0 0 2 4 this 3 440  3 pos 1 444  
-48 0 0 4 57 414 0 0 0 3 4 this 3 439  4 mins 1 435  4 maxs 1 435  
-49 0 0 7 61 446 233 0 0 0 
-50 0 0 7 61 446 233 0 0 1 6 param0 0 447  
-51 0 0 7 60 421 0 0 0 0 
-52 0 0 6 62 375 0 0 0 1 4 this 3 447  
-53 0 0 7 63 450 0 0 0 1 4 this 3 447  
-54 0 0 4 64 414 0 0 0 3 4 this 3 446  4 mins 1 435  4 maxs 1 435  
-55 0 0 7 70 453 238 0 0 1 6 param0 0 451  
-56 0 0 6 67 375 0 0 0 1 4 this 3 451  
-57 0 0 6 68 375 0 0 0 1 4 this 3 451  
-58 0 0 6 69 375 0 0 0 1 4 this 3 451  
-59 0 0 7 78 456 245 0 0 1 6 param0 0 454  
-60 0 0 6 73 375 0 0 0 1 4 this 3 454  
-61 0 0 6 74 375 0 0 0 1 4 this 3 454  
-62 0 0 6 75 375 0 0 0 1 4 this 3 454  
-63 0 0 6 76 375 0 0 0 1 4 this 3 454  
-64 0 0 6 77 417 0 0 0 1 4 this 3 454  
-65 0 0 6 81 375 0 0 0 1 4 this 3 457  
-66 0 0 4 82 414 0 0 35 // number of textures to consider.. 2 4 this 3 457  6 tcount 1 375  
-67 0 0 4 83 414 0 0 21 // add textures 0 - n 3 4 this 3 457  3 wid 1 375  3 hit 1 375  
-68 0 0 6 84 417 0 0 0 7 4 this 3 457  3 wid 1 375  3 hit 1 375  15 forcePowerOfTwo 1 417  14 onePixelBorder 1 417  7 max_wid 1 375  7 max_hit 1 375  
-69 0 0 4 85 414 0 0 0 3 4 this 3 457  3 wid 1 375  3 hit 1 375  
-70 0 0 7 86 453 238 0 74 // pack the textures, the return code is the amount of wasted/unused area. 3 4 this 3 457  15 forcePowerOfTwo 1 417  14 onePixelBorder 1 417  
-71 0 0 7 87 456 245 0 58 // returns true if the texture has been rotated 90 degrees 2 4 this 3 457  5 index 1 375  
-72 0 0 6 88 457 0 0 0 0 
-73 0 0 4 89 414 0 0 0 1 2 tp 1 457  
-74 0 0 7 93 423 0 0 0 2 13 face_material 1 409  9 face_type 1 375  
-75 0 0 7 94 423 0 0 0 0 
-76 0 0 7 95 423 0 0 0 0 
-77 0 0 6 96 409 0 0 0 1 4 this 3 458  
-78 0 0 6 97 375 0 0 0 1 4 this 3 458  
-79 0 0 6 98 417 0 0 0 1 4 this 3 458  
-80 0 0 6 99 375 0 0 0 0 
-81 0 0 7 101 421 0 0 0 0 
-82 0 0 7 104 429 323 0 0 0 
-83 0 0 6 105 417 0 0 0 2 4 this 3 429  4 file 1 418  
-84 0 0 4 106 414 0 0 0 1 4 this 3 429  
-85 0 0 4 107 414 0 0 0 3 4 this 3 429  5 gamma 1 460  10 overbright 1 375  
-86 0 0 6 108 460 0 0 0 1 4 this 3 462  
-87 0 0 4 109 414 0 0 0 2 4 this 3 429  3 win 1 464  
-88 0 0 4 110 414 0 0 0 2 4 this 3 429  6 camera 1 466  
-89 0 0 4 111 414 0 0 0 2 4 this 3 429  6 render 1 466  
-90 0 0 4 112 414 0 0 0 2 4 this 3 429  4 flag 1 417  
-91 0 0 4 113 414 0 0 0 2 4 this 3 429  4 flag 1 417  
-92 0 0 4 114 414 0 0 0 2 4 this 3 429  4 type 1 375  
-93 0 0 4 115 414 0 0 0 2 4 this 3 429  4 flag 1 417  
-94 0 0 4 116 414 0 0 0 2 4 this 3 429  4 file 1 418  
-95 0 0 4 117 414 0 0 0 2 4 this 3 429  4 flag 1 417  
-96 0 0 6 118 417 0 0 0 1 4 this 3 462  
-97 0 0 7 119 450 0 0 0 1 4 this 3 462  
-98 0 0 4 120 414 0 0 0 1 4 this 3 429  
-99 0 0 4 121 414 0 0 0 1 4 this 3 429  
-100 0 0 4 122 414 0 0 0 2 4 this 3 429  4 node 1 466  
-101 0 0 4 123 414 0 0 0 2 4 this 3 429  4 flag 1 417  
-102 0 0 4 124 414 0 0 0 2 4 this 3 429  3 pos 1 444  
-103 0 0 4 125 414 0 0 0 2 4 this 3 429  4 mask 1 468  
-104 0 0 4 126 414 0 0 0 2 4 this 3 429  5 color 1 472  
-105 0 0 4 127 414 0 0 0 3 4 this 3 429  8 filmsize 1 375  7 texsize 1 375  
-106 0 0 4 128 414 0 0 0 2 4 this 3 429  4 node 1 450  
-107 0 0 7 129 478 0 0 0 1 4 this 3 462  
-108 0 0 6 130 375 0 0 0 2 4 this 3 429  6 entnum 1 375  
-109 0 0 4 131 414 0 0 0 4 4 this 3 429  8 modelnum 1 375  4 mins 1 435  4 maxs 1 435  
-110 0 0 4 132 414 0 0 0 2 4 this 3 429  10 dispatcher 1 479  
-111 0 0 4 133 414 0 0 0 3 4 this 3 429  4 name 1 409  4 type 1 482  
-112 0 0 4 134 414 0 0 0 2 4 this 3 429  2 ai 1 417  
-113 0 0 6 135 417 0 0 0 1 4 this 3 462  
-114 0 0 4 136 414 0 0 0 2 4 this 3 429  4 node 1 466  
-115 0 0 6 137 417 0 0 0 3 4 this 3 429  5 start 1 444  3 end 1 444  
-116 0 0 4 138 414 0 0 0 3 4 this 3 429  7 entname 1 409  4 type 1 482  
-117 0 0 6 139 479 0 0 0 2 4 this 3 462  10 targetname 1 409  
-118 0 0 6 140 479 0 0 0 2 4 this 3 429  9 classname 1 409  
-119 0 0 4 141 414 0 0 0 3 4 this 3 429  4 list 1 479  6 entnum 1 485  
-120 0 0 4 142 414 0 0 0 3 4 this 3 429  5 entum 1 375  5 pyent 1 479  
-121 0 0 6 143 375 0 0 0 1 4 this 3 462  
-122 0 0 6 144 409 0 0 0 3 4 this 3 462  6 entnum 1 375  3 key 1 409  
-123 0 0 6 145 461 0 0 0 3 4 this 3 462  6 entnum 1 375  3 key 1 409  
-124 0 0 6 146 375 0 0 0 3 4 this 3 462  6 entnum 1 375  3 key 1 409  
-125 0 0 7 147 438 0 0 0 3 4 this 3 462  6 entnum 1 375  3 key 1 409  
-126 0 0 7 148 486 0 0 0 4 4 this 3 462  6 entnum 1 375  3 key 1 409  5 scale 1 417  
-127 0 0 7 149 450 0 0 0 2 4 this 3 462  6 entnum 1 375  
-128 0 0 7 150 450 0 0 0 2 4 this 3 462  8 modelnum 1 375  
-129 0 0 7 151 426 216 0 0 2 4 this 3 462  6 entnum 1 485  
-130 0 0 6 152 375 0 0 0 2 4 this 3 429  3 pos 1 444  
-131 0 0 6 152 375 0 0 0 2 4 this 3 429  2 np 1 466  
-132 0 0 6 153 375 0 0 0 2 4 this 3 429  3 pos 1 444  
-133 0 0 6 154 417 0 0 0 3 4 this 3 462  12 curr_cluster 1 375  7 cluster 1 375  
-134 0 0 6 155 417 0 0 0 2 4 this 3 429  6 bounds 1 487  
-135 0 0 7 156 487 0 0 0 3 4 this 3 429  13 net_transform 1 490  8 original 1 487  
-136 0 0 6 157 417 0 0 0 1 4 this 3 462  
-137 0 0 6 158 417 0 0 0 1 4 this 3 462  
-138 0 0 4 159 414 0 0 0 1 4 this 3 429  
-139 0 0 7 160 450 0 0 0 1 4 this 3 462  
-140 0 0 6 161 429 0 0 0 0 
-141 0 0 7 167 495 326 0 0 1 6 param0 0 493  
-142 0 0 7 167 495 326 0 0 2 4 trav 1 496  6 loader 1 429  
-143 0 0 7 166 421 0 0 0 0 
-144 0 0 7 172 499 329 0 0 1 6 param0 0 497  
-145 0 0 7 172 499 329 0 0 2 4 name 1 409  6 loader 1 429  
-146 0 0 7 171 421 0 0 0 0 
-147 0 0 7 176 502 332 0 0 1 6 param0 0 500  
-148 0 0 7 176 502 332 0 0 1 4 name 1 409  
-149 0 0 7 175 421 0 0 0 0 
-150 0 0 7 181 505 335 0 0 1 6 param0 0 503  
-151 0 0 7 181 505 335 0 0 1 4 name 1 409  
-152 0 0 7 180 421 0 0 0 0 
-153 0 0 7 185 508 338 0 0 1 6 param0 0 506  
-154 0 0 7 185 508 338 0 0 1 4 name 1 409  
-155 0 0 7 184 421 0 0 0 0 
-156 0 0 7 192 509 344 0 0 0 
-157 0 0 7 192 509 344 0 0 1 6 param0 0 510  
-158 0 0 4 188 414 0 0 0 3 4 this 3 509  3 key 1 409  5 value 1 409  
-159 0 0 4 189 414 0 0 0 3 4 this 3 509  3 inp 1 512  9 important 1 417  
-160 0 0 4 190 414 0 0 0 2 4 this 3 509  4 flag 1 375  
-161 0 0 6 191 417 0 0 0 2 4 this 3 510  5 other 1 510  
-162 0 0 4 201 414 0 0 0 4 4 this 3 515  9 vert_file 1 418  10 pixel_file 1 418  9 geom_file 1 418  
-163 0 0 7 202 421 0 0 0 0 
-164 0 0 7 196 516 0 0 0 1 4 this 3 515  
-165 0 0 6 199 517 0 0 0 1 4 this 3 515  
-166 0 0 7 206 520 361 0 0 3 3 gsg 1 518  6 camera 1 466  6 render 1 466  
-167 0 0 7 206 520 361 0 0 1 6 param0 0 521  
-168 0 0 4 207 414 0 0 0 2 4 this 3 520  2 np 1 466  
-169 0 0 4 208 414 0 0 0 1 4 this 3 520  
-170 0 0 4 209 414 0 0 0 2 4 this 3 520  4 spec 1 515  
-171 0 0 6 210 417 0 0 0 1 4 this 3 521  
-172 0 0 7 211 478 0 0 0 1 4 this 3 521  
-173 0 0 6 212 523 0 0 0 1 4 this 3 521  
-174 0 0 7 213 478 0 0 0 0 
-175 0 0 7 214 421 0 0 0 0 
-176 0 0 7 217 525 363 0 0 0 
-177 0 0 7 220 526 365 0 0 0 
-178 0 0 7 223 527 367 0 0 0 
-179 0 0 7 226 528 369 0 0 0 
-159
-370 13 TextureStages 0 141313 13 TextureStages 13 TextureStages 0 0 0 1 190 191 0 10 180 181 182 183 184 185 186 187 188 189 0 0 0 0 0 752
+377 13 CSMRenderSpec 0 4 414 28 CSMRenderSpec::CSMRenderSpec 0 1 183 0
+35
+CSMRenderSpec::CSMRenderSpec(void);
+
+378 14 ~CSMRenderSpec 0 4 414 29 CSMRenderSpec::~CSMRenderSpec 0 0 0
+36
+CSMRenderSpec::~CSMRenderSpec(void);
+
+183
+1 0 0 7 12 415 195 0 0 0 
+2 0 0 7 12 415 195 0 0 1 6 param0 0 416  
+3 0 0 7 2 420 0 0 0 1 4 name 1 419  
+4 0 0 7 2 420 0 0 0 2 4 name 1 419  7 uv_name 1 419  
+5 0 0 7 3 420 0 0 0 0 
+6 0 0 7 4 420 0 0 0 0 
+7 0 0 7 5 420 0 0 0 0 
+8 0 0 7 6 420 0 0 0 0 
+9 0 0 7 7 420 0 0 0 0 
+10 0 0 7 8 420 0 0 0 0 
+11 0 0 7 9 420 0 0 0 0 
+12 0 0 7 10 420 0 0 0 0 
+13 0 0 7 11 420 0 0 0 0 
+14 0 0 7 16 423 209 0 0 1 4 copy 1 421  
+15 0 0 7 16 423 209 0 0 1 4 name 1 419  
+16 0 0 7 17 423 209 0 0 2 4 this 3 423  4 copy 1 421  
+17 0 0 4 18 424 0 0 0 3 4 this 3 423  3 key 1 419  5 value 1 419  
+18 0 0 6 19 419 0 0 0 2 4 this 3 421  3 key 1 419  
+19 0 0 4 20 424 0 0 0 2 4 this 3 423  11 shader_name 1 419  
+20 0 0 6 21 419 0 0 0 1 4 this 3 421  
+21 0 0 7 22 426 0 0 0 1 4 this 3 421  
+22 0 0 6 23 427 0 0 0 2 4 this 3 421  3 key 1 419  
+23 0 0 6 24 427 0 0 0 1 4 this 3 421  
+24 0 0 6 25 419 0 0 0 1 4 this 3 421  
+25 0 0 6 26 419 0 0 0 1 4 this 3 421  
+26 0 0 7 27 421 0 0 0 1 4 file 1 428  
+27 0 0 7 28 431 0 0 0 0 
+28 0 0 7 32 433 0 0 0 1 3 mat 1 421  
+29 0 0 7 33 433 0 0 0 1 3 mat 1 421  
+30 0 0 7 34 433 0 0 0 0 
+31 0 0 6 35 419 0 0 0 1 4 this 3 434  
+32 0 0 6 36 427 0 0 0 1 4 this 3 434  
+33 0 0 7 37 421 0 0 0 1 4 this 3 434  
+34 0 0 6 38 384 0 0 0 0 
+35 0 0 7 41 431 0 0 0 0 
+36 0 0 7 45 436 223 0 0 0 
+37 0 0 7 45 436 223 0 0 1 6 param0 0 437  
+38 0 0 7 44 431 0 0 0 0 
+39 0 0 6 46 384 0 0 0 1 4 this 3 437  
+40 0 0 6 47 439 0 0 0 1 4 this 3 437  
+41 0 0 7 51 440 228 0 0 0 
+42 0 0 7 51 440 228 0 0 1 6 param0 0 441  
+43 0 0 7 50 431 0 0 0 0 
+44 0 0 7 52 445 0 0 0 1 4 this 3 441  
+45 0 0 7 53 448 0 0 0 1 4 this 3 441  
+46 0 0 7 57 449 234 0 0 0 
+47 0 0 7 57 449 234 0 0 1 6 param0 0 450  
+48 0 0 7 56 431 0 0 0 0 
+49 0 0 7 58 453 0 0 0 1 4 this 3 450  
+50 0 0 6 59 427 0 0 0 2 4 this 3 450  3 pos 1 454  
+51 0 0 4 60 424 0 0 0 3 4 this 3 449  4 mins 1 445  4 maxs 1 445  
+52 0 0 7 64 456 240 0 0 0 
+53 0 0 7 64 456 240 0 0 1 6 param0 0 457  
+54 0 0 7 63 431 0 0 0 0 
+55 0 0 6 65 384 0 0 0 1 4 this 3 457  
+56 0 0 7 66 460 0 0 0 1 4 this 3 457  
+57 0 0 4 67 424 0 0 0 3 4 this 3 456  4 mins 1 445  4 maxs 1 445  
+58 0 0 7 73 463 245 0 0 1 6 param0 0 461  
+59 0 0 6 70 384 0 0 0 1 4 this 3 461  
+60 0 0 6 71 384 0 0 0 1 4 this 3 461  
+61 0 0 6 72 384 0 0 0 1 4 this 3 461  
+62 0 0 7 81 466 252 0 0 1 6 param0 0 464  
+63 0 0 6 76 384 0 0 0 1 4 this 3 464  
+64 0 0 6 77 384 0 0 0 1 4 this 3 464  
+65 0 0 6 78 384 0 0 0 1 4 this 3 464  
+66 0 0 6 79 384 0 0 0 1 4 this 3 464  
+67 0 0 6 80 427 0 0 0 1 4 this 3 464  
+68 0 0 6 84 384 0 0 0 1 4 this 3 467  
+69 0 0 4 85 424 0 0 35 // number of textures to consider.. 2 4 this 3 467  6 tcount 1 384  
+70 0 0 4 86 424 0 0 21 // add textures 0 - n 3 4 this 3 467  3 wid 1 384  3 hit 1 384  
+71 0 0 6 87 427 0 0 0 7 4 this 3 467  3 wid 1 384  3 hit 1 384  15 forcePowerOfTwo 1 427  14 onePixelBorder 1 427  7 max_wid 1 384  7 max_hit 1 384  
+72 0 0 4 88 424 0 0 0 3 4 this 3 467  3 wid 1 384  3 hit 1 384  
+73 0 0 7 89 463 245 0 74 // pack the textures, the return code is the amount of wasted/unused area. 3 4 this 3 467  15 forcePowerOfTwo 1 427  14 onePixelBorder 1 427  
+74 0 0 7 90 466 252 0 58 // returns true if the texture has been rotated 90 degrees 2 4 this 3 467  5 index 1 384  
+75 0 0 6 91 467 0 0 0 0 
+76 0 0 4 92 424 0 0 0 1 2 tp 1 467  
+77 0 0 7 96 433 0 0 0 2 13 face_material 1 419  9 face_type 1 384  
+78 0 0 7 97 433 0 0 0 0 
+79 0 0 7 98 433 0 0 0 0 
+80 0 0 6 99 419 0 0 0 1 4 this 3 468  
+81 0 0 6 100 384 0 0 0 1 4 this 3 468  
+82 0 0 6 101 427 0 0 0 1 4 this 3 468  
+83 0 0 6 102 384 0 0 0 0 
+84 0 0 7 104 431 0 0 0 0 
+85 0 0 7 107 439 330 0 0 0 
+86 0 0 6 108 427 0 0 0 2 4 this 3 439  4 file 1 428  
+87 0 0 4 109 424 0 0 0 1 4 this 3 439  
+88 0 0 4 110 424 0 0 0 3 4 this 3 439  5 gamma 1 470  10 overbright 1 384  
+89 0 0 6 111 470 0 0 0 1 4 this 3 472  
+90 0 0 4 112 424 0 0 0 2 4 this 3 439  3 win 1 474  
+91 0 0 4 113 424 0 0 0 2 4 this 3 439  6 camera 1 476  
+92 0 0 4 114 424 0 0 0 2 4 this 3 439  6 render 1 476  
+93 0 0 4 115 424 0 0 0 2 4 this 3 439  4 flag 1 427  
+94 0 0 4 116 424 0 0 0 2 4 this 3 439  4 flag 1 427  
+95 0 0 4 117 424 0 0 0 2 4 this 3 439  4 type 1 384  
+96 0 0 4 118 424 0 0 0 2 4 this 3 439  4 flag 1 427  
+97 0 0 4 119 424 0 0 0 2 4 this 3 439  4 file 1 428  
+98 0 0 4 120 424 0 0 0 2 4 this 3 439  4 flag 1 427  
+99 0 0 6 121 427 0 0 0 1 4 this 3 472  
+100 0 0 7 122 460 0 0 0 1 4 this 3 472  
+101 0 0 4 123 424 0 0 0 1 4 this 3 439  
+102 0 0 4 124 424 0 0 0 1 4 this 3 439  
+103 0 0 4 125 424 0 0 0 2 4 this 3 439  4 node 1 476  
+104 0 0 4 126 424 0 0 0 2 4 this 3 439  4 flag 1 427  
+105 0 0 4 127 424 0 0 0 2 4 this 3 439  3 pos 1 454  
+106 0 0 4 128 424 0 0 0 2 4 this 3 439  4 mask 1 478  
+107 0 0 4 129 424 0 0 0 2 4 this 3 439  5 color 1 482  
+108 0 0 4 130 424 0 0 0 3 4 this 3 439  8 filmsize 1 384  7 texsize 1 384  
+109 0 0 4 131 424 0 0 0 2 4 this 3 439  4 node 1 460  
+110 0 0 7 132 488 0 0 0 1 4 this 3 472  
+111 0 0 6 133 384 0 0 0 2 4 this 3 439  6 entnum 1 384  
+112 0 0 4 134 424 0 0 0 4 4 this 3 439  8 modelnum 1 384  4 mins 1 445  4 maxs 1 445  
+113 0 0 4 135 424 0 0 0 2 4 this 3 439  10 dispatcher 1 489  
+114 0 0 4 136 424 0 0 0 3 4 this 3 439  4 name 1 419  4 type 1 492  
+115 0 0 4 137 424 0 0 0 2 4 this 3 439  2 ai 1 427  
+116 0 0 6 138 427 0 0 0 1 4 this 3 472  
+117 0 0 4 139 424 0 0 0 2 4 this 3 439  4 node 1 476  
+118 0 0 6 140 427 0 0 0 3 4 this 3 439  5 start 1 454  3 end 1 454  
+119 0 0 4 141 424 0 0 0 3 4 this 3 439  7 entname 1 419  4 type 1 492  
+120 0 0 6 142 489 0 0 0 2 4 this 3 472  10 targetname 1 419  
+121 0 0 6 143 489 0 0 0 2 4 this 3 439  9 classname 1 419  
+122 0 0 4 144 424 0 0 0 3 4 this 3 439  4 list 1 489  6 entnum 1 495  
+123 0 0 4 145 424 0 0 0 3 4 this 3 439  5 entum 1 384  5 pyent 1 489  
+124 0 0 6 146 384 0 0 0 1 4 this 3 472  
+125 0 0 6 147 419 0 0 0 3 4 this 3 472  6 entnum 1 384  3 key 1 419  
+126 0 0 6 148 471 0 0 0 3 4 this 3 472  6 entnum 1 384  3 key 1 419  
+127 0 0 6 149 384 0 0 0 3 4 this 3 472  6 entnum 1 384  3 key 1 419  
+128 0 0 7 150 448 0 0 0 3 4 this 3 472  6 entnum 1 384  3 key 1 419  
+129 0 0 7 151 496 0 0 0 4 4 this 3 472  6 entnum 1 384  3 key 1 419  5 scale 1 427  
+130 0 0 7 152 460 0 0 0 2 4 this 3 472  6 entnum 1 384  
+131 0 0 7 153 460 0 0 0 2 4 this 3 472  8 modelnum 1 384  
+132 0 0 7 154 436 223 0 0 2 4 this 3 472  6 entnum 1 495  
+133 0 0 6 155 384 0 0 0 2 4 this 3 439  3 pos 1 454  
+134 0 0 6 155 384 0 0 0 2 4 this 3 439  2 np 1 476  
+135 0 0 6 156 384 0 0 0 2 4 this 3 439  3 pos 1 454  
+136 0 0 6 157 427 0 0 0 3 4 this 3 472  12 curr_cluster 1 384  7 cluster 1 384  
+137 0 0 6 158 427 0 0 0 2 4 this 3 439  6 bounds 1 497  
+138 0 0 7 159 497 0 0 0 3 4 this 3 439  13 net_transform 1 500  8 original 1 497  
+139 0 0 6 160 427 0 0 0 1 4 this 3 472  
+140 0 0 6 161 427 0 0 0 1 4 this 3 472  
+141 0 0 4 162 424 0 0 0 1 4 this 3 439  
+142 0 0 7 163 460 0 0 0 1 4 this 3 472  
+143 0 0 6 164 439 0 0 0 0 
+144 0 0 7 170 505 333 0 0 1 6 param0 0 503  
+145 0 0 7 170 505 333 0 0 2 4 trav 1 506  6 loader 1 439  
+146 0 0 7 169 431 0 0 0 0 
+147 0 0 7 175 509 336 0 0 1 6 param0 0 507  
+148 0 0 7 175 509 336 0 0 2 4 name 1 419  6 loader 1 439  
+149 0 0 7 174 431 0 0 0 0 
+150 0 0 7 179 512 339 0 0 1 6 param0 0 510  
+151 0 0 7 179 512 339 0 0 1 4 name 1 419  
+152 0 0 7 178 431 0 0 0 0 
+153 0 0 7 184 515 342 0 0 1 6 param0 0 513  
+154 0 0 7 184 515 342 0 0 1 4 name 1 419  
+155 0 0 7 183 431 0 0 0 0 
+156 0 0 7 188 518 345 0 0 1 6 param0 0 516  
+157 0 0 7 188 518 345 0 0 1 4 name 1 419  
+158 0 0 7 187 431 0 0 0 0 
+159 0 0 7 195 519 351 0 0 0 
+160 0 0 7 195 519 351 0 0 1 6 param0 0 520  
+161 0 0 4 191 424 0 0 0 3 4 this 3 519  3 key 1 419  5 value 1 419  
+162 0 0 4 192 424 0 0 0 3 4 this 3 519  3 inp 1 522  9 important 1 427  
+163 0 0 4 193 424 0 0 0 2 4 this 3 519  4 flag 1 384  
+164 0 0 6 194 427 0 0 0 2 4 this 3 520  5 other 1 520  
+165 0 0 4 204 424 0 0 0 4 4 this 3 525  9 vert_file 1 428  10 pixel_file 1 428  9 geom_file 1 428  
+166 0 0 7 205 431 0 0 0 0 
+167 0 0 7 199 526 0 0 0 1 4 this 3 525  
+168 0 0 6 202 527 0 0 0 1 4 this 3 525  
+169 0 0 7 209 530 368 0 0 3 3 gsg 1 528  6 camera 1 476  6 render 1 476  
+170 0 0 7 209 530 368 0 0 1 6 param0 0 531  
+171 0 0 4 210 424 0 0 0 2 4 this 3 530  2 np 1 476  
+172 0 0 4 211 424 0 0 0 1 4 this 3 530  
+173 0 0 4 212 424 0 0 0 2 4 this 3 530  4 spec 1 525  
+174 0 0 6 213 427 0 0 0 1 4 this 3 531  
+175 0 0 7 214 488 0 0 0 1 4 this 3 531  
+176 0 0 6 215 533 0 0 0 1 4 this 3 531  
+177 0 0 7 216 488 0 0 0 0 
+178 0 0 7 217 431 0 0 0 0 
+179 0 0 7 220 535 370 0 0 0 
+180 0 0 7 223 536 372 0 0 0 
+181 0 0 7 226 537 374 0 0 0 
+182 0 0 7 229 538 376 0 0 0 
+183 0 0 7 232 539 378 0 0 0 
+161
+379 13 TextureStages 0 141313 13 TextureStages 13 TextureStages 0 0 0 1 194 195 0 10 184 185 186 187 188 189 190 191 192 193 0 0 0 0 0 752
 /**
  * This simple interface maintains a single TextureStage object for each unique name.
  * It avoids the creation of duplicate TextureStages with the same name, which
@@ -981,9 +1005,9 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * will know that the texture you supplied is to be treated as a normal map.
  */
 
-371 11 BSPMaterial 0 141313 11 BSPMaterial 11 BSPMaterial 0 0 0 1 192 205 0 12 193 194 195 196 197 198 199 200 201 202 203 204 0 0 1 0 372 0 0 0 0 0
+380 11 BSPMaterial 0 141313 11 BSPMaterial 11 BSPMaterial 0 0 0 1 196 209 0 12 197 198 199 200 201 202 203 204 205 206 207 208 0 0 1 0 381 0 0 0 0 0
 
-372 19 TypedReferenceCount 0 2048 19 TypedReferenceCount 19 TypedReferenceCount 0 0 0 0 0 0 0 0 0 0 0 0 410
+381 19 TypedReferenceCount 0 2048 19 TypedReferenceCount 19 TypedReferenceCount 0 0 0 0 0 0 0 0 0 0 0 0 410
 /**
  * A base class for things which need to inherit from both TypedObject and
  * from ReferenceCount.  It's convenient to define this intermediate base
@@ -994,9 +1018,9 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * See also TypedObject for detailed instructions.
  */
 
-373 17 BSPMaterialAttrib 0 141313 17 BSPMaterialAttrib 17 BSPMaterialAttrib 0 0 0 0 211 1 529 5 206 207 208 209 210 0 0 1 0 374 0 0 0 0 0
+382 17 BSPMaterialAttrib 0 141313 17 BSPMaterialAttrib 17 BSPMaterialAttrib 0 0 0 0 218 1 540 8 210 211 212 213 214 215 216 217 0 0 1 0 383 0 0 0 0 0
 
-374 12 RenderAttrib 0 2048 12 RenderAttrib 12 RenderAttrib 0 0 0 0 0 0 0 0 0 0 0 0 1074
+383 12 RenderAttrib 0 2048 12 RenderAttrib 12 RenderAttrib 0 0 0 0 0 0 0 0 0 0 0 0 1074
 /**
  * This is the base class for a number of render attributes (other than
  * transform) that may be set on scene graph nodes to control the appearance
@@ -1017,52 +1041,52 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * if you wish to change its properties; instead, create a new one.
  */
 
-375 3 int 0 8194 3 int 3 int 0 1 0 0 0 0 0 0 0 0 0 0 0
+384 3 int 0 8194 3 int 3 int 0 1 0 0 0 0 0 0 0 0 0 0 0
 
-376 11 CBaseEntity 0 141313 11 CBaseEntity 11 CBaseEntity 0 0 0 1 213 216 0 3 212 214 215 0 0 1 0 372 0 0 0 0 0
+385 11 CBaseEntity 0 141313 11 CBaseEntity 11 CBaseEntity 0 0 0 1 220 223 0 3 219 221 222 0 0 1 0 381 0 0 0 0 0
 
-377 12 CPointEntity 0 141313 12 CPointEntity 12 CPointEntity 0 0 0 1 218 221 0 3 217 219 220 0 0 1 0 376 0 0 0 0 0
+386 12 CPointEntity 0 141313 12 CPointEntity 12 CPointEntity 0 0 0 1 225 228 0 3 224 226 227 0 0 1 0 385 0 0 0 0 0
 
-378 13 CBoundsEntity 0 141313 13 CBoundsEntity 13 CBoundsEntity 0 0 0 1 223 227 0 4 222 224 225 226 0 0 1 0 376 0 0 0 0 219
+387 13 CBoundsEntity 0 141313 13 CBoundsEntity 13 CBoundsEntity 0 0 0 1 230 234 0 4 229 231 232 233 0 0 1 0 385 0 0 0 0 219
 /**
  * A flavor of a brush entity (but doesn't inherit from CBrushEntity) which uses the brush only to describe
  * the bounds. Useful for triggers or water, because we don't actually care about the brush's geometry.
  */
 
-379 12 CBrushEntity 0 141313 12 CBrushEntity 12 CBrushEntity 0 0 0 1 229 233 0 4 228 230 231 232 0 0 1 0 376 0 0 0 0 0
+388 12 CBrushEntity 0 141313 12 CBrushEntity 12 CBrushEntity 0 0 0 1 236 240 0 4 235 237 238 239 0 0 1 0 385 0 0 0 0 0
 
-380 10 PackResult 0 141313 10 PackResult 10 PackResult 0 0 0 1 237 238 0 3 234 235 236 0 0 0 0 0 0
+389 10 PackResult 0 141313 10 PackResult 10 PackResult 0 0 0 1 244 245 0 3 241 242 243 0 0 0 0 0 0
 
-381 15 TextureLocation 0 141313 15 TextureLocation 15 TextureLocation 0 0 0 1 244 245 0 5 239 240 241 242 243 0 0 0 0 0 0
+390 15 TextureLocation 0 141313 15 TextureLocation 15 TextureLocation 0 0 0 1 251 252 0 5 246 247 248 249 250 0 0 0 0 0 0
 
-382 13 TexturePacker 0 141313 13 TexturePacker 13 TexturePacker 0 0 0 0 255 0 9 246 247 248 249 250 251 252 253 254 0 0 0 0 0 0
+391 13 TexturePacker 0 141313 13 TexturePacker 13 TexturePacker 0 0 0 0 262 0 9 253 254 255 256 257 258 259 260 261 0 0 0 0 0 0
 
-383 13 BSPFaceAttrib 0 141313 13 BSPFaceAttrib 13 BSPFaceAttrib 0 0 0 0 264 1 530 8 256 257 258 259 260 261 262 263 0 0 1 0 374 0 0 0 1 384 193
+392 13 BSPFaceAttrib 0 141313 13 BSPFaceAttrib 13 BSPFaceAttrib 0 0 0 0 271 1 541 8 263 264 265 266 267 268 269 270 0 0 1 0 383 0 0 0 1 393 193
 /**
  * An attribute applied to each face Geom from a BSP file.
  * All it does right now is indicate the material of the face
  * and if it's a wall or a floor (depending on the face normal).
  */
 
-384 0 0 794624 15 BSPFaceAttrib:: 0 383 0 0 0 0 0 0 0 0 0 2 13 FACETYPE_WALL 28 BSPFaceAttrib::FACETYPE_WALL 0
+393 0 0 794624 15 BSPFaceAttrib:: 0 392 0 0 0 0 0 0 0 0 0 2 13 FACETYPE_WALL 28 BSPFaceAttrib::FACETYPE_WALL 0
 0 14 FACETYPE_FLOOR 29 BSPFaceAttrib::FACETYPE_FLOOR 0
 1 0 0
 
-385 9 BSPLoader 0 141313 9 BSPLoader 9 BSPLoader 0 0 0 1 265 323 0 57 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 0 0 0 0 1 386 58
+394 9 BSPLoader 0 141313 9 BSPLoader 9 BSPLoader 0 0 0 1 272 330 0 57 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 0 0 0 0 1 395 58
 /**
  * Loads and handles the operations of PBSP files.
  */
 
-386 11 PhysicsType 0 794624 22 BSPLoader::PhysicsType 22 BSPLoader::PhysicsType 385 0 0 0 0 0 0 0 0 0 5 7 PT_none 18 BSPLoader::PT_none 0
+395 11 PhysicsType 0 794624 22 BSPLoader::PhysicsType 22 BSPLoader::PhysicsType 394 0 0 0 0 0 0 0 0 0 5 7 PT_none 18 BSPLoader::PT_none 0
 0 8 PT_panda 19 BSPLoader::PT_panda 0
 1 9 PT_bullet 20 BSPLoader::PT_bullet 0
 2 6 PT_ode 17 BSPLoader::PT_ode 0
 3 8 PT_physx 19 BSPLoader::PT_physx 0
 4 0 0
 
-387 16 BSPCullTraverser 0 141313 16 BSPCullTraverser 16 BSPCullTraverser 0 0 0 1 325 326 0 1 324 0 0 1 0 388 0 0 0 0 0
+396 16 BSPCullTraverser 0 141313 16 BSPCullTraverser 16 BSPCullTraverser 0 0 0 1 332 333 0 1 331 0 0 1 0 397 0 0 0 0 0
 
-388 13 CullTraverser 0 2048 13 CullTraverser 13 CullTraverser 0 0 0 0 0 0 0 0 0 0 0 0 279
+397 13 CullTraverser 0 2048 13 CullTraverser 13 CullTraverser 0 0 0 0 0 0 0 0 0 0 0 0 279
 /**
  * This object performs a depth-first traversal of the scene graph, with
  * optional view-frustum culling, collecting CullState and searching for
@@ -1070,24 +1094,24 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * associated RenderState to the CullHandler object.
  */
 
-389 9 BSPRender 0 141313 9 BSPRender 9 BSPRender 0 0 0 1 328 329 0 1 327 0 0 1 0 390 0 0 0 0 125
+398 9 BSPRender 0 141313 9 BSPRender 9 BSPRender 0 0 0 1 335 336 0 1 334 0 0 1 0 399 0 0 0 0 125
 /**
  * Top of the scene graph when a BSP level is in effect.
  * Culls nodes against the PVS, operates ambient cubes, etc.
  */
 
-390 9 PandaNode 0 2048 9 PandaNode 9 PandaNode 0 0 0 0 0 0 0 0 0 0 0 0 175
+399 9 PandaNode 0 2048 9 PandaNode 9 PandaNode 0 0 0 0 0 0 0 0 0 0 0 0 175
 /**
  * A basic node of the scene graph or data graph.  This is the base class of
  * all specialized nodes, and also serves as a generic node with no special
  * properties.
  */
 
-391 7 BSPRoot 0 141313 7 BSPRoot 7 BSPRoot 0 0 0 1 331 332 0 1 330 0 0 1 0 390 0 0 0 0 0
+400 7 BSPRoot 0 141313 7 BSPRoot 7 BSPRoot 0 0 0 1 338 339 0 1 337 0 0 1 0 399 0 0 0 0 0
 
-392 7 BSPProp 0 141313 7 BSPProp 7 BSPProp 0 0 0 1 334 335 0 1 333 0 0 1 0 393 0 0 0 0 0
+401 7 BSPProp 0 141313 7 BSPProp 7 BSPProp 0 0 0 1 341 342 0 1 340 0 0 1 0 402 0 0 0 0 0
 
-393 9 ModelNode 0 2048 9 ModelNode 9 ModelNode 0 0 0 0 0 0 0 0 0 0 0 0 411
+402 9 ModelNode 0 2048 9 ModelNode 9 ModelNode 0 0 0 0 0 0 0 0 0 0 0 0 411
 /**
  * This node is placed at key points within the scene graph to indicate the
  * roots of "models": subtrees that are conceptually to be treated as a single
@@ -1099,35 +1123,35 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * file.
  */
 
-394 8 BSPModel 0 141313 8 BSPModel 8 BSPModel 0 0 0 1 337 338 0 1 336 0 0 1 0 393 0 0 0 0 0
+403 8 BSPModel 0 141313 8 BSPModel 8 BSPModel 0 0 0 1 344 345 0 1 343 0 0 1 0 402 0 0 0 0 0
 
-395 18 ShaderPermutations 0 141313 18 ShaderPermutations 18 ShaderPermutations 0 0 0 1 343 344 0 4 339 340 341 342 0 0 0 0 0 97
+404 18 ShaderPermutations 0 141313 18 ShaderPermutations 18 ShaderPermutations 0 0 0 1 350 351 0 4 346 347 348 349 0 0 0 0 0 97
 /**
  * Represents a list of #defines and variable inputs to a shader that is being generated.
  */
 
-396 10 ShaderSpec 0 141313 10 ShaderSpec 10 ShaderSpec 0 0 0 0 351 0 2 349 350 0 0 2 3 397 345 346 3 398 347 348 0 0 121
+405 10 ShaderSpec 0 141313 10 ShaderSpec 10 ShaderSpec 0 0 0 0 358 0 2 356 357 0 0 2 3 406 352 353 3 407 354 355 0 0 121
 /**
  * Serves to setup the permutations for a specific shader
  * when setting up a shader for a specific RenderState.
  */
 
-397 14 ReferenceCount 0 2048 14 ReferenceCount 14 ReferenceCount 0 0 0 0 0 0 0 0 0 0 0 0 203
+406 14 ReferenceCount 0 2048 14 ReferenceCount 14 ReferenceCount 0 0 0 0 0 0 0 0 0 0 0 0 203
 /**
  * A base class for all things that want to be reference-counted.
  * ReferenceCount works in conjunction with PointerTo to automatically delete
  * objects when the last pointer to them goes away.
  */
 
-398 7 Namable 0 2048 7 Namable 7 Namable 0 0 0 0 0 0 0 0 0 0 0 0 125
+407 7 Namable 0 2048 7 Namable 7 Namable 0 0 0 0 0 0 0 0 0 0 0 0 125
 /**
  * A base class for all things which can have a name.  The name is either
  * empty or nonempty, but it is never NULL.
  */
 
-399 19 PSSMShaderGenerator 0 141313 19 PSSMShaderGenerator 19 PSSMShaderGenerator 0 0 0 1 352 361 0 8 353 354 355 356 357 358 359 360 0 0 1 0 400 0 0 0 0 0
+408 19 PSSMShaderGenerator 0 141313 19 PSSMShaderGenerator 19 PSSMShaderGenerator 0 0 0 1 359 368 0 8 360 361 362 363 364 365 366 367 0 0 1 0 409 0 0 0 0 0
 
-400 15 ShaderGenerator 0 2048 15 ShaderGenerator 15 ShaderGenerator 0 0 0 0 0 0 0 0 0 0 0 0 1069
+409 15 ShaderGenerator 0 2048 15 ShaderGenerator 15 ShaderGenerator 0 0 0 0 0 0 0 0 0 0 0 0 1069
 /**
  * The ShaderGenerator is a device that effectively replaces the classic fixed
  * function pipeline with a 'next-gen' fixed function pipeline.  The next-gen
@@ -1152,25 +1176,27 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  *
  */
 
-401 20 VertexLitGenericSpec 0 141313 20 VertexLitGenericSpec 20 VertexLitGenericSpec 0 0 0 1 362 363 0 0 0 0 1 0 396 0 0 0 0 0
+410 20 VertexLitGenericSpec 0 141313 20 VertexLitGenericSpec 20 VertexLitGenericSpec 0 0 0 1 369 370 0 0 0 0 1 0 405 0 0 0 0 0
 
-402 22 LightmappedGenericSpec 0 141313 22 LightmappedGenericSpec 22 LightmappedGenericSpec 0 0 0 1 364 365 0 0 0 0 1 0 396 0 0 0 0 0
+411 22 LightmappedGenericSpec 0 141313 22 LightmappedGenericSpec 22 LightmappedGenericSpec 0 0 0 1 371 372 0 0 0 0 1 0 405 0 0 0 0 0
 
-403 16 UnlitGenericSpec 0 141313 16 UnlitGenericSpec 16 UnlitGenericSpec 0 0 0 1 366 367 0 0 0 0 1 0 396 0 0 0 0 160
+412 16 UnlitGenericSpec 0 141313 16 UnlitGenericSpec 16 UnlitGenericSpec 0 0 0 1 373 374 0 0 0 0 1 0 405 0 0 0 0 160
 /**
  * Shader that only supports a basetexture, no fancy lighting effects or anything.
  * Could be used for UI elements, emissive materials, particles, etc.
  */
 
-404 14 UnlitNoMatSpec 0 141313 14 UnlitNoMatSpec 14 UnlitNoMatSpec 0 0 0 1 368 369 0 0 0 0 1 0 396 0 0 0 0 0
+413 14 UnlitNoMatSpec 0 141313 14 UnlitNoMatSpec 14 UnlitNoMatSpec 0 0 0 1 375 376 0 0 0 0 1 0 405 0 0 0 0 0
 
-405 15 TextureStages * 0 8576 15 TextureStages * 15 TextureStages * 0 0 370 0 0 0 0 0 0 0 0 0 0
+414 13 CSMRenderSpec 0 141313 13 CSMRenderSpec 13 CSMRenderSpec 0 0 0 1 377 378 0 0 0 0 1 0 405 0 0 0 0 0
 
-406 21 TextureStages const * 0 8576 21 TextureStages const * 21 TextureStages const * 0 0 407 0 0 0 0 0 0 0 0 0 0
+415 15 TextureStages * 0 8576 15 TextureStages * 15 TextureStages * 0 0 379 0 0 0 0 0 0 0 0 0 0
 
-407 19 TextureStages const 0 8832 19 TextureStages const 19 TextureStages const 0 0 370 0 0 0 0 0 0 0 0 0 0
+416 21 TextureStages const * 0 8576 21 TextureStages const * 21 TextureStages const * 0 0 417 0 0 0 0 0 0 0 0 0 0
 
-408 12 TextureStage 0 2048 12 TextureStage 12 TextureStage 0 0 0 0 0 0 0 0 0 0 0 0 336
+417 19 TextureStages const 0 8832 19 TextureStages const 19 TextureStages const 0 0 379 0 0 0 0 0 0 0 0 0 0
+
+418 12 TextureStage 0 2048 12 TextureStage 12 TextureStage 0 0 0 0 0 0 0 0 0 0 0 0 336
 /**
  * Defines the properties of a named stage of the multitexture pipeline.  The
  * TextureAttrib will associated a number of these stages with Texture
@@ -1179,19 +1205,19 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * calls to activate them.
  */
 
-409 13 atomic string 0 2 13 atomic string 13 atomic string 0 7 0 0 0 0 0 0 0 0 0 0 0
+419 13 atomic string 0 2 13 atomic string 13 atomic string 0 7 0 0 0 0 0 0 0 0 0 0 0
 
-410 14 TextureStage * 0 8576 14 TextureStage * 14 TextureStage * 0 0 408 0 0 0 0 0 0 0 0 0 0
+420 14 TextureStage * 0 8576 14 TextureStage * 14 TextureStage * 0 0 418 0 0 0 0 0 0 0 0 0 0
 
-411 19 BSPMaterial const * 0 8576 19 BSPMaterial const * 19 BSPMaterial const * 0 0 412 0 0 0 0 0 0 0 0 0 0
+421 19 BSPMaterial const * 0 8576 19 BSPMaterial const * 19 BSPMaterial const * 0 0 422 0 0 0 0 0 0 0 0 0 0
 
-412 17 BSPMaterial const 0 8832 17 BSPMaterial const 17 BSPMaterial const 0 0 371 0 0 0 0 0 0 0 0 0 0
+422 17 BSPMaterial const 0 8832 17 BSPMaterial const 17 BSPMaterial const 0 0 380 0 0 0 0 0 0 0 0 0 0
 
-413 13 BSPMaterial * 0 8576 13 BSPMaterial * 13 BSPMaterial * 0 0 371 0 0 0 0 0 0 0 0 0 0
+423 13 BSPMaterial * 0 8576 13 BSPMaterial * 13 BSPMaterial * 0 0 380 0 0 0 0 0 0 0 0 0 0
 
-414 4 void 0 8194 4 void 4 void 0 6 0 0 0 0 0 0 0 0 0 0 0
+424 4 void 0 8194 4 void 4 void 0 6 0 0 0 0 0 0 0 0 0 0 0
 
-415 8 Filename 0 2048 8 Filename 8 Filename 0 0 0 0 0 0 0 0 0 0 0 0 550
+425 8 Filename 0 2048 8 Filename 8 Filename 0 0 0 0 0 0 0 0 0 0 0 0 550
 /**
  * The name of a file, such as a texture file or an Egg file.  Stores the full
  * pathname, and includes functions for extracting out the directory prefix
@@ -1204,15 +1230,15 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * open an fstream for reading or writing.
  */
 
-416 10 Filename * 0 8576 10 Filename * 10 Filename * 0 0 415 0 0 0 0 0 0 0 0 0 0
+426 10 Filename * 0 8576 10 Filename * 10 Filename * 0 0 425 0 0 0 0 0 0 0 0 0 0
 
-417 4 bool 0 8194 4 bool 4 bool 0 4 0 0 0 0 0 0 0 0 0 0 0
+427 4 bool 0 8194 4 bool 4 bool 0 4 0 0 0 0 0 0 0 0 0 0 0
 
-418 16 Filename const * 0 8576 16 Filename const * 16 Filename const * 0 0 419 0 0 0 0 0 0 0 0 0 0
+428 16 Filename const * 0 8576 16 Filename const * 16 Filename const * 0 0 429 0 0 0 0 0 0 0 0 0 0
 
-419 14 Filename const 0 8832 14 Filename const 14 Filename const 0 0 415 0 0 0 0 0 0 0 0 0 0
+429 14 Filename const 0 8832 14 Filename const 14 Filename const 0 0 425 0 0 0 0 0 0 0 0 0 0
 
-420 10 TypeHandle 0 16779264 10 TypeHandle 10 TypeHandle 0 0 0 0 0 0 0 0 0 0 0 0 732
+430 10 TypeHandle 0 16779264 10 TypeHandle 10 TypeHandle 0 0 0 0 0 0 0 0 0 0 0 0 732
 /**
  * TypeHandle is the identifier used to differentiate C++ class types.  Any
  * C++ classes that inherit from some base class, and must be differentiated
@@ -1227,33 +1253,33 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * retrieved for run-time display.
  */
 
-421 12 TypeHandle * 0 8576 12 TypeHandle * 12 TypeHandle * 0 0 420 0 0 0 0 0 0 0 0 0 0
+431 12 TypeHandle * 0 8576 12 TypeHandle * 12 TypeHandle * 0 0 430 0 0 0 0 0 0 0 0 0 0
 
-422 18 RenderAttrib const 0 8832 18 RenderAttrib const 18 RenderAttrib const 0 0 374 0 0 0 0 0 0 0 0 0 0
+432 18 RenderAttrib const 0 8832 18 RenderAttrib const 18 RenderAttrib const 0 0 383 0 0 0 0 0 0 0 0 0 0
 
-423 20 RenderAttrib const * 0 8576 20 RenderAttrib const * 20 RenderAttrib const * 0 0 422 0 0 0 0 0 0 0 0 0 0
+433 20 RenderAttrib const * 0 8576 20 RenderAttrib const * 20 RenderAttrib const * 0 0 432 0 0 0 0 0 0 0 0 0 0
 
-424 25 BSPMaterialAttrib const * 0 8576 25 BSPMaterialAttrib const * 25 BSPMaterialAttrib const * 0 0 425 0 0 0 0 0 0 0 0 0 0
+434 25 BSPMaterialAttrib const * 0 8576 25 BSPMaterialAttrib const * 25 BSPMaterialAttrib const * 0 0 435 0 0 0 0 0 0 0 0 0 0
 
-425 23 BSPMaterialAttrib const 0 8832 23 BSPMaterialAttrib const 23 BSPMaterialAttrib const 0 0 373 0 0 0 0 0 0 0 0 0 0
+435 23 BSPMaterialAttrib const 0 8832 23 BSPMaterialAttrib const 23 BSPMaterialAttrib const 0 0 382 0 0 0 0 0 0 0 0 0 0
 
-426 13 CBaseEntity * 0 8576 13 CBaseEntity * 13 CBaseEntity * 0 0 376 0 0 0 0 0 0 0 0 0 0
+436 13 CBaseEntity * 0 8576 13 CBaseEntity * 13 CBaseEntity * 0 0 385 0 0 0 0 0 0 0 0 0 0
 
-427 19 CBaseEntity const * 0 8576 19 CBaseEntity const * 19 CBaseEntity const * 0 0 428 0 0 0 0 0 0 0 0 0 0
+437 19 CBaseEntity const * 0 8576 19 CBaseEntity const * 19 CBaseEntity const * 0 0 438 0 0 0 0 0 0 0 0 0 0
 
-428 17 CBaseEntity const 0 8832 17 CBaseEntity const 17 CBaseEntity const 0 0 376 0 0 0 0 0 0 0 0 0 0
+438 17 CBaseEntity const 0 8832 17 CBaseEntity const 17 CBaseEntity const 0 0 385 0 0 0 0 0 0 0 0 0 0
 
-429 11 BSPLoader * 0 8576 11 BSPLoader * 11 BSPLoader * 0 0 385 0 0 0 0 0 0 0 0 0 0
+439 11 BSPLoader * 0 8576 11 BSPLoader * 11 BSPLoader * 0 0 394 0 0 0 0 0 0 0 0 0 0
 
-430 14 CPointEntity * 0 8576 14 CPointEntity * 14 CPointEntity * 0 0 377 0 0 0 0 0 0 0 0 0 0
+440 14 CPointEntity * 0 8576 14 CPointEntity * 14 CPointEntity * 0 0 386 0 0 0 0 0 0 0 0 0 0
 
-431 20 CPointEntity const * 0 8576 20 CPointEntity const * 20 CPointEntity const * 0 0 432 0 0 0 0 0 0 0 0 0 0
+441 20 CPointEntity const * 0 8576 20 CPointEntity const * 20 CPointEntity const * 0 0 442 0 0 0 0 0 0 0 0 0 0
 
-432 18 CPointEntity const 0 8832 18 CPointEntity const 18 CPointEntity const 0 0 377 0 0 0 0 0 0 0 0 0 0
+442 18 CPointEntity const 0 8832 18 CPointEntity const 18 CPointEntity const 0 0 386 0 0 0 0 0 0 0 0 0 0
 
-433 7 LPoint3 0 2105344 7 LPoint3 7 LPoint3 0 0 434 0 0 0 0 0 0 0 0 0 0
+443 7 LPoint3 0 2105344 7 LPoint3 7 LPoint3 0 0 444 0 0 0 0 0 0 0 0 0 0
 
-434 8 LPoint3f 0 2048 8 LPoint3f 8 LPoint3f 0 0 0 0 0 0 0 0 0 0 0 0 337
+444 8 LPoint3f 0 2048 8 LPoint3f 8 LPoint3f 0 0 0 0 0 0 0 0 0 0 0 0 337
 /**
  * This is a three-component point in space (as opposed to a three-component
  * vector, which represents a direction and a distance).  Some of the methods
@@ -1262,11 +1288,11 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * point yields a point.
  */
 
-435 9 LPoint3 * 0 8576 9 LPoint3 * 9 LPoint3 * 0 0 433 0 0 0 0 0 0 0 0 0 0
+445 9 LPoint3 * 0 8576 9 LPoint3 * 9 LPoint3 * 0 0 443 0 0 0 0 0 0 0 0 0 0
 
-436 8 LVector3 0 2105344 8 LVector3 8 LVector3 0 0 437 0 0 0 0 0 0 0 0 0 0
+446 8 LVector3 0 2105344 8 LVector3 8 LVector3 0 0 447 0 0 0 0 0 0 0 0 0 0
 
-437 9 LVector3f 0 2048 9 LVector3f 9 LVector3f 0 0 0 0 0 0 0 0 0 0 0 0 338
+447 9 LVector3f 0 2048 9 LVector3f 9 LVector3f 0 0 0 0 0 0 0 0 0 0 0 0 338
 /**
  * This is a three-component vector distance (as opposed to a three-component
  * point, which represents a particular point in space).  Some of the methods
@@ -1275,15 +1301,15 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * point yields a point.
  */
 
-438 10 LVector3 * 0 8576 10 LVector3 * 10 LVector3 * 0 0 436 0 0 0 0 0 0 0 0 0 0
+448 10 LVector3 * 0 8576 10 LVector3 * 10 LVector3 * 0 0 446 0 0 0 0 0 0 0 0 0 0
 
-439 15 CBoundsEntity * 0 8576 15 CBoundsEntity * 15 CBoundsEntity * 0 0 378 0 0 0 0 0 0 0 0 0 0
+449 15 CBoundsEntity * 0 8576 15 CBoundsEntity * 15 CBoundsEntity * 0 0 387 0 0 0 0 0 0 0 0 0 0
 
-440 21 CBoundsEntity const * 0 8576 21 CBoundsEntity const * 21 CBoundsEntity const * 0 0 441 0 0 0 0 0 0 0 0 0 0
+450 21 CBoundsEntity const * 0 8576 21 CBoundsEntity const * 21 CBoundsEntity const * 0 0 451 0 0 0 0 0 0 0 0 0 0
 
-441 19 CBoundsEntity const 0 8832 19 CBoundsEntity const 19 CBoundsEntity const 0 0 378 0 0 0 0 0 0 0 0 0 0
+451 19 CBoundsEntity const 0 8832 19 CBoundsEntity const 19 CBoundsEntity const 0 0 387 0 0 0 0 0 0 0 0 0 0
 
-442 11 BoundingBox 0 2048 11 BoundingBox 11 BoundingBox 0 0 0 0 0 0 0 0 0 0 0 0 201
+452 11 BoundingBox 0 2048 11 BoundingBox 11 BoundingBox 0 0 0 0 0 0 0 0 0 0 0 0 201
 /**
  * An axis-aligned bounding box; that is, a minimum and maximum coordinate
  * triple.
@@ -1292,19 +1318,19 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * try BoundingHexahedron.
  */
 
-443 13 BoundingBox * 0 8576 13 BoundingBox * 13 BoundingBox * 0 0 442 0 0 0 0 0 0 0 0 0 0
+453 13 BoundingBox * 0 8576 13 BoundingBox * 13 BoundingBox * 0 0 452 0 0 0 0 0 0 0 0 0 0
 
-444 15 LPoint3 const * 0 8576 15 LPoint3 const * 15 LPoint3 const * 0 0 445 0 0 0 0 0 0 0 0 0 0
+454 15 LPoint3 const * 0 8576 15 LPoint3 const * 15 LPoint3 const * 0 0 455 0 0 0 0 0 0 0 0 0 0
 
-445 13 LPoint3 const 0 8832 13 LPoint3 const 13 LPoint3 const 0 0 433 0 0 0 0 0 0 0 0 0 0
+455 13 LPoint3 const 0 8832 13 LPoint3 const 13 LPoint3 const 0 0 443 0 0 0 0 0 0 0 0 0 0
 
-446 14 CBrushEntity * 0 8576 14 CBrushEntity * 14 CBrushEntity * 0 0 379 0 0 0 0 0 0 0 0 0 0
+456 14 CBrushEntity * 0 8576 14 CBrushEntity * 14 CBrushEntity * 0 0 388 0 0 0 0 0 0 0 0 0 0
 
-447 20 CBrushEntity const * 0 8576 20 CBrushEntity const * 20 CBrushEntity const * 0 0 448 0 0 0 0 0 0 0 0 0 0
+457 20 CBrushEntity const * 0 8576 20 CBrushEntity const * 20 CBrushEntity const * 0 0 458 0 0 0 0 0 0 0 0 0 0
 
-448 18 CBrushEntity const 0 8832 18 CBrushEntity const 18 CBrushEntity const 0 0 379 0 0 0 0 0 0 0 0 0 0
+458 18 CBrushEntity const 0 8832 18 CBrushEntity const 18 CBrushEntity const 0 0 388 0 0 0 0 0 0 0 0 0 0
 
-449 8 NodePath 0 2048 8 NodePath 8 NodePath 0 0 0 0 0 0 0 0 0 0 0 0 762
+459 8 NodePath 0 2048 8 NodePath 8 NodePath 0 0 0 0 0 0 0 0 0 0 0 0 762
 /**
  * NodePath is the fundamental system for disambiguating instances, and also
  * provides a higher-level interface for manipulating the scene graph.
@@ -1321,68 +1347,68 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * will automatically be updated to reflect the changes.
  */
 
-450 10 NodePath * 0 8576 10 NodePath * 10 NodePath * 0 0 449 0 0 0 0 0 0 0 0 0 0
+460 10 NodePath * 0 8576 10 NodePath * 10 NodePath * 0 0 459 0 0 0 0 0 0 0 0 0 0
 
-451 18 PackResult const * 0 8576 18 PackResult const * 18 PackResult const * 0 0 452 0 0 0 0 0 0 0 0 0 0
+461 18 PackResult const * 0 8576 18 PackResult const * 18 PackResult const * 0 0 462 0 0 0 0 0 0 0 0 0 0
 
-452 16 PackResult const 0 8832 16 PackResult const 16 PackResult const 0 0 380 0 0 0 0 0 0 0 0 0 0
+462 16 PackResult const 0 8832 16 PackResult const 16 PackResult const 0 0 389 0 0 0 0 0 0 0 0 0 0
 
-453 12 PackResult * 0 8576 12 PackResult * 12 PackResult * 0 0 380 0 0 0 0 0 0 0 0 0 0
+463 12 PackResult * 0 8576 12 PackResult * 12 PackResult * 0 0 389 0 0 0 0 0 0 0 0 0 0
 
-454 23 TextureLocation const * 0 8576 23 TextureLocation const * 23 TextureLocation const * 0 0 455 0 0 0 0 0 0 0 0 0 0
+464 23 TextureLocation const * 0 8576 23 TextureLocation const * 23 TextureLocation const * 0 0 465 0 0 0 0 0 0 0 0 0 0
 
-455 21 TextureLocation const 0 8832 21 TextureLocation const 21 TextureLocation const 0 0 381 0 0 0 0 0 0 0 0 0 0
+465 21 TextureLocation const 0 8832 21 TextureLocation const 21 TextureLocation const 0 0 390 0 0 0 0 0 0 0 0 0 0
 
-456 17 TextureLocation * 0 8576 17 TextureLocation * 17 TextureLocation * 0 0 381 0 0 0 0 0 0 0 0 0 0
+466 17 TextureLocation * 0 8576 17 TextureLocation * 17 TextureLocation * 0 0 390 0 0 0 0 0 0 0 0 0 0
 
-457 15 TexturePacker * 0 8576 15 TexturePacker * 15 TexturePacker * 0 0 382 0 0 0 0 0 0 0 0 0 0
+467 15 TexturePacker * 0 8576 15 TexturePacker * 15 TexturePacker * 0 0 391 0 0 0 0 0 0 0 0 0 0
 
-458 21 BSPFaceAttrib const * 0 8576 21 BSPFaceAttrib const * 21 BSPFaceAttrib const * 0 0 459 0 0 0 0 0 0 0 0 0 0
+468 21 BSPFaceAttrib const * 0 8576 21 BSPFaceAttrib const * 21 BSPFaceAttrib const * 0 0 469 0 0 0 0 0 0 0 0 0 0
 
-459 19 BSPFaceAttrib const 0 8832 19 BSPFaceAttrib const 19 BSPFaceAttrib const 0 0 383 0 0 0 0 0 0 0 0 0 0
+469 19 BSPFaceAttrib const 0 8832 19 BSPFaceAttrib const 19 BSPFaceAttrib const 0 0 392 0 0 0 0 0 0 0 0 0 0
 
-460 11 PN_stdfloat 0 2105344 11 PN_stdfloat 11 PN_stdfloat 0 0 461 0 0 0 0 0 0 0 0 0 0
+470 11 PN_stdfloat 0 2105344 11 PN_stdfloat 11 PN_stdfloat 0 0 471 0 0 0 0 0 0 0 0 0 0
 
-461 5 float 0 8194 5 float 5 float 0 2 0 0 0 0 0 0 0 0 0 0 0
+471 5 float 0 8194 5 float 5 float 0 2 0 0 0 0 0 0 0 0 0 0 0
 
-462 17 BSPLoader const * 0 8576 17 BSPLoader const * 17 BSPLoader const * 0 0 463 0 0 0 0 0 0 0 0 0 0
+472 17 BSPLoader const * 0 8576 17 BSPLoader const * 17 BSPLoader const * 0 0 473 0 0 0 0 0 0 0 0 0 0
 
-463 15 BSPLoader const 0 8832 15 BSPLoader const 15 BSPLoader const 0 0 385 0 0 0 0 0 0 0 0 0 0
+473 15 BSPLoader const 0 8832 15 BSPLoader const 15 BSPLoader const 0 0 394 0 0 0 0 0 0 0 0 0 0
 
-464 16 GraphicsWindow * 0 8576 16 GraphicsWindow * 16 GraphicsWindow * 0 0 465 0 0 0 0 0 0 0 0 0 0
+474 16 GraphicsWindow * 0 8576 16 GraphicsWindow * 16 GraphicsWindow * 0 0 475 0 0 0 0 0 0 0 0 0 0
 
-465 14 GraphicsWindow 0 2048 14 GraphicsWindow 14 GraphicsWindow 0 0 0 0 0 0 0 0 0 0 0 0 122
+475 14 GraphicsWindow 0 2048 14 GraphicsWindow 14 GraphicsWindow 0 0 0 0 0 0 0 0 0 0 0 0 122
 /**
  * A window, fullscreen or on a desktop, into which a graphics device sends
  * its output for interactive display.
  */
 
-466 16 NodePath const * 0 8576 16 NodePath const * 16 NodePath const * 0 0 467 0 0 0 0 0 0 0 0 0 0
+476 16 NodePath const * 0 8576 16 NodePath const * 16 NodePath const * 0 0 477 0 0 0 0 0 0 0 0 0 0
 
-467 14 NodePath const 0 8832 14 NodePath const 14 NodePath const 0 0 449 0 0 0 0 0 0 0 0 0 0
+477 14 NodePath const 0 8832 14 NodePath const 14 NodePath const 0 0 459 0 0 0 0 0 0 0 0 0 0
 
-468 17 BitMask32 const * 0 8576 17 BitMask32 const * 17 BitMask32 const * 0 0 469 0 0 0 0 0 0 0 0 0 0
+478 17 BitMask32 const * 0 8576 17 BitMask32 const * 17 BitMask32 const * 0 0 479 0 0 0 0 0 0 0 0 0 0
 
-469 15 BitMask32 const 0 8832 15 BitMask32 const 15 BitMask32 const 0 0 470 0 0 0 0 0 0 0 0 0 0
+479 15 BitMask32 const 0 8832 15 BitMask32 const 15 BitMask32 const 0 0 480 0 0 0 0 0 0 0 0 0 0
 
-470 9 BitMask32 0 2105344 9 BitMask32 9 BitMask32 0 0 471 0 0 0 0 0 0 0 0 0 0
+480 9 BitMask32 0 2105344 9 BitMask32 9 BitMask32 0 0 481 0 0 0 0 0 0 0 0 0 0
 
-471 23 BitMask< uint32_t, 32 > 0 2048 23 BitMask< uint32_t, 32 > 23 BitMask< uint32_t, 32 > 0 0 0 0 0 0 0 0 0 0 0 0 0
+481 23 BitMask< uint32_t, 32 > 0 2048 23 BitMask< uint32_t, 32 > 23 BitMask< uint32_t, 32 > 0 0 0 0 0 0 0 0 0 0 0 0 0
 
-472 14 LColor const * 0 8576 14 LColor const * 14 LColor const * 0 0 473 0 0 0 0 0 0 0 0 0 0
+482 14 LColor const * 0 8576 14 LColor const * 14 LColor const * 0 0 483 0 0 0 0 0 0 0 0 0 0
 
-473 12 LColor const 0 8832 12 LColor const 12 LColor const 0 0 474 0 0 0 0 0 0 0 0 0 0
+483 12 LColor const 0 8832 12 LColor const 12 LColor const 0 0 484 0 0 0 0 0 0 0 0 0 0
 
-474 6 LColor 0 2105344 6 LColor 6 LColor 0 0 475 0 0 0 0 0 0 0 0 0 0
+484 6 LColor 0 2105344 6 LColor 6 LColor 0 0 485 0 0 0 0 0 0 0 0 0 0
 
-475 7 LColorf 0 2105344 7 LColorf 7 LColorf 0 0 476 0 0 0 0 0 0 0 0 0 0
+485 7 LColorf 0 2105344 7 LColorf 7 LColorf 0 0 486 0 0 0 0 0 0 0 0 0 0
 
-476 10 LVecBase4f 0 2048 10 LVecBase4f 10 LVecBase4f 0 0 0 0 0 0 0 0 0 0 0 0 77
+486 10 LVecBase4f 0 2048 10 LVecBase4f 10 LVecBase4f 0 0 0 0 0 0 0 0 0 0 0 0 77
 /**
  * This is the base class for all three-component vectors and points.
  */
 
-477 7 Texture 0 2048 7 Texture 7 Texture 0 0 0 0 0 0 0 0 0 0 0 0 688
+487 7 Texture 0 2048 7 Texture 7 Texture 0 0 0 0 0 0 0 0 0 0 0 0 688
 /**
  * Represents a texture object, which is typically a single 2-d image but may
  * also represent a 1-d or 3-d texture image, or the six 2-d faces of a cube
@@ -1397,40 +1423,40 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * the system RAM image is automatically freed.
  */
 
-478 9 Texture * 0 8576 9 Texture * 9 Texture * 0 0 477 0 0 0 0 0 0 0 0 0 0
+488 9 Texture * 0 8576 9 Texture * 9 Texture * 0 0 487 0 0 0 0 0 0 0 0 0 0
 
-479 10 PyObject * 0 8576 10 PyObject * 10 PyObject * 0 0 480 0 0 0 0 0 0 0 0 0 0
+489 10 PyObject * 0 8576 10 PyObject * 10 PyObject * 0 0 490 0 0 0 0 0 0 0 0 0 0
 
-480 8 PyObject 0 2105344 8 PyObject 8 PyObject 0 0 481 0 0 0 0 0 0 0 0 0 0
+490 8 PyObject 0 2105344 8 PyObject 8 PyObject 0 0 491 0 0 0 0 0 0 0 0 0 0
 
-481 7 _object 0 1024 7 _object 7 _object 0 0 0 0 0 0 0 0 0 0 0 0 0
+491 7 _object 0 1024 7 _object 7 _object 0 0 0 0 0 0 0 0 0 0 0 0 0
 
-482 14 PyTypeObject * 0 8576 14 PyTypeObject * 14 PyTypeObject * 0 0 483 0 0 0 0 0 0 0 0 0 0
+492 14 PyTypeObject * 0 8576 14 PyTypeObject * 14 PyTypeObject * 0 0 493 0 0 0 0 0 0 0 0 0 0
 
-483 12 PyTypeObject 0 2105344 12 PyTypeObject 12 PyTypeObject 0 0 484 0 0 0 0 0 0 0 0 0 0
+493 12 PyTypeObject 0 2105344 12 PyTypeObject 12 PyTypeObject 0 0 494 0 0 0 0 0 0 0 0 0 0
 
-484 11 _typeobject 0 1024 11 _typeobject 11 _typeobject 0 0 0 0 0 0 0 0 0 0 0 0 0
+494 11 _typeobject 0 1024 11 _typeobject 11 _typeobject 0 0 0 0 0 0 0 0 0 0 0 0 0
 
-485 9 int const 0 8832 9 int const 9 int const 0 0 375 0 0 0 0 0 0 0 0 0 0
+495 9 int const 0 8832 9 int const 9 int const 0 0 384 0 0 0 0 0 0 0 0 0 0
 
-486 8 LColor * 0 8576 8 LColor * 8 LColor * 0 0 474 0 0 0 0 0 0 0 0 0 0
+496 8 LColor * 0 8576 8 LColor * 8 LColor * 0 0 484 0 0 0 0 0 0 0 0 0 0
 
-487 31 GeometricBoundingVolume const * 0 8576 31 GeometricBoundingVolume const * 31 GeometricBoundingVolume const * 0 0 488 0 0 0 0 0 0 0 0 0 0
+497 31 GeometricBoundingVolume const * 0 8576 31 GeometricBoundingVolume const * 31 GeometricBoundingVolume const * 0 0 498 0 0 0 0 0 0 0 0 0 0
 
-488 29 GeometricBoundingVolume const 0 8832 29 GeometricBoundingVolume const 29 GeometricBoundingVolume const 0 0 489 0 0 0 0 0 0 0 0 0 0
+498 29 GeometricBoundingVolume const 0 8832 29 GeometricBoundingVolume const 29 GeometricBoundingVolume const 0 0 499 0 0 0 0 0 0 0 0 0 0
 
-489 23 GeometricBoundingVolume 0 2048 23 GeometricBoundingVolume 23 GeometricBoundingVolume 0 0 0 0 0 0 0 0 0 0 0 0 167
+499 23 GeometricBoundingVolume 0 2048 23 GeometricBoundingVolume 23 GeometricBoundingVolume 0 0 0 0 0 0 0 0 0 0 0 0 167
 /**
  * This is another abstract class, for a general class of bounding volumes
  * that actually enclose points in 3-d space, such as BSP's and bounding
  * spheres.
  */
 
-490 22 TransformState const * 0 8576 22 TransformState const * 22 TransformState const * 0 0 491 0 0 0 0 0 0 0 0 0 0
+500 22 TransformState const * 0 8576 22 TransformState const * 22 TransformState const * 0 0 501 0 0 0 0 0 0 0 0 0 0
 
-491 20 TransformState const 0 8832 20 TransformState const 20 TransformState const 0 0 492 0 0 0 0 0 0 0 0 0 0
+501 20 TransformState const 0 8832 20 TransformState const 20 TransformState const 0 0 502 0 0 0 0 0 0 0 0 0 0
 
-492 14 TransformState 0 16779264 14 TransformState 14 TransformState 0 0 0 0 0 0 0 0 0 0 0 0 734
+502 14 TransformState 0 16779264 14 TransformState 14 TransformState 0 0 0 0 0 0 0 0 0 0 0 0 734
 /**
  * Indicates a coordinate-system transform on vertices.  TransformStates are
  * the primary means for storing transformations on the scene graph.
@@ -1447,63 +1473,63 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * And instead of modifying a TransformState object, create a new one.
  */
 
-493 24 BSPCullTraverser const * 0 8576 24 BSPCullTraverser const * 24 BSPCullTraverser const * 0 0 494 0 0 0 0 0 0 0 0 0 0
+503 24 BSPCullTraverser const * 0 8576 24 BSPCullTraverser const * 24 BSPCullTraverser const * 0 0 504 0 0 0 0 0 0 0 0 0 0
 
-494 22 BSPCullTraverser const 0 8832 22 BSPCullTraverser const 22 BSPCullTraverser const 0 0 387 0 0 0 0 0 0 0 0 0 0
+504 22 BSPCullTraverser const 0 8832 22 BSPCullTraverser const 22 BSPCullTraverser const 0 0 396 0 0 0 0 0 0 0 0 0 0
 
-495 18 BSPCullTraverser * 0 8576 18 BSPCullTraverser * 18 BSPCullTraverser * 0 0 387 0 0 0 0 0 0 0 0 0 0
+505 18 BSPCullTraverser * 0 8576 18 BSPCullTraverser * 18 BSPCullTraverser * 0 0 396 0 0 0 0 0 0 0 0 0 0
 
-496 15 CullTraverser * 0 8576 15 CullTraverser * 15 CullTraverser * 0 0 388 0 0 0 0 0 0 0 0 0 0
+506 15 CullTraverser * 0 8576 15 CullTraverser * 15 CullTraverser * 0 0 397 0 0 0 0 0 0 0 0 0 0
 
-497 17 BSPRender const * 0 8576 17 BSPRender const * 17 BSPRender const * 0 0 498 0 0 0 0 0 0 0 0 0 0
+507 17 BSPRender const * 0 8576 17 BSPRender const * 17 BSPRender const * 0 0 508 0 0 0 0 0 0 0 0 0 0
 
-498 15 BSPRender const 0 8832 15 BSPRender const 15 BSPRender const 0 0 389 0 0 0 0 0 0 0 0 0 0
+508 15 BSPRender const 0 8832 15 BSPRender const 15 BSPRender const 0 0 398 0 0 0 0 0 0 0 0 0 0
 
-499 11 BSPRender * 0 8576 11 BSPRender * 11 BSPRender * 0 0 389 0 0 0 0 0 0 0 0 0 0
+509 11 BSPRender * 0 8576 11 BSPRender * 11 BSPRender * 0 0 398 0 0 0 0 0 0 0 0 0 0
 
-500 15 BSPRoot const * 0 8576 15 BSPRoot const * 15 BSPRoot const * 0 0 501 0 0 0 0 0 0 0 0 0 0
+510 15 BSPRoot const * 0 8576 15 BSPRoot const * 15 BSPRoot const * 0 0 511 0 0 0 0 0 0 0 0 0 0
 
-501 13 BSPRoot const 0 8832 13 BSPRoot const 13 BSPRoot const 0 0 391 0 0 0 0 0 0 0 0 0 0
+511 13 BSPRoot const 0 8832 13 BSPRoot const 13 BSPRoot const 0 0 400 0 0 0 0 0 0 0 0 0 0
 
-502 9 BSPRoot * 0 8576 9 BSPRoot * 9 BSPRoot * 0 0 391 0 0 0 0 0 0 0 0 0 0
+512 9 BSPRoot * 0 8576 9 BSPRoot * 9 BSPRoot * 0 0 400 0 0 0 0 0 0 0 0 0 0
 
-503 15 BSPProp const * 0 8576 15 BSPProp const * 15 BSPProp const * 0 0 504 0 0 0 0 0 0 0 0 0 0
+513 15 BSPProp const * 0 8576 15 BSPProp const * 15 BSPProp const * 0 0 514 0 0 0 0 0 0 0 0 0 0
 
-504 13 BSPProp const 0 8832 13 BSPProp const 13 BSPProp const 0 0 392 0 0 0 0 0 0 0 0 0 0
+514 13 BSPProp const 0 8832 13 BSPProp const 13 BSPProp const 0 0 401 0 0 0 0 0 0 0 0 0 0
 
-505 9 BSPProp * 0 8576 9 BSPProp * 9 BSPProp * 0 0 392 0 0 0 0 0 0 0 0 0 0
+515 9 BSPProp * 0 8576 9 BSPProp * 9 BSPProp * 0 0 401 0 0 0 0 0 0 0 0 0 0
 
-506 16 BSPModel const * 0 8576 16 BSPModel const * 16 BSPModel const * 0 0 507 0 0 0 0 0 0 0 0 0 0
+516 16 BSPModel const * 0 8576 16 BSPModel const * 16 BSPModel const * 0 0 517 0 0 0 0 0 0 0 0 0 0
 
-507 14 BSPModel const 0 8832 14 BSPModel const 14 BSPModel const 0 0 394 0 0 0 0 0 0 0 0 0 0
+517 14 BSPModel const 0 8832 14 BSPModel const 14 BSPModel const 0 0 403 0 0 0 0 0 0 0 0 0 0
 
-508 10 BSPModel * 0 8576 10 BSPModel * 10 BSPModel * 0 0 394 0 0 0 0 0 0 0 0 0 0
+518 10 BSPModel * 0 8576 10 BSPModel * 10 BSPModel * 0 0 403 0 0 0 0 0 0 0 0 0 0
 
-509 20 ShaderPermutations * 0 8576 20 ShaderPermutations * 20 ShaderPermutations * 0 0 395 0 0 0 0 0 0 0 0 0 0
+519 20 ShaderPermutations * 0 8576 20 ShaderPermutations * 20 ShaderPermutations * 0 0 404 0 0 0 0 0 0 0 0 0 0
 
-510 26 ShaderPermutations const * 0 8576 26 ShaderPermutations const * 26 ShaderPermutations const * 0 0 511 0 0 0 0 0 0 0 0 0 0
+520 26 ShaderPermutations const * 0 8576 26 ShaderPermutations const * 26 ShaderPermutations const * 0 0 521 0 0 0 0 0 0 0 0 0 0
 
-511 24 ShaderPermutations const 0 8832 24 ShaderPermutations const 24 ShaderPermutations const 0 0 395 0 0 0 0 0 0 0 0 0 0
+521 24 ShaderPermutations const 0 8832 24 ShaderPermutations const 24 ShaderPermutations const 0 0 404 0 0 0 0 0 0 0 0 0 0
 
-512 19 ShaderInput const * 0 8576 19 ShaderInput const * 19 ShaderInput const * 0 0 513 0 0 0 0 0 0 0 0 0 0
+522 19 ShaderInput const * 0 8576 19 ShaderInput const * 19 ShaderInput const * 0 0 523 0 0 0 0 0 0 0 0 0 0
 
-513 17 ShaderInput const 0 8832 17 ShaderInput const 17 ShaderInput const 0 0 514 0 0 0 0 0 0 0 0 0 0
+523 17 ShaderInput const 0 8832 17 ShaderInput const 17 ShaderInput const 0 0 524 0 0 0 0 0 0 0 0 0 0
 
-514 11 ShaderInput 0 2048 11 ShaderInput 11 ShaderInput 0 0 0 0 0 0 0 0 0 0 0 0 127
+524 11 ShaderInput 0 2048 11 ShaderInput 11 ShaderInput 0 0 0 0 0 0 0 0 0 0 0 0 127
 /**
  * This is a small container class that can hold any one of the value types
  * that can be passed as input to a shader.
  */
 
-515 12 ShaderSpec * 0 8576 12 ShaderSpec * 12 ShaderSpec * 0 0 396 0 0 0 0 0 0 0 0 0 0
+525 12 ShaderSpec * 0 8576 12 ShaderSpec * 12 ShaderSpec * 0 0 405 0 0 0 0 0 0 0 0 0 0
 
-516 16 ReferenceCount * 0 8576 16 ReferenceCount * 16 ReferenceCount * 0 0 397 0 0 0 0 0 0 0 0 0 0
+526 16 ReferenceCount * 0 8576 16 ReferenceCount * 16 ReferenceCount * 0 0 406 0 0 0 0 0 0 0 0 0 0
 
-517 9 Namable * 0 8576 9 Namable * 9 Namable * 0 0 398 0 0 0 0 0 0 0 0 0 0
+527 9 Namable * 0 8576 9 Namable * 9 Namable * 0 0 407 0 0 0 0 0 0 0 0 0 0
 
-518 23 GraphicsStateGuardian * 0 8576 23 GraphicsStateGuardian * 23 GraphicsStateGuardian * 0 0 519 0 0 0 0 0 0 0 0 0 0
+528 23 GraphicsStateGuardian * 0 8576 23 GraphicsStateGuardian * 23 GraphicsStateGuardian * 0 0 529 0 0 0 0 0 0 0 0 0 0
 
-519 21 GraphicsStateGuardian 0 2048 21 GraphicsStateGuardian 21 GraphicsStateGuardian 0 0 0 0 0 0 0 0 0 0 0 0 308
+529 21 GraphicsStateGuardian 0 2048 21 GraphicsStateGuardian 21 GraphicsStateGuardian 0 0 0 0 0 0 0 0 0 0 0 0 308
 /**
  * Encapsulates all the communication with a particular instance of a given
  * rendering backend.  Tries to guarantee that redundant state-change requests
@@ -1513,28 +1539,30 @@ UnlitNoMatSpec::~UnlitNoMatSpec(void);
  * active in the system.
  */
 
-520 21 PSSMShaderGenerator * 0 8576 21 PSSMShaderGenerator * 21 PSSMShaderGenerator * 0 0 399 0 0 0 0 0 0 0 0 0 0
+530 21 PSSMShaderGenerator * 0 8576 21 PSSMShaderGenerator * 21 PSSMShaderGenerator * 0 0 408 0 0 0 0 0 0 0 0 0 0
 
-521 27 PSSMShaderGenerator const * 0 8576 27 PSSMShaderGenerator const * 27 PSSMShaderGenerator const * 0 0 522 0 0 0 0 0 0 0 0 0 0
+531 27 PSSMShaderGenerator const * 0 8576 27 PSSMShaderGenerator const * 27 PSSMShaderGenerator const * 0 0 532 0 0 0 0 0 0 0 0 0 0
 
-522 25 PSSMShaderGenerator const 0 8832 25 PSSMShaderGenerator const 25 PSSMShaderGenerator const 0 0 399 0 0 0 0 0 0 0 0 0 0
+532 25 PSSMShaderGenerator const 0 8832 25 PSSMShaderGenerator const 25 PSSMShaderGenerator const 0 0 408 0 0 0 0 0 0 0 0 0 0
 
-523 15 PSSMCameraRig * 0 8576 15 PSSMCameraRig * 15 PSSMCameraRig * 0 0 524 0 0 0 0 0 0 0 0 0 0
+533 15 PSSMCameraRig * 0 8576 15 PSSMCameraRig * 15 PSSMCameraRig * 0 0 534 0 0 0 0 0 0 0 0 0 0
 
-524 13 PSSMCameraRig 0 2048 13 PSSMCameraRig 13 PSSMCameraRig 0 0 0 0 0 0 0 0 0 0 0 0 0
+534 13 PSSMCameraRig 0 2048 13 PSSMCameraRig 13 PSSMCameraRig 0 0 0 0 0 0 0 0 0 0 0 0 0
 
-525 22 VertexLitGenericSpec * 0 8576 22 VertexLitGenericSpec * 22 VertexLitGenericSpec * 0 0 401 0 0 0 0 0 0 0 0 0 0
+535 22 VertexLitGenericSpec * 0 8576 22 VertexLitGenericSpec * 22 VertexLitGenericSpec * 0 0 410 0 0 0 0 0 0 0 0 0 0
 
-526 24 LightmappedGenericSpec * 0 8576 24 LightmappedGenericSpec * 24 LightmappedGenericSpec * 0 0 402 0 0 0 0 0 0 0 0 0 0
+536 24 LightmappedGenericSpec * 0 8576 24 LightmappedGenericSpec * 24 LightmappedGenericSpec * 0 0 411 0 0 0 0 0 0 0 0 0 0
 
-527 18 UnlitGenericSpec * 0 8576 18 UnlitGenericSpec * 18 UnlitGenericSpec * 0 0 403 0 0 0 0 0 0 0 0 0 0
+537 18 UnlitGenericSpec * 0 8576 18 UnlitGenericSpec * 18 UnlitGenericSpec * 0 0 412 0 0 0 0 0 0 0 0 0 0
 
-528 16 UnlitNoMatSpec * 0 8576 16 UnlitNoMatSpec * 16 UnlitNoMatSpec * 0 0 404 0 0 0 0 0 0 0 0 0 0
+538 16 UnlitNoMatSpec * 0 8576 16 UnlitNoMatSpec * 16 UnlitNoMatSpec * 0 0 413 0 0 0 0 0 0 0 0 0 0
+
+539 15 CSMRenderSpec * 0 8576 15 CSMRenderSpec * 15 CSMRenderSpec * 0 0 414 0 0 0 0 0 0 0 0 0 0
 
 0
 2
-529 10 class_slot 0 2 375 209 0 0 0 0 0 0 0 29 BSPMaterialAttrib::class_slot 0
+540 10 class_slot 0 2 384 216 0 0 0 0 0 0 0 29 BSPMaterialAttrib::class_slot 0
 
-530 10 class_slot 0 2 375 262 0 0 0 0 0 0 0 25 BSPFaceAttrib::class_slot 0
+541 10 class_slot 0 2 384 269 0 0 0 0 0 0 0 25 BSPFaceAttrib::class_slot 0
 
 0

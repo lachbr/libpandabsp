@@ -284,7 +284,9 @@ inline void merge_points_interleaved( LVecBase3( &dest )[8], LVecBase3 const ( &
 * @param max_distance Maximum pssm distance, relative to the camera far plane
 * @param light_vector Sun-Vector
 */
-void PSSMCameraRig::compute_pssm_splits( const LMatrix4& transform, float max_distance, const LVecBase3& light_vector, Camera *main_cam )
+void PSSMCameraRig::compute_pssm_splits( const LMatrix4& transform, float max_distance,
+                                         const LVecBase3& light_vector, Camera *main_cam,
+                                         const GeometricBoundingVolume *light_bounds )
 {
         nassertv( !_parent.is_empty() );
 
@@ -378,10 +380,9 @@ void PSSMCameraRig::compute_pssm_splits( const LMatrix4& transform, float max_di
         // Use the exact same cull bounds as the main camera.
         // There is no reason to render something to the shadow camera
         // that we wouldn't see a shadow of.
-        LMatrix4 inv_cammat = NodePath( main_cam ).get_net_transform()->get_inverse()->get_mat();
-        PT( GeometricBoundingVolume ) bounds = main_cam->get_lens()->make_bounds()->as_geometric_bounding_volume();
-        LVector3 light_extents = light_vector * _sun_distance;
-        bounds->extend_by( inv_cammat.xform_point( light_extents ) );
+        PT( GeometricBoundingVolume ) bounds = main_cam->get_lens()->
+                make_bounds()->as_geometric_bounding_volume();
+        bounds->extend_by( light_bounds );
         
         Camera *maincam = DCAST( Camera, _cam_nodes[0].node() );
         maincam->set_cull_center( NodePath( main_cam ) );
@@ -402,7 +403,7 @@ void PSSMCameraRig::compute_pssm_splits( const LMatrix4& transform, float max_di
 * @param cam_node Target camera node
 * @param light_vector The vector from the light to any point
 */
-void PSSMCameraRig::update( NodePath cam_node, const LVecBase3 &light_vector )
+void PSSMCameraRig::update( NodePath cam_node, const LVecBase3 &light_vector, const GeometricBoundingVolume *light_bounds )
 {
         nassertv( !cam_node.is_empty() );
         _update_collector.start();
@@ -436,7 +437,7 @@ void PSSMCameraRig::update( NodePath cam_node, const LVecBase3 &light_vector )
         }
 
         // Do the actual PSSM
-        compute_pssm_splits( transform, _pssm_distance / lens->get_far(), light_vector, cam );
+        compute_pssm_splits( transform, _pssm_distance / lens->get_far(), light_vector, cam, light_bounds );
 
         _update_collector.stop();
 }
