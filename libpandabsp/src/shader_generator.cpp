@@ -66,7 +66,7 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
         ShaderGenerator( gsg ),
         _gsg( gsg ),
         _update_task( new GenericAsyncTask( "PSSMShaderGenerator_update_pssm", update_pssm, this ) ),
-        _pssm_rig( new PSSMCameraRig( pssm_splits ) ),
+        _pssm_rig( new PSSMCameraRig( pssm_splits, this ) ),
         _camera( camera ),
         _render( render ),
         _sun_vector( 0 ),
@@ -86,7 +86,6 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
         
         if ( want_pssm )
         {
-                _pssm_rig->reparent_to( _render );
                 _pssm_split_texture_array = new Texture( "pssmSplitTextureArray" );
                 _pssm_split_texture_array->setup_2d_texture_array( pssm_size, pssm_size, pssm_splits, Texture::T_float, Texture::F_depth_component );
                 _pssm_split_texture_array->set_clear_color( LVecBase4( 1.0 ) );
@@ -136,8 +135,6 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 Camera *cam = DCAST( Camera, _pssm_rig->get_camera( 0 ).node() );
                 cam->set_initial_state( state );
                 cam->set_scene( _render );
-                cam->set_cull_bounds( new OmniBoundingVolume() );
-                cam->set_final( true );
 
                 PT( DisplayRegion ) dr = _pssm_layered_buffer->make_display_region();
                 dr->set_camera( _pssm_rig->get_camera( 0 ) );
@@ -163,6 +160,8 @@ void PSSMShaderGenerator::set_sun_light( const NodePath &np )
         _sun_vector = -dlight->get_direction();
 
         _has_shadow_sunlight = true;
+
+        _pssm_rig->reparent_to( _render );
 }
 
 void PSSMShaderGenerator::start_update()
@@ -181,11 +180,12 @@ AsyncTask::DoneStatus PSSMShaderGenerator::update_pssm( GenericAsyncTask *task, 
                 {
                         self->_sunlight = NodePath();
                         self->_has_shadow_sunlight = false;
+                        self->_pssm_rig->reparent_to( NodePath() );
                         return AsyncTask::DS_cont;
                 }
 
                 DirectionalLight *dlight = DCAST( DirectionalLight, self->_sunlight.node() );
-                PT( GeometricBoundingVolume ) bounds = dlight->get_lens()->make_bounds()->as_geometric_bounding_volume();
+                PT( BoundingHexahedron ) bounds = DCAST( BoundingHexahedron, dlight->get_lens()->make_bounds() );
 
                 // move from local space into camera space
                 LMatrix4 inv_cammat = NodePath( self->_camera ).get_transform(

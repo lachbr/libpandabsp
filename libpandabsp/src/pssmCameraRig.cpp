@@ -34,8 +34,21 @@
 #include "orthographicLens.h"
 #include "boundingSphere.h"
 
-PStatCollector PSSMCameraRig::_update_collector( "App:Show code:RP_PSSM_update" );
-static PStatCollector create_union_collector( "App:Show code:PSSM_makeUnionAABB" );
+#include "bounding_kdop.h"
+#include "shader_generator.h"
+#include <graphicsBuffer.h>
+#include <lineSegs.h>
+#include <collisionNode.h>
+#include <collisionPlane.h>
+#include <meshDrawer.h>
+
+PStatCollector PSSMCameraRig::_update_collector( "App:CSM:Update" );
+static PStatCollector create_union_collector( "App:CSM:Update:MakeCullBounds" );
+
+static MeshDrawer dbg_draw;
+static NodePath dbg_root( "dbgRoot" );
+
+#define CSM_BOUNDS_DEBUG 0
 
 /**
 * @brief Constructs a new PSSM camera rig
@@ -46,7 +59,7 @@ static PStatCollector create_union_collector( "App:Show code:PSSM_makeUnionAABB"
 *
 * @param num_splits Amount of PSSM splits
 */
-PSSMCameraRig::PSSMCameraRig( size_t num_splits )
+PSSMCameraRig::PSSMCameraRig( size_t num_splits, PSSMShaderGenerator *gen )
 {
         nassertv( num_splits > 0 );
         _num_splits = num_splits;
@@ -61,6 +74,7 @@ PSSMCameraRig::PSSMCameraRig( size_t num_splits )
         _camera_nearfar = PTA_LVecBase2::empty_array( num_splits );
         _camera_viewmatrix = PTA_LMatrix4::empty_array( num_splits );
         _sun_vector = PTA_LVecBase3f::empty_array( 1 );
+        _gen = gen;
         init_cam_nodes();
 }
 
@@ -112,12 +126,16 @@ void PSSMCameraRig::init_cam_nodes()
 */
 void PSSMCameraRig::reparent_to( NodePath parent )
 {
-        nassertv( !parent.is_empty() );
+        //nassertv( !parent.is_empty() );
         for ( size_t i = 0; i < _num_splits; ++i )
         {
                 _cam_nodes[i].reparent_to( parent );
         }
         _parent = parent;
+        dbg_draw.set_budget( 1000 );
+        dbg_root = dbg_draw.get_root();
+        dbg_root.reparent_to( _gen->_render );
+        dbg_root.set_two_sided( true );
 }
 
 /**
@@ -273,6 +291,338 @@ inline void merge_points_interleaved( LVecBase3( &dest )[8], LVecBase3 const ( &
         }
 }
 
+class FrustumHelper
+{
+public:
+        /** Frustum planes. */
+        enum
+        {
+                PLANE_NEAR,
+                PLANE_TOP,
+                PLANE_LEFT,
+                PLANE_BOTTOM,
+                PLANE_RIGHT,
+                PLANE_FAR,
+                PLANE_TOTAL
+        };
+
+        /** Frustum points. */
+        enum
+        {
+                POINT_FAR_BOTTOM_LEFT,
+                POINT_FAR_BOTTOM_RIGHT,
+                POINT_FAR_TOP_RIGHT,
+                POINT_FAR_TOP_LEFT,       
+                
+                POINT_NEAR_BOTTOM_LEFT,
+                POINT_NEAR_BOTTOM_RIGHT,
+                POINT_NEAR_TOP_RIGHT,
+                POINT_NEAR_TOP_LEFT,
+        };
+
+        INLINE static void get_corners_of_planes( int plane1, int plane2, int points[2] )
+        {
+                static const int table[PLANE_TOTAL][PLANE_TOTAL][2] = {
+                        // ==
+                        {	// PLANE_NEAR
+                                {	// PLANE_NEAR
+                                        POINT_NEAR_TOP_LEFT, POINT_NEAR_TOP_RIGHT,		// Invalid combination.
+                                },
+                                {	// PLANE_TOP
+                                        POINT_NEAR_TOP_RIGHT, POINT_NEAR_TOP_LEFT,
+                                },
+                                {	// PLANE_LEFT
+                                        POINT_NEAR_TOP_LEFT, POINT_NEAR_BOTTOM_LEFT,
+                                },
+                                {	// PLANE_BOTTOM
+                                        POINT_NEAR_BOTTOM_LEFT, POINT_NEAR_BOTTOM_RIGHT,
+                                },
+                                {	// PLANE_RIGHT
+                                        POINT_NEAR_BOTTOM_RIGHT, POINT_NEAR_TOP_RIGHT,
+                                },
+                                {	// PLANE_FAR
+                                        POINT_FAR_TOP_RIGHT, POINT_FAR_TOP_LEFT,		// Invalid combination.
+                                },
+
+                        },
+                        // ==
+                        {	// PLANE_TOP
+                                {	// PLANE_NEAR
+                                        POINT_NEAR_TOP_LEFT, POINT_NEAR_TOP_RIGHT,
+                                },
+                                {	// PLANE_TOP
+                                        POINT_NEAR_TOP_LEFT, POINT_FAR_TOP_LEFT,		// Invalid combination.
+                                },
+                                {	// PLANE_LEFT
+                                        POINT_FAR_TOP_LEFT, POINT_NEAR_TOP_LEFT,
+                                },
+                                {	// PLANE_BOTTOM
+                                        POINT_FAR_BOTTOM_LEFT, POINT_NEAR_BOTTOM_LEFT,	// Invalid combination.
+                                },
+                                {	// PLANE_RIGHT
+                                        POINT_NEAR_TOP_RIGHT, POINT_FAR_TOP_RIGHT,
+                                },
+                                {	// PLANE_FAR
+                                        POINT_FAR_TOP_RIGHT, POINT_FAR_TOP_LEFT,
+                                },
+                        },
+                        {	// PLANE_LEFT
+                                {	// PLANE_NEAR
+                                        POINT_NEAR_BOTTOM_LEFT, POINT_NEAR_TOP_LEFT,
+                                },
+                                {	// PLANE_TOP
+                                        POINT_NEAR_TOP_LEFT, POINT_FAR_TOP_LEFT,
+                                },
+                                {	// PLANE_LEFT
+                                        POINT_FAR_BOTTOM_LEFT, POINT_FAR_BOTTOM_LEFT,		// Invalid combination.
+                                },
+                                {	// PLANE_BOTTOM
+                                        POINT_FAR_BOTTOM_LEFT, POINT_NEAR_BOTTOM_LEFT,
+                                },
+                                {	// PLANE_RIGHT
+                                        POINT_FAR_BOTTOM_LEFT, POINT_FAR_BOTTOM_LEFT,		// Invalid combination.
+                                },
+                                {	// PLANE_FAR
+                                        POINT_FAR_TOP_LEFT, POINT_FAR_BOTTOM_LEFT,
+                                },
+                        },
+                        {	// PLANE_BOTTOM
+                                {	// PLANE_NEAR
+                                        POINT_NEAR_BOTTOM_RIGHT, POINT_NEAR_BOTTOM_LEFT,
+                                },
+                                {	// PLANE_TOP
+                                        POINT_NEAR_BOTTOM_LEFT, POINT_FAR_BOTTOM_LEFT,	// Invalid combination.
+                                },
+                                {	// PLANE_LEFT
+                                        POINT_NEAR_BOTTOM_LEFT, POINT_FAR_BOTTOM_LEFT,
+                                },
+                                {	// PLANE_BOTTOM
+                                        POINT_FAR_BOTTOM_LEFT, POINT_NEAR_BOTTOM_LEFT,	// Invalid combination.
+                                },
+                                {	// PLANE_RIGHT
+                                        POINT_FAR_BOTTOM_RIGHT, POINT_NEAR_BOTTOM_RIGHT,
+                                },
+                                {	// PLANE_FAR
+                                        POINT_FAR_BOTTOM_LEFT, POINT_FAR_BOTTOM_RIGHT,
+                                },
+                        },
+                        {	// PLANE_RIGHT
+                                {	// PLANE_NEAR
+                                        POINT_NEAR_TOP_RIGHT, POINT_NEAR_BOTTOM_RIGHT,
+                                },
+                                {	// PLANE_TOP
+                                        POINT_FAR_TOP_RIGHT, POINT_NEAR_TOP_RIGHT,
+                                },
+                                {	// PLANE_LEFT
+                                        POINT_FAR_BOTTOM_RIGHT, POINT_FAR_BOTTOM_RIGHT,	// Invalid combination.
+                                },
+                                {	// PLANE_BOTTOM
+                                        POINT_NEAR_BOTTOM_RIGHT, POINT_FAR_BOTTOM_RIGHT,
+                                },                                
+                                {	// PLANE_RIGHT
+                                        POINT_FAR_BOTTOM_RIGHT, POINT_FAR_BOTTOM_RIGHT,	// Invalid combination.
+                                },
+                                {	// PLANE_FAR
+                                        POINT_FAR_BOTTOM_RIGHT, POINT_FAR_TOP_RIGHT,
+                                },
+                        },
+                        {	// PLANE_FAR
+                                {	// PLANE_NEAR
+                                        POINT_FAR_TOP_LEFT, POINT_FAR_TOP_RIGHT,		// Invalid combination.
+                                },
+                                {	// PLANE_TOP
+                                        POINT_FAR_TOP_LEFT, POINT_FAR_TOP_RIGHT,
+                                },
+                                {	// PLANE_LEFT
+                                        POINT_FAR_BOTTOM_LEFT, POINT_FAR_TOP_LEFT,
+                                },
+                                {	// PLANE_BOTTOM
+                                        POINT_FAR_BOTTOM_RIGHT, POINT_FAR_BOTTOM_LEFT,
+                                },
+                                {	// PLANE_RIGHT
+                                        POINT_FAR_TOP_RIGHT, POINT_FAR_BOTTOM_RIGHT,
+                                },
+                                {	// PLANE_FAR
+                                        POINT_FAR_TOP_RIGHT, POINT_FAR_TOP_LEFT,		// Invalid combination.
+                                },
+                        },
+                        
+                };
+                points[0] = table[plane1][plane2][0];
+                points[1] = table[plane1][plane2][1];
+        }
+
+        INLINE static std::string get_plane_name( int planenum )
+        {
+                switch ( planenum )
+                {
+                case PLANE_NEAR:
+                        return "near";
+                case PLANE_FAR:
+                        return "far";
+                case PLANE_LEFT:
+                        return "left";
+                case PLANE_RIGHT:
+                        return "right";
+                case PLANE_BOTTOM:
+                        return "bottom";
+                case PLANE_TOP:
+                        return "top";
+                default:
+                        return "unknown";
+                }
+        }
+
+        INLINE static std::string get_point_name( int pointnum )
+        {
+                switch ( pointnum )
+                {
+                case POINT_FAR_BOTTOM_LEFT:
+                        return "fll";
+                case POINT_FAR_BOTTOM_RIGHT:
+                        return "flr";
+                case POINT_FAR_TOP_LEFT:
+                        return "ful";
+                case POINT_FAR_TOP_RIGHT:
+                        return "fur";
+
+                case POINT_NEAR_BOTTOM_LEFT:
+                        return "nll";
+                case POINT_NEAR_BOTTOM_RIGHT:
+                        return "nlr";
+                case POINT_NEAR_TOP_LEFT:
+                        return "nul";
+                case POINT_NEAR_TOP_RIGHT:
+                        return "nur";
+
+                default:
+                        return "unknown";
+                }
+        }
+
+        INLINE static void get_neighbors( int planenum, int neighbors[4] )
+        {
+                static const int planes[PLANE_TOTAL][4] = {
+                        {	// PLANE_NEAR
+                                PLANE_LEFT,
+                                PLANE_RIGHT,
+                                PLANE_TOP,
+                                PLANE_BOTTOM
+                        },
+                        {	// PLANE_TOP
+                                PLANE_LEFT,
+                                PLANE_RIGHT,
+                                PLANE_NEAR,
+                                PLANE_FAR
+                        },
+                        {	// PLANE_LEFT
+                                PLANE_TOP,
+                                PLANE_BOTTOM,
+                                PLANE_NEAR,
+                                PLANE_FAR
+                        },
+                        {	// PLANE_BOTTOM
+                                PLANE_LEFT,
+                                PLANE_RIGHT,
+                                PLANE_NEAR,
+                                PLANE_FAR
+                        },
+                        {	// PLANE_RIGHT
+                                PLANE_TOP,
+                                PLANE_BOTTOM,
+                                PLANE_NEAR,
+                                PLANE_FAR
+                        },                        
+                        {	// PLANE_FAR
+                                PLANE_LEFT,
+                                PLANE_RIGHT,
+                                PLANE_TOP,
+                                PLANE_BOTTOM
+                        },
+                        
+                        
+                };
+
+                for ( int i = 0; i < 4; i++ )
+                {
+                        neighbors[i] = planes[planenum][i];
+                }
+        }
+};
+
+static bool three_planes( const LPlane &p0, const LPlane &p1, const LPlane &p2, LPoint3 &pt )
+{
+        LVector3 u = p1.get_normal().cross( p2.get_normal() );
+        float denom = p0.get_normal().dot( u );
+        if ( fabsf( denom ) <= FLT_EPSILON )
+                return false;
+        pt = ( u * p0[3] + p0.get_normal().cross( p1.get_normal() * p2[3] - p2.get_normal() * p1[3] ) ) / denom;
+        return true;
+}
+
+static PT( BoundingKDOP ) make_shadow_cull_bounds( const BoundingHexahedron *view_frustum, const LVector3 &light_dir, int &backplanes )
+{
+        pvector<LPlane> planes;
+
+        // Add the planes that are facing towards us.
+        for ( int i = 0; i < 6; i++ )
+        {
+                const LPlane &plane = view_frustum->get_plane( i );
+                float dot = plane.get_normal().dot( light_dir );
+                if ( dot < 0 )
+                {
+                        planes.push_back( plane );
+                }
+                        
+        }
+        backplanes = (int)planes.size();
+#if CSM_BOUNDS_DEBUG
+        std::cout << "Points of frustum:" << std::endl;
+        for ( size_t i = 0; i < view_frustum->get_num_points(); i++ )
+        {
+                std::cout << "\t" << FrustumHelper::get_point_name( i ) << ": " << view_frustum->get_point( i ) << std::endl;
+        }
+#endif
+
+        // We have added the back sides of the planes.
+        // Now find the edges for each plane.
+        for ( int i = 0; i < 6; i++ )
+        {
+                const LPlane &plane = view_frustum->get_plane( i );
+                float dot = plane.get_normal().dot( light_dir );
+                if ( dot > 0 )
+                        continue;
+
+                // For each neighbor of this plane.
+                int neighbors[4];
+                FrustumHelper::get_neighbors( i, neighbors );
+
+                for ( int j = 0; j < 4; j++ )
+                {
+                        const LPlane &neighbor_plane = view_frustum->get_plane( neighbors[j] );
+                        if ( neighbor_plane.get_normal().dot( light_dir ) > 0 )
+                        {
+                                int points[2];
+                                FrustumHelper::get_corners_of_planes( i, neighbors[j], points );
+#if CSM_BOUNDS_DEBUG
+                                std::cout << "Corners of planes " << FrustumHelper::get_plane_name( i ) << " and "
+                                        << FrustumHelper::get_plane_name( neighbors[j] ) << ":" << std::endl;
+                                for ( size_t x = 0; x < 2; x++ )
+                                {
+                                        std::cout << "\t" << FrustumHelper::get_point_name( points[x] ) << std::endl;
+                                }
+#endif
+                                planes.push_back( LPlane( view_frustum->get_point( points[0] ),
+                                                          view_frustum->get_point( points[1] ),
+                                                          view_frustum->get_point( points[0] ) + light_dir ) );
+                                        
+                        }
+                }
+        }
+
+        return new BoundingKDOP( planes );
+}
+
 
 /**
 * @brief Internal method to compute the splits
@@ -377,17 +727,60 @@ void PSSMCameraRig::compute_pssm_splits( const LMatrix4& transform, float max_di
                 _camera_mvps.set_element( i, mvp );
         }
 
-        // Use the exact same cull bounds as the main camera.
-        // There is no reason to render something to the shadow camera
-        // that we wouldn't see a shadow of.
-        PT( GeometricBoundingVolume ) bounds = main_cam->get_lens()->
-                make_bounds()->as_geometric_bounding_volume();
-        bounds->extend_by( light_bounds );
+        create_union_collector.start();
+        
+        // Generate a tight shadow camera frustum to only
+        // render objects into the shadow maps that may
+        // possibly cast a shadow into the view frustum.
+        PT( BoundingHexahedron ) world_view_frustum = DCAST( BoundingHexahedron, main_cam->get_lens()->make_bounds() );
+        //LMatrix4 cam_mat = NodePath( main_cam ).get_net_transform()->get_mat();
+        //world_view_frustum->xform( cam_mat );
+
+        int backplanes;
+        PT( BoundingKDOP ) bounds = make_shadow_cull_bounds(
+                world_view_frustum,
+                NodePath( main_cam ).get_net_transform()->get_inverse()->get_mat().xform_vec( -light_vector ),
+                backplanes );
+
+#if CSM_BOUNDS_DEBUG
+        PT( BoundingKDOP ) dbg_bounds = DCAST( BoundingKDOP, bounds->make_copy() );
+        // Print planes in camera space for the sake of simplicity.
+        //dbg_bounds->xform( NodePath( main_cam ).get_net_transform()->get_inverse()->get_mat() );
+        std::cout << dbg_bounds->get_num_planes() << " planes" << std::endl;
+        for ( size_t i = 0; i < dbg_bounds->get_num_planes(); i++ )
+        {
+                std::cout << "\t" << dbg_bounds->get_plane( i ) << std::endl;
+        }
+        dbg_draw.begin( _gen->_camera, _gen->_render );
+        // generate geometry for the planes
+        for ( size_t i = 0; i < backplanes; i++ )
+        {
+                for ( size_t j = 0; j < backplanes; j++ )
+                {
+                        for ( size_t k = 0; k < backplanes; k++ )
+                        {
+                                LPoint3 vertex;
+                                if ( three_planes( bounds->get_plane( i ),
+                                                   bounds->get_plane( j ),
+                                                   bounds->get_plane( k ),
+                                                   vertex ) )
+                                {
+                                        // put a point at this vertex
+                                        dbg_draw.billboard( vertex, LVector4( -1, 1, -1, 1 ), 0.3, LVector4( 1, 0, 0, 1 ) );
+;                                }
+                        }
+                }
+        }
+        dbg_draw.end();
+        dbg_root.reparent_to( NodePath(main_cam) );
+#endif
         
         Camera *maincam = DCAST( Camera, _cam_nodes[0].node() );
-        maincam->set_cull_center( NodePath( main_cam ) );
+        maincam->set_cull_center( NodePath(main_cam) );
         maincam->set_cull_bounds( bounds );
         maincam->set_final( true );
+
+        create_union_collector.stop();
 }
 
 

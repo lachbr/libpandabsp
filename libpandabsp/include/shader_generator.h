@@ -110,6 +110,8 @@ public:
 
 private:
         static TypeHandle _type_handle;
+
+        friend class PSSMCameraRig;
 };
 
 #endif // BSP_SHADERGENERATOR_H

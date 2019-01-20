@@ -15,6 +15,7 @@
 #include "bsp_material.h"
 #include "shader_spec.h"
 #include "aux_data_attrib.h"
+#include "bounding_kdop.h"
 
 ConfigureDef( config_bsp );
 ConfigureFn( config_bsp )
@@ -48,4 +49,6 @@ void init_libpandabsp()
         AuxDataAttrib::init_type();
 
         ShaderSpec::init_type();
+
+        BoundingKDOP::init_type();
 }

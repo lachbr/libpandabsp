@@ -35,6 +35,8 @@
 
 #include <vector>
 
+class PSSMShaderGenerator;
+
 /**
 * @brief Main class used for handling PSSM
 * @details This is the main class for supporting PSSM, it is used by the PSSM
@@ -59,7 +61,7 @@
 class PSSMCameraRig
 {
 PUBLISHED:
-        PSSMCameraRig( size_t num_splits );
+        PSSMCameraRig( size_t num_splits, PSSMShaderGenerator *gen );
         ~PSSMCameraRig();
 
         void set_pssm_distance( float distance );
@@ -126,6 +128,8 @@ protected:
         PTA_LMatrix4 _camera_viewmatrix;
         PTA_LVecBase2 _camera_nearfar;
         PTA_LMatrix4 _camera_cropmatrix;
+
+        PSSMShaderGenerator *_gen;
 
         static PStatCollector _update_collector;
 };
