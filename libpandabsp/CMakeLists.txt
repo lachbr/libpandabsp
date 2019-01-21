@@ -22,25 +22,47 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG")
 string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 string(REPLACE "/DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
-set(P3BSP_PANDA3D_DIR ../../../cio/cio-panda3d/built_x64 CACHE PATH "Path to panda3d root dir.")
+if (DEFINED LINK_ALL_STATIC)
+    set(P3BUILT built_x64_static)
+else()
+    set(P3BUILT built_x64)
+endif ()
 
-include_directories(./include ${P3BSP_PANDA3D_DIR}/include ${P3BSP_PANDA3D_DIR}/python/include ../../panda3d/thirdparty/win-libs-vc14-x64/png/include ../../panda3d/thirdparty/win-libs-vc14-x64/jpeg/include ../../panda_hl_bsp_tools/common ../../panda_hl_bsp_tools/template ../vifparser/include)
+set(P3BSP_PANDA3D_DIR ../../../cio/cio-panda3d/${P3BUILT})
+
+include_directories(./include ${P3BSP_PANDA3D_DIR}/include ${P3BSP_PANDA3D_DIR}/python/include ../../../cio/cio-panda3d/thirdparty/win-libs-vc14-x64/png/include ../../../cio/cio-panda3d/thirdparty/win-libs-vc14-x64/jpeg/include ../../panda_hl_bsp_tools/common ../../panda_hl_bsp_tools/template ../vifparser/include)
 link_directories(${P3BSP_PANDA3D_DIR}/lib ${P3BSP_PANDA3D_DIR}/python/libs ../vifparser/Release)
 
 add_definitions(-DNOMINMAX -DBUILDING_LIBPANDABSP -DWITHIN_PANDA -DCOMPILER_MSVC64 -DVERSION_64BIT -DDOUBLEVEC_T -DSYSTEM_WIN32 -DSTDC_HEADERS -DCIO)
+if (DEFINED LINK_ALL_STATIC)
+    set(LIB_TYPE STATIC)
+    set(OUT_EXT .lib)
+    add_definitions(-DLINK_ALL_STATIC)
+else ()
+    set(LIB_TYPE SHARED)
+    set(OUT_EXT .pyd)
+endif ()
 
-add_library(libpandabsp SHARED ${SRCS} ${HEADERS} ${CM_INC} ${CM_SRCS} ${SSE_INC} ${SSE_SRCS} ${KD_SRCS} ${KD_HDRS})
+add_library(libpandabsp ${LIB_TYPE} ${SRCS} ${HEADERS} ${CM_INC} ${CM_SRCS} ${SSE_INC} ${SSE_SRCS} ${KD_SRCS} ${KD_HDRS})
 
-set(bsp_suff .pyd CACHE STRING "Extension of output file")
-set(bsp_out bsp CACHE STRING "Name of output file")
+set(bsp_suff ${OUT_EXT})
+set(bsp_out bsp)
 
 set_target_properties(libpandabsp PROPERTIES SUFFIX ${bsp_suff})
 set_target_properties(libpandabsp PROPERTIES OUTPUT_NAME ${bsp_out})
 
 string(REGEX REPLACE "/" "\\\\" P3BSP_PANDA3D_DIR ${P3BSP_PANDA3D_DIR})
 
-add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${P3BSP_PANDA3D_DIR}\\panda3d\\${bsp_out}${bsp_suff})
-add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}.pdb ${P3BSP_PANDA3D_DIR}\\panda3d\\${bsp_out}.pdb)
+add_custom_command(TARGET libpandabsp PRE_BUILD COMMAND interrogate.bat)
+
+if (DEFINED LINK_ALL_STATIC)
+    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${P3BSP_PANDA3D_DIR}\\lib\\${bsp_out}${bsp_suff})
+else()
+    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${P3BSP_PANDA3D_DIR}\\panda3d\\${bsp_out}${bsp_suff})
+    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${P3BSP_PANDA3D_DIR}\\bin\\${bsp_out}${bsp_suff})
+    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}.pdb ${P3BSP_PANDA3D_DIR}\\panda3d\\${bsp_out}.pdb)
+    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}.pdb ${P3BSP_PANDA3D_DIR}\\bin\\${bsp_out}.pdb)
+endif()
 
 target_link_libraries(libpandabsp libpanda.lib
                             libpandaexpress.lib
@@ -52,3 +74,5 @@ target_link_libraries(libpandabsp libpanda.lib
 							libp3interrogatedb.lib
 							libvif.lib
 							python27.lib)
+                            
+add_dependencies(libpandabsp vifparser)
