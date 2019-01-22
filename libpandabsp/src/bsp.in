@@ -1,4 +1,4 @@
-1548096395
+1548132918
 3 3
 3 bsp 4 t5GT 3 bsp 
 195
@@ -470,12 +470,12 @@ void BSPLoader::cast_shadows(NodePath &node);
 Texture *BSPLoader::get_shadow_tex(void) const;
 
 298 16 extract_modelnum 0 4 394 27 BSPLoader::extract_modelnum 0 1 111 0
-51
-inline int BSPLoader::extract_modelnum(int entnum);
+44
+int BSPLoader::extract_modelnum(int entnum);
 
 299 16 get_model_bounds 0 4 394 27 BSPLoader::get_model_bounds 0 1 112 0
-84
-inline void BSPLoader::get_model_bounds(int modelnum, LPoint3 &mins, LPoint3 &maxs);
+77
+void BSPLoader::get_model_bounds(int modelnum, LPoint3 &mins, LPoint3 &maxs);
 
 300 28 set_server_entity_dispatcher 0 4 394 39 BSPLoader::set_server_entity_dispatcher 0 1 113 0
 67
@@ -522,8 +522,8 @@ void BSPLoader::get_entity_keyvalues(PyObject *list, int const entnum);
 void BSPLoader::link_cent_to_pyent(int entum, PyObject *pyent);
 
 311 16 get_num_entities 0 4 394 27 BSPLoader::get_num_entities 0 1 124 0
-44
-int BSPLoader::get_num_entities(void) const;
+51
+inline int BSPLoader::get_num_entities(void) const;
 
 312 16 get_entity_value 0 4 394 27 BSPLoader::get_entity_value 0 1 125 0
 75
@@ -554,29 +554,29 @@ NodePath BSPLoader::get_entity(int entnum) const;
 NodePath BSPLoader::get_model(int modelnum) const;
 
 319 12 get_c_entity 0 4 394 23 BSPLoader::get_c_entity 0 1 132 0
-68
-inline CBaseEntity *BSPLoader::get_c_entity(int const entnum) const;
+61
+CBaseEntity *BSPLoader::get_c_entity(int const entnum) const;
 
 320 9 find_leaf 0 4 394 20 BSPLoader::find_leaf 0 2 133 134 0
-105
+98
 inline int BSPLoader::find_leaf(NodePath const &np);
-inline int BSPLoader::find_leaf(LPoint3 const &pos);
+int BSPLoader::find_leaf(LPoint3 const &pos);
 
 321 9 find_node 0 4 394 20 BSPLoader::find_node 0 1 135 0
-52
-inline int BSPLoader::find_node(LPoint3 const &pos);
+45
+int BSPLoader::find_node(LPoint3 const &pos);
 
 322 18 is_cluster_visible 0 4 394 29 BSPLoader::is_cluster_visible 0 1 136 0
-79
-inline bool BSPLoader::is_cluster_visible(int curr_cluster, int cluster) const;
+72
+bool BSPLoader::is_cluster_visible(int curr_cluster, int cluster) const;
 
 323 15 pvs_bounds_test 0 4 394 26 BSPLoader::pvs_bounds_test 0 1 137 0
-78
-inline bool BSPLoader::pvs_bounds_test(GeometricBoundingVolume const *bounds);
+71
+bool BSPLoader::pvs_bounds_test(GeometricBoundingVolume const *bounds);
 
 324 15 make_net_bounds 0 4 394 26 BSPLoader::make_net_bounds 0 1 138 0
-154
-inline ConstPointerTo< GeometricBoundingVolume > BSPLoader::make_net_bounds(TransformState const *net_transform, GeometricBoundingVolume const *original);
+147
+ConstPointerTo< GeometricBoundingVolume > BSPLoader::make_net_bounds(TransformState const *net_transform, GeometricBoundingVolume const *original);
 
 325 16 has_active_level 0 4 394 27 BSPLoader::has_active_level 0 1 139 0
 52
@@ -591,8 +591,8 @@ inline bool BSPLoader::has_visibility(void) const;
 void BSPLoader::cleanup(void);
 
 328 10 get_result 0 4 394 21 BSPLoader::get_result 0 1 142 0
-43
-NodePath BSPLoader::get_result(void) const;
+50
+inline NodePath BSPLoader::get_result(void) const;
 
 329 14 get_global_ptr 0 4 394 25 BSPLoader::get_global_ptr 0 1 143 0
 50

@@ -31,7 +31,7 @@ endif ()
 set(P3BSP_PANDA3D_DIR ../../../cio/cio-panda3d/${P3BUILT})
 
 include_directories(./include ${P3BSP_PANDA3D_DIR}/include ${P3BSP_PANDA3D_DIR}/python/include ../../../cio/cio-panda3d/thirdparty/win-libs-vc14-x64/png/include ../../../cio/cio-panda3d/thirdparty/win-libs-vc14-x64/jpeg/include ../../panda_hl_bsp_tools/common ../../panda_hl_bsp_tools/template ../vifparser/include)
-link_directories(${P3BSP_PANDA3D_DIR}/lib ${P3BSP_PANDA3D_DIR}/python/libs ../vifparser/Release)
+link_directories(${P3BSP_PANDA3D_DIR}/lib ${P3BSP_PANDA3D_DIR}/python/libs)
 
 add_definitions(-DNOMINMAX -DBUILDING_LIBPANDABSP -DWITHIN_PANDA -DCOMPILER_MSVC64 -DVERSION_64BIT -DDOUBLEVEC_T -DSYSTEM_WIN32 -DSTDC_HEADERS -DCIO)
 if (DEFINED LINK_ALL_STATIC)

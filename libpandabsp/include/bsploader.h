@@ -78,7 +78,11 @@ class BSPLoader;
 class EXPCL_PANDABSP BSPFaceAttrib : public RenderAttrib
 {
 private:
-	INLINE BSPFaceAttrib();
+	INLINE BSPFaceAttrib() :
+                RenderAttrib(),
+                _ignore_pvs( false )
+        {
+        }
 
 PUBLISHED:
         enum
@@ -91,8 +95,14 @@ PUBLISHED:
 	static CPT( RenderAttrib ) make_default();
         static CPT( RenderAttrib ) make_ignore_pvs();
 
-	INLINE string get_material() const;
-        INLINE int get_face_type() const;
+	INLINE string get_material() const
+        {
+                return _material;
+        }
+        INLINE int get_face_type() const
+        {
+                return _face_type;
+        }
         INLINE bool get_ignore_pvs() const
         {
                 return _ignore_pvs;
@@ -161,7 +171,10 @@ PUBLISHED:
 	void do_optimizations();
 
 	void set_gamma( PN_stdfloat gamma, int overbright = 1 );
-        INLINE PN_stdfloat get_gamma() const;
+        INLINE PN_stdfloat get_gamma() const
+        {
+                return _gamma;
+        }
 	void set_win( GraphicsWindow *win );
         void set_camera( const NodePath &camera );
 	void set_render( const NodePath &render );
@@ -171,7 +184,10 @@ PUBLISHED:
 	void set_visualize_leafs( bool flag );
 	void set_materials_file( const Filename &file );
         void set_wireframe( bool flag );
-        INLINE bool get_wireframe() const;
+        INLINE bool get_wireframe() const
+        {
+                return _wireframe;
+        }
 
         INLINE NodePath get_camera() const
         {
@@ -193,8 +209,8 @@ PUBLISHED:
 
         Texture *get_shadow_tex() const;
 
-        INLINE int extract_modelnum( int entnum );
-        INLINE void get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs );
+        int extract_modelnum( int entnum );
+        void get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs );
 
 #ifdef HAVE_PYTHON
         void set_server_entity_dispatcher( PyObject *dispatcher );
@@ -202,7 +218,10 @@ PUBLISHED:
 #endif
 
         void set_ai( bool ai );
-        INLINE bool is_ai() const;
+        INLINE bool is_ai() const
+        {
+                return _ai;
+        }
 
         void update_dynamic_node( const NodePath &node );
 
@@ -216,7 +235,10 @@ PUBLISHED:
         void link_cent_to_pyent( int entum, PyObject *pyent );
 #endif
 
-	int get_num_entities() const;
+	INLINE int get_num_entities() const
+        {
+                return _bspdata->numentities;
+        }
 	string get_entity_value( int entnum, const char *key ) const;
 	float get_entity_value_float( int entnum, const char *key ) const;
 	int get_entity_value_int( int entnum, const char *key ) const;
@@ -225,23 +247,36 @@ PUBLISHED:
 	NodePath get_entity( int entnum ) const;
 	NodePath get_model( int modelnum ) const;
 
-        INLINE CBaseEntity *get_c_entity( const int entnum ) const;
+        CBaseEntity *get_c_entity( const int entnum ) const;
 
-	INLINE int find_leaf( const NodePath &np );
-	INLINE int find_leaf( const LPoint3 &pos );
-        INLINE int find_node( const LPoint3 &pos );
-        INLINE bool is_cluster_visible( int curr_cluster, int cluster ) const;
+	INLINE int find_leaf( const NodePath &np )
+        {
+                return find_leaf( np.get_pos( _result ) );
+        }
+        
+	int find_leaf( const LPoint3 &pos );
+        int find_node( const LPoint3 &pos );
+        bool is_cluster_visible( int curr_cluster, int cluster ) const;
 
-        INLINE bool pvs_bounds_test( const GeometricBoundingVolume *bounds );
-        INLINE CPT( GeometricBoundingVolume ) make_net_bounds( const TransformState *net_transform,
-                                                               const GeometricBoundingVolume *original );
+        bool pvs_bounds_test( const GeometricBoundingVolume *bounds );
+        CPT( GeometricBoundingVolume ) make_net_bounds( const TransformState *net_transform,
+                                                        const GeometricBoundingVolume *original );
 
-        INLINE bool has_active_level() const;
-        INLINE bool has_visibility() const;
+        INLINE bool has_active_level() const
+        {
+                return _active_level;
+        }
+        INLINE bool has_visibility() const
+        {
+                return _active_level && _want_visibility && _has_pvs_data;
+        }
 
 	void cleanup();
 
-        NodePath get_result() const;
+        INLINE NodePath get_result() const
+        {
+                return _result;
+        }
 
         static BSPLoader *get_global_ptr();
 
@@ -256,8 +291,15 @@ PUBLISHED:
 	};
 
 public:
-	INLINE pvector<BoundingBox *> get_visible_leaf_bboxs() const;
-        INLINE bspdata_t *get_bspdata() const;
+	INLINE pvector<BoundingBox *> get_visible_leaf_bboxs() const
+        {
+                LightReMutexHolder holder( _leaf_aabb_lock );
+                return _visible_leaf_bboxs;
+        }
+        INLINE bspdata_t *get_bspdata() const
+        {
+                return _bspdata;
+        }
 
 private:
         

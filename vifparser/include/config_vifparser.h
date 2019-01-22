@@ -1,12 +1,14 @@
 #ifndef __CONFIG_VIFPARSER_H__
 #define __CONFIG_VIFPARSER_H__
 
+#include <pandabase.h>
+
 #ifdef BUILDING_VIFPARSER
-#define EXPCL_VIF __declspec(dllexport)
-#define EXPTP_VIF __declspec(dllexport)
+#define EXPCL_VIF EXPORT_CLASS
+#define EXPTP_VIF EXPORT_TEMPL
 #else
-#define EXPCL_VIF __declspec(dllimport)
-#define EXPTP_VIF __declspec(dllimport)
+#define EXPCL_VIF IMPORT_CLASS
+#define EXPTP_VIF IMPORT_TEMPL
 #endif // BUILDING_VIFPARSER
 
 #endif // __CONFIG_VIFPARSER_H__

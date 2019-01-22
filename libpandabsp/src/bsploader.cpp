@@ -89,25 +89,9 @@ PStatCollector bfa_collector( "BSP:BSPFaceAttrib" );
 TypeHandle BSPFaceAttrib::_type_handle;
 int BSPFaceAttrib::_attrib_slot;
 
-INLINE BSPFaceAttrib::BSPFaceAttrib() :
-        RenderAttrib(),
-        _ignore_pvs( false )
-{
-}
-
 bool BSPFaceAttrib::has_cull_callback() const
 {
         return false;
-}
-
-INLINE string BSPFaceAttrib::get_material() const
-{
-        return _material;
-}
-
-INLINE int BSPFaceAttrib::get_face_type() const
-{
-        return _face_type;
 }
 
 CPT( RenderAttrib ) BSPFaceAttrib::make( const string &face_material, int face_type )
@@ -209,12 +193,7 @@ NotifyCategoryDef( bspfile, "" );
 
 BSPLoader *BSPLoader::_global_ptr = nullptr;
 
-INLINE int BSPLoader::find_leaf( const NodePath &np )
-{
-        return find_leaf( np.get_pos( _result ) );
-}
-
-INLINE int BSPLoader::find_leaf( const LPoint3 &pos )
+int BSPLoader::find_leaf( const LPoint3 &pos )
 {
         if ( !_active_level )
         {
@@ -247,7 +226,7 @@ INLINE int BSPLoader::find_leaf( const LPoint3 &pos )
         return ~i;
 }
 
-INLINE int BSPLoader::find_node( const LPoint3 &pos )
+int BSPLoader::find_node( const LPoint3 &pos )
 {
         if ( !_active_level )
         {
@@ -1061,12 +1040,12 @@ LColor color_from_value( const string &value, bool scale )
         return col;
 }
 
-INLINE int BSPLoader::extract_modelnum( int entnum )
+int BSPLoader::extract_modelnum( int entnum )
 {
         return extract_modelnum_s( _bspdata->entities + entnum );
 }
 
-INLINE void BSPLoader::get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs )
+void BSPLoader::get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs )
 {
         dmodel_t *mdl = _bspdata->dmodels + modelnum;
         VectorCopy( mdl->mins, mins );
@@ -1616,7 +1595,7 @@ void BSPLoader::remove_model( int modelnum )
         }
 }
 
-INLINE bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
+bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
 {
         if ( !_active_level )
         {
@@ -1635,13 +1614,6 @@ INLINE bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
         // 0 means it's not
         int dat = _leaf_pvs[curr_cluster][( cluster - 1 ) >> 3] & ( 1 << ( ( cluster - 1 ) & 7 ) );
         return dat != 0;
-}
-
-INLINE pvector<BoundingBox *> BSPLoader::get_visible_leaf_bboxs() const
-{
-        LightReMutexHolder holder( _leaf_aabb_lock );
-
-        return _visible_leaf_bboxs;
 }
 
 void BSPLoader::update()
@@ -2392,11 +2364,6 @@ void BSPLoader::set_wireframe( bool flag )
         _wireframe = flag;
 }
 
-INLINE bool BSPLoader::get_wireframe() const
-{
-        return _wireframe;
-}
-
 void BSPLoader::set_want_shadows( bool flag )
 {
         _want_shadows = flag;
@@ -2454,30 +2421,6 @@ void BSPLoader::set_ai( bool ai )
         _ai = ai;
 }
 
-/**
- * Gets whether or not this is an AI/Server instance of the loader.
- * If this is true, only the AI views of entities will be loaded,
- * and nothing related to rendering will be dealt with.
- */
-INLINE bool BSPLoader::is_ai() const
-{
-        return _ai;
-}
-
-INLINE bool BSPLoader::has_active_level() const
-{
-        return _active_level;
-}
-
-/**
- * Returns true if there is an active BSP level loaded
- * with a PVS and visibility has been toggled on.
- */
-INLINE bool BSPLoader::has_visibility() const
-{
-        return _active_level && _want_visibility && _has_pvs_data;
-}
-
 void BSPLoader::set_camera( const NodePath &camera )
 {
         _camera = camera;
@@ -2498,11 +2441,6 @@ void BSPLoader::set_gamma( PN_stdfloat gamma, int overbright )
         _gamma = gamma;
 }
 
-INLINE PN_stdfloat BSPLoader::get_gamma() const
-{
-        return _gamma;
-}
-
 void BSPLoader::set_win( GraphicsWindow *win )
 {
         _win = win;
@@ -2521,16 +2459,6 @@ void BSPLoader::set_want_lightmaps( bool flag )
 void BSPLoader::link_entity_to_class( const string &entname, PyTypeObject *type )
 {
         _entity_to_class[entname] = type;
-}
-
-NodePath BSPLoader::get_result() const
-{
-        return _result;
-}
-
-int BSPLoader::get_num_entities() const
-{
-        return _bspdata->numentities;
 }
 
 string BSPLoader::get_entity_value( int entnum, const char *key ) const
@@ -2652,7 +2580,7 @@ BSPLoader *BSPLoader::get_global_ptr()
  * Checks if the specified bounding volume intersects any
  * of the potentially visible leaf bounding boxes.
  */
-INLINE bool BSPLoader::pvs_bounds_test( const GeometricBoundingVolume *bounds )
+bool BSPLoader::pvs_bounds_test( const GeometricBoundingVolume *bounds )
 {
         LightReMutexHolder holder( _leaf_aabb_lock );
 
@@ -2670,7 +2598,7 @@ INLINE bool BSPLoader::pvs_bounds_test( const GeometricBoundingVolume *bounds )
         return false;
 }
 
-INLINE CPT( GeometricBoundingVolume ) BSPLoader::make_net_bounds( const TransformState *net_transform,
+CPT( GeometricBoundingVolume ) BSPLoader::make_net_bounds( const TransformState *net_transform,
                                                                   const GeometricBoundingVolume *original )
 {
         if ( net_transform->is_identity() )
@@ -2702,12 +2630,7 @@ bool BSPLoader::trace_line( const LPoint3 &start, const LPoint3 &end )
         return !trace.has_hit();
 }
 
-INLINE bspdata_t *BSPLoader::get_bspdata() const
-{
-        return _bspdata;
-}
-
-INLINE CBaseEntity *BSPLoader::get_c_entity( const int entnum ) const
+CBaseEntity *BSPLoader::get_c_entity( const int entnum ) const
 {
         for ( size_t i = 0; i < _class_entities.size(); i++ )
         {

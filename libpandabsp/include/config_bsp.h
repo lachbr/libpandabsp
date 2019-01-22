@@ -13,12 +13,14 @@
 #include <dconfig.h>
 
 #ifdef BUILDING_LIBPANDABSP
-#define EXPCL_PANDABSP __declspec(dllexport)
-#define EXPTP_PANDABSP __declspec(dllexport)
+#define EXPCL_PANDABSP EXPORT_CLASS
+#define EXPTP_PANDABSP EXPORT_TEMPL
 #else
-#define EXPCL_PANDABSP __declspec(dllimport)
-#define EXPTP_PANDABSP __declspec(dllimport)
+#define EXPCL_PANDABSP IMPORT_CLASS
+#define EXPTP_PANDABSP IMPORT_TEMPL
 #endif
+
+//
 
 ConfigureDecl( config_bsp, EXPCL_PANDABSP, EXPTP_PANDABSP );
 
