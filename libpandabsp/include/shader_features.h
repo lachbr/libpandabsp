@@ -111,7 +111,7 @@ class RimLightFeature : public ShaderFeature
 public:
         INLINE RimLightFeature() :
                 ShaderFeature(),
-                boost( 2.0 ),
+                boost( 1.0 ),
                 exponent( 4.0 )
         {
         }

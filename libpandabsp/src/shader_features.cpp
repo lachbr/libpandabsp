@@ -70,7 +70,7 @@ void PhongFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shader
 
 void PhongFeature::add_permutations( ShaderPermutations &perms )
 {
-        if ( has_feature )
+        if ( has_feature && ConfigVariableBool( "mat_phong", true ) )
         {
                 perms.add_permutation( "PHONG" );
 
