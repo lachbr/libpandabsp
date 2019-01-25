@@ -18,6 +18,7 @@
 
 #include <nodePath.h>
 #include <typedReferenceCount.h>
+#include <boundingBox.h>
 
 class BSPLoader;
 
@@ -68,7 +69,10 @@ PUBLISHED:
         CBoundsEntity();
 
         BoundingBox *get_bounds() const;
-        INLINE bool is_inside( const LPoint3 &pos ) const;
+        INLINE bool is_inside( const LPoint3 &pos ) const
+        {
+                return _bounds->contains( pos ) != BoundingVolume::IF_no_intersection;
+        }
 
         void fillin_bounds( LPoint3 &mins, LPoint3 &maxs );
 

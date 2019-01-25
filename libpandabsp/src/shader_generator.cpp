@@ -129,7 +129,7 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 shattr = DCAST( ShaderAttrib, shattr )->set_shader_auto();
                 state = state->set_attrib( shattr, 10 );
                 state = state->set_attrib( BSPMaterialAttrib::make_override_shader( BSPMaterial::get_from_file(
-                        "resources/phase_14/materials/csm_shadow.mat"
+                        "phase_14/materials/csm_shadow.mat"
                 ) ) );
                 
                 Camera *cam = DCAST( Camera, _pssm_rig->get_camera( 0 ).node() );
