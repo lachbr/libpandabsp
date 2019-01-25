@@ -49,6 +49,7 @@ static MeshDrawer dbg_draw;
 static NodePath dbg_root( "dbgRoot" );
 
 #define CSM_BOUNDS_DEBUG 0
+#define CSM_TIGHT_BOUNDS 0
 
 /**
 * @brief Constructs a new PSSM camera rig
@@ -727,6 +728,7 @@ void PSSMCameraRig::compute_pssm_splits( const LMatrix4& transform, float max_di
                 _camera_mvps.set_element( i, mvp );
         }
 
+#if CSM_TIGHT_BOUNDS
         create_union_collector.start();
         
         // Generate a tight shadow camera frustum to only
@@ -773,14 +775,17 @@ void PSSMCameraRig::compute_pssm_splits( const LMatrix4& transform, float max_di
         }
         dbg_draw.end();
         dbg_root.reparent_to( NodePath(main_cam) );
-#endif
+#endif // CSM_BOUNDS_DEBUG
         
         Camera *maincam = DCAST( Camera, _cam_nodes[0].node() );
         maincam->set_cull_center( NodePath(main_cam) );
         maincam->set_cull_bounds( bounds );
         maincam->set_final( true );
 
+
         create_union_collector.stop();
+
+#endif // CSM_TIGHT_BOUNDS
 }
 
 

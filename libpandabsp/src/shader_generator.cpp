@@ -134,7 +134,7 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 
                 Camera *cam = DCAST( Camera, _pssm_rig->get_camera( 0 ).node() );
                 cam->set_initial_state( state );
-                cam->set_scene( _render );
+				cam->set_cull_bounds( new OmniBoundingVolume );
 
                 PT( DisplayRegion ) dr = _pssm_layered_buffer->make_display_region();
                 dr->set_camera( _pssm_rig->get_camera( 0 ) );
@@ -154,7 +154,13 @@ void PSSMShaderGenerator::add_shader( PT( ShaderSpec ) shader )
 
 void PSSMShaderGenerator::set_sun_light( const NodePath &np )
 {
-        _sunlight = np;
+		_sunlight = np;
+		if ( np.is_empty() )
+		{
+				_has_shadow_sunlight = false;
+				_pssm_rig->reparent_to( NodePath() );
+				return;
+		}
 
         DirectionalLight *dlight = DCAST( DirectionalLight, _sunlight.node() );
         _sun_vector = -dlight->get_direction();
