@@ -45,7 +45,7 @@ void initbsp() {
 
   const LibraryDef *defs[] = {&bsp_moddef, nullptr};
 
-  PyObject *module = Dtool_PyModuleInitHelper(defs, "bsp");
+  PyObject *module = Dtool_PyModuleInitHelper(defs, "panda3d.bsp");
   if (module != nullptr) {
     Dtool_bsp_BuildInstants(module);
   }

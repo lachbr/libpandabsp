@@ -75,11 +75,6 @@ CBoundsEntity::CBoundsEntity() :
 {
 }
 
-INLINE bool CBoundsEntity::is_inside( const LPoint3 &pos ) const
-{
-        return _bounds->contains( pos ) != BoundingVolume::IF_no_intersection;
-}
-
 BoundingBox *CBoundsEntity::get_bounds() const
 {
         return _bounds;
