@@ -13,6 +13,7 @@
 #include "ambient_probes.h"
 #include "cubemaps.h"
 #include "aux_data_attrib.h"
+#include "bsploader.h"
 
 #include <pStatTimer.h>
 #include <config_pgraphnodes.h>
@@ -56,6 +57,9 @@ ConfigVariableDouble normal_offset_scale( "pssm-normal-offset-scale", 1.0 );
 ConfigVariableDouble softness_factor( "pssm-softness-factor", 1.0 );
 ConfigVariableBool cache_shaders( "pssm-cache-shaders", true );
 ConfigVariableBool normal_offset_uv_space( "pssm-normal-offset-uv-space", true );
+ConfigVariableColor ambient_light_identifier( "pssm-ambient-light-identifier", LColor( 0.5, 0.5, 0.5, 1 ) );
+ConfigVariableColor ambient_light_min( "pssm-ambient-light-min", LColor( 0, 0, 0, 1 ) );
+ConfigVariableDouble ambient_light_scale( "pssm-ambient-light-scale", 1.0 );
 
 TypeHandle PSSMShaderGenerator::_type_handle;
 PT( Texture ) PSSMShaderGenerator::_identity_cubemap = nullptr;
@@ -83,7 +87,9 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
         _pssm_rig->set_pssm_distance( 200.0 );
         _pssm_rig->set_resolution( pssm_size );
         _pssm_rig->set_use_fixed_film_size( true );
-        
+
+        BSPLoader::get_global_ptr()->set_shader_generator( this );
+
         if ( want_pssm )
         {
                 _pssm_split_texture_array = new Texture( "pssmSplitTextureArray" );
@@ -109,7 +115,7 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 // render to the individual textures in the array in a single render pass using geometry
                 // shader cloning.
                 _pssm_layered_buffer->add_render_texture( _pssm_split_texture_array, GraphicsOutput::RTM_bind_layered,
-                                                          GraphicsOutput::RTP_depth );
+                        GraphicsOutput::RTP_depth );
 
                 CPT( RenderState ) state = RenderState::make_empty();
                 state = state->set_attrib( LightAttrib::make_all_off(), 10 );
@@ -121,7 +127,7 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 state = state->set_attrib( TextureAttrib::make_all_off(), 10 );
                 state = state->set_attrib( ColorBlendAttrib::make_off(), 10 );
                 state = state->set_attrib( CullBinAttrib::make_default(), 10 );
-                state = state->set_attrib( TransparencyAttrib::make( (TransparencyAttrib::Mode)TransparencyAttrib::M_off ), 10 );
+                state = state->set_attrib( TransparencyAttrib::make( ( TransparencyAttrib::Mode )TransparencyAttrib::M_off ), 10 );
                 state = state->set_attrib( CullFaceAttrib::make( CullFaceAttrib::M_cull_none ), 10 );
 
                 // Automatically generate shaders for the shadow scene using the CSMRender shader.
@@ -131,10 +137,17 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 state = state->set_attrib( BSPMaterialAttrib::make_override_shader( BSPMaterial::get_from_file(
                         "resources/phase_14/materials/csm_shadow.mat"
                 ) ) );
-                
-                Camera *cam = DCAST( Camera, _pssm_rig->get_camera( 0 ).node() );
-                cam->set_initial_state( state );
-				cam->set_cull_bounds( new OmniBoundingVolume );
+
+                Camera *maincam = DCAST( Camera, _pssm_rig->get_camera( 0 ).node() );
+                maincam->set_initial_state( state );
+                maincam->set_cull_bounds( new OmniBoundingVolume );
+
+                // So we can be selective over what casts shadows
+                for ( int i = 0; i < pssm_splits; i++ )
+                {
+                        Camera *cam = DCAST( Camera, _pssm_rig->get_camera( i ).node() );
+                        cam->set_camera_mask( shadow_camera_mask );
+                }
 
                 PT( DisplayRegion ) dr = _pssm_layered_buffer->make_display_region();
                 dr->set_camera( _pssm_rig->get_camera( 0 ) );
@@ -154,13 +167,13 @@ void PSSMShaderGenerator::add_shader( PT( ShaderSpec ) shader )
 
 void PSSMShaderGenerator::set_sun_light( const NodePath &np )
 {
-		_sunlight = np;
-		if ( np.is_empty() )
-		{
-				_has_shadow_sunlight = false;
-				_pssm_rig->reparent_to( NodePath() );
-				return;
-		}
+        _sunlight = np;
+        if ( np.is_empty() )
+        {
+                _has_shadow_sunlight = false;
+                _pssm_rig->reparent_to( NodePath() );
+                return;
+        }
 
         DirectionalLight *dlight = DCAST( DirectionalLight, _sunlight.node() );
         _sun_vector = -dlight->get_direction();
@@ -200,7 +213,7 @@ AsyncTask::DoneStatus PSSMShaderGenerator::update_pssm( GenericAsyncTask *task, 
 
                 self->_pssm_rig->update( self->_camera, self->_sun_vector, bounds );
         }
-        
+
         return AsyncTask::DS_cont;
 }
 
@@ -251,7 +264,7 @@ CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib 
 }
 
 CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *rs,
-                                                            const GeomVertexAnimationSpec &anim )
+        const GeomVertexAnimationSpec &anim )
 {
         findmatshader_collector.start();
 
@@ -298,7 +311,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
 
         ShaderPermutations permutations;
         ShaderSpec *spec;
-        
+
         {
                 PStatTimer timer( lookup_collector );
 
@@ -316,9 +329,9 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                                 return shattr;
                         }
                 }
-                
+
         }
-        
+
         synthesize_collector.start();
 
         stringstream defines;
@@ -348,9 +361,9 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                         << "\n" << defines.str()
                         << spec->_pixel.after_defines;
         }
-        
+
         PT( Shader ) shader = Shader::make( Shader::SL_GLSL, vshader.str(), fshader.str(), gshader.str() );
-        
+
         nassertr( shader != nullptr, nullptr );
 
         CPT( RenderAttrib ) shattr = ShaderAttrib::make( shader );
@@ -369,7 +382,7 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         {
                 shattr = DCAST( ShaderAttrib, shattr )->set_flag( permutations.flags[i], true );
         }
-        
+
         CPT( ShaderAttrib ) attr = DCAST( ShaderAttrib, shattr );
 
         if ( cache_shaders )

@@ -18,6 +18,8 @@
 #include "viftokenizer.h"
 #include "bsp_material.h"
 #include "cubemaps.h"
+#include "shader_generator.h"
+#include "bsptools.h"
 
 #include <array>
 #include <bitset>
@@ -544,192 +546,6 @@ void BSPLoader::make_faces_ai()
         flatten_node( _result );
 }
 
-static PT( Shader ) get_csm_caster_shader()
-{
-        stringstream vshader;
-        vshader << "#version 430;\n";
-        vshader << "uniform mat4 p3d_ModelViewProjectionMatrix;\n";
-        vshader << "in vec4 p3d_Vertex;\n";
-        vshader << "out vec4 l_position;\n";
-        vshader << "void main() {\n";
-        vshader << "\t gl_Position = p3d_ModelViewProjectionMatrix * p3d_Vertex;\n";
-        vshader << "\t l_position = gl_Position;\n";
-        vshader << "}\n";
-
-        stringstream pshader;
-        pshader << "#version 430\n";
-        pshader << "in vec4 l_position;\n";
-        pshader << "out vec4 o_color;\n";
-        pshader << "void main() {\n";
-        pshader << "\t float z = (l_position.z / l_position.w) * 0.5 + 0.5;\n";
-        pshader << "\t o_color = vec4(z, z, z, 1.0);\n";
-        pshader << "}\n";
-
-        return Shader::make( Shader::SL_GLSL, vshader.str(), pshader.str() );
-}
-
-static pvector<string> make_bface_shaders( bool lightmap, bool envmap, float envmap_shininess, bool bumped,
-                                           bool normalmap, bool recv_projshadows )
-{
-
-        pvector<string> result;
-
-        stringstream vshader;
-        vshader << "#version 430\n";
-        vshader << "in vec4 p3d_Vertex;\n";
-        vshader << "in vec2 p3d_MultiTexCoord0;\n";
-        if ( lightmap )
-        {
-                vshader << "in vec2 p3d_MultiTexCoord1;\n";
-        }
-        if ( recv_projshadows )
-        {
-                vshader << "out vec4 l_projshadowcoords;\n";
-                vshader << "uniform mat4 trans_model_to_clip_of_shadowcam;\n";
-        }
-        vshader << "uniform mat4 p3d_ModelViewProjectionMatrix;\n";
-        vshader << "in vec3 p3d_Normal;\n";
-        if ( envmap )
-        {
-                vshader << "uniform mat4 p3d_ModelViewMatrix;\n";
-                vshader << "uniform mat4 p3d_ViewMatrixInverse;\n";
-                vshader << "uniform mat4 tpose_view_to_model;\n";
-                vshader << "in vec4 mspos_view;\n";
-                //vshader << "out vec3 refl_vec;\n";
-                vshader << "out vec2 envmap_coords;\n";
-        }
-        if ( bumped && normalmap )
-        {
-                vshader << "in vec3 p3d_Tangent;\n";
-                vshader << "in vec3 p3d_Binormal;\n";
-                vshader << "out vec3 tangent;out vec3 binormal;out vec3 vnormal;\n";
-        }
-        vshader << "out vec2 diff_texcoord;\n";
-        if ( lightmap )
-        {
-                vshader << "out vec2 lm_texcoord;\n";
-        }
-        vshader << "void main() {\n";
-        vshader << "\t diff_texcoord = p3d_MultiTexCoord0;\n";
-        if ( lightmap )
-        {
-                vshader << "\t lm_texcoord = p3d_MultiTexCoord1;\n";
-        }
-        vshader << "\t gl_Position = p3d_ModelViewProjectionMatrix * p3d_Vertex;\n";
-        if ( envmap )
-        {
-                vshader << "vec4 eye_normal;\neye_normal.xyz = normalize(mat3(tpose_view_to_model) * p3d_Normal);\n"
-                        "eye_normal.w = 0.0;\n";
-                vshader << "\t vec3 eye_vec = (p3d_ModelViewMatrix * p3d_Vertex).xyz;//mspos_view.xyz - p3d_Vertex.xyz);\n";
-                vshader << "\t vec3 r = reflect(eye_vec, eye_normal.xyz);\n";
-                vshader << "\t r = vec3(p3d_ViewMatrixInverse * vec4(r, 0.0));\n";
-                vshader << "\t float m = 2.0 * sqrt(pow(r.x, 2.0) + pow(r.y, 2.0) + pow(r.z + 1.0, 2.0));\n";
-                vshader << "\t envmap_coords = r.xy / m + 0.5;\n";
-        }
-        if ( bumped && normalmap )
-        {
-                vshader << "\t tangent = p3d_Tangent;\n";
-                vshader << "\t binormal = p3d_Binormal;\n";
-                vshader << "\t vnormal = p3d_Normal;\n";
-        }
-        if ( recv_projshadows )
-        {
-                vshader << "vec4 camclip = trans_model_to_clip_of_shadowcam * p3d_Vertex;\n";
-                vshader << "l_projshadowcoords = camclip * vec4(0.5,0.5,0.5,1.0) + camclip.w * vec4(0.5,0.5,0.5,0.0);\n";
-        }
-        vshader << "}\n";
-
-        stringstream pshader;
-        pshader << "#version 430\n";
-        pshader << "uniform sampler2D p3d_Texture0;\n";
-        pshader << "in vec2 diff_texcoord;\n";
-        if ( recv_projshadows )
-        {
-                pshader << "uniform sampler2D shadowtex;\n";
-                pshader << "uniform sampler2D shadowdepth;\n";
-                pshader << "in vec4 l_projshadowcoords;\n";
-        }
-        if ( lightmap )
-        {
-                pshader << "uniform sampler2D p3d_Texture1;\n";
-                pshader << "in vec2 lm_texcoord;\n";
-        }
-        if ( envmap )
-        {
-                pshader << "uniform sampler2D envmap_texture;\n";
-                //pshader << "in vec3 refl_vec;\n";
-                pshader << "in vec2 envmap_coords;\n";
-        }
-        if ( normalmap && bumped )
-        {
-                pshader << "uniform sampler2D normalmap_texture;\n";
-                pshader << "uniform sampler2D lightmap_colors0;uniform sampler2D lightmap_colors1;uniform sampler2D lightmap_colors2;\n";
-                pshader << "uniform vec3 bump_basis0;uniform vec3 bump_basis1;uniform vec3 bump_basis2;\n";
-                pshader << "in vec3 tangent; in vec3 binormal;in vec3 vnormal;\n";
-        }
-        pshader << "out vec4 frag_color;\n";
-
-        pshader << "void main() {\n";
-        pshader << "\t frag_color = texture2D(p3d_Texture0, diff_texcoord);\n";
-        if ( normalmap && bumped )
-        {
-                
-                pshader << "\t mat3 bump_trans = mat3(bump_basis0, bump_basis1, bump_basis2);\n";
-                pshader << "\t vec3 norm_col = texture2D( normalmap_texture, diff_texcoord ).rgb;\n";
-                pshader << "\t vec3 normal = norm_col * 2.0 - 1.0;\n";
-                //pshader << "\t normal *= bump_trans;\n";// * mat3(tangent, binormal, vnormal);\n";
-                //pshader << "\t normal *= vnormal.z;\n";
-                //pshader << "\t normal += tangent * vnormal.x;\n";
-                //pshader << "\t normal += binormal * vnormal.y;\n";
-                pshader << "\t normal = normalize( normal );\n";
-        }
-        if ( envmap )
-        {
-                pshader << "\t frag_color.rgb += (texture2D(envmap_texture, envmap_coords).rgb * " << envmap_shininess << ");\n";
-        }
-        if ( lightmap )
-        {
-                if ( normalmap && bumped )
-                {
-                        pshader << "vec3 dp = vec3(0, 0, 0);\n";
-                        pshader << "dp.x = clamp(dot(normal, bump_basis0), 0, 1);\n";
-                        pshader << "dp.y = clamp(dot(normal, bump_basis1), 0, 1);\n";
-                        pshader << "dp.z = clamp(dot(normal, bump_basis2), 0, 1);\n";
-                        pshader << "dp *= dp;\n";
-
-                        pshader << "vec3 lmcolor0 = texture2D(lightmap_colors0, lm_texcoord).rgb;\n";
-                        pshader << "vec3 lmcolor1 = texture2D(lightmap_colors1, lm_texcoord).rgb;\n";
-                        pshader << "vec3 lmcolor2 = texture2D(lightmap_colors2, lm_texcoord).rgb;\n";
-
-                        pshader << "float sum = dot(dp, vec3(1.0, 1.0, 1.0));\n";
-
-                        pshader << "vec3 final_lightmap = dp.x*lmcolor0 + dp.y*lmcolor1 + dp.z*lmcolor2;\n";
-                        pshader << "final_lightmap *= 1.0 / sum;\n";
-
-                        pshader << "\t frag_color.rgb *= final_lightmap;\n";
-                }
-                else
-                {
-                        pshader << "\t frag_color.rgb *= texture2D(p3d_Texture1, lm_texcoord).rgb;\n";
-                }
-        }
-        if ( recv_projshadows )
-        {
-                //pshader << "vec4 proj = l_projshadowcoords / l_projshadowcoords.w;\n";
-                //pshader << "float mapval = texture2D(shadowdepth, proj.xy).r;\n";
-                //pshader << "if (mapval > proj.z) { frag_color.rgb *= texture2DProj(shadowtex, l_projshadowcoords).rgb; }\n";
-
-                pshader << "frag_color.rgb *= texture2DProj(shadowtex, l_projshadowcoords).rgb;\n";
-        }
-        //pshader << "frag_color.rgb = clamp(frag_color.rgb, 0.0, 1.0);\n";
-        pshader << "}\n";
-
-        result.push_back( vshader.str() );
-        result.push_back( pshader.str() );
-
-        return result;
-}
-
 void BSPLoader::make_faces()
 {
         bspfile_cat.info()
@@ -1171,6 +987,8 @@ void BSPLoader::load_static_props()
                      ( prop->flags & STATICPROPFLAGS_STATICLIGHTING ) != 0 &&
                      ( prop->flags & STATICPROPFLAGS_DYNAMICLIGHTING ) == 0 )
                 {
+                        bool use_cubemap = false;
+
                         // prop has pre computed per vertex lighting
                         pvector<VDataDef> vdatadefs;
 
@@ -1270,18 +1088,19 @@ void BSPLoader::load_static_props()
                                 {
                                         continue;
                                 }
-#ifdef CIO
                                 else
                                 {
                                         // game specific code, yuck
                                         //
                                         // don't apply vertex lighting to shadow models
-
+#ifdef CIO
                                         bool shadow_skip = false;
+#endif
  
                                         for ( int j = 0; j < res.geomnode->get_num_geoms(); j++ )
                                         {
                                                 const RenderState *state = res.geomnode->get_geom_state( j );
+#ifdef CIO
                                                 const TextureAttrib *tattr;
                                                 if ( state->get_attrib( tattr ) )
                                                 {
@@ -1298,16 +1117,34 @@ void BSPLoader::load_static_props()
                                                                 break;
                                                         }
                                                 }
+#endif
+                                                const BSPMaterialAttrib *bma;
+                                                state->get_attrib_def( bma );
+                                                if ( bma->get_material() && bma->get_material()->has_env_cubemap() )
+                                                {
+                                                        use_cubemap = true;
+                                                }
                                         }
 
+#ifdef CIO
                                         if ( shadow_skip )
                                                 continue;
-                                }
 #endif
+                                }
 
                                 mod_geom->set_vertex_data( mod_vdata );
                                 res.geomnode->set_geom( res.geomidx, mod_geom );
                         }
+
+                        if ( use_cubemap )
+                        {
+                                cubemap_t *cm = find_closest_cubemap( pos / 16.0 );
+                                if ( cm )
+                                {
+                                        propnp.set_texture( TextureStages::get_cubemap(), cm->cubemap_tex );
+                                }
+                        }
+		        
 
                         // since this prop has static lighting applied to the vertices
                         // ignore any dynamic lights.
@@ -1371,6 +1208,11 @@ void BSPLoader::load_static_props()
                         propmdl.flatten_strong();
                 }
 
+                if ( prop->flags & STATICPROPFLAGS_LIGHTMAPSHADOWS )
+                {
+                        propnp.hide( shadow_camera_mask );
+                }
+
                 // only do group flattening if the prop doesn't
                 // use dynamic lighting (ambient probes).
                 //
@@ -1382,7 +1224,8 @@ void BSPLoader::load_static_props()
                      ( prop->flags & STATICPROPFLAGS_DYNAMICLIGHTING ) == 0 )
                 {
                         // find the leaf this prop resides in
-                        int leaf = find_leaf( pos / 16.0 );
+                        //int leaf = find_leaf( pos / 16.0 );
+                        int leaf = 0;
                         if ( leaf2props.find( leaf ) == -1 )
                         {
                                 stringstream ss;
@@ -1507,6 +1350,9 @@ void BSPLoader::load_entities()
                         }
                         else
                         {
+                                if ( classname == "shadow_control" )
+                                        _shadow_control = ent;
+
                                 // We don't know what this entity is exactly, maybe they linked it to a python class.
                                 // It didn't start with func_, so we can assume it's just a point entity.
                                 PT( CPointEntity ) entity = new CPointEntity;
@@ -1719,63 +1565,6 @@ void BSPLoader::read_materials_file()
         }
 }
 
-void BSPLoader::setup_shadowcam()
-{
-        PT( Camera ) cam = new Camera( "shadowcam" );
-        cam->set_camera_mask( _shadowcam_mask );
-        cam->set_scene( _render );
-        PT( OrthographicLens ) lens = new OrthographicLens();
-        lens->set_film_size( _shadow_filmsize, _shadow_filmsize );
-        cam->set_lens( lens );
-
-        NodePath state( "state" );
-        state.set_color_scale_off( 10 );
-        state.set_shader_off( 10 );
-        state.set_texture_off( 10 );
-        state.set_light_off( 10 );
-        state.set_fog_off( 10 );
-        state.set_material_off( 10 );
-        state.set_attrib( BSPFaceAttrib::make_ignore_pvs(), 10 );
-        state.set_color( _shadow_color, 10 );
-
-        cam->set_initial_state( state.get_state() );
-
-        _render.hide( _shadowcam_mask );
-
-        _shadowcam = _camera.attach_new_node( cam );
-        _shadowcam.set_attrib( BSPFaceAttrib::make_ignore_pvs(), 1 );
-        _shadowcam.set_pos( _shadowcam_pos );
-        _shadowcam.look_at( 0, 0, 0 );
-        _shadowcam.set_compass( _render );
-
-        PT( GraphicsOutput ) buf = _win->make_texture_buffer( "shadow", _shadow_texsize, _shadow_texsize );
-        buf->set_clear_color_active( true );
-        buf->set_clear_color( LColor( 1 ) );
-        _shadow_buf = buf;
-        PT( DisplayRegion ) dr = buf->make_display_region();
-        dr->set_camera( _shadowcam );
-
-        PT( Texture ) tex = buf->get_texture();
-        tex->set_border_color( LColor( 1 ) );
-        tex->set_wrap_u( SamplerState::WM_border_color );
-        tex->set_wrap_v( SamplerState::WM_border_color );
-        _shadow_tex = tex;
-
-        _shadow_depth = new Texture( "shadowdepth" );
-        buf->add_render_texture( _shadow_depth, GraphicsOutput::RTM_bind_or_copy,
-                                 GraphicsOutput::RTP_depth_stencil );
-        if ( _win->get_gsg()->get_supports_shadow_filter() )
-        {
-                _shadow_depth->set_minfilter( SamplerState::FT_shadow );
-                _shadow_depth->set_magfilter( SamplerState::FT_shadow );
-        }
-}
-
-Texture *BSPLoader::get_shadow_tex() const
-{
-        return _shadow_tex;
-}
-
 bool BSPLoader::read( const Filename &file )
 {
         cleanup();
@@ -1816,11 +1605,6 @@ bool BSPLoader::read( const Filename &file )
                 // Scale down the entire loaded level as a conversion from Hammer units to Panda units.
                 // Hammer units are tiny compared to panda.
                 _result.set_scale( HAMMER_TO_PANDA );
-
-                if ( _want_shadows )
-                {
-                        setup_shadowcam();
-                }
         }
         
         _has_pvs_data = false;
@@ -1915,6 +1699,36 @@ bool BSPLoader::read( const Filename &file )
 
                 _amb_probe_mgr.process_ambient_probes();
 
+                // Don't let the static brushes cast depth-map shadows,
+                // they have lightmap shadows.
+                get_model( 0 ).hide( shadow_camera_mask );
+
+                // Check if we are casting real-time shadows
+                if ( _want_shadows && _shgen )
+                {
+                        if ( _shadow_control )
+                        {
+                                vec3_t dir;
+                                GetVectorForKey( _shadow_control, "angles", dir );
+                                float temp = dir[1];
+                                dir[1] = dir[0];
+                                dir[0] = temp;
+                                _shadow_dir = angles_to_vector( dir );
+                                _shadow_color = color_from_value( ValueForKey( _shadow_control, "color" ) );
+                        }
+                        else if ( _amb_probe_mgr.get_sunlight() )
+                        {
+                                _shadow_dir = _amb_probe_mgr.get_sunlight()->direction.get_xyz();
+                        }
+
+                        // Create a fake DirectionalLight to contain the direction
+                        PT( DirectionalLight ) dl = new DirectionalLight( "fake-dl" );
+                        dl->set_direction( _shadow_dir );
+                        // Keep a reference to the fake light
+                        _fake_dl = NodePath( dl );
+                        _shgen->set_sun_light( _fake_dl );
+                }
+
                 _update_task = new GenericAsyncTask( file.get_basename_wo_extension() + "-updateTask", update_task, this );
                 AsyncTaskManager::get_global_ptr()->add( _update_task );
         }
@@ -1922,14 +1736,6 @@ bool BSPLoader::read( const Filename &file )
         _colldata = SetupCollisionBSPData( _bspdata );
 
         return true;
-}
-
-void BSPLoader::update_dynamic_node( const NodePath &node )
-{
-        if ( _active_level )
-        {
-                _amb_probe_mgr.update_node( node.node(), node.get_net_transform() );
-        }
 }
 
 void BSPLoader::do_optimizations()
@@ -2124,11 +1930,6 @@ void BSPLoader::set_materials_file( const Filename &file )
         _materials_file = file;
 }
 
-void BSPLoader::add_dynamic_node( const NodePath &node )
-{
-        _explicit_dynamic_nodes.push_back( WeakNodePath( node ) );
-}
-
 cubemap_t *BSPLoader::find_closest_cubemap( const LPoint3 &pos )
 {
         if ( !_amb_probe_mgr.get_cubemaps().size() )
@@ -2247,8 +2048,6 @@ void BSPLoader::cleanup()
 
         _materials.clear();
 
-        _geom_shader_cache.clear();
-
         _leaf_pvs.clear();
 
         _leaf_aabb_lock.acquire();
@@ -2258,17 +2057,6 @@ void BSPLoader::cleanup()
         _leaf_bboxs.clear();
         _visible_leaf_bboxs.clear();
         _leaf_aabb_lock.release();
-
-        if ( _shadow_buf != nullptr )
-        {
-                _win->get_engine()->remove_window( _shadow_buf );
-                _shadow_buf = nullptr;
-        }
-
-        if ( !_shadowcam.is_empty() )
-        {
-                _shadowcam.remove_node();
-        }
 
         if ( _update_task != nullptr )
         {
@@ -2300,6 +2088,11 @@ void BSPLoader::cleanup()
         _lightmap_dir.face_entries.clear();
         _lightmap_dir.entries.clear();
 
+        if ( !_fake_dl.is_empty() )
+                _fake_dl.remove_node();
+        if ( _want_shadows && _shgen )
+                _shgen->set_sun_light( NodePath() );
+
         if ( !_result.is_empty() )
                 _result.remove_node();
 
@@ -2326,37 +2119,24 @@ BSPLoader::BSPLoader() :
         _curr_leaf_idx( -1 ),
         _leaf_aabb_lock( "leafAABBMutex" ),
         _gamma( DEFAULT_GAMMA ),
-        _diffuse_stage( new TextureStage( "diffuse_stage" ) ),
-        _lightmap_stage( new TextureStage( "lightmap_stage" ) ),
-        _envmap_stage( new TextureStage( "envmap_stage" ) ),
-        _shadow_stage( new TextureStage( "shadow_stage" ) ),
         _amb_probe_mgr( this ),
         _active_level( false ),
+        _shgen( nullptr ),
         _ai( false ),
-        _shadowcam_pos( -30, 25, 40 ),
-        _shadowcam_mask( BitMask32::bit( 5 ) ),
+        _light_environment( nullptr ),
+        _shadow_control( nullptr ),
+        _shadow_dir( 0.5, 0, -0.9 ),
         _shadow_color( 0.5, 0.5, 0.5, 1.0 ),
-        _shadow_tex( nullptr ),
-        _shadow_buf( nullptr ),
-        _shadow_depth( nullptr ),
-        _shadow_filmsize( 60 ),
-        _shadow_texsize( 1024 ),
-        _want_shadows( true ),
+        _want_shadows( false ),
         _wireframe( false ),
         _bspdata( nullptr ),
         _colldata( nullptr )
 {
-        _diffuse_stage->set_texcoord_name( "basetexture" );
-        _diffuse_stage->set_sort( 0 );
+}
 
-        _lightmap_stage->set_texcoord_name( "lightmap" );
-        _lightmap_stage->set_mode( TextureStage::M_modulate );
-        _lightmap_stage->set_sort( 1 );
-
-        _shadow_stage->set_texcoord_name( "shadow" );
-        _shadow_stage->set_sort( 2 );
-
-        _envmap_stage->set_mode( TextureStage::M_add );
+void BSPLoader::set_shader_generator( PSSMShaderGenerator *shgen )
+{
+        _shgen = shgen;
 }
 
 void BSPLoader::set_wireframe( bool flag )
@@ -2369,46 +2149,14 @@ void BSPLoader::set_want_shadows( bool flag )
         _want_shadows = flag;
 }
 
-void BSPLoader::set_shadow_resolution( int filmsize, int texsize )
-{
-        _shadow_filmsize = filmsize;
-        _shadow_texsize = texsize;
-}
-
-void BSPLoader::cast_shadows( NodePath &node )
-{
-        node.show_through( _shadowcam_mask );
-}
-
 void BSPLoader::set_shadow_color( const LColor &color )
 {
         _shadow_color = color;
-        if ( !_shadowcam.is_empty() )
-        {
-                Camera *cam = DCAST( Camera, _shadowcam.node() );
-                CPT( RenderState ) state = cam->get_initial_state();
-                state = state->set_attrib( ColorAttrib::make_flat( _shadow_color ), 10 );
-                cam->set_initial_state( state );
-        }
 }
 
-void BSPLoader::set_shadow_cam_bitmask( const BitMask32 &mask )
+void BSPLoader::set_shadow_dir( const LVector3 &dir )
 {
-        _shadowcam_mask = mask;
-        if ( !_shadowcam.is_empty() )
-        {
-                DCAST( Camera, _shadowcam.node() )->set_camera_mask( _shadowcam_mask );
-                _render.hide( mask );
-        }
-}
-
-void BSPLoader::set_shadow_cam_pos( const LPoint3 &pos )
-{
-        _shadowcam_pos = pos;
-        if ( !_shadowcam.is_empty() )
-        {
-                _shadowcam.set_pos( pos );
-        }
+        _shadow_dir = dir;
 }
 
 /**

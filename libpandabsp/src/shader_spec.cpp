@@ -127,4 +127,41 @@ void ShaderSpec::add_color( const RenderState *rs, ShaderPermutations &perms )
         }
 }
 
+#include "pssmCameraRig.h"
+
+bool ShaderSpec::add_csm( ShaderPermutations &result, PSSMShaderGenerator *generator )
+{
+        if ( generator->has_shadow_sunlight() )
+        {
+                result.add_permutation( "HAS_SHADOW_SUNLIGHT" );
+                result.permutations["PSSM_SPLITS"] = pssm_splits.get_string_value();
+                result.permutations["DEPTH_BIAS"] = depth_bias.get_string_value();
+                result.permutations["NORMAL_OFFSET_SCALE"] = normal_offset_scale.get_string_value();
+
+                float xel_size = 1.0 / pssm_size.get_value();
+
+                std::stringstream ss;
+                ss << xel_size * softness_factor.get_value();
+                result.permutations["SHADOW_BLUR"] = ss.str();
+                std::stringstream size_ss;
+                size_ss << xel_size;
+                result.permutations["SHADOW_TEXEL_SIZE"] = size_ss.str();
+
+                if ( normal_offset_uv_space.get_value() )
+                        result.add_permutation( "NORMAL_OFFSET_UV_SPACE" );
+
+                result.add_input( ShaderInput( "pssmSplitSampler", generator->get_pssm_array_texture() ) );
+                result.add_input( ShaderInput( "pssmMVPs", generator->get_pssm_rig()->get_mvp_array() ) );
+                result.add_input( ShaderInput( "sunVector", generator->get_pssm_rig()->get_sun_vector() ) );
+
+                result.add_input( ShaderInput( "ambientLightIdentifier", ambient_light_identifier.get_value().get_xyz() ) );
+                result.add_input( ShaderInput( "ambientLightMin", ambient_light_min.get_value().get_xyz() ) );
+                result.add_input( ShaderInput( "ambientLightScale", LVector2( ambient_light_scale ) ) );
+
+                return true;
+        }
+
+        return false;
+}
+
 //=================================================================================================

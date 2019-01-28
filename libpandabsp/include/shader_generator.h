@@ -14,6 +14,7 @@
 #include <genericAsyncTask.h>
 #include <nodePath.h>
 #include <weakNodePath.h>
+#include <configVariableColor.h>
 
 #include "shader_spec.h"
 
@@ -27,8 +28,13 @@ extern ConfigVariableDouble depth_bias;
 extern ConfigVariableDouble normal_offset_scale;
 extern ConfigVariableDouble softness_factor;
 extern ConfigVariableBool normal_offset_uv_space;
+extern ConfigVariableColor ambient_light_identifier;
+extern ConfigVariableColor ambient_light_min;
+extern ConfigVariableDouble ambient_light_scale;
 
 #define DEFAULT_SHADER "UnlitNoMat"
+
+static const BitMask32 shadow_camera_mask = BitMask32::bit( 5 );
 
 NotifyCategoryDeclNoExport(bspShaderGenerator);
 

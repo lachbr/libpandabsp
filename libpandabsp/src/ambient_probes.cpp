@@ -120,13 +120,6 @@ AmbientProbeManager::AmbientProbeManager( BSPLoader *loader ) :
 {
 }
 
-INLINE LVector3 angles_to_vector( const vec3_t &angles )
-{
-        return LVector3( cos( deg_2_rad(angles[0]) ) * cos( deg_2_rad(angles[1]) ),
-                         sin( deg_2_rad(angles[0]) ) * cos( deg_2_rad(angles[1]) ),
-                         sin( deg_2_rad(angles[1]) ) );
-}
-
 INLINE int lighttype_from_classname( const char *classname )
 {
         if ( !strncmp( classname, "light_environment", 18 ) )
@@ -249,11 +242,11 @@ void AmbientProbeManager::process_ambient_probes()
                         }
 
                         _all_lights.push_back( light );
-                        //if ( light->type == LIGHTTYPE_SUN )
-                        //{
-                        //        // don't put the sun in the k-d tree
-                        //        _sunlight = light;
-                        //}
+                        if ( light->type == LIGHTTYPE_SUN )
+                        {
+                                // don't put the sun in the k-d tree
+                                _sunlight = light;
+                        }
                         //else
                         //{
                         //        // add the light into our k-d tree

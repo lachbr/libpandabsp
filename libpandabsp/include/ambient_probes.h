@@ -212,6 +212,11 @@ public:
                 return _cubemaps;
         }
 
+        INLINE light_t *get_sunlight() const
+        {
+                return _sunlight;
+        }
+
 public:
 
         void xform_lights( const TransformState *cam_trans );

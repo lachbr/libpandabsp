@@ -204,33 +204,6 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                         std::stringstream ss;
                         ss << num_lights;
                         result.permutations["NUM_LIGHTS"] = ss.str();
-
-                        if ( generator->has_shadow_sunlight() )
-                        {
-                                need_world_normal = true;
-                                need_world_position = true;
-
-                                result.add_permutation( "HAS_SHADOW_SUNLIGHT" );
-                                result.permutations["PSSM_SPLITS"] = pssm_splits.get_string_value();
-                                result.permutations["DEPTH_BIAS"] = depth_bias.get_string_value();
-                                result.permutations["NORMAL_OFFSET_SCALE"] = normal_offset_scale.get_string_value();
-
-                                float xel_size = 1.0 / pssm_size.get_value();
-
-                                stringstream ss;
-                                ss << xel_size * softness_factor.get_value();
-                                result.permutations["SHADOW_BLUR"] = ss.str();
-                                stringstream size_ss;
-                                size_ss << xel_size;
-                                result.permutations["SHADOW_TEXEL_SIZE"] = size_ss.str();
-
-                                if ( normal_offset_uv_space.get_value() )
-                                        result.add_permutation( "NORMAL_OFFSET_UV_SPACE" );
-
-                                result.add_input( ShaderInput( "pssmSplitSampler", generator->get_pssm_array_texture() ) );
-                                result.add_input( ShaderInput( "pssmMVPs", generator->get_pssm_rig()->get_mvp_array() ) );
-                                result.add_input( ShaderInput( "sunVector", generator->get_pssm_rig()->get_sun_vector() ) );
-                        }
                 }
                 for ( size_t i = 0; i < num_lights; i++ )
                 {
@@ -270,6 +243,12 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                         result.add_permutation( "AMBIENT_CUBE" );
                 }
 
+        }
+
+        if ( add_csm( result, generator ) )
+        {
+                need_world_normal = true;
+                need_world_position = true;
         }
 
         const LightRampAttrib *lra;

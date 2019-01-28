@@ -69,6 +69,7 @@ class EggPolygon;
 class Geom;
 class GeomNode;
 class BSPLoader;
+class PSSMShaderGenerator;
 
 /**
  * An attribute applied to each face Geom from a BSP file.
@@ -178,6 +179,7 @@ PUBLISHED:
 	void set_win( GraphicsWindow *win );
         void set_camera( const NodePath &camera );
 	void set_render( const NodePath &render );
+        void set_shader_generator( PSSMShaderGenerator *shgen );
 	void set_want_visibility( bool flag );
 	void set_want_lightmaps( bool flag );
 	void set_physics_type( int type );
@@ -196,18 +198,9 @@ PUBLISHED:
 
         void build_cubemaps();
 
-        void setup_shadowcam();
-
-        void add_dynamic_node( const NodePath &node );
-
         void set_want_shadows( bool flag );
-        void set_shadow_cam_pos( const LPoint3 &pos );
-        void set_shadow_cam_bitmask( const BitMask32 &mask );
+        void set_shadow_dir( const LVector3 &dir );
         void set_shadow_color( const LColor &color );
-        void set_shadow_resolution( int filmsize, int texsize );
-        void cast_shadows( NodePath &node );
-
-        Texture *get_shadow_tex() const;
 
         int extract_modelnum( int entnum );
         void get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs );
@@ -222,8 +215,6 @@ PUBLISHED:
         {
                 return _ai;
         }
-
-        void update_dynamic_node( const NodePath &node );
 
         bool trace_line( const LPoint3 &start, const LPoint3 &end );
 
@@ -334,20 +325,17 @@ private:
 
 private:
         bspdata_t *_bspdata;
+        PSSMShaderGenerator *_shgen;
         collbspdata_t *_colldata;
 	NodePath _result;
         NodePath _camera;
 	NodePath _render;
-        NodePath _shadowcam;
-        BitMask32 _shadowcam_mask;
-        LPoint3 _shadowcam_pos;
-        PT( GraphicsOutput ) _shadow_buf;
-        PT( Texture ) _shadow_tex;
-        PT( Texture ) _shadow_depth;
+        NodePath _fake_dl;
+        LVector3 _shadow_dir;
         LColor _shadow_color;
-        int _shadow_filmsize;
-        int _shadow_texsize;
         bool _want_shadows;
+        entity_t *_light_environment;
+        entity_t *_shadow_control;
         bool _wireframe;
 	Filename _materials_file;
         PN_stdfloat _gamma;
@@ -379,13 +367,6 @@ private:
         PyObject *_sv_ent_dispatch;
         pmap<string, PyTypeObject *> _svent_to_class;
 
-        PT( TextureStage ) _diffuse_stage;
-        PT( TextureStage ) _lightmap_stage;
-        PT( TextureStage ) _envmap_stage;
-        PT( TextureStage ) _shadow_stage;
-
-        pvector<WeakNodePath> _explicit_dynamic_nodes;
-
         pmap<texref_t *, CPT( BSPMaterial )> _texref_materials;
         vector<uint8_t *> _leaf_pvs;
 	pvector<NodePath> _leaf_visnp;
@@ -405,9 +386,6 @@ private:
 	
         PT( GenericAsyncTask ) _update_task;
         UpdateSeq _generated_shader_seq;
-
-        typedef SimpleHashMap<const Geom *, CPT( RenderAttrib ), pointer_hash> geomshadercache_t;
-        geomshadercache_t _geom_shader_cache;
 
         struct WorldSpawnGeomState
         {

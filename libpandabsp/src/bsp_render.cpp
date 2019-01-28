@@ -438,7 +438,7 @@ bool BSPRoot::safe_to_flatten() const
 }
 
 BSPProp::BSPProp( const std::string &name ) :
-        ModelNode( name )
+	    ModelRoot( name )
 {
 }
 

@@ -14,6 +14,7 @@
 
 #include <pandaNode.h>
 #include <modelNode.h>
+#include <modelRoot.h>
 #include <cullTraverser.h>
 #include <cullableObject.h>
 
@@ -70,9 +71,9 @@ public:
         virtual bool safe_to_flatten() const;
 };
 
-class BSPProp : public ModelNode
+class BSPProp : public ModelRoot
 {
-        TypeDecl( BSPProp, ModelNode );
+        TypeDecl( BSPProp, ModelRoot );
 
 PUBLISHED:
         BSPProp( const std::string &name );
