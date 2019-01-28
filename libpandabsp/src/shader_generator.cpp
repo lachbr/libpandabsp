@@ -93,7 +93,7 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
         if ( want_pssm )
         {
                 _pssm_split_texture_array = new Texture( "pssmSplitTextureArray" );
-                _pssm_split_texture_array->setup_2d_texture_array( pssm_size, pssm_size, pssm_splits, Texture::T_float, Texture::F_depth_component );
+                _pssm_split_texture_array->setup_2d_texture_array( pssm_size, pssm_size, pssm_splits, Texture::T_unsigned_byte, Texture::F_depth_component );
                 _pssm_split_texture_array->set_clear_color( LVecBase4( 1.0 ) );
                 _pssm_split_texture_array->set_wrap_u( SamplerState::WM_clamp );
                 _pssm_split_texture_array->set_wrap_v( SamplerState::WM_clamp );
@@ -104,12 +104,28 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 // Setup the buffer that this split shadow map will be rendered into.
                 FrameBufferProperties fbp;
                 fbp.set_depth_bits( shadow_depth_bits );
+                fbp.set_multisamples( 0 );
+                fbp.set_color_bits( 0 );
+                fbp.set_alpha_bits( 0 );
+                fbp.set_stencil_bits( 0 );
+                fbp.set_float_color( false );
+                fbp.set_float_depth( false );
+                fbp.set_stereo( false );
+                fbp.set_accum_bits( 0 );
+                fbp.set_aux_float( 0 );
+                fbp.set_aux_rgba( 0 );
+                fbp.set_aux_hrgba( 0 );
+                fbp.set_coverage_samples( 0 );
+
                 WindowProperties props = WindowProperties::size( LVecBase2i( pssm_size ) );
-                int flags = GraphicsPipe::BF_refuse_window;
+                int flags = GraphicsPipe::BF_refuse_window | GraphicsPipe::BF_can_bind_layered;
                 _pssm_layered_buffer = _gsg->get_engine()->make_output(
                         _gsg->get_pipe(), "pssmShadowBuffer", -10000, fbp, props,
                         flags, _gsg, _gsg->get_engine()->get_window( 0 )
                 );
+                _pssm_layered_buffer->set_clear_color_active( false );
+                _pssm_layered_buffer->set_clear_stencil_active( false );
+                _pssm_layered_buffer->set_clear_depth_active( true );
 
                 // Using a geometry shader on the first PSSM split camera (the one that sees everything),
                 // render to the individual textures in the array in a single render pass using geometry
@@ -150,6 +166,9 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 }
 
                 PT( DisplayRegion ) dr = _pssm_layered_buffer->make_display_region();
+                dr->set_clear_color_active( false );
+                dr->set_clear_stencil_active( false );
+                dr->set_clear_depth_active( true );
                 dr->set_camera( _pssm_rig->get_camera( 0 ) );
                 dr->set_sort( -10000 );
         }
