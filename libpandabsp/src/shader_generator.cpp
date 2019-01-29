@@ -93,7 +93,7 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
         if ( want_pssm )
         {
                 _pssm_split_texture_array = new Texture( "pssmSplitTextureArray" );
-                _pssm_split_texture_array->setup_2d_texture_array( pssm_size, pssm_size, pssm_splits, Texture::T_unsigned_byte, Texture::F_depth_component );
+                _pssm_split_texture_array->setup_2d_texture_array( pssm_size, pssm_size, pssm_splits, Texture::T_float, Texture::F_depth_component );
                 _pssm_split_texture_array->set_clear_color( LVecBase4( 1.0 ) );
                 _pssm_split_texture_array->set_wrap_u( SamplerState::WM_clamp );
                 _pssm_split_texture_array->set_wrap_v( SamplerState::WM_clamp );
@@ -109,7 +109,7 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
                 fbp.set_alpha_bits( 0 );
                 fbp.set_stencil_bits( 0 );
                 fbp.set_float_color( false );
-                fbp.set_float_depth( false );
+                fbp.set_float_depth( true );
                 fbp.set_stereo( false );
                 fbp.set_accum_bits( 0 );
                 fbp.set_aux_float( 0 );
