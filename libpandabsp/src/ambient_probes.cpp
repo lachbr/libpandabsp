@@ -318,11 +318,11 @@ void AmbientProbeManager::process_ambient_probes()
                         tn->set_text( text );
                         tn->set_text_color( LColor( 1, 1, 1, 1 ) );
                         NodePath smiley = _vis_root.attach_new_node( tn->generate() );
-                        smiley.set_pos( probe.pos );
+                        smiley.set_pos( probe->pos );
                         smiley.set_billboard_axis();
                         smiley.clear_model_nodes();
                         smiley.flatten_strong();
-                        probe.visnode = smiley;
+                        probe->visnode = smiley;
 #endif
                         _probes[i].push_back( probe );
 
@@ -564,7 +564,7 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                         }
                         for ( size_t j = 0; j < _probes[leaf_id].size(); j++ )
                         {
-                                _probes[leaf_id][j].visnode.set_color_scale( LColor( 0, 0, 1, 1 ), 1 );
+                                _probes[leaf_id][j]->visnode.set_color_scale( LColor( 0, 0, 1, 1 ), 1 );
                         }
                         if ( !sample->visnode.is_empty() )
                         {
