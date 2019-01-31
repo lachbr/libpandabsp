@@ -93,17 +93,20 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
         if ( want_pssm )
         {
                 _pssm_split_texture_array = new Texture( "pssmSplitTextureArray" );
-                _pssm_split_texture_array->setup_2d_texture_array( pssm_size, pssm_size, pssm_splits, Texture::T_float, Texture::F_depth_component );
+                _pssm_split_texture_array->setup_2d_texture_array( pssm_size, pssm_size, pssm_splits, Texture::T_float, Texture::F_depth_component32 );
                 _pssm_split_texture_array->set_clear_color( LVecBase4( 1.0 ) );
                 _pssm_split_texture_array->set_wrap_u( SamplerState::WM_clamp );
                 _pssm_split_texture_array->set_wrap_v( SamplerState::WM_clamp );
                 _pssm_split_texture_array->set_border_color( LColor( 1.0 ) );
                 _pssm_split_texture_array->set_minfilter( SamplerState::FT_linear );
                 _pssm_split_texture_array->set_magfilter( SamplerState::FT_linear );
+                _pssm_split_texture_array->set_anisotropic_degree( 0 );
 
                 // Setup the buffer that this split shadow map will be rendered into.
                 FrameBufferProperties fbp;
                 fbp.set_depth_bits( shadow_depth_bits );
+                fbp.set_back_buffers( 0 );
+                fbp.set_force_hardware( true );
                 fbp.set_multisamples( 0 );
                 fbp.set_color_bits( 0 );
                 fbp.set_alpha_bits( 0 );
