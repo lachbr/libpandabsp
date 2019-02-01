@@ -192,6 +192,9 @@ static PStatCollector wsp_trav_collector( "Cull:BSP:WorldSpawn:TraverseLeafs" );
 static PStatCollector wsp_geom_traverse_collector( "Cull:BSP:WorldSpawn:TraverseLeafGeoms" );
 static PStatCollector wsp_make_cullableobject_collector( "Cull:BSP:WorldSpawn:MakeCullableObject" );
 
+// For worldspawn rendering
+static byte *visited = new byte[MAX_MAP_FACES];
+
 void BSPCullTraverser::traverse_below( CullTraverserData &data )
 {
         _nodes_pcollector.add_level( 1 );
@@ -223,7 +226,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
 
                         // We have a specialized way of rendering worldspawn.
                         // Cuts down on Cull time.
-                        byte visited[MAX_MAP_FACES] = { 0 };
+                        memset( visited, 0, MAX_MAP_FACES );
 
                         _loader->_leaf_aabb_lock.acquire();
 
