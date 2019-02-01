@@ -69,6 +69,9 @@
 
 static PStatCollector bsp_build_leaf_geom_collector( "BSP:BuildAcceleratedLeafGeomStructure" );
 
+static LVector3 default_shadow_dir( 0.5, 0, -0.9 );
+static LVector4 default_shadow_color( 0.5, 0.5, 0.5, 1.0 );
+
 #define DEFAULT_BRUSH_SHADER "LightmappedGeneric"
 
 INLINE static void flatten_node( const NodePath &node )
@@ -2032,6 +2035,11 @@ void BSPLoader::cleanup()
 
         _active_level = false;
 
+        _shadow_color = default_shadow_color;
+        _shadow_dir = default_shadow_dir;
+        _shadow_control = nullptr;
+        _light_environment = nullptr;
+
         _map_file = Filename();
 
         _cubemaps.clear();
@@ -2125,8 +2133,8 @@ BSPLoader::BSPLoader() :
         _ai( false ),
         _light_environment( nullptr ),
         _shadow_control( nullptr ),
-        _shadow_dir( 0.5, 0, -0.9 ),
-        _shadow_color( 0.5, 0.5, 0.5, 1.0 ),
+        _shadow_dir( default_shadow_dir ),
+        _shadow_color( default_shadow_color ),
         _want_shadows( false ),
         _wireframe( false ),
         _bspdata( nullptr ),
