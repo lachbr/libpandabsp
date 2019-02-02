@@ -51,6 +51,8 @@ static PStatCollector synthesize_collector( "*:Munge:PSSMShaderGen:Synthesize" )
 
 ConfigVariableInt pssm_splits( "pssm-splits", 3 );
 ConfigVariableInt pssm_size( "pssm-size", 1024 );
+ConfigVariableInt pssm_max_distance( "pssm-max-distance", 200 );
+ConfigVariableInt pssm_sun_distance( "pssm-sun-distance", 400 );
 ConfigVariableBool want_pssm( "want-pssm", false );
 ConfigVariableDouble depth_bias( "pssm-shadow-depth-bias", 0.001 );
 ConfigVariableDouble normal_offset_scale( "pssm-normal-offset-scale", 1.0 );
@@ -83,8 +85,8 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
         // Any RTT of the main scene should happen after shadows are updated.
         _update_task->set_sort( -10000 );
         _pssm_rig->set_use_stable_csm( true );
-        _pssm_rig->set_sun_distance( 400.0 );
-        _pssm_rig->set_pssm_distance( 200.0 );
+        _pssm_rig->set_sun_distance( pssm_sun_distance );
+        _pssm_rig->set_pssm_distance( pssm_max_distance );
         _pssm_rig->set_resolution( pssm_size );
         _pssm_rig->set_use_fixed_film_size( true );
 
