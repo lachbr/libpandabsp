@@ -199,4 +199,21 @@ public:
         PT( Texture ) lightwarp_tex;
 };
 
+class SelfIllumFeature : public ShaderFeature
+{
+public:
+        INLINE SelfIllumFeature() :
+                ShaderFeature(),
+                selfillummask( nullptr ),
+                selfillumtint( 1.0, 1.0, 1.0 )
+        {
+        }
+
+        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
+        virtual void add_permutations( ShaderPermutations &perms );
+
+        PT( Texture ) selfillummask;
+        LVector3 selfillumtint;
+};
+
 #endif // SHADER_FEATURES_H

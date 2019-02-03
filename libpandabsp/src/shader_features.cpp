@@ -374,3 +374,33 @@ void LightwarpFeature::add_permutations( ShaderPermutations &perms )
 }
 
 //==============================================================================================//
+
+void SelfIllumFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+{
+        if ( mat->has_keyvalue( "$selfillum" ) &&
+                (bool)atoi( mat->get_keyvalue( "$selfillum" ).c_str() ) )
+        {
+                has_feature = true;
+                
+                if ( mat->has_keyvalue( "$selfillummask" ) )
+                {
+                        selfillummask = TexturePool::load_texture( mat->get_keyvalue( "$selfillummask" ) );
+                }
+                if ( mat->has_keyvalue( "$selfillumtint" ) )
+                {
+                        selfillumtint = Parser::to_3f( mat->get_keyvalue( "$selfillumtint" ) );
+                }
+        }
+}
+
+void SelfIllumFeature::add_permutations( ShaderPermutations &perms )
+{
+        if ( has_feature && selfillummask )
+        {
+                perms.add_permutation( "SELFILLUM" );
+                perms.add_input( ShaderInput( "selfillumSampler", selfillummask ) );
+                perms.add_input( ShaderInput( "selfillumTint", selfillumtint ) );
+        }
+}
+
+//==============================================================================================//

@@ -40,6 +40,7 @@ void VLGShaderConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
         bumpmap.parse_from_material_keyvalues( mat, this );
         lightwarp.parse_from_material_keyvalues( mat, this );
         rimlight.parse_from_material_keyvalues( mat, this );
+        selfillum.parse_from_material_keyvalues( mat, this );
 }
 
 VertexLitGenericSpec::VertexLitGenericSpec() :
@@ -72,6 +73,7 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         conf->phong.add_permutations( result );
         conf->lightwarp.add_permutations( result );
         conf->rimlight.add_permutations( result );
+        conf->selfillum.add_permutations( result );
 
         bool disable_alpha_write = false;
         bool calc_primary_alpha = false;

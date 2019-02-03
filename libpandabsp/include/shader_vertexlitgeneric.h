@@ -26,6 +26,7 @@ public:
         HalfLambertFeature halflambert;
         LightwarpFeature lightwarp;
         RimLightFeature rimlight;
+        SelfIllumFeature selfillum;
 
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat );
 };
