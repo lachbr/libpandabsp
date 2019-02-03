@@ -786,6 +786,7 @@ void BSPLoader::make_faces()
                                 {
                                         // material wants us to use a cubemap_tex embedded in the level.
                                         // find the closest one to the center of the face.
+                                        centroid /= 16.0; // move from hammer space into panda space
                                         cubemap_t *cm = find_closest_cubemap(
                                                 LPoint3( centroid[0], centroid[1], centroid[2] ) );
                                         if ( cm )
