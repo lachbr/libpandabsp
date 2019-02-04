@@ -79,7 +79,14 @@ class nodeshaderinput_t : public TypedReferenceCount
         TypeDecl( nodeshaderinput_t, TypedReferenceCount );
 
 public:
+        // This is the ambient cube actually used by the shader
         PTA_LVecBase3 ambient_cube;
+        // This is a storage of the ambient cube pre-boosting,
+        // so we can correctly time average the ambient cube,
+        // and then boost.
+        LVector3 boxcolor[6];
+        LVector3 boxcolor_boosted[6];
+        bool ambient_boost;
 
         PTA_int light_count;
         PTA_int light_type;
@@ -135,6 +142,9 @@ public:
                 cubemap_tex->clear_image();
                 sky_idx = -1;
                 active_lights = 0;
+                ambient_boost = false;
+                memset( boxcolor, 0, sizeof( LVector3 ) * 6 );
+                memset( boxcolor_boosted, 0, sizeof( LVector3 ) * 6 );
 
                 lighting_time = LIGHTING_UNINITIALIZED;
         }

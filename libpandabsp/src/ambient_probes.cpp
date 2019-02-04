@@ -45,15 +45,24 @@ static PStatCollector interp_ac_collector               ( "AmbientProbes:UpdateN
 static PStatCollector copystate_collector               ( "AmbientProbes:UpdateNodes:CopyState" );
 static PStatCollector addlights_collector               ( "AmbientProbes:UpdateNodes:AddLights" );
 static PStatCollector fadelights_collector              ( "AmbientProbes:UpdateNodes:FadeLights" );
+static PStatCollector ambientboost_collector( "AmbientProbes:UpdateNodes:BoostAmbient" );
 static PStatCollector xformlight_collector( "AmbientProbes:XformLight" );
 static PStatCollector loadcubemap_collector( "AmbientProbes:UpdateNodes:LoadCubemap" );
 static PStatCollector findcubemap_collector( "AmbientProbes:UpdateNodes:FindCubemap" );
 
 static ConfigVariableBool cfg_lightaverage
 ( "light-average", true, "Activates/deactivate light averaging" );
-
 static ConfigVariableDouble cfg_lightinterp
 ( "light-lerp-speed", 5.0, "Controls the speed of light interpolation, 0 turns off interpolation" );
+
+static ConfigVariableBool r_ambientboost
+( "r_ambientboost", true, "Boosts ambient term if it is totally swamped by local lights." );
+static ConfigVariableDouble r_ambientmin
+( "r_ambientmin", 0.3, "Threshold above which ambient cube will not boost (i.e. it's already sufficiently bright)." );
+static ConfigVariableDouble r_ambientfraction
+( "r_ambientfraction", 0.1, "Cheat. Fraction of direct lighting that ambient cube must be below to trigger boosting." );
+static ConfigVariableDouble r_ambientfactor
+( "r_ambientfactor", 5.0, "Boost ambient cube by no more than this factor." );
 
 using std::cos;
 using std::sin;
@@ -597,6 +606,8 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                 _pos_cache[node] = curr_trans;
         }
 
+        bool ambientcube_changed = false;
+
         interp_ac_collector.start();
         if ( input->amb_probe )
         {
@@ -604,12 +615,13 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                 LVector3 delta( 0 );
                 for ( int i = 0; i < 6; i++ )
                 {
-                        if ( average_lighting && input->amb_probe->cube[i] != input->ambient_cube[i] )
+                        delta = input->amb_probe->cube[i] - input->boxcolor[i];
+                        if ( average_lighting && delta.length_squared() >= EQUAL_EPSILON )
                         {
-                                delta = input->amb_probe->cube[i] - input->ambient_cube[i];
                                 delta *= atten_factor;
+                                ambientcube_changed = true;
                         }
-                        input->ambient_cube[i] = input->amb_probe->cube[i] - delta;
+                        input->boxcolor[i] = input->amb_probe->cube[i] - delta;
                 }
         }
         interp_ac_collector.stop();
@@ -772,6 +784,82 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
         }
 
         input->light_count[0] = lights_updated;
+
+        ambientboost_collector.start();
+        // If we have any lights and want to do ambient boost
+        if ( lights_updated > 0 && r_ambientboost.get_value() )
+        {
+                if ( pos_changed || ambientcube_changed )
+                {
+                        static const LVector3 lum_coeff( 0.3, 0.59, 0.11 );
+                        float avg_cube_luminance = 0.0;
+                        float min_cube_luminance = FLT_MAX;
+                        float max_cube_luminance = 0.0;
+
+                        // Compute average luminance of ambient cube
+                        for ( int i = 0; i < 6; i++ )
+                        {
+                                float luminance = input->boxcolor[i].dot( lum_coeff );
+                                min_cube_luminance = std::min( min_cube_luminance, luminance );
+                                max_cube_luminance = std::max( max_cube_luminance, luminance );
+                                avg_cube_luminance += luminance;
+                        }
+                        avg_cube_luminance /= 6.0;
+
+                        // Compute the amount of direct light reaching the model
+                        float direct_light = 0.0;
+                        for ( int i = 0; i < lights_updated; i++ )
+                        {
+                                light_t *light = _all_lights[input->light_ids[i]];
+                                LVector3 lvec = ( light->pos - curr_net );
+                                float d2 = lvec.dot( lvec );
+                                float d = std::sqrt( d2 );
+                                float atten = 1.0;
+
+                                float denom = light->falloff[0] +
+                                        light->falloff[1] * d +
+                                        light->falloff[2] * d2;
+                                if ( denom > 0.00001 )
+                                {
+                                        atten = 1.0 / denom;
+                                }
+
+                                LVector3 lit = light->color * atten;
+                                direct_light += lit.dot( lum_coeff );
+                        }
+
+                        if ( avg_cube_luminance < r_ambientmin &&
+                                avg_cube_luminance < ( direct_light * r_ambientfraction.get_value() ) )
+                        {
+                                float boost_factor = std::min( ( direct_light * r_ambientfraction ) / max_cube_luminance,
+                                        r_ambientfactor.get_value() );
+                                for ( int i = 0; i < 6; i++ )
+                                {
+                                        input->boxcolor_boosted[i] = input->boxcolor[i] * boost_factor; // boost
+                                }
+                                input->ambient_boost = true;
+                        }
+                        else
+                        {
+                                input->ambient_boost = false;
+                        }
+                }
+        }
+        else
+        {
+                input->ambient_boost = false;
+        }
+
+        if ( input->ambient_boost )
+        {
+                memcpy( input->ambient_cube.p(), input->boxcolor_boosted, sizeof( LVector3 ) * 6 ); // no boost
+        }
+        else
+        {
+                memcpy( input->ambient_cube.p(), input->boxcolor, sizeof( LVector3 ) * 6 ); // no boost
+        }
+
+        ambientboost_collector.stop();
 
         return input->state_with_input;
 }
