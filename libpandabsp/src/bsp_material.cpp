@@ -259,6 +259,8 @@ size_t BSPMaterialAttrib::get_hash_impl() const
 {
         size_t hash = 0;
         hash = pointer_hash::add_hash( hash, _mat );
+        hash = int_hash::add_hash( hash, _has_override_shader );
+        hash = string_hash::add_hash( hash, _override_shader );
         return hash;
 }
 

@@ -309,6 +309,10 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
         {
                 // no overrided shader, use the one specified on the material
                 shader_name = mat->get_shader();
+                if ( shader_name.empty() )
+                {
+                        shader_name = DEFAULT_SHADER;
+                }
         }
 
         if ( _shaders.find( shader_name ) == _shaders.end() )
@@ -317,8 +321,12 @@ CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *r
                 // add_shader().
 
                 std::stringstream msg;
-                msg << "Don't know about shader `" << shader_name << "` referenced by material `"
-                        << mat->get_file().get_fullpath() << "`\n";
+                msg << "Don't know about shader `" << shader_name << "`";
+                if ( mat )
+                {
+                        msg << "referenced by material `"
+                                << mat->get_file().get_fullpath() << "`\n";
+                }
                 msg << "Known shaders are:\n";
                 for ( auto itr = _shaders.begin(); itr != _shaders.end(); ++itr )
                 {

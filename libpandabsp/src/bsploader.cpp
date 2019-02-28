@@ -1630,7 +1630,7 @@ bool BSPLoader::read( const Filename &file )
 
         _map_file = file;
 
-        ParseEntities(_bspdata);
+        ParseEntities( _bspdata );
 
         _leaf_aabb_lock.acquire();
         _leaf_bboxs.resize( MAX_MAP_LEAFS );

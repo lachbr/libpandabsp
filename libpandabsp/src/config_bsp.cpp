@@ -16,6 +16,7 @@
 #include "shader_spec.h"
 #include "aux_data_attrib.h"
 #include "bounding_kdop.h"
+#include "raytrace.h"
 
 ConfigureDef( config_bsp );
 ConfigureFn( config_bsp )
@@ -51,4 +52,8 @@ void init_libpandabsp()
         ShaderSpec::init_type();
 
         BoundingKDOP::init_type();
+
+        RayTrace::initialize();
+        RayTraceGeometry::init_type();
+        RayTraceTriangleMesh::init_type();
 }
