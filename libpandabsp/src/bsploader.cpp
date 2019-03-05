@@ -67,8 +67,6 @@
 #include <materialAttrib.h>
 #include <materialPool.h>
 
-static PStatCollector bsp_build_leaf_geom_collector( "BSP:BuildAcceleratedLeafGeomStructure" );
-
 static LVector3 default_shadow_dir( 0.5, 0, -0.9 );
 static LVector4 default_shadow_color( 0.5, 0.5, 0.5, 1.0 );
 
@@ -1802,128 +1800,64 @@ void BSPLoader::do_optimizations()
 
         std::cout << "There are " << _bspdata->dmodels[0].numfaces << " world faces." << std::endl;
 
-        // another very important optimization is to try and flatten all faces together that are in the same leaf
-
-        // determine list of geoms for each leaf
-        // foreach leaf: move geoms to new node, flatten that node, move geoms back to worldspawn
-        // generate leaf geom structure
+        // Another very important optimization is to try and flatten all faces together that are in the same PVS
+        // For each leaf, we will combine all potentially visible Geoms into as few batches as possible.
+        // This means that we will be duplicating Geoms (and lose a lot of view frustum culling on worldspawn, but
+        // it is worth it due to fewer batches).
 
         NodePath worldspawn = get_model( 0 );
-        NodePathCollection geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
+        NodePath npgn = worldspawn.find( "**/+GeomNode" );
+        PT( GeomNode ) gn = DCAST( GeomNode, npgn.node() );
+        int num_geoms = gn->get_num_geoms();
+        CPT( RenderState ) node_state = npgn.get_net_state();
 
-        byte geoms_found[5][MAX_MAP_FACES];
-        memset( geoms_found, 0, MAX_MAP_FACES * 5 );
-        int global_geomnum = 0;
+        int numvisleafs = _bspdata->dmodels[0].visleafs + 1;
 
-        PT( GeomNode ) newgn = new GeomNode( "worldspawn" );
+        // List of potentially visible Geoms in each leaf
+        // ( concatenation of Geoms in that leaf + Geoms of leafs in PVS )
+        _leaf_world_geoms.clear();
+        _leaf_world_geoms.resize( numvisleafs );
 
         // not including the solid leaf 0
-        for ( int leafnum = 1; leafnum < _bspdata->dmodels[0].visleafs + 1; leafnum++ )
+        for ( int leafnum = 1; leafnum < numvisleafs; leafnum++ )
         {
+                // Build a list of worldspawn Geoms that we can render from this leaf.
+                // We will then flatten those Geoms into as few batches as possible.
+
                 PT( GeomNode ) lgn = new GeomNode( "leafnode" );
                 NodePath leafnode( lgn );
 
-                BoundingBox *leaf_bounds = _leaf_bboxs[leafnum];
-
-                for ( int i = 0; i < geomnodes.get_num_paths(); i++ )
+                for ( int geomnum = 0; geomnum < num_geoms; geomnum++ )
                 {
-                        CPT( TransformState ) transform = geomnodes[i].get_net_transform();
-                        CPT( RenderState ) node_state = geomnodes[i].get_net_state();
+                        const Geom *geom = gn->get_geom( geomnum );
 
-                        PT( GeomNode ) gn = DCAST( GeomNode, geomnodes[i].node() );
-                        int num_geoms = gn->get_num_geoms();
+                        // We are going to assume that world Geoms are already in world space
+                        // ( and they definitely should be )
+                        CPT( GeometricBoundingVolume ) geom_gbv = geom->get_bounds()
+                                ->as_geometric_bounding_volume();
 
-                        for ( int geomnum = 0; geomnum < num_geoms; geomnum++ )
+                        for ( size_t pvsidx = 1; pvsidx < numvisleafs; pvsidx++ )
                         {
-                                if ( geoms_found[i][geomnum] )
+                                if ( !is_cluster_visible( leafnum, pvsidx ) )
                                         continue;
 
-                                const Geom *geom = gn->get_geom( geomnum );
-
-                                        // Move the Geom bounds into leaf AABB space (world space).
-                                PT( GeometricBoundingVolume ) geom_gbv = geom->get_bounds()
-                                        ->make_copy()->as_geometric_bounding_volume();
-                                geom_gbv->xform( transform->get_mat() );
+                                BoundingBox *leaf_bounds = _leaf_bboxs[pvsidx];
 
                                 if ( leaf_bounds->contains( geom_gbv ) != BoundingVolume::IF_no_intersection )
                                 {
-                                        // This leaf contains this geom!
                                         lgn->add_geom( gn->modify_geom( geomnum ), gn->get_geom_state( geomnum ) );
-                                        geoms_found[i][geomnum] = 1;
+                                        break;
                                 }
                         }
                 }
-                
-                // aggressively combine all geoms in this leaf
+
+                // aggressively combine all geoms visibible from this leaf
                 leafnode.clear_model_nodes();
                 leafnode.flatten_strong();
 
-                // now move the new geoms back to worldspawn
-                newgn->add_geoms_from( lgn );
+                // We've created a batched list of Geoms to render when we are in this leaf.
+                _leaf_world_geoms[leafnum] = lgn->get_geoms();
         }
-        
-        // replace the old non-flattened geoms with the new ones
-        worldspawn.node()->remove_all_children();
-        worldspawn.attach_new_node( newgn );
-
-        std::cout << "Flattened to " << newgn->get_num_geoms() << " world faces\n";
-        
-        //========================================================================
-        // Since it's safe to assume that worldspawn geometry will never move,
-        // we can predetermine which leafs contain which worldspawn Geoms.
-        // This will greatly optimize Cull, as we no longer have to test
-        // each Geom against each visible leaf to determine visibility,
-        // we already know which Geoms are visible.
-
-        bsp_build_leaf_geom_collector.start();
-
-        std::cout << "Building accelerated leaf Geom structure...\n";
-
-        worldspawn = get_model( 0 );
-        geomnodes = worldspawn.find_all_matches( "**/+GeomNode" );
-
-        _leaf_geom_list.resize( _bspdata->dmodels[0].visleafs + 1 );
-        for ( int i = 0; i < geomnodes.get_num_paths(); i++ )
-        {
-                CPT( TransformState ) transform = geomnodes[i].get_net_transform();
-                CPT( RenderState ) node_state = geomnodes[i].get_net_state();
-                
-                PT( GeomNode ) gn = DCAST( GeomNode, geomnodes[i].node() );
-                int num_geoms = gn->get_num_geoms();
-                _leaf_geoms.reserve( _leaf_geoms.size() + num_geoms );
-                for ( int j = 0; j < num_geoms; j++ )
-                {
-                        CPT( Geom ) geom = gn->get_geom( j );
-                        CPT( RenderState ) geom_state = gn->get_geom_state( j );
-
-                        CPT( RenderState ) net_state = node_state->compose( geom_state );
-                        size_t geom_idx = _leaf_geoms.size();
-                        _leaf_geoms.push_back( WorldSpawnGeomState( geom, net_state ) );
-                        for ( int leafnum = 0; leafnum < _bspdata->dmodels[0].visleafs + 1; leafnum++ )
-                        {
-                                PT( BoundingBox ) leaf_bounds = _leaf_bboxs[leafnum];
-
-                                // Move the Geom bounds into leaf AABB space (world space).
-                                PT( GeometricBoundingVolume ) geom_gbv = geom->get_bounds()
-                                        ->make_copy()->as_geometric_bounding_volume();
-                                geom_gbv->xform( transform->get_mat() );
-
-                                if ( leaf_bounds->contains( geom_gbv ) != BoundingVolume::IF_no_intersection )
-                                {
-                                        // This leaf contains this geom!
-                                        _leaf_geom_list[leafnum].push_back( geom_idx );
-                                }
-                        }
-
-                        PT( Geom ) modgeom = gn->modify_geom( j );
-                        modgeom->set_bounds_type( BoundingVolume::BT_fastest );
-                        gn->set_geom( j, modgeom );
-                }
-        }
-
-        std::cout << "Done.\n";
-
-        bsp_build_leaf_geom_collector.stop();
 
         _result.premunge_scene( _win->get_gsg() );
         _result.prepare_scene( _win->get_gsg() );
@@ -2060,8 +1994,7 @@ void BSPLoader::cleanup()
         _leaf_pvs.clear();
 
         _leaf_aabb_lock.acquire();
-        _leaf_geom_list.clear();
-        _leaf_geoms.clear();
+        _leaf_world_geoms.clear();
         _visible_leafs.clear();
         _leaf_bboxs.clear();
         _visible_leaf_bboxs.clear();
@@ -2385,6 +2318,27 @@ bool BSPLoader::trace_line( const LPoint3 &start, const LPoint3 &end )
         CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _colldata, trace );
 
         return !trace.has_hit();
+}
+
+/**
+ * Clips the line segment specified from `start` to `end` against the solid BSP tree (aka worldspawn).
+ * Returns the clipped endpoint of the line segment.
+ */
+LPoint3 BSPLoader::clip_line( const LPoint3 &start, const LPoint3 &end )
+{
+        if ( !_active_level )
+        {
+                return end;
+        }
+
+        Ray ray( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, LPoint3::zero(), LPoint3::zero() );
+        Trace tr;
+        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _colldata, tr );
+
+        if ( !tr.has_hit() )
+                return end;
+
+        return tr.end_pos;
 }
 
 CBaseEntity *BSPLoader::get_c_entity( const int entnum ) const

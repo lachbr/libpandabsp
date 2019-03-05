@@ -217,6 +217,7 @@ PUBLISHED:
         }
 
         bool trace_line( const LPoint3 &start, const LPoint3 &end );
+        LPoint3 clip_line( const LPoint3 &start, const LPoint3 &end );
 
 #ifdef HAVE_PYTHON
 	void link_entity_to_class( const string &entname, PyTypeObject *type );
@@ -387,20 +388,9 @@ private:
         PT( GenericAsyncTask ) _update_task;
         UpdateSeq _generated_shader_seq;
 
-        struct WorldSpawnGeomState
-        {
-                CPT( Geom ) geom;
-                CPT( RenderState ) state;
-
-                INLINE WorldSpawnGeomState( CPT( Geom ) g, CPT( RenderState ) st )
-                {
-                        geom = g;
-                        state = st;
-                }
-        };
-
-        pvector<WorldSpawnGeomState> _leaf_geoms;
-        pvector<pvector<int>> _leaf_geom_list;
+        // A per-leaf list of world Geoms.
+        // This list of Geoms will be rendered for the current leaf.
+        pvector<GeomNode::Geoms> _leaf_world_geoms;
 
 	friend class BSPFaceAttrib;
         friend class BSPGeomNode;

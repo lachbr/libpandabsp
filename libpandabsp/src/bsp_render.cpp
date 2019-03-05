@@ -224,78 +224,49 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
 
                         keep_going = false;
 
-                        // We have a specialized way of rendering worldspawn.
-                        // Cuts down on Cull time.
-                        memset( visited, 0, MAX_MAP_FACES );
-
                         _loader->_leaf_aabb_lock.acquire();
 
-                        size_t num_visible_leafs = _loader->_visible_leafs.size();
-                        for ( size_t i = 0; i < num_visible_leafs; i++ )
+                        if ( _loader->_curr_leaf_idx != 0 )
                         {
-                                const int &leaf = _loader->_visible_leafs[i];
-                                const pvector<int> &geoms = _loader->_leaf_geom_list[leaf];
-                                size_t num_geoms = geoms.size();
-                                
-                                for ( size_t j = 0; j < num_geoms; j++ )
+                                const GeomNode::Geoms &world_geoms = _loader->_leaf_world_geoms[_loader->_curr_leaf_idx];
+
+                                int num_world_geoms = world_geoms.get_num_geoms();
+                                for ( int i = 0; i < num_world_geoms; i++ )
                                 {
-                                        wsp_geom_traverse_collector.start();
-                                        const int &geom_id = geoms[j];
-                                        wsp_geom_traverse_collector.stop();
-
-                                        wsp_bitset_collector.start();
-                                        if ( visited[geom_id] )
-                                        {
-                                                // Geom already culled or rendered.
-                                                wsp_bitset_collector.stop();
-                                                continue;
-                                        }
-                                        wsp_bitset_collector.stop();
-
-                                        wsp_tuple_collector.start();
-                                        const BSPLoader::WorldSpawnGeomState &gs =
-                                                _loader->_leaf_geoms[geom_id];
-                                        wsp_tuple_collector.stop();
-                                        //CPT( TransformState ) transform = std::get<2>( _loader->_leaf_geoms[geom_id] );
+                                        const Geom *world_geom = world_geoms.get_geom( i );
+                                        const RenderState *world_state = world_geoms.get_geom_state( i );
 
                                         wsp_ctest_collector.start();
                                         const GeometricBoundingVolume *geom_gbv;
-                                        if ( !geom_cull_test( gs.geom, gs.state, data, geom_gbv ) )
+                                        if ( !geom_cull_test( world_geom, world_state, data, geom_gbv ) )
                                         {
                                                 // Geom culled away by view frustum or clip planes.
-                                                visited[geom_id] = 1;
                                                 wsp_ctest_collector.stop();
                                                 continue;
                                         }
                                         wsp_ctest_collector.stop();
 
-                                        CPT( RenderState ) state = gs.state;
-
                                         if ( _loader->get_wireframe() )
                                         {
                                                 CPT( RenderAttrib ) wfattr = RenderModeAttrib::make( RenderModeAttrib::M_filled_wireframe,
-                                                                                                     0.5, true, brush_wf_color );
+                                                        0.5, true, brush_wf_color );
                                                 CPT( RenderState ) wfstate = RenderState::make( wfattr, 1 );
-                                                state = state->compose( wfstate );
-                                        }                                        
+                                                world_state = world_state->compose( wfstate );
+                                        }
 
                                         wsp_make_cullableobject_collector.start();
                                         // Go ahead and render this worldspawn Geom.
                                         CullableObject *object = new CullableObject(
-                                                std::move( gs.geom ), std::move( state ),
+                                                std::move( world_geom ), std::move( world_state ),
                                                 internal_transform );
                                         wsp_make_cullableobject_collector.stop();
                                         wsp_record_collector.start();
                                         get_cull_handler()->record_object( object, this );
                                         _geoms_pcollector.add_level( 1 );
                                         wsp_record_collector.stop();
-
-                                        // Make sure we don't render this geom again.
-                                        visited[geom_id] = 1;
                                 }
-                                
                         }
-
+                        
                         _loader->_leaf_aabb_lock.release();
 
                         wsp_trav_collector.stop();

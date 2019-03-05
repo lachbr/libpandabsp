@@ -2,6 +2,7 @@
 #define BSP_RAYTRACE_H
 
 #include "config_bsp.h"
+#include "mathlib/ssemath.h"
 
 #include <aa_luse.h>
 #include <bitMask.h>
@@ -10,6 +11,7 @@
 #include <pandaNode.h>
 #include <cullTraverser.h>
 #include <cullTraverserData.h>
+#include <simpleHashMap.h>
 
 NotifyCategoryDeclNoExport(raytrace);
 
@@ -83,6 +85,19 @@ PUBLISHED:
         }
 };
 
+#ifndef CPPPARSER
+class ALIGN_16BYTE EXPCL_PANDABSP RayTraceHitResult4
+{
+public:
+        FourVectors hit_normal;
+        FourVectors hit_uv;
+        u32x4 prim_id;
+        u32x4 geom_id;
+        fltx4 hit_fraction;
+        u32x4 hit;
+};
+#endif
+
 class RayTraceGeometry;
 
 class EXPCL_PANDABSP RayTraceScene : public ReferenceCount
@@ -95,6 +110,13 @@ PUBLISHED:
         void remove_geometry( RayTraceGeometry *geom );
         void remove_all();
 
+        enum
+        {
+                BUILD_QUALITY_LOW       = 0,
+                BUILD_QUALITY_MEDIUM    = 1,
+                BUILD_QUALITY_HIGH      = 2,
+        };
+
         INLINE RayTraceHitResult trace_line( const LPoint3 &start, const LPoint3 &end, const BitMask32 &mask )
         {
                 LPoint3 delta = end - start;
@@ -103,13 +125,41 @@ PUBLISHED:
         RayTraceHitResult trace_ray( const LPoint3 &origin, const LVector3 &direction,
                 float distance, const BitMask32 &mask );
 
+        void set_build_quality( int quality );
+
         void update();
+
+        INLINE RayTraceGeometry *get_geometry( unsigned int geom_id )
+        {
+                //if ( _geoms.find( geom_id ) == -1 )
+                //{
+                //        raytrace_cat.error()
+                //                << "Geometry with ID " << geom_id << " does not exist\n";
+                //        return nullptr;
+                //}
+                return _geoms[geom_id];
+        }
+
+public:
+#ifndef CPPPARSER
+        INLINE void trace_four_lines( const FourVectors &start, const FourVectors &end,
+                const u32x4 &mask, RayTraceHitResult4 *res )
+        {
+                FourVectors direction = end;
+                direction -= start;
+                fltx4 length4 = direction.length();
+                direction.VectorNormalize();
+                return trace_four_rays( start, direction, length4, mask, res );
+        }
+        void trace_four_rays( const FourVectors &origin, const FourVectors &direction,
+                const fltx4 &distance, const u32x4 &mask, RayTraceHitResult4 *res );
+#endif
 
 private:
         RTCScene _scene;
         bool _scene_needs_rebuild;
 
-        pvector<RayTraceGeometry *> _geoms;
+        SimpleHashMap<unsigned int, RayTraceGeometry *, int_hash> _geoms;
 
         friend class RayTraceGeometry;
 };
@@ -135,7 +185,14 @@ PUBLISHED:
         }
         void set_mask( unsigned int mask );
 
-        virtual void build() = 0;
+        INLINE BitMask32 get_mask() const
+        {
+                return _mask;
+        }
+
+        void set_build_quality( int quality );
+
+        virtual void build() = 0;        
 
 public:
         RayTraceGeometry( int type, const std::string &name = "" );
@@ -150,6 +207,7 @@ public:
 protected:
         RTCGeometry _geometry;
         unsigned int _geom_id;
+        unsigned int _mask;
         RayTraceScene *_rtscene;
 
         CPT(TransformState) _last_trans;
