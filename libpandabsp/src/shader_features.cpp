@@ -152,6 +152,25 @@ void BaseTextureFeature::parse_from_material_keyvalues( const BSPMaterial *mat, 
                         base_texture = TexturePool::load_texture( mat->get_keyvalue( "$basetexture" ) );
                 }
 
+                if ( mat->has_keyvalue( "$basetexture_wrap" ) )
+                {
+                        const std::string &wrapmode = mat->get_keyvalue( "$basetexture_wrap" );
+                        if ( wrapmode == "clamp" )
+                        {
+                                base_texture->set_wrap_u( SamplerState::WM_clamp );
+                                base_texture->set_wrap_v( SamplerState::WM_clamp );
+                        }
+                        else if ( wrapmode == "repeat" )
+                        {
+                                base_texture->set_wrap_u( SamplerState::WM_repeat );
+                                base_texture->set_wrap_v( SamplerState::WM_repeat );
+                        }
+                        else
+                        {
+                                bspmaterial_cat.warning()
+                                        << "BaseTextureFeature: unknown wrap mode `" << wrapmode << "`\n";
+                        }
+                }
                 
         }
 }

@@ -621,9 +621,17 @@ void BSPLoader::make_faces()
                                 
                         bool has_texture = !skip;
 
-                        // this is just so we can retrieve the width and height of the texture
-                        // for brush face texcoords, it's poopy
-                        PT( Texture ) tex = TexturePool::load_texture( bspmat->get_keyvalue( "$basetexture" ) );
+                        // HACKHACK:
+                        // Read the material's $basetexture and alpha to determine
+                        // if a TransparencyAttrib is needed, and to get the size of the
+                        // texture for brush face texcoords
+                        PT( Texture ) tex = nullptr;
+                        if ( bspmat->has_keyvalue( "$basetexture" ) )
+                        {
+                                tex = TexturePool::load_texture( bspmat->get_keyvalue( "$basetexture" ) );
+                        }
+                        bool has_transparency = ( bspmat->has_keyvalue( "$alpha" ) && atof( bspmat->get_keyvalue( "$alpha" ).c_str() ) < 1.0 ) ||
+                                ( bspmat->has_keyvalue( "$translucent" ) && (bool)atoi( bspmat->get_keyvalue( "$translucent" ).c_str() ) );
 
                         LightmapPaletteDirectory::LightmapFacePaletteEntry *lmfaceentry = _lightmap_dir.face_index[facenum];
 
@@ -759,6 +767,11 @@ void BSPLoader::make_faces()
                         data->recompute_tangent_binormal_auto();
 
                         NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
+
+                        if ( has_transparency )
+                        {
+                                faceroot.set_transparency( TransparencyAttrib::M_dual, 1 );
+                        }   
 
                         if ( has_lighting )
                         {
@@ -1210,9 +1223,14 @@ void BSPLoader::load_static_props()
                         propmdl.flatten_strong();
                 }
 
-                if ( prop->flags & STATICPROPFLAGS_LIGHTMAPSHADOWS )
+                propnp.hide( shadow_camera_mask );
+
+                // No lightmap shadows,
+                // but depth-map shadows?
+                if ( ( prop->flags & STATICPROPFLAGS_LIGHTMAPSHADOWS ) == 0 &&
+                        ( prop->flags & STATICPROPFLAGS_REALSHADOWS ) != 0 )
                 {
-                        propnp.hide( shadow_camera_mask );
+                        propnp.show_through( shadow_camera_mask );
                 }
 
                 // only do group flattening if the prop doesn't

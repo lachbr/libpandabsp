@@ -379,10 +379,10 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_TypeHandle (imports[0].type)
   {"Filename", nullptr},
 #define Dtool_Ptr_Filename (imports[1].type)
-  {"TypedObject", nullptr},
-#define Dtool_Ptr_TypedObject (imports[2].type)
   {"Namable", nullptr},
-#define Dtool_Ptr_Namable (imports[3].type)
+#define Dtool_Ptr_Namable (imports[2].type)
+  {"TypedObject", nullptr},
+#define Dtool_Ptr_TypedObject (imports[3].type)
   {"ReferenceCount", nullptr},
 #define Dtool_Ptr_ReferenceCount (imports[4].type)
   {"TypedReferenceCount", nullptr},
@@ -391,26 +391,26 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_TypedWritable (imports[6].type)
   {"TypedWritableReferenceCount", nullptr},
 #define Dtool_Ptr_TypedWritableReferenceCount (imports[7].type)
-  {"LVector2f", nullptr},
-#define Dtool_Ptr_LVector2f (imports[8].type)
+  {"LVecBase4f", nullptr},
+#define Dtool_Ptr_LVecBase4f (imports[8].type)
   {"LVector3f", nullptr},
 #define Dtool_Ptr_LVector3f (imports[9].type)
+  {"LVector2f", nullptr},
+#define Dtool_Ptr_LVector2f (imports[10].type)
   {"LPoint3f", nullptr},
-#define Dtool_Ptr_LPoint3f (imports[10].type)
-  {"LVecBase4f", nullptr},
-#define Dtool_Ptr_LVecBase4f (imports[11].type)
+#define Dtool_Ptr_LPoint3f (imports[11].type)
   {"BitMask< uint32_t, 32 >", nullptr},
 #define Dtool_Ptr_BitMask_uint32_t_32 (imports[12].type)
   {"GeometricBoundingVolume", nullptr},
 #define Dtool_Ptr_GeometricBoundingVolume (imports[13].type)
   {"Texture", nullptr},
 #define Dtool_Ptr_Texture (imports[14].type)
-  {"ShaderInput", nullptr},
-#define Dtool_Ptr_ShaderInput (imports[15].type)
-  {"TextureStage", nullptr},
-#define Dtool_Ptr_TextureStage (imports[16].type)
   {"RenderAttrib", nullptr},
-#define Dtool_Ptr_RenderAttrib (imports[17].type)
+#define Dtool_Ptr_RenderAttrib (imports[15].type)
+  {"ShaderInput", nullptr},
+#define Dtool_Ptr_ShaderInput (imports[16].type)
+  {"TextureStage", nullptr},
+#define Dtool_Ptr_TextureStage (imports[17].type)
   {"Geom", nullptr},
 #define Dtool_Ptr_Geom (imports[18].type)
   {"TransformState", nullptr},
@@ -429,10 +429,10 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_BoundingBox (imports[25].type)
   {"GraphicsWindow", nullptr},
 #define Dtool_Ptr_GraphicsWindow (imports[26].type)
-  {"ModelNode", nullptr},
-#define Dtool_Ptr_ModelNode (imports[27].type)
   {"ModelRoot", nullptr},
-#define Dtool_Ptr_ModelRoot (imports[28].type)
+#define Dtool_Ptr_ModelRoot (imports[27].type)
+  {"ModelNode", nullptr},
+#define Dtool_Ptr_ModelNode (imports[28].type)
   {nullptr, nullptr},
 };
 #endif
@@ -461,17 +461,17 @@ extern struct Dtool_PyTypedObject Dtool_Filename;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Filename = &Dtool_Filename;
 extern Filename *Dtool_Coerce_Filename(PyObject *args, Filename &coerced);
 #endif
-// TypedObject
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedObject;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedObject = &Dtool_TypedObject;
-#endif
 // Namable
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_Namable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
+#endif
+// TypedObject
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedObject;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedObject = &Dtool_TypedObject;
 #endif
 // ReferenceCount
 #ifndef LINK_ALL_STATIC
@@ -497,17 +497,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedW
 extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
 #endif
-// LVector2f
+// LVecBase4f
 #ifndef LINK_ALL_STATIC
-inline static LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced) {
-  nassertr(Dtool_Ptr_LVector2f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVector2f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVector2f *(*)(PyObject *, LVector2f &))Dtool_Ptr_LVector2f->_Dtool_Coerce)(args, coerced);
+inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
+  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
 }
 #else
-extern struct Dtool_PyTypedObject Dtool_LVector2f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2f = &Dtool_LVector2f;
-extern LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced);
+extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
+extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
 #endif
 // LVector3f
 #ifndef LINK_ALL_STATIC
@@ -521,6 +521,18 @@ extern struct Dtool_PyTypedObject Dtool_LVector3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
 extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
 #endif
+// LVector2f
+#ifndef LINK_ALL_STATIC
+inline static LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced) {
+  nassertr(Dtool_Ptr_LVector2f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVector2f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVector2f *(*)(PyObject *, LVector2f &))Dtool_Ptr_LVector2f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVector2f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2f = &Dtool_LVector2f;
+extern LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced);
+#endif
 // LPoint3f
 #ifndef LINK_ALL_STATIC
 inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
@@ -532,18 +544,6 @@ inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced)
 extern struct Dtool_PyTypedObject Dtool_LPoint3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
 extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
-#endif
-// LVecBase4f
-#ifndef LINK_ALL_STATIC
-inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
-  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
-extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
 #endif
 // BitMask< uint32_t, 32 >
 #ifndef LINK_ALL_STATIC
@@ -569,6 +569,12 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dt
 extern struct Dtool_PyTypedObject Dtool_Texture;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Texture = &Dtool_Texture;
 #endif
+// RenderAttrib
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
+#endif
 // ShaderInput
 #ifndef LINK_ALL_STATIC
 #else
@@ -580,12 +586,6 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderInput = &Dtool_ShaderIn
 #else
 extern struct Dtool_PyTypedObject Dtool_TextureStage;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TextureStage = &Dtool_TextureStage;
-#endif
-// RenderAttrib
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
 #endif
 // Geom
 #ifndef LINK_ALL_STATIC
@@ -653,17 +653,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_BoundingBox = &Dtool_Bounding
 extern struct Dtool_PyTypedObject Dtool_GraphicsWindow;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsWindow = &Dtool_GraphicsWindow;
 #endif
-// ModelNode
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_ModelNode;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelNode = &Dtool_ModelNode;
-#endif
 // ModelRoot
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_ModelRoot;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelRoot = &Dtool_ModelRoot;
+#endif
+// ModelNode
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_ModelNode;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelNode = &Dtool_ModelNode;
 #endif
 
 /**
@@ -15739,7 +15739,7 @@ extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, nullp
 extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, imports};
 #endif
 static InterrogateModuleDef _in_module_def = {
-  1551824217,  /* file_identifier */
+  1551906514,  /* file_identifier */
   "bsp",  /* library_name */
   "t5GT",  /* library_hash_name */
   "bsp",  /* module_name */
