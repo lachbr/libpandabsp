@@ -630,8 +630,7 @@ void BSPLoader::make_faces()
                         {
                                 tex = TexturePool::load_texture( bspmat->get_keyvalue( "$basetexture" ) );
                         }
-                        bool has_transparency = ( bspmat->has_keyvalue( "$alpha" ) && atof( bspmat->get_keyvalue( "$alpha" ).c_str() ) < 1.0 ) ||
-                                ( bspmat->has_keyvalue( "$translucent" ) && (bool)atoi( bspmat->get_keyvalue( "$translucent" ).c_str() ) );
+                        bool has_transparency = bspmat->has_transparency();
 
                         LightmapPaletteDirectory::LightmapFacePaletteEntry *lmfaceentry = _lightmap_dir.face_index[facenum];
 
@@ -1988,6 +1987,8 @@ void BSPLoader::cleanup()
 
         _active_level = false;
 
+        _decal_mgr.cleanup();
+
         _shadow_color = default_shadow_color;
         _shadow_dir = default_shadow_dir;
         _shadow_control = nullptr;
@@ -2080,6 +2081,7 @@ BSPLoader::BSPLoader() :
         _leaf_aabb_lock( "leafAABBMutex" ),
         _gamma( DEFAULT_GAMMA ),
         _amb_probe_mgr( this ),
+        _decal_mgr( this ),
         _active_level( false ),
         _shgen( nullptr ),
         _ai( false ),

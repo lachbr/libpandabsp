@@ -34,6 +34,7 @@
 #include "ambient_probes.h"
 #include "vifparser.h"
 #include "cubemaps.h"
+#include "decals.h"
 
 NotifyCategoryDeclNoExport(bspfile);
 
@@ -196,6 +197,12 @@ PUBLISHED:
                 return _camera;
         }
 
+        INLINE NodePath trace_decal( const std::string &decal_material, const LPoint2 &decal_scale,
+                float rotate, const LPoint3 &start, const LPoint3 &end )
+        {
+                return _decal_mgr.decal_trace( decal_material, decal_scale, rotate, start, end );
+        }
+
         void build_cubemaps();
 
         void set_want_shadows( bool flag );
@@ -292,6 +299,10 @@ public:
         {
                 return _bspdata;
         }
+        INLINE collbspdata_t *get_colldata() const
+        {
+                return _colldata;
+        }
 
 private:
         
@@ -383,6 +394,7 @@ private:
 	pvector<PT( CBaseEntity )> _class_entities;
         LightmapPaletteDirectory _lightmap_dir;
         AmbientProbeManager _amb_probe_mgr;
+        DecalManager _decal_mgr;
         pvector<cubemap_t> _cubemaps;
 	
         PT( GenericAsyncTask ) _update_task;

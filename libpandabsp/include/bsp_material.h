@@ -65,6 +65,7 @@ PUBLISHED:
                 TypedReferenceCount(),
                 _has_env_cubemap( false ),
                 _cached_env_cubemap( false ),
+                _has_transparency( false ),
                 _shader_name( name ),
                 _surfaceprop( "default" ),
                 _contents( "solid" )
@@ -79,7 +80,8 @@ PUBLISHED:
                 _has_env_cubemap( copy._has_env_cubemap ),
                 _cached_env_cubemap( copy._cached_env_cubemap ),
                 _surfaceprop( copy._surfaceprop ),
-                _contents( copy._contents )
+                _contents( copy._contents ),
+                _has_transparency( copy._has_transparency )
         {
         }
 
@@ -93,6 +95,7 @@ PUBLISHED:
                 _cached_env_cubemap = copy._cached_env_cubemap;
                 _surfaceprop = copy._surfaceprop;
                 _contents = copy._contents;
+                _has_transparency = copy._has_transparency;
         }
 
         INLINE void set_keyvalue( const std::string &key, const std::string &value )
@@ -128,6 +131,11 @@ PUBLISHED:
                 return _has_env_cubemap;
         }
 
+        INLINE bool has_transparency() const
+        {
+                return _has_transparency;
+        }
+
         INLINE std::string get_surface_prop() const
         {
                 return _surfaceprop;
@@ -145,6 +153,7 @@ private:
         std::string _shader_name;
         bool _has_env_cubemap;
         bool _cached_env_cubemap;
+        bool _has_transparency;
         std::string _surfaceprop;
         std::string _contents;
         SimpleHashMap<std::string, std::string, string_hash> _shader_keyvalues;
