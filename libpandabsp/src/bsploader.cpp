@@ -601,7 +601,7 @@ void BSPLoader::make_faces()
 
                         CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
                         contents_t contents = ContentsFromName( bspmat->get_contents().c_str() );
-                        if ( contents == CONTENTS_SKY || contents == CONTENTS_NULL )
+                        if ( contents == CONTENTS_NULL )
                         {
                                 continue;
                         }

@@ -15,6 +15,7 @@
 #include <nodePath.h>
 #include <weakNodePath.h>
 #include <configVariableColor.h>
+#include <camera.h>
 
 #include "shader_spec.h"
 
@@ -67,6 +68,15 @@ PUBLISHED:
                 return _pssm_rig;
         }
 
+        INLINE NodePath get_skybox_root() const
+        {
+                return _skybox_root;
+        }
+        INLINE Texture *get_skybox_rtt() const
+        {
+                return _skybox_rtt;
+        }
+
         static Texture *get_identity_cubemap();
 
 private:
@@ -94,6 +104,10 @@ private:
         LVector3 _sun_vector;
         NodePath _camera;
         NodePath _render;
+
+        PT( Texture ) _skybox_rtt;
+        PT( Camera ) _skybox_camera;
+        NodePath _skybox_root;
 
         static PT( Texture ) _identity_cubemap;
 

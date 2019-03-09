@@ -251,7 +251,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                                                 CPT( RenderAttrib ) wfattr = RenderModeAttrib::make( RenderModeAttrib::M_filled_wireframe,
                                                         0.5, true, brush_wf_color );
                                                 CPT( RenderState ) wfstate = RenderState::make( wfattr, 1 );
-                                                world_state = world_state->compose( wfstate );
+                                                //world_state = world_state->compose( wfstate );
                                         }
 
                                         wsp_make_cullableobject_collector.start();
