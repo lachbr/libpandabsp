@@ -763,7 +763,7 @@ void BSPLoader::make_faces()
                                 }
                         }
 
-                        data->recompute_tangent_binormal_auto();
+                        data->recompute_tangent_binormal( GlobPattern( "*" ) );
 
                         NodePath faceroot = _result.attach_new_node( load_egg_data( data ) );
 
