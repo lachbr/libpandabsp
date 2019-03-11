@@ -20,6 +20,7 @@ public:
 
         BaseTextureFeature basetexture;
         AlphaFeature alpha;
+        ARME_Feature arme;
         EnvmapFeature envmap;
         BumpmapFeature bumpmap;
         DetailFeature detail;

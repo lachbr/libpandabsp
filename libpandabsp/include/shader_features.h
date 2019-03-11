@@ -17,6 +17,30 @@ class BSPMaterial;
 class ShaderConfig;
 class ShaderPermutations;
 
+// New material parameters for PBR
+//
+// Textures
+//      $basetexture    -       Diffuse map RGBA, if selfillum, A is selfillum mask
+//      $bumpmap        -       Normal map
+//      $specgloss      -       Specular RGB, Glossiness A
+// Parameters
+//      $envmap         -       Cubemap specular reflection, `env_cubemap` uses closest one in level,
+//                              or provide an explicit cubemap texture
+//      $phong          -       Real-time diffuse reflection from local lights, `1` to enable
+//      $selfillum      -       Self-illumination/glow, `1` to enable, will use Alpha channel
+//                              of $basetexture as a mask
+
+#define DECLARE_SHADERFEATURE() \
+public:\
+        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );\
+        virtual void add_permutations( ShaderPermutations &perms );
+
+#define SHADERFEATURE_PARSE_FUNC(clsname)\
+void clsname::parse_from_material_keyvalues(const BSPMaterial *mat, ShaderConfig *conf)
+
+#define SHADERFEATURE_SETUP_FUNC(clsname)\
+void clsname::add_permutations(ShaderPermutations &perms)
+
 class ShaderFeature
 {
 public:
@@ -31,8 +55,13 @@ public:
         bool has_feature;
 };
 
+/**
+ * Diffuse/albedo map. If $selfillum is 1, alpha channel
+ * is the selfillum mask.
+ */
 class BaseTextureFeature : public ShaderFeature
 {
+        DECLARE_SHADERFEATURE();
 public:
         INLINE BaseTextureFeature() :
                 ShaderFeature(),
@@ -40,31 +69,104 @@ public:
         {
         }
 
-        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
-        virtual void add_permutations( ShaderPermutations &perms );
-
         PT( Texture ) base_texture;
 };
 
+/**
+ * A normal map.
+ */
+class BumpmapFeature : public ShaderFeature
+{
+        DECLARE_SHADERFEATURE();
+public:
+        INLINE BumpmapFeature() :
+                ShaderFeature(),
+                bump_tex( nullptr )
+        {
+        }
+
+        PT( Texture ) bump_tex;
+};
+
+/**
+ * AO/Roughness/Metallic/Emissive texture
+ * Each channel represents each piece of data.
+ */
+class ARME_Feature : public ShaderFeature
+{
+        DECLARE_SHADERFEATURE();
+public:
+        INLINE ARME_Feature() :
+                ShaderFeature()
+        {
+        }
+
+        PT( Texture ) arme_texture;
+};
+
+/**
+ * Specifies if the material has self-illuminated (emissive)
+ * parts. If so, the emissive mask is read from the Alpha
+ * channel of the basetexture. Since the mask is only one
+ * channel, an optional $selfillumtint can be specified.
+ */
+class SelfIllumFeature : public ShaderFeature
+{
+        DECLARE_SHADERFEATURE();
+public:
+        INLINE SelfIllumFeature() :
+                ShaderFeature(),
+                selfillumtint( 1.0, 1.0, 1.0 )
+        {
+        }
+
+        LVector3 selfillumtint;
+};
+
+/**
+ * Specifies if the material has translucent parts.
+ * If translucent, alpha value is read from $basetexture.
+ * Or provides an explicit alpha value.
+ */
 class AlphaFeature : public ShaderFeature
 {
+        DECLARE_SHADERFEATURE();
+
 public:
         INLINE AlphaFeature() :
                 ShaderFeature(),
                 alpha( -1 ),
                 translucent( false )
         {
-        }
-
-        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
-        virtual void add_permutations( ShaderPermutations &perms );
+        }        
 
         float alpha;
         bool translucent;
 };
 
+/**
+ * Texture which warps the NdotL term.
+ */
+class LightwarpFeature : public ShaderFeature
+{
+        DECLARE_SHADERFEATURE();
+public:
+        INLINE LightwarpFeature() :
+                ShaderFeature(),
+                lightwarp_tex( nullptr )
+        {
+        }
+
+        PT( Texture ) lightwarp_tex;
+};
+
+/**
+ * Specifies if the material should use the half-lambert warping function
+ * of the NdotL term.
+ */
 class HalfLambertFeature : public ShaderFeature
 {
+        DECLARE_SHADERFEATURE();
 public:
         INLINE HalfLambertFeature()
                 : ShaderFeature(),
@@ -72,42 +174,17 @@ public:
         {
         }
 
-        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
-        virtual void add_permutations( ShaderPermutations &perms );
-
         bool halflambert;
 };
 
-class PhongFeature : public ShaderFeature
-{
-public:
-        INLINE PhongFeature() :
-                ShaderFeature(),
-                phong_exponent( 1.0 ),
-                phong_exponent_texture( nullptr ),
-                phong_boost( 1.0 ),
-                phong_fresnel_ranges( 0.0, 0.5, 1.0 ),
-                phong_albedo_tint( false ),
-                phong_mask_texture( nullptr ),
-                phong_tint( 1.0, 1.0, 1.0 )
-        {
-        }
-
-        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
-        virtual void add_permutations( ShaderPermutations &perms );
-
-        // phong
-        float phong_exponent;
-        PT( Texture ) phong_exponent_texture;
-        PT( Texture ) phong_mask_texture;
-        float phong_boost;
-        LVector3 phong_fresnel_ranges;
-        bool phong_albedo_tint;
-        LVector3 phong_tint;
-};
-
+/**
+ * A dedicated rim term derived from Team Fortess 2 shading.
+ * Gives extra highlights to the outer edges near the top of
+ * an object to help them stand out more against the environment.
+ */
 class RimLightFeature : public ShaderFeature
 {
+        DECLARE_SHADERFEATURE();
 public:
         INLINE RimLightFeature() :
                 ShaderFeature(),
@@ -116,39 +193,32 @@ public:
         {
         }
 
-        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
-        virtual void add_permutations( ShaderPermutations &perms );
-
         float boost;
         float exponent;
 };
 
 class EnvmapFeature : public ShaderFeature
 {
+        DECLARE_SHADERFEATURE();
 public:
         INLINE EnvmapFeature() :
                 ShaderFeature(),
-                envmap_texture( nullptr ),
-                envmap_mask_texture( nullptr ),
                 envmap_tint( 1.0 ),
-                envmap_contrast( 0.0 ),
-                envmap_saturation( 1.0 )
+                envmap_texture( nullptr )
         {
         }
 
-        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
-        virtual void add_permutations( ShaderPermutations &perms );
-
-        // envmap
         PT( Texture ) envmap_texture;
-        PT( Texture ) envmap_mask_texture;
         LVector3 envmap_tint;
-        LVector3 envmap_contrast;
-        LVector3 envmap_saturation;
 };
 
+/**
+ * Not used anywhere yet, but gives higher detail up close
+ * to a surface. Derived from Half-Life 2.
+ */
 class DetailFeature : public ShaderFeature
 {
+        DECLARE_SHADERFEATURE();
 public:
         INLINE DetailFeature() :
                 ShaderFeature(),
@@ -159,61 +229,11 @@ public:
         {
         }
 
-        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
-        virtual void add_permutations( ShaderPermutations &perms );
-
         // detail
         PT( Texture ) detail_texture;
         float detail_factor;
         float detail_scale;
         LVector3 detail_tint;
-};
-
-class BumpmapFeature : public ShaderFeature
-{
-public:
-        INLINE BumpmapFeature() :
-                ShaderFeature(),
-                bump_tex( nullptr )
-        {
-        }
-
-        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
-        virtual void add_permutations( ShaderPermutations &perms );
-
-        PT( Texture ) bump_tex;
-};
-
-class LightwarpFeature : public ShaderFeature
-{
-public:
-        INLINE LightwarpFeature() :
-                ShaderFeature(),
-                lightwarp_tex( nullptr )
-        {
-        }
-
-        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
-        virtual void add_permutations( ShaderPermutations &perms );
-
-        PT( Texture ) lightwarp_tex;
-};
-
-class SelfIllumFeature : public ShaderFeature
-{
-public:
-        INLINE SelfIllumFeature() :
-                ShaderFeature(),
-                selfillummask( nullptr ),
-                selfillumtint( 1.0, 1.0, 1.0 )
-        {
-        }
-
-        virtual void parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf );
-        virtual void add_permutations( ShaderPermutations &perms );
-
-        PT( Texture ) selfillummask;
-        LVector3 selfillumtint;
 };
 
 #endif // SHADER_FEATURES_H

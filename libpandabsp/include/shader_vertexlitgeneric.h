@@ -18,9 +18,9 @@ class VLGShaderConfig : public ShaderConfig
 public:
 
         BaseTextureFeature basetexture;
+        ARME_Feature arme;
         BumpmapFeature bumpmap;
         EnvmapFeature envmap;
-        PhongFeature phong;
         DetailFeature detail;
         AlphaFeature alpha;
         HalfLambertFeature halflambert;

@@ -33,9 +33,9 @@ void VLGShaderConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
 {
         basetexture.parse_from_material_keyvalues( mat, this );
         alpha.parse_from_material_keyvalues( mat, this );
+        arme.parse_from_material_keyvalues( mat, this );
         envmap.parse_from_material_keyvalues( mat, this );
         halflambert.parse_from_material_keyvalues( mat, this );
-        phong.parse_from_material_keyvalues( mat, this );
         detail.parse_from_material_keyvalues( mat, this );
         bumpmap.parse_from_material_keyvalues( mat, this );
         lightwarp.parse_from_material_keyvalues( mat, this );
@@ -45,8 +45,8 @@ void VLGShaderConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
 
 VertexLitGenericSpec::VertexLitGenericSpec() :
         ShaderSpec( "VertexLitGeneric",
-                    Filename( "phase_14/models/shaders/stdshaders/vertexLitGeneric.vert.glsl" ),
-                    Filename( "phase_14/models/shaders/stdshaders/vertexLitGeneric.frag.glsl" ) )
+                    Filename( "phase_14/models/shaders/stdshaders/vertexLitGeneric_PBR.vert.glsl" ),
+                    Filename( "phase_14/models/shaders/stdshaders/vertexLitGeneric_PBR.frag.glsl" ) )
 {
 }
 
@@ -68,9 +68,9 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         conf->alpha.add_permutations( result );
         conf->bumpmap.add_permutations( result );
         conf->detail.add_permutations( result );
+        conf->arme.add_permutations( result );
         conf->envmap.add_permutations( result );
         conf->halflambert.add_permutations( result );
-        conf->phong.add_permutations( result );
         conf->lightwarp.add_permutations( result );
         conf->rimlight.add_permutations( result );
         conf->selfillum.add_permutations( result );
@@ -82,9 +82,9 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         bool need_world_position = false;
         bool need_world_normal = false;
         bool need_world_vec = false;
-        bool need_eye_vec = false;
-        bool need_eye_position = false;
-        bool need_eye_normal = false;
+        bool need_eye_vec = true;
+        bool need_eye_position = true;
+        bool need_eye_normal = true;
 
         if ( conf->envmap.has_feature )
         {
@@ -98,12 +98,6 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         {
                 need_tbn = true;
                 need_eye_normal = true;
-        }
-        if ( conf->phong.has_feature )
-        {
-                need_eye_vec = true;
-                need_eye_normal = true;
-                need_eye_position = true;
         }
         if ( conf->rimlight.has_feature )
         {

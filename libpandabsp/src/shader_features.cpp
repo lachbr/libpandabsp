@@ -14,98 +14,18 @@
 
 #include <texturePool.h>
 
-//==============================================================================================//
-
-void PhongFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+static PT( Texture ) brdf_lut = nullptr;
+static Texture *get_brdf_lut()
 {
-        if ( mat->has_keyvalue( "$phong" ) )
-        {
-                if ( atoi( mat->get_keyvalue( "$phong" ).c_str() ) )
-                {
-                        has_feature = true;
+        if ( !brdf_lut )
+                brdf_lut = TexturePool::load_texture( "phase_14/maps/brdf_lut.png" );
 
-                        if ( mat->has_keyvalue( "$phongexponent" ) )
-                        {
-                                phong_exponent = atof( mat->get_keyvalue( "$phongexponent" ).c_str() );
-                        }
-                        else if ( mat->has_keyvalue( "$phongexponenttexture" ) )
-                        {
-                                phong_exponent_texture = TexturePool::load_texture(
-                                        mat->get_keyvalue( "$phongexponenttexture" )
-                                );
-                        }
-
-                        if ( mat->has_keyvalue( "$phongboost" ) )
-                        {
-                                phong_boost = atof( mat->get_keyvalue( "$phongboost" ).c_str() );
-                        }
-
-                        if ( mat->has_keyvalue( "$phongfresnelranges" ) )
-                        {
-                                phong_fresnel_ranges = Parser::to_3f
-                                ( mat->get_keyvalue( "$phongfresnelranges" ) );
-                        }
-
-                        if ( mat->has_keyvalue( "$phongalbedotint" ) )
-                        {
-                                phong_albedo_tint = (bool)
-                                        atoi( mat->get_keyvalue( "$phongalbedotint" ).c_str() );
-                        }
-
-                        if ( mat->has_keyvalue( "$phongtint" ) )
-                        {
-                                phong_tint = Parser::to_3f
-                                ( mat->get_keyvalue( "$phongtint" ) );
-                        }
-
-                        if ( mat->has_keyvalue( "$phongmask" ) )
-                        {
-                                phong_mask_texture = TexturePool::load_texture(
-                                        mat->get_keyvalue( "$phongmask" )
-                                );
-                        }
-                }
-        }
-}
-
-void PhongFeature::add_permutations( ShaderPermutations &perms )
-{
-        if ( has_feature && ConfigVariableBool( "mat_phong", true ) )
-        {
-                perms.add_permutation( "PHONG" );
-
-                if ( phong_exponent_texture )
-                {
-                        perms.add_permutation( "PHONG_EXP_TEX" );
-                        perms.add_input( ShaderInput( "phongExponentTexture", phong_exponent_texture ) );
-                }
-                else
-                {
-                        perms.add_input( ShaderInput( "phongExponent", LVector2( phong_exponent ) ) );
-                }
-
-                perms.add_input( ShaderInput( "phongBoost", LVector2( phong_boost ) ) );
-                perms.add_input( ShaderInput( "phongFresnelRanges", phong_fresnel_ranges ) );
-                
-                if ( phong_albedo_tint )
-                {
-                        perms.add_permutation( "PHONG_ALBEDO_TINT" );
-                }
-
-                perms.add_input( ShaderInput( "phongTint", phong_tint ) );
-
-                if ( phong_mask_texture )
-                {
-                        perms.add_permutation( "PHONG_MASK" );
-                        perms.add_input( ShaderInput( "phongMaskSampler", phong_mask_texture ) );
-                }
-                
-        }
+        return brdf_lut;
 }
 
 //==============================================================================================//
 
-void RimLightFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+SHADERFEATURE_PARSE_FUNC( RimLightFeature )
 {
         if ( mat->has_keyvalue( "$rimlight" ) &&
                 (bool)atoi( mat->get_keyvalue( "$rimlight" ).c_str() ) )
@@ -123,7 +43,7 @@ void RimLightFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Sha
         }
 }
 
-void RimLightFeature::add_permutations( ShaderPermutations &perms )
+SHADERFEATURE_SETUP_FUNC( RimLightFeature )
 {
         if ( has_feature && ConfigVariableBool( "mat_rimlight", true ) )
         {
@@ -134,7 +54,7 @@ void RimLightFeature::add_permutations( ShaderPermutations &perms )
 
 //==============================================================================================//
 
-void BaseTextureFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+SHADERFEATURE_PARSE_FUNC( BaseTextureFeature )
 {
         if ( mat->has_keyvalue( "$basetexture" ) )
         {
@@ -175,7 +95,7 @@ void BaseTextureFeature::parse_from_material_keyvalues( const BSPMaterial *mat, 
         }
 }
 
-void BaseTextureFeature::add_permutations( ShaderPermutations &perms )
+SHADERFEATURE_SETUP_FUNC( BaseTextureFeature )
 {
         if ( has_feature && base_texture )
         {
@@ -186,7 +106,7 @@ void BaseTextureFeature::add_permutations( ShaderPermutations &perms )
 
 //==============================================================================================//
 
-void AlphaFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+SHADERFEATURE_PARSE_FUNC( AlphaFeature )
 {
         if ( mat->has_keyvalue( "$alpha" ) )
         {
@@ -203,7 +123,7 @@ void AlphaFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shader
         }
 }
 
-void AlphaFeature::add_permutations( ShaderPermutations &perms )
+SHADERFEATURE_SETUP_FUNC( AlphaFeature )
 {
         if ( has_feature )
         {
@@ -222,7 +142,7 @@ void AlphaFeature::add_permutations( ShaderPermutations &perms )
 
 //==============================================================================================//
 
-void EnvmapFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+SHADERFEATURE_PARSE_FUNC( EnvmapFeature )
 {
         if ( mat->has_keyvalue( "$envmap" ) )
         {
@@ -232,33 +152,18 @@ void EnvmapFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shade
                 if ( envmap != "env_cubemap" )
                 {
                         envmap_texture = TexturePool::load_cube_map( envmap );
-                }
-
-                if ( mat->has_keyvalue( "$envmapmask" ) )
-                {
-                        // controls per-pixel intensity of envmap contribution
-                        envmap_mask_texture = TexturePool::load_texture( mat->get_keyvalue( "$envmapmask" ) );
+                        envmap_texture->set_minfilter( SamplerState::FT_linear_mipmap_linear );
                 }
 
                 if ( mat->has_keyvalue( "$envmaptint" ) )
                 {
                         envmap_tint = Parser::to_3f( mat->get_keyvalue( "$envmaptint" ) );
                 }
-
-                if ( mat->has_keyvalue( "$envmapcontrast" ) )
-                {
-                        envmap_contrast = Parser::to_3f( mat->get_keyvalue( "$envmapcontrast" ) );
-                }
-
-                if ( mat->has_keyvalue( "$envmapsaturation" ) )
-                {
-                        envmap_saturation = Parser::to_3f( mat->get_keyvalue( "$envmapsaturation" ) );
-                }
         }
         
 }
 
-void EnvmapFeature::add_permutations( ShaderPermutations &perms )
+SHADERFEATURE_SETUP_FUNC( EnvmapFeature )
 {
         if ( has_feature && ConfigVariableBool( "mat_envmaps", true ) )
         {
@@ -271,21 +176,16 @@ void EnvmapFeature::add_permutations( ShaderPermutations &perms )
                         perms.add_input( ShaderInput( "envmapSampler", envmap_texture ) );
                 }
 
-                if ( envmap_mask_texture )
-                {
-                        perms.add_permutation( "ENVMAP_MASK" );
-                        perms.add_input( ShaderInput( "envmapMaskSampler", envmap_mask_texture ) );
-                }
-
                 perms.add_input( ShaderInput( "envmapTint", envmap_tint ) );
-                perms.add_input( ShaderInput( "envmapContrast", envmap_contrast ) );
-                perms.add_input( ShaderInput( "envmapSaturation", envmap_saturation ) );
+
+                // For PBR Image-Based Lighting
+                perms.add_input( ShaderInput( "brdfLUTSampler", get_brdf_lut() ) );
         }
 }
 
 //==============================================================================================//
 
-void DetailFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+SHADERFEATURE_PARSE_FUNC( DetailFeature )
 {
         if ( mat->has_keyvalue( "$detail" ) )
         {
@@ -308,7 +208,7 @@ void DetailFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shade
         }  
 }
 
-void DetailFeature::add_permutations( ShaderPermutations &perms )
+SHADERFEATURE_SETUP_FUNC( DetailFeature )
 {
         if ( has_feature && detail_texture )
         {
@@ -323,7 +223,7 @@ void DetailFeature::add_permutations( ShaderPermutations &perms )
 
 //==============================================================================================//
 
-void HalfLambertFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+SHADERFEATURE_PARSE_FUNC( HalfLambertFeature )
 {
         if ( mat->has_keyvalue( "$halflambert" ) )
         {
@@ -340,7 +240,7 @@ void HalfLambertFeature::parse_from_material_keyvalues( const BSPMaterial *mat, 
         }
 }
 
-void HalfLambertFeature::add_permutations( ShaderPermutations &perms )
+SHADERFEATURE_SETUP_FUNC( HalfLambertFeature )
 {
         if ( has_feature && halflambert )
         {
@@ -350,7 +250,7 @@ void HalfLambertFeature::add_permutations( ShaderPermutations &perms )
 
 //==============================================================================================//
 
-void BumpmapFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+SHADERFEATURE_PARSE_FUNC( BumpmapFeature )
 {
         if ( mat->has_keyvalue( "$bumpmap" ) )
         {
@@ -360,7 +260,7 @@ void BumpmapFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Shad
         }
 }
 
-void BumpmapFeature::add_permutations( ShaderPermutations &perms )
+SHADERFEATURE_SETUP_FUNC( BumpmapFeature )
 {
         if ( has_feature && bump_tex )
         {
@@ -371,7 +271,7 @@ void BumpmapFeature::add_permutations( ShaderPermutations &perms )
 
 //==============================================================================================//
 
-void LightwarpFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+SHADERFEATURE_PARSE_FUNC( LightwarpFeature )
 {
         if ( mat->has_keyvalue( "$lightwarp" ) )
         {
@@ -383,7 +283,7 @@ void LightwarpFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Sh
         }
 }
 
-void LightwarpFeature::add_permutations( ShaderPermutations &perms )
+SHADERFEATURE_SETUP_FUNC( LightwarpFeature )
 {
         if ( has_feature && lightwarp_tex )
         {
@@ -394,17 +294,13 @@ void LightwarpFeature::add_permutations( ShaderPermutations &perms )
 
 //==============================================================================================//
 
-void SelfIllumFeature::parse_from_material_keyvalues( const BSPMaterial *mat, ShaderConfig *conf )
+SHADERFEATURE_PARSE_FUNC( SelfIllumFeature )
 {
         if ( mat->has_keyvalue( "$selfillum" ) &&
                 (bool)atoi( mat->get_keyvalue( "$selfillum" ).c_str() ) )
         {
                 has_feature = true;
-                
-                if ( mat->has_keyvalue( "$selfillummask" ) )
-                {
-                        selfillummask = TexturePool::load_texture( mat->get_keyvalue( "$selfillummask" ) );
-                }
+
                 if ( mat->has_keyvalue( "$selfillumtint" ) )
                 {
                         selfillumtint = Parser::to_3f( mat->get_keyvalue( "$selfillumtint" ) );
@@ -412,14 +308,31 @@ void SelfIllumFeature::parse_from_material_keyvalues( const BSPMaterial *mat, Sh
         }
 }
 
-void SelfIllumFeature::add_permutations( ShaderPermutations &perms )
+SHADERFEATURE_SETUP_FUNC( SelfIllumFeature )
 {
-        if ( has_feature && selfillummask )
+        if ( has_feature )
         {
                 perms.add_permutation( "SELFILLUM" );
-                perms.add_input( ShaderInput( "selfillumSampler", selfillummask ) );
                 perms.add_input( ShaderInput( "selfillumTint", selfillumtint ) );
         }
 }
 
 //==============================================================================================//
+
+SHADERFEATURE_PARSE_FUNC( ARME_Feature )
+{
+        if ( mat->has_keyvalue( "$arme" ) )
+        {
+                has_feature = true;
+                arme_texture = TexturePool::load_texture( mat->get_keyvalue( "$arme" ) );
+        }
+}
+
+SHADERFEATURE_SETUP_FUNC( ARME_Feature )
+{
+        if ( has_feature && arme_texture )
+        {
+                perms.add_permutation( "ARME" );
+                perms.add_input( ShaderInput( "armeSampler", arme_texture ) );
+        }
+}

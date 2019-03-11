@@ -21,6 +21,7 @@ void LMGConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
 {
         basetexture.parse_from_material_keyvalues( mat, this );
         alpha.parse_from_material_keyvalues( mat, this );
+        arme.parse_from_material_keyvalues( mat, this );
         envmap.parse_from_material_keyvalues( mat, this );
         bumpmap.parse_from_material_keyvalues( mat, this );
         detail.parse_from_material_keyvalues( mat, this );
@@ -28,8 +29,8 @@ void LMGConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
 
 LightmappedGenericSpec::LightmappedGenericSpec() :
         ShaderSpec( "LightmappedGeneric",
-                    Filename( "phase_14/models/shaders/stdshaders/lightmappedGeneric.vert.glsl" ),
-                    Filename( "phase_14/models/shaders/stdshaders/lightmappedGeneric.frag.glsl" ) )
+                    Filename( "phase_14/models/shaders/stdshaders/lightmappedGeneric_PBR.vert.glsl" ),
+                    Filename( "phase_14/models/shaders/stdshaders/lightmappedGeneric_PBR.frag.glsl" ) )
 {
 }
 
@@ -58,6 +59,7 @@ ShaderPermutations LightmappedGenericSpec::setup_permutations( const BSPMaterial
 
         conf->basetexture.add_permutations( result );
         conf->alpha.add_permutations( result );
+        conf->arme.add_permutations( result );
         conf->envmap.add_permutations( result );
         conf->bumpmap.add_permutations( result );
         conf->detail.add_permutations( result );
