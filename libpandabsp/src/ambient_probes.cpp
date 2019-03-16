@@ -13,6 +13,7 @@
 #include "mathlib.h"
 #include "bsptools.h"
 #include "winding.h"
+#include "ambient_boost_effect.h"
 
 #include <shader.h>
 #include <loader.h>
@@ -787,7 +788,8 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
 
         ambientboost_collector.start();
         // If we have any lights and want to do ambient boost
-        if ( lights_updated > 0 && r_ambientboost.get_value() )
+        if ( lights_updated > 0 && r_ambientboost.get_value() &&
+                node->has_effect( AmbientBoostEffect::get_class_type() ) )
         {
                 if ( pos_changed || ambientcube_changed )
                 {

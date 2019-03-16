@@ -17,6 +17,7 @@
 #include "aux_data_attrib.h"
 #include "bounding_kdop.h"
 #include "raytrace.h"
+#include "ambient_boost_effect.h"
 
 ConfigureDef( config_bsp );
 ConfigureFn( config_bsp )
@@ -42,6 +43,9 @@ void init_libpandabsp()
         BSPProp::init_type();
         BSPModel::init_type();
         PSSMShaderGenerator::init_type();
+
+        AmbientBoostEffect::init_type();
+        AmbientBoostEffect::register_with_read_factory();
 
         BSPMaterial::init_type();
         BSPMaterialAttrib::init_type();
