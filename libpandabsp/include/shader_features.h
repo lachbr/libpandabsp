@@ -91,17 +91,29 @@ public:
 /**
  * AO/Roughness/Metallic/Emissive texture
  * Each channel represents each piece of data.
+ *
+ * Or explicit values for each.
  */
 class ARME_Feature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 public:
         INLINE ARME_Feature() :
-                ShaderFeature()
+                ShaderFeature(),
+                arme_texture( nullptr ),
+                ao( 1.0 ),
+                roughness( 0.0 ),
+                metallic( 0.0 ),
+                emissive( 0.0 )
         {
+                has_feature = true;
         }
 
         PT( Texture ) arme_texture;
+        float ao;
+        float roughness;
+        float metallic;
+        float emissive;
 };
 
 /**

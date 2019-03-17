@@ -28,22 +28,29 @@ static Texture *get_brdf_lut()
         return brdf_lut;
 }
 
+INLINE static std::string convert_to_string( float value )
+{
+        std::stringstream ss;
+        ss << value;
+        return ss.str();
+}
+
 //==============================================================================================//
 
 SHADERFEATURE_PARSE_FUNC( RimLightFeature )
 {
         if ( mat->has_keyvalue( "$rimlight" ) &&
-                (bool)atoi( mat->get_keyvalue( "$rimlight" ).c_str() ) )
+                (bool)mat->get_keyvalue_int( "$rimlight" ) )
         {
                 has_feature = true;
 
                 if ( mat->has_keyvalue( "$rimlightboost" ) )
                 {
-                        boost = atof( mat->get_keyvalue( "$rimlightboost" ).c_str() );
+                        boost = mat->get_keyvalue_float( "$rimlightboost" );
                 }
                 if ( mat->has_keyvalue( "$rimlightexponent" ) )
                 {
-                        exponent = atof( mat->get_keyvalue( "$rimlightexponent" ).c_str() );
+                        exponent = mat->get_keyvalue_float( "$rimlightexponent" );
                 }
         }
 }
@@ -115,14 +122,13 @@ SHADERFEATURE_PARSE_FUNC( AlphaFeature )
 {
         if ( mat->has_keyvalue( "$alpha" ) )
         {
-                alpha = atof( mat->get_keyvalue( "$alpha" ).c_str() );
+                alpha = mat->get_keyvalue_float( "$alpha" );
 
                 has_feature = true;
         }
         else if ( mat->has_keyvalue( "$translucent" ) )
         {
-                translucent = (bool)
-                        atoi( mat->get_keyvalue( "$translucent" ).c_str() );
+                translucent = (bool)mat->get_keyvalue_int( "$translucent" );
 
                 has_feature = true;
         }
@@ -134,9 +140,7 @@ SHADERFEATURE_SETUP_FUNC( AlphaFeature )
         {
                 if ( !translucent && alpha != -1 )
                 {
-                        std::stringstream ss;
-                        ss << alpha;
-                        perms.add_permutation( "ALPHA", ss.str() );
+                        perms.add_permutation( "ALPHA", convert_to_string( alpha ) );
                 }
                 else if ( translucent )
                 {
@@ -199,11 +203,11 @@ SHADERFEATURE_PARSE_FUNC( DetailFeature )
                 detail_texture = TexturePool::load_texture( mat->get_keyvalue( "$detail" ) );
                 if ( mat->has_keyvalue( "$detailfactor" ) )
                 {
-                        detail_factor = atof( mat->get_keyvalue( "$detailfactor" ).c_str() );
+                        detail_factor = mat->get_keyvalue_float( "$detailfactor" );
                 }
                 if ( mat->has_keyvalue( "$detailscale" ) )
                 {
-                        detail_scale = atof( mat->get_keyvalue( "$detailscale" ).c_str() );
+                        detail_scale = mat->get_keyvalue_float( "$detailscale" );
                 }
                 if ( mat->has_keyvalue( "$detailtint" ) )
                 {
@@ -232,7 +236,7 @@ SHADERFEATURE_PARSE_FUNC( HalfLambertFeature )
 {
         if ( mat->has_keyvalue( "$halflambert" ) )
         {
-                if ( atoi( mat->get_keyvalue( "$halflambert" ).c_str() ) )
+                if ( (bool)mat->get_keyvalue_int( "$halflambert" ) )
                 {
                         has_feature = true;
                         halflambert = true;
@@ -302,7 +306,7 @@ SHADERFEATURE_SETUP_FUNC( LightwarpFeature )
 SHADERFEATURE_PARSE_FUNC( SelfIllumFeature )
 {
         if ( mat->has_keyvalue( "$selfillum" ) &&
-                (bool)atoi( mat->get_keyvalue( "$selfillum" ).c_str() ) )
+                (bool)mat->get_keyvalue_int( "$selfillum" ) )
         {
                 has_feature = true;
 
@@ -328,16 +332,41 @@ SHADERFEATURE_PARSE_FUNC( ARME_Feature )
 {
         if ( mat->has_keyvalue( "$arme" ) )
         {
-                has_feature = true;
                 arme_texture = TexturePool::load_texture( mat->get_keyvalue( "$arme" ) );
+        }
+        else
+        {
+                if ( mat->has_keyvalue( "$ao" ) )
+                {
+                        ao = mat->get_keyvalue_float( "$ao" );
+                }
+                if ( mat->has_keyvalue( "$roughness" ) )
+                {
+                        roughness = mat->get_keyvalue_float( "$roughness" );
+                }
+                if ( mat->has_keyvalue( "$metallic" ) )
+                {
+                        metallic = mat->get_keyvalue_float( "$metallic" );
+                }
+                if ( mat->has_keyvalue( "$emissive" ) )
+                {
+                        emissive = mat->get_keyvalue_float( "$emissive" );
+                }
         }
 }
 
 SHADERFEATURE_SETUP_FUNC( ARME_Feature )
 {
-        if ( has_feature && arme_texture )
+        if ( arme_texture )
         {
                 perms.add_permutation( "ARME" );
                 perms.add_input( ShaderInput( "armeSampler", arme_texture ) );
+        }
+        else
+        {
+                perms.add_permutation( "AO", convert_to_string( ao ) );
+                perms.add_permutation( "ROUGHNESS", convert_to_string( roughness ) );
+                perms.add_permutation( "METALLIC", convert_to_string( metallic ) );
+                perms.add_permutation( "EMISSIVE", convert_to_string( emissive ) );
         }
 }

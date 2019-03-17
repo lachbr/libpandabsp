@@ -107,6 +107,15 @@ PUBLISHED:
                 return _shader_keyvalues.get_data( _shader_keyvalues.find( key ) );
         }
 
+        INLINE int get_keyvalue_int( const std::string &key ) const
+        {
+                return atoi( get_keyvalue( key ).c_str() );
+        }
+        INLINE float get_keyvalue_float( const std::string &key ) const
+        {
+                return atof( get_keyvalue( key ).c_str() );
+        }
+
         INLINE void set_shader( const std::string &shader_name )
         {
                 _shader_name = shader_name;
