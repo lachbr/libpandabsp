@@ -190,6 +190,11 @@ PUBLISHED:
                 return _mask;
         }
 
+        INLINE unsigned int get_geom_id() const
+        {
+                return _geom_id;
+        }
+
         void set_build_quality( int quality );
 
         virtual void build() = 0;        
