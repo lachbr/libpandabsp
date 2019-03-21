@@ -164,4 +164,19 @@ bool ShaderSpec::add_csm( ShaderPermutations &result, PSSMShaderGenerator *gener
         return false;
 }
 
+#include <clipPlaneAttrib.h>
+
+bool ShaderSpec::add_clip_planes( const RenderState *rs, ShaderPermutations &perms )
+{
+        // Check for clip planes.
+        const ClipPlaneAttrib *clip_plane;
+        rs->get_attrib_def( clip_plane );
+
+        std::stringstream ss;
+        ss << clip_plane->get_num_on_planes();
+        perms.add_permutation( "NUM_CLIP_PLANES", ss.str() );
+
+        return clip_plane->get_num_on_planes() > 0;
+}
+
 //=================================================================================================

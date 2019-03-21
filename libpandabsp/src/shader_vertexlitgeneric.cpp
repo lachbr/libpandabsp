@@ -278,16 +278,10 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                 }
         }
 
-        // Check for clip planes.
-        const ClipPlaneAttrib *clip_plane;
-        rs->get_attrib_def( clip_plane );
-        stringstream ss;
-        ss << clip_plane->get_num_on_planes();
-        if ( clip_plane->get_num_on_planes() > 0 )
+        if ( add_clip_planes( rs, result ) )
         {
-                need_world_position = true;
+                need_eye_position = true;
         }
-        result.permutations["NUM_CLIP_PLANES"] = ss.str();
 
         add_fog( rs, result );
 
