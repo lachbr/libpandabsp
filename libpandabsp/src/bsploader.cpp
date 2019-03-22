@@ -1737,7 +1737,7 @@ bool BSPLoader::read( const Filename &file )
                         }
                         else if ( _amb_probe_mgr.get_sunlight() )
                         {
-                                _shadow_dir = _amb_probe_mgr.get_sunlight()->direction.get_xyz();
+                                _shadow_dir = -_amb_probe_mgr.get_sunlight()->direction.get_xyz();
                         }
 
                         // Create a fake DirectionalLight to contain the direction

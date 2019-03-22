@@ -410,30 +410,30 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_ReferenceCount (imports[4].type)
   {"TypedReferenceCount", nullptr},
 #define Dtool_Ptr_TypedReferenceCount (imports[5].type)
-  {"TypedWritableReferenceCount", nullptr},
-#define Dtool_Ptr_TypedWritableReferenceCount (imports[6].type)
   {"TypedWritable", nullptr},
-#define Dtool_Ptr_TypedWritable (imports[7].type)
-  {"LPoint3f", nullptr},
-#define Dtool_Ptr_LPoint3f (imports[8].type)
-  {"LVecBase4f", nullptr},
-#define Dtool_Ptr_LVecBase4f (imports[9].type)
-  {"LVector2f", nullptr},
-#define Dtool_Ptr_LVector2f (imports[10].type)
-  {"LVector3f", nullptr},
-#define Dtool_Ptr_LVector3f (imports[11].type)
+#define Dtool_Ptr_TypedWritable (imports[6].type)
+  {"TypedWritableReferenceCount", nullptr},
+#define Dtool_Ptr_TypedWritableReferenceCount (imports[7].type)
   {"LPoint2f", nullptr},
-#define Dtool_Ptr_LPoint2f (imports[12].type)
+#define Dtool_Ptr_LPoint2f (imports[8].type)
+  {"LVector2f", nullptr},
+#define Dtool_Ptr_LVector2f (imports[9].type)
+  {"LVector3f", nullptr},
+#define Dtool_Ptr_LVector3f (imports[10].type)
+  {"LPoint3f", nullptr},
+#define Dtool_Ptr_LPoint3f (imports[11].type)
+  {"LVecBase4f", nullptr},
+#define Dtool_Ptr_LVecBase4f (imports[12].type)
   {"BitMask< uint32_t, 32 >", nullptr},
 #define Dtool_Ptr_BitMask_uint32_t_32 (imports[13].type)
   {"GeometricBoundingVolume", nullptr},
 #define Dtool_Ptr_GeometricBoundingVolume (imports[14].type)
   {"Texture", nullptr},
 #define Dtool_Ptr_Texture (imports[15].type)
-  {"TextureStage", nullptr},
-#define Dtool_Ptr_TextureStage (imports[16].type)
   {"ShaderInput", nullptr},
-#define Dtool_Ptr_ShaderInput (imports[17].type)
+#define Dtool_Ptr_ShaderInput (imports[16].type)
+  {"TextureStage", nullptr},
+#define Dtool_Ptr_TextureStage (imports[17].type)
   {"RenderAttrib", nullptr},
 #define Dtool_Ptr_RenderAttrib (imports[18].type)
   {"Geom", nullptr},
@@ -512,41 +512,29 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_Refer
 extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
 #endif
-// TypedWritableReferenceCount
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
-#endif
 // TypedWritable
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_TypedWritable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedWritable;
 #endif
-// LPoint3f
+// TypedWritableReferenceCount
 #ifndef LINK_ALL_STATIC
-inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
-  nassertr(Dtool_Ptr_LPoint3f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LPoint3f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LPoint3f *(*)(PyObject *, LPoint3f &))Dtool_Ptr_LPoint3f->_Dtool_Coerce)(args, coerced);
-}
 #else
-extern struct Dtool_PyTypedObject Dtool_LPoint3f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
-extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
+extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
 #endif
-// LVecBase4f
+// LPoint2f
 #ifndef LINK_ALL_STATIC
-inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
-  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
+inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced) {
+  nassertr(Dtool_Ptr_LPoint2f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LPoint2f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LPoint2f *(*)(PyObject *, LPoint2f &))Dtool_Ptr_LPoint2f->_Dtool_Coerce)(args, coerced);
 }
 #else
-extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
-extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
+extern struct Dtool_PyTypedObject Dtool_LPoint2f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint2f = &Dtool_LPoint2f;
+extern LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced);
 #endif
 // LVector2f
 #ifndef LINK_ALL_STATIC
@@ -572,17 +560,29 @@ extern struct Dtool_PyTypedObject Dtool_LVector3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
 extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
 #endif
-// LPoint2f
+// LPoint3f
 #ifndef LINK_ALL_STATIC
-inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced) {
-  nassertr(Dtool_Ptr_LPoint2f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LPoint2f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LPoint2f *(*)(PyObject *, LPoint2f &))Dtool_Ptr_LPoint2f->_Dtool_Coerce)(args, coerced);
+inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
+  nassertr(Dtool_Ptr_LPoint3f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LPoint3f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LPoint3f *(*)(PyObject *, LPoint3f &))Dtool_Ptr_LPoint3f->_Dtool_Coerce)(args, coerced);
 }
 #else
-extern struct Dtool_PyTypedObject Dtool_LPoint2f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint2f = &Dtool_LPoint2f;
-extern LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced);
+extern struct Dtool_PyTypedObject Dtool_LPoint3f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
+extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
+#endif
+// LVecBase4f
+#ifndef LINK_ALL_STATIC
+inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
+  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
+extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
 #endif
 // BitMask< uint32_t, 32 >
 #ifndef LINK_ALL_STATIC
@@ -608,17 +608,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dt
 extern struct Dtool_PyTypedObject Dtool_Texture;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Texture = &Dtool_Texture;
 #endif
-// TextureStage
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TextureStage;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TextureStage = &Dtool_TextureStage;
-#endif
 // ShaderInput
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_ShaderInput;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderInput = &Dtool_ShaderInput;
+#endif
+// TextureStage
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TextureStage;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TextureStage = &Dtool_TextureStage;
 #endif
 // RenderAttrib
 #ifndef LINK_ALL_STATIC
@@ -5551,6 +5551,19 @@ static PyObject *Dtool_BSPLoader_find_leaf_155(PyObject *self, PyObject *arg) {
     return nullptr;
   }
   {
+    // -2 int BSPLoader::find_leaf(LPoint3 const &pos)
+    LPoint3 const *arg_this = nullptr;
+    DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_LPoint3f);
+    if (arg_this != nullptr) {
+      int return_value = (*local_this).find_leaf(*arg_this);
+      if (Dtool_CheckErrorOccurred()) {
+        return nullptr;
+      }
+      return Dtool_WrapValue(return_value);
+    }
+  }
+
+  {
     // -2 inline int BSPLoader::find_leaf(NodePath const &np)
     NodePath const *arg_this = nullptr;
     DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_NodePath);
@@ -5563,7 +5576,6 @@ static PyObject *Dtool_BSPLoader_find_leaf_155(PyObject *self, PyObject *arg) {
     }
   }
 
-  // No coercion possible: inline int BSPLoader::find_leaf(NodePath const &np)
   {
     // -2 int BSPLoader::find_leaf(LPoint3 const &pos)
     LPoint3f arg_local;
@@ -5577,8 +5589,10 @@ static PyObject *Dtool_BSPLoader_find_leaf_155(PyObject *self, PyObject *arg) {
     }
   }
 
+  // No coercion possible: inline int BSPLoader::find_leaf(NodePath const &np)
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
+      "find_leaf(const BSPLoader self, const LPoint3f pos)\n"
       "find_leaf(const BSPLoader self, const NodePath np)\n");
   }
   return nullptr;
@@ -5587,6 +5601,7 @@ static PyObject *Dtool_BSPLoader_find_leaf_155(PyObject *self, PyObject *arg) {
 #ifndef NDEBUG
 static const char *Dtool_BSPLoader_find_leaf_155_comment =
   "C++ Interface:\n"
+  "find_leaf(const BSPLoader self, const LPoint3f pos)\n"
   "find_leaf(const BSPLoader self, const NodePath np)\n";
 #else
 static const char *Dtool_BSPLoader_find_leaf_155_comment = nullptr;
@@ -16696,7 +16711,7 @@ extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, nullp
 extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, imports};
 #endif
 static InterrogateModuleDef _in_module_def = {
-  1553282886,  /* file_identifier */
+  1553291653,  /* file_identifier */
   "bsp",  /* library_name */
   "t5GT",  /* library_hash_name */
   "bsp",  /* module_name */
