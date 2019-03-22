@@ -28,6 +28,8 @@ ShaderPermutations CSMRenderSpec::setup_permutations( const BSPMaterial *mat,
         conf->basetexture.add_permutations( result );
         conf->alpha.add_permutations( result );
 
+        add_hw_skinning( anim, result );
+
         result.add_input( ShaderInput( "split_mvps", generator->get_pssm_rig()->get_mvp_array() ) );
 
         return result;

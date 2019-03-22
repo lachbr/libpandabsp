@@ -40,6 +40,7 @@ ShaderPermutations UnlitGenericSpec::setup_permutations( const BSPMaterial *mat,
 
         add_color( rs, result );
         add_fog( rs, result );
+        add_hw_skinning( anim, result );
 
         return result;
 }

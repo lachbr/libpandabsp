@@ -1885,6 +1885,15 @@ void BSPLoader::set_materials_file( const Filename &file )
         _materials_file = file;
 }
 
+Texture *BSPLoader::get_closest_cubemap_texture( const LPoint3 &pos )
+{
+        cubemap_t *cm = find_closest_cubemap( pos );
+        if ( !cm )
+                return _shgen->get_identity_cubemap();
+
+        return cm->cubemap_tex;
+}
+
 cubemap_t *BSPLoader::find_closest_cubemap( const LPoint3 &pos )
 {
         if ( !_amb_probe_mgr.get_cubemaps().size() )

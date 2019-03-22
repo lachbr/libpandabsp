@@ -179,4 +179,31 @@ bool ShaderSpec::add_clip_planes( const RenderState *rs, ShaderPermutations &per
         return clip_plane->get_num_on_planes() > 0;
 }
 
+void ShaderSpec::add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPermutations &perms )
+{
+        // Hardware skinning?
+        if ( anim.get_animation_type() == GeomEnums::AT_hardware &&
+                anim.get_num_transforms() > 0 )
+        {
+                perms.permutations["HARDWARE_SKINNING"] = "1";
+                int num_transforms;
+                if ( anim.get_indexed_transforms() )
+                {
+                        num_transforms = 120;
+                }
+                else
+                {
+                        num_transforms = anim.get_num_transforms();
+                }
+                std::stringstream ss;
+                ss << num_transforms;
+                perms.permutations["NUM_TRANSFORMS"] = ss.str();
+
+                if ( anim.get_indexed_transforms() )
+                {
+                        perms.permutations["INDEXED_TRANSFORMS"] = "1";
+                }
+        }
+}
+
 //=================================================================================================

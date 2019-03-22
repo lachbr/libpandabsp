@@ -170,6 +170,7 @@ public:
         static void add_color( const RenderState *rs, ShaderPermutations &perms );
         static bool add_csm( ShaderPermutations &perms, PSSMShaderGenerator *generator );
         static bool add_clip_planes( const RenderState *rs, ShaderPermutations &perms );
+        static void add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPermutations &perms );
 
         typedef SimpleHashMap<const BSPMaterial *, PT( ShaderConfig ), pointer_hash> ConfigCache;
         ConfigCache _config_cache;

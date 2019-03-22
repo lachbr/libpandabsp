@@ -285,29 +285,7 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
 
         add_fog( rs, result );
 
-        // Hardware skinning?
-        if ( anim.get_animation_type() == GeomEnums::AT_hardware &&
-             anim.get_num_transforms() > 0 )
-        {
-                result.permutations["HARDWARE_SKINNING"] = "1";
-                int num_transforms;
-                if ( anim.get_indexed_transforms() )
-                {
-                        num_transforms = 120;
-                }
-                else
-                {
-                        num_transforms = anim.get_num_transforms();
-                }
-                stringstream ss;
-                ss << num_transforms;
-                result.permutations["NUM_TRANSFORMS"] = ss.str();
-
-                if ( anim.get_indexed_transforms() )
-                {
-                        result.permutations["INDEXED_TRANSFORMS"] = "1";
-                }
-        }
+        add_hw_skinning( anim, result );
 
         if ( need_world_vec )
                 need_world_position = true;

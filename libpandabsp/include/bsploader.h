@@ -203,6 +203,8 @@ PUBLISHED:
                 return _decal_mgr.decal_trace( decal_material, decal_scale, rotate, start, end );
         }
 
+        Texture *get_closest_cubemap_texture( const LPoint3 &pos );
+
         void build_cubemaps();
 
         void set_want_shadows( bool flag );
