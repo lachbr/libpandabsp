@@ -77,6 +77,7 @@ PUBLISHED:
                 return _skybox_rtt;
         }
 
+        static void set_identity_cubemap( Texture *tex );
         static Texture *get_identity_cubemap();
 
 private:

@@ -467,7 +467,12 @@ CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs
         return attr;
 }
 
-Texture *PSSMShaderGenerator::get_identity_cubemap()
+void BSPShaderGenerator::set_identity_cubemap( Texture *tex )
+{
+        _identity_cubemap = tex;
+}
+
+Texture *BSPShaderGenerator::get_identity_cubemap()
 {
         if ( !_identity_cubemap )
         {
