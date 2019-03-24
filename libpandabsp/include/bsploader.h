@@ -234,6 +234,7 @@ PUBLISHED:
         PyObject *find_all_entities( const string &classname );
         void get_entity_keyvalues( PyObject *list, const int entnum );
         void link_cent_to_pyent( int entum, PyObject *pyent );
+        void remove_py_entity( PyObject *ent );
 #endif
 
 	INLINE int get_num_entities() const

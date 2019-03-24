@@ -2281,6 +2281,20 @@ PyObject *BSPLoader::find_all_entities( const string &classname )
         return list;
 }
 
+/**
+ * Manually remove a Python entity from the list.
+ * Note: `unload()` will no longer be called on this entity when the level unloads.
+ */
+void BSPLoader::remove_py_entity( PyObject *obj )
+{
+        auto itr = std::find( _py_entities.begin(), _py_entities.end(), obj );
+        if ( itr != _py_entities.end() )
+        {
+                _py_entities.erase( itr );
+                Py_DECREF( obj );
+        }
+}
+
 #endif
 
 void BSPLoader::set_physics_type( int type )
