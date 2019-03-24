@@ -2105,7 +2105,7 @@ BSPLoader::BSPLoader() :
 {
 }
 
-void BSPLoader::set_shader_generator( PSSMShaderGenerator *shgen )
+void BSPLoader::set_shader_generator( BSPShaderGenerator *shgen )
 {
         _shgen = shgen;
 }

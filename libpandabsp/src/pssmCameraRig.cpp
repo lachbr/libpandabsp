@@ -60,7 +60,7 @@ static NodePath dbg_root( "dbgRoot" );
 *
 * @param num_splits Amount of PSSM splits
 */
-PSSMCameraRig::PSSMCameraRig( size_t num_splits, PSSMShaderGenerator *gen )
+PSSMCameraRig::PSSMCameraRig( size_t num_splits, BSPShaderGenerator *gen )
 {
         nassertv( num_splits > 0 );
         _num_splits = num_splits;

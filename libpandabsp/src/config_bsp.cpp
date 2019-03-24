@@ -42,7 +42,7 @@ void init_libpandabsp()
         BSPRoot::init_type();
         BSPProp::init_type();
         BSPModel::init_type();
-        PSSMShaderGenerator::init_type();
+        BSPShaderGenerator::init_type();
 
         AmbientBoostEffect::init_type();
         AmbientBoostEffect::register_with_read_factory();

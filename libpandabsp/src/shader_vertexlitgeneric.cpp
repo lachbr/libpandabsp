@@ -58,7 +58,7 @@ PT( ShaderConfig ) VertexLitGenericSpec::make_new_config()
 ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *mat,
                                                              const RenderState *rs,
                                                              const GeomVertexAnimationSpec &anim,
-                                                             PSSMShaderGenerator *generator )
+                                                             BSPShaderGenerator *generator )
 {
         VLGShaderConfig *conf = (VLGShaderConfig *)get_shader_config( mat );
 

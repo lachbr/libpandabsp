@@ -19,7 +19,7 @@ CSMRenderSpec::CSMRenderSpec() :
 ShaderPermutations CSMRenderSpec::setup_permutations( const BSPMaterial *mat,
                                                       const RenderState *rs,
                                                       const GeomVertexAnimationSpec &anim,
-                                                      PSSMShaderGenerator *generator )
+                                                      BSPShaderGenerator *generator )
 {
         CSMRenderConfig *conf = (CSMRenderConfig *)get_shader_config( mat );
 

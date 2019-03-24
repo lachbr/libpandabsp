@@ -64,12 +64,12 @@ ConfigVariableColor ambient_light_identifier( "pssm-ambient-light-identifier", L
 ConfigVariableColor ambient_light_min( "pssm-ambient-light-min", LColor( 0, 0, 0, 1 ) );
 ConfigVariableDouble ambient_light_scale( "pssm-ambient-light-scale", 1.0 );
 
-TypeHandle PSSMShaderGenerator::_type_handle;
-PT( Texture ) PSSMShaderGenerator::_identity_cubemap = nullptr;
+TypeHandle BSPShaderGenerator::_type_handle;
+PT( Texture ) BSPShaderGenerator::_identity_cubemap = nullptr;
 
 NotifyCategoryDef( bspShaderGenerator, "" );
 
-PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const NodePath &camera, const NodePath &render ) :
+BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePath &camera, const NodePath &render ) :
         ShaderGenerator( gsg ),
         _gsg( gsg ),
         _update_task( new GenericAsyncTask( "PSSMShaderGenerator_update_pssm", update_pssm, this ) ),
@@ -215,12 +215,12 @@ PSSMShaderGenerator::PSSMShaderGenerator( GraphicsStateGuardian *gsg, const Node
  * The ShaderSpec class will setup the correct permutations
  * for the shader based on the RenderState.
  */
-void PSSMShaderGenerator::add_shader( PT( ShaderSpec ) shader )
+void BSPShaderGenerator::add_shader( PT( ShaderSpec ) shader )
 {
         _shaders[shader->get_name()] = shader;
 }
 
-void PSSMShaderGenerator::set_sun_light( const NodePath &np )
+void BSPShaderGenerator::set_sun_light( const NodePath &np )
 {
         _sunlight = np;
         if ( np.is_empty() )
@@ -238,16 +238,16 @@ void PSSMShaderGenerator::set_sun_light( const NodePath &np )
         _pssm_rig->reparent_to( _render );
 }
 
-void PSSMShaderGenerator::start_update()
+void BSPShaderGenerator::start_update()
 {
         AsyncTaskManager *mgr = AsyncTaskManager::get_global_ptr();
         mgr->remove( _update_task );
         mgr->add( _update_task );
 }
 
-AsyncTask::DoneStatus PSSMShaderGenerator::update_pssm( GenericAsyncTask *task, void *data )
+AsyncTask::DoneStatus BSPShaderGenerator::update_pssm( GenericAsyncTask *task, void *data )
 {
-        PSSMShaderGenerator *self = (PSSMShaderGenerator *)data;
+        BSPShaderGenerator *self = (BSPShaderGenerator *)data;
         if ( want_pssm )
         {
                 if ( self->_sunlight.is_empty() || !self->_has_shadow_sunlight )
@@ -317,7 +317,7 @@ CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib 
                 if ( DCAST( ShaderAttrib, shattr )->get_shader_input( "envmapSampler" ) == ShaderInput::get_blank() )
                 {
                         // Nope, give it the default envmap
-                        inputs.push_back( ShaderInput( "envmapSampler", PSSMShaderGenerator::get_identity_cubemap() ) );
+                        inputs.push_back( ShaderInput( "envmapSampler", BSPShaderGenerator::get_identity_cubemap() ) );
                 }
 
                 shattr = DCAST( ShaderAttrib, shattr )->set_shader_inputs( inputs );
@@ -326,7 +326,7 @@ CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib 
         return shattr;
 }
 
-CPT( ShaderAttrib ) PSSMShaderGenerator::synthesize_shader( const RenderState *rs,
+CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs,
         const GeomVertexAnimationSpec &anim )
 {
         findmatshader_collector.start();

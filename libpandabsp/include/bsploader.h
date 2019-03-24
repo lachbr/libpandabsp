@@ -70,7 +70,7 @@ class EggPolygon;
 class Geom;
 class GeomNode;
 class BSPLoader;
-class PSSMShaderGenerator;
+class BSPShaderGenerator;
 
 /**
  * An attribute applied to each face Geom from a BSP file.
@@ -180,7 +180,7 @@ PUBLISHED:
 	void set_win( GraphicsWindow *win );
         void set_camera( const NodePath &camera );
 	void set_render( const NodePath &render );
-        void set_shader_generator( PSSMShaderGenerator *shgen );
+        void set_shader_generator( BSPShaderGenerator *shgen );
 	void set_want_visibility( bool flag );
 	void set_want_lightmaps( bool flag );
 	void set_physics_type( int type );
@@ -339,7 +339,7 @@ private:
 
 private:
         bspdata_t *_bspdata;
-        PSSMShaderGenerator *_shgen;
+        BSPShaderGenerator *_shgen;
         collbspdata_t *_colldata;
 	NodePath _result;
         NodePath _camera;

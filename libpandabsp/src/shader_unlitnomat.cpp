@@ -27,7 +27,7 @@ UnlitNoMatSpec::UnlitNoMatSpec() :
 ShaderPermutations UnlitNoMatSpec::setup_permutations( const BSPMaterial *mat,
                                                        const RenderState *rs,
                                                        const GeomVertexAnimationSpec &anim,
-                                                       PSSMShaderGenerator *generator )
+                                                       BSPShaderGenerator *generator )
 {
         ShaderPermutations result = ShaderSpec::setup_permutations( mat, rs, anim, generator );
 

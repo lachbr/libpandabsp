@@ -35,7 +35,7 @@
 
 #include <vector>
 
-class PSSMShaderGenerator;
+class BSPShaderGenerator;
 
 /**
 * @brief Main class used for handling PSSM
@@ -61,7 +61,7 @@ class PSSMShaderGenerator;
 class PSSMCameraRig
 {
 PUBLISHED:
-        PSSMCameraRig( size_t num_splits, PSSMShaderGenerator *gen );
+        PSSMCameraRig( size_t num_splits, BSPShaderGenerator *gen );
         ~PSSMCameraRig();
 
         void set_pssm_distance( float distance );
@@ -129,7 +129,7 @@ protected:
         PTA_LVecBase2 _camera_nearfar;
         PTA_LMatrix4 _camera_cropmatrix;
 
-        PSSMShaderGenerator *_gen;
+        BSPShaderGenerator *_gen;
 
         static PStatCollector _update_collector;
 };

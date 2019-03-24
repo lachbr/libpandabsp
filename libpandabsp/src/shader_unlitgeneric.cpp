@@ -30,7 +30,7 @@ PT( ShaderConfig ) UnlitGenericSpec::make_new_config()
 ShaderPermutations UnlitGenericSpec::setup_permutations( const BSPMaterial *mat,
                                                          const RenderState *rs,
                                                          const GeomVertexAnimationSpec &anim,
-                                                         PSSMShaderGenerator *generator )
+                                                         BSPShaderGenerator *generator )
 {
         ULGConfig *conf = (ULGConfig *)get_shader_config( mat );
         ShaderPermutations result = ShaderSpec::setup_permutations( mat, rs, anim, generator );

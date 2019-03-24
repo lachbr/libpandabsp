@@ -17,7 +17,7 @@
 #include <geomVertexAnimationSpec.h>
 
 class RenderState;
-class PSSMShaderGenerator;
+class BSPShaderGenerator;
 class BSPMaterial;
 
 class ShaderConfig : public ReferenceCount
@@ -160,7 +160,7 @@ PUBLISHED:
 
 public:
         virtual ShaderPermutations setup_permutations( const BSPMaterial *mat, const RenderState *state,
-                                                 const GeomVertexAnimationSpec &anim, PSSMShaderGenerator *generator );
+                                                 const GeomVertexAnimationSpec &anim, BSPShaderGenerator *generator );
         
 
         ShaderConfig *get_shader_config( const BSPMaterial *mat );
@@ -168,7 +168,7 @@ public:
 
         static void add_fog( const RenderState *rs, ShaderPermutations &perms );
         static void add_color( const RenderState *rs, ShaderPermutations &perms );
-        static bool add_csm( ShaderPermutations &perms, PSSMShaderGenerator *generator );
+        static bool add_csm( ShaderPermutations &perms, BSPShaderGenerator *generator );
         static bool add_clip_planes( const RenderState *rs, ShaderPermutations &perms );
         static void add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPermutations &perms );
 

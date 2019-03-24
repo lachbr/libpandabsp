@@ -22,7 +22,7 @@ public:
         virtual ShaderPermutations setup_permutations( const BSPMaterial *mat,
                                                        const RenderState *rs,
                                                        const GeomVertexAnimationSpec &anim,
-                                                       PSSMShaderGenerator *generator );
+                                                       BSPShaderGenerator *generator );
         virtual PT( ShaderConfig ) make_new_config();
 };
 

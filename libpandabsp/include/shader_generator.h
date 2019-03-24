@@ -41,10 +41,10 @@ NotifyCategoryDeclNoExport(bspShaderGenerator);
 
 class nodeshaderinput_t;
 
-class PSSMShaderGenerator : public ShaderGenerator
+class BSPShaderGenerator : public ShaderGenerator
 {
 PUBLISHED:
-        PSSMShaderGenerator( GraphicsStateGuardian *gsg, const NodePath &camera, const NodePath &render );
+        BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePath &camera, const NodePath &render );
 
         virtual CPT( ShaderAttrib ) synthesize_shader( const RenderState *rs,
                                                        const GeomVertexAnimationSpec &anim );
@@ -119,7 +119,7 @@ public:
         static void init_type()
         {
                 ShaderGenerator::init_type();
-                register_type( _type_handle, "PSSMShaderGenerator",
+                register_type( _type_handle, "BSPShaderGenerator",
                                ShaderGenerator::get_class_type() );
         }
         virtual TypeHandle get_type() const

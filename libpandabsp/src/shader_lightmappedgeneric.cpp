@@ -44,7 +44,7 @@ string get_texcoord( int n )
 ShaderPermutations LightmappedGenericSpec::setup_permutations( const BSPMaterial *mat,
                                                                const RenderState *rs,
                                                                const GeomVertexAnimationSpec &anim,
-                                                               PSSMShaderGenerator *generator )
+                                                               BSPShaderGenerator *generator )
 {
         LMGConfig *conf = (LMGConfig *)get_shader_config( mat );
 

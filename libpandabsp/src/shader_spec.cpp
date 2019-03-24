@@ -85,7 +85,7 @@ ShaderConfig *ShaderSpec::get_shader_config( const BSPMaterial *mat )
 ShaderPermutations ShaderSpec::setup_permutations( const BSPMaterial *mat,
                                                    const RenderState *state,
                                                    const GeomVertexAnimationSpec &anim, 
-                                                   PSSMShaderGenerator *generator )
+                                                   BSPShaderGenerator *generator )
 {
         ShaderPermutations result;
         return result;
@@ -129,7 +129,7 @@ void ShaderSpec::add_color( const RenderState *rs, ShaderPermutations &perms )
 
 #include "pssmCameraRig.h"
 
-bool ShaderSpec::add_csm( ShaderPermutations &result, PSSMShaderGenerator *generator )
+bool ShaderSpec::add_csm( ShaderPermutations &result, BSPShaderGenerator *generator )
 {
         if ( generator->has_shadow_sunlight() )
         {
