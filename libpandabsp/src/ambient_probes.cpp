@@ -813,7 +813,7 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                         for ( int i = 0; i < lights_updated; i++ )
                         {
                                 light_t *light = _all_lights[input->light_ids[i]];
-                                LVector3 lvec = ( light->pos - curr_net );
+                                LVector3 lvec = ( light->pos - curr_net ) * 16.0; // lighting falloff parameters in hammer space
                                 float d2 = lvec.dot( lvec );
                                 float d = std::sqrt( d2 );
                                 float atten = 1.0;

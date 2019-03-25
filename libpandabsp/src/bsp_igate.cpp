@@ -406,22 +406,22 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_TypedObject (imports[2].type)
   {"Namable", nullptr},
 #define Dtool_Ptr_Namable (imports[3].type)
-  {"TypedReferenceCount", nullptr},
-#define Dtool_Ptr_TypedReferenceCount (imports[4].type)
   {"ReferenceCount", nullptr},
-#define Dtool_Ptr_ReferenceCount (imports[5].type)
-  {"TypedWritableReferenceCount", nullptr},
-#define Dtool_Ptr_TypedWritableReferenceCount (imports[6].type)
+#define Dtool_Ptr_ReferenceCount (imports[4].type)
+  {"TypedReferenceCount", nullptr},
+#define Dtool_Ptr_TypedReferenceCount (imports[5].type)
   {"TypedWritable", nullptr},
-#define Dtool_Ptr_TypedWritable (imports[7].type)
+#define Dtool_Ptr_TypedWritable (imports[6].type)
+  {"TypedWritableReferenceCount", nullptr},
+#define Dtool_Ptr_TypedWritableReferenceCount (imports[7].type)
   {"LVector3f", nullptr},
 #define Dtool_Ptr_LVector3f (imports[8].type)
   {"LPoint3f", nullptr},
 #define Dtool_Ptr_LPoint3f (imports[9].type)
-  {"LVecBase4f", nullptr},
-#define Dtool_Ptr_LVecBase4f (imports[10].type)
   {"LPoint2f", nullptr},
-#define Dtool_Ptr_LPoint2f (imports[11].type)
+#define Dtool_Ptr_LPoint2f (imports[10].type)
+  {"LVecBase4f", nullptr},
+#define Dtool_Ptr_LVecBase4f (imports[11].type)
   {"LVector2f", nullptr},
 #define Dtool_Ptr_LVector2f (imports[12].type)
   {"BitMask< uint32_t, 32 >", nullptr},
@@ -430,12 +430,12 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_GeometricBoundingVolume (imports[14].type)
   {"Texture", nullptr},
 #define Dtool_Ptr_Texture (imports[15].type)
-  {"RenderAttrib", nullptr},
-#define Dtool_Ptr_RenderAttrib (imports[16].type)
   {"TextureStage", nullptr},
-#define Dtool_Ptr_TextureStage (imports[17].type)
+#define Dtool_Ptr_TextureStage (imports[16].type)
   {"ShaderInput", nullptr},
-#define Dtool_Ptr_ShaderInput (imports[18].type)
+#define Dtool_Ptr_ShaderInput (imports[17].type)
+  {"RenderAttrib", nullptr},
+#define Dtool_Ptr_RenderAttrib (imports[18].type)
   {"Geom", nullptr},
 #define Dtool_Ptr_Geom (imports[19].type)
   {"TransformState", nullptr},
@@ -456,10 +456,10 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_BoundingBox (imports[27].type)
   {"GraphicsWindow", nullptr},
 #define Dtool_Ptr_GraphicsWindow (imports[28].type)
-  {"ModelNode", nullptr},
-#define Dtool_Ptr_ModelNode (imports[29].type)
   {"ModelRoot", nullptr},
-#define Dtool_Ptr_ModelRoot (imports[30].type)
+#define Dtool_Ptr_ModelRoot (imports[29].type)
+  {"ModelNode", nullptr},
+#define Dtool_Ptr_ModelNode (imports[30].type)
   {nullptr, nullptr},
 };
 #endif
@@ -500,29 +500,29 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedObject = &Dtool_TypedObj
 extern struct Dtool_PyTypedObject Dtool_Namable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
 #endif
-// TypedReferenceCount
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
-#endif
 // ReferenceCount
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
 #endif
-// TypedWritableReferenceCount
+// TypedReferenceCount
 #ifndef LINK_ALL_STATIC
 #else
-extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
+extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
 #endif
 // TypedWritable
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_TypedWritable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedWritable;
+#endif
+// TypedWritableReferenceCount
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
 #endif
 // LVector3f
 #ifndef LINK_ALL_STATIC
@@ -548,18 +548,6 @@ extern struct Dtool_PyTypedObject Dtool_LPoint3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
 extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
 #endif
-// LVecBase4f
-#ifndef LINK_ALL_STATIC
-inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
-  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
-extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
-#endif
 // LPoint2f
 #ifndef LINK_ALL_STATIC
 inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced) {
@@ -571,6 +559,18 @@ inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced)
 extern struct Dtool_PyTypedObject Dtool_LPoint2f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint2f = &Dtool_LPoint2f;
 extern LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced);
+#endif
+// LVecBase4f
+#ifndef LINK_ALL_STATIC
+inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
+  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
+extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
 #endif
 // LVector2f
 #ifndef LINK_ALL_STATIC
@@ -608,12 +608,6 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dt
 extern struct Dtool_PyTypedObject Dtool_Texture;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Texture = &Dtool_Texture;
 #endif
-// RenderAttrib
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
-#endif
 // TextureStage
 #ifndef LINK_ALL_STATIC
 #else
@@ -625,6 +619,12 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_TextureStage = &Dtool_Texture
 #else
 extern struct Dtool_PyTypedObject Dtool_ShaderInput;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderInput = &Dtool_ShaderInput;
+#endif
+// RenderAttrib
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
 #endif
 // Geom
 #ifndef LINK_ALL_STATIC
@@ -698,17 +698,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_BoundingBox = &Dtool_Bounding
 extern struct Dtool_PyTypedObject Dtool_GraphicsWindow;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsWindow = &Dtool_GraphicsWindow;
 #endif
-// ModelNode
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_ModelNode;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelNode = &Dtool_ModelNode;
-#endif
 // ModelRoot
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_ModelRoot;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelRoot = &Dtool_ModelRoot;
+#endif
+// ModelNode
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_ModelNode;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelNode = &Dtool_ModelNode;
 #endif
 
 /**
@@ -5194,9 +5194,36 @@ static const char *Dtool_BSPLoader_link_cent_to_pyent_145_comment = nullptr;
 
 /**
  * Python function wrapper for:
+ * void BSPLoader::remove_py_entity(PyObject *ent)
+ */
+static PyObject *Dtool_BSPLoader_remove_py_entity_146(PyObject *self, PyObject *arg) {
+  BSPLoader *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_BSPLoader, (void **)&local_this, "BSPLoader.remove_py_entity")) {
+    return nullptr;
+  }
+  // 1-void BSPLoader::remove_py_entity(PyObject *ent)
+  (*local_this).remove_py_entity(arg);
+  return Dtool_Return_None();
+  if (!_PyErr_OCCURRED()) {
+    return Dtool_Raise_BadArgumentsError(
+      "remove_py_entity(const BSPLoader self, object ent)\n");
+  }
+  return nullptr;
+}
+
+#ifndef NDEBUG
+static const char *Dtool_BSPLoader_remove_py_entity_146_comment =
+  "C++ Interface:\n"
+  "remove_py_entity(const BSPLoader self, object ent)\n";
+#else
+static const char *Dtool_BSPLoader_remove_py_entity_146_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
  * inline int BSPLoader::get_num_entities(void) const
  */
-static PyObject *Dtool_BSPLoader_get_num_entities_146(PyObject *self, PyObject *) {
+static PyObject *Dtool_BSPLoader_get_num_entities_147(PyObject *self, PyObject *) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5210,18 +5237,18 @@ static PyObject *Dtool_BSPLoader_get_num_entities_146(PyObject *self, PyObject *
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_num_entities_146_comment =
+static const char *Dtool_BSPLoader_get_num_entities_147_comment =
   "C++ Interface:\n"
   "get_num_entities(BSPLoader self)\n";
 #else
-static const char *Dtool_BSPLoader_get_num_entities_146_comment = nullptr;
+static const char *Dtool_BSPLoader_get_num_entities_147_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * std::string BSPLoader::get_entity_value(int entnum, char const *key) const
  */
-static PyObject *Dtool_BSPLoader_get_entity_value_147(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_BSPLoader_get_entity_value_148(PyObject *self, PyObject *args, PyObject *kwds) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5245,18 +5272,18 @@ static PyObject *Dtool_BSPLoader_get_entity_value_147(PyObject *self, PyObject *
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_entity_value_147_comment =
+static const char *Dtool_BSPLoader_get_entity_value_148_comment =
   "C++ Interface:\n"
   "get_entity_value(BSPLoader self, int entnum, str key)\n";
 #else
-static const char *Dtool_BSPLoader_get_entity_value_147_comment = nullptr;
+static const char *Dtool_BSPLoader_get_entity_value_148_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float BSPLoader::get_entity_value_float(int entnum, char const *key) const
  */
-static PyObject *Dtool_BSPLoader_get_entity_value_float_148(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_BSPLoader_get_entity_value_float_149(PyObject *self, PyObject *args, PyObject *kwds) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5280,18 +5307,18 @@ static PyObject *Dtool_BSPLoader_get_entity_value_float_148(PyObject *self, PyOb
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_entity_value_float_148_comment =
+static const char *Dtool_BSPLoader_get_entity_value_float_149_comment =
   "C++ Interface:\n"
   "get_entity_value_float(BSPLoader self, int entnum, str key)\n";
 #else
-static const char *Dtool_BSPLoader_get_entity_value_float_148_comment = nullptr;
+static const char *Dtool_BSPLoader_get_entity_value_float_149_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int BSPLoader::get_entity_value_int(int entnum, char const *key) const
  */
-static PyObject *Dtool_BSPLoader_get_entity_value_int_149(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_BSPLoader_get_entity_value_int_150(PyObject *self, PyObject *args, PyObject *kwds) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5315,18 +5342,18 @@ static PyObject *Dtool_BSPLoader_get_entity_value_int_149(PyObject *self, PyObje
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_entity_value_int_149_comment =
+static const char *Dtool_BSPLoader_get_entity_value_int_150_comment =
   "C++ Interface:\n"
   "get_entity_value_int(BSPLoader self, int entnum, str key)\n";
 #else
-static const char *Dtool_BSPLoader_get_entity_value_int_149_comment = nullptr;
+static const char *Dtool_BSPLoader_get_entity_value_int_150_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * LVector3 BSPLoader::get_entity_value_vector(int entnum, char const *key) const
  */
-static PyObject *Dtool_BSPLoader_get_entity_value_vector_150(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_BSPLoader_get_entity_value_vector_151(PyObject *self, PyObject *args, PyObject *kwds) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5354,18 +5381,18 @@ static PyObject *Dtool_BSPLoader_get_entity_value_vector_150(PyObject *self, PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_entity_value_vector_150_comment =
+static const char *Dtool_BSPLoader_get_entity_value_vector_151_comment =
   "C++ Interface:\n"
   "get_entity_value_vector(BSPLoader self, int entnum, str key)\n";
 #else
-static const char *Dtool_BSPLoader_get_entity_value_vector_150_comment = nullptr;
+static const char *Dtool_BSPLoader_get_entity_value_vector_151_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * LColor BSPLoader::get_entity_value_color(int entnum, char const *key, bool scale = true) const
  */
-static PyObject *Dtool_BSPLoader_get_entity_value_color_151(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_BSPLoader_get_entity_value_color_152(PyObject *self, PyObject *args, PyObject *kwds) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5394,18 +5421,18 @@ static PyObject *Dtool_BSPLoader_get_entity_value_color_151(PyObject *self, PyOb
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_entity_value_color_151_comment =
+static const char *Dtool_BSPLoader_get_entity_value_color_152_comment =
   "C++ Interface:\n"
   "get_entity_value_color(BSPLoader self, int entnum, str key, bool scale)\n";
 #else
-static const char *Dtool_BSPLoader_get_entity_value_color_151_comment = nullptr;
+static const char *Dtool_BSPLoader_get_entity_value_color_152_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * NodePath BSPLoader::get_entity(int entnum) const
  */
-static PyObject *Dtool_BSPLoader_get_entity_152(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_BSPLoader_get_entity_153(PyObject *self, PyObject *arg) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5438,18 +5465,18 @@ static PyObject *Dtool_BSPLoader_get_entity_152(PyObject *self, PyObject *arg) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_entity_152_comment =
+static const char *Dtool_BSPLoader_get_entity_153_comment =
   "C++ Interface:\n"
   "get_entity(BSPLoader self, int entnum)\n";
 #else
-static const char *Dtool_BSPLoader_get_entity_152_comment = nullptr;
+static const char *Dtool_BSPLoader_get_entity_153_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * NodePath BSPLoader::get_model(int modelnum) const
  */
-static PyObject *Dtool_BSPLoader_get_model_153(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_BSPLoader_get_model_154(PyObject *self, PyObject *arg) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5482,18 +5509,18 @@ static PyObject *Dtool_BSPLoader_get_model_153(PyObject *self, PyObject *arg) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_model_153_comment =
+static const char *Dtool_BSPLoader_get_model_154_comment =
   "C++ Interface:\n"
   "get_model(BSPLoader self, int modelnum)\n";
 #else
-static const char *Dtool_BSPLoader_get_model_153_comment = nullptr;
+static const char *Dtool_BSPLoader_get_model_154_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * CBaseEntity *BSPLoader::get_c_entity(int const entnum) const
  */
-static PyObject *Dtool_BSPLoader_get_c_entity_154(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_BSPLoader_get_c_entity_155(PyObject *self, PyObject *arg) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5533,11 +5560,11 @@ static PyObject *Dtool_BSPLoader_get_c_entity_154(PyObject *self, PyObject *arg)
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_c_entity_154_comment =
+static const char *Dtool_BSPLoader_get_c_entity_155_comment =
   "C++ Interface:\n"
   "get_c_entity(BSPLoader self, int entnum)\n";
 #else
-static const char *Dtool_BSPLoader_get_c_entity_154_comment = nullptr;
+static const char *Dtool_BSPLoader_get_c_entity_155_comment = nullptr;
 #endif
 
 /**
@@ -5545,24 +5572,11 @@ static const char *Dtool_BSPLoader_get_c_entity_154_comment = nullptr;
  * int BSPLoader::find_leaf(LPoint3 const &pos)
  * inline int BSPLoader::find_leaf(NodePath const &np)
  */
-static PyObject *Dtool_BSPLoader_find_leaf_155(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_BSPLoader_find_leaf_156(PyObject *self, PyObject *arg) {
   BSPLoader *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_BSPLoader, (void **)&local_this, "BSPLoader.find_leaf")) {
     return nullptr;
   }
-  {
-    // -2 int BSPLoader::find_leaf(LPoint3 const &pos)
-    LPoint3 const *arg_this = nullptr;
-    DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_LPoint3f);
-    if (arg_this != nullptr) {
-      int return_value = (*local_this).find_leaf(*arg_this);
-      if (Dtool_CheckErrorOccurred()) {
-        return nullptr;
-      }
-      return Dtool_WrapValue(return_value);
-    }
-  }
-
   {
     // -2 inline int BSPLoader::find_leaf(NodePath const &np)
     NodePath const *arg_this = nullptr;
@@ -5576,6 +5590,7 @@ static PyObject *Dtool_BSPLoader_find_leaf_155(PyObject *self, PyObject *arg) {
     }
   }
 
+  // No coercion possible: inline int BSPLoader::find_leaf(NodePath const &np)
   {
     // -2 int BSPLoader::find_leaf(LPoint3 const &pos)
     LPoint3f arg_local;
@@ -5589,29 +5604,26 @@ static PyObject *Dtool_BSPLoader_find_leaf_155(PyObject *self, PyObject *arg) {
     }
   }
 
-  // No coercion possible: inline int BSPLoader::find_leaf(NodePath const &np)
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
-      "find_leaf(const BSPLoader self, const LPoint3f pos)\n"
       "find_leaf(const BSPLoader self, const NodePath np)\n");
   }
   return nullptr;
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_find_leaf_155_comment =
+static const char *Dtool_BSPLoader_find_leaf_156_comment =
   "C++ Interface:\n"
-  "find_leaf(const BSPLoader self, const LPoint3f pos)\n"
   "find_leaf(const BSPLoader self, const NodePath np)\n";
 #else
-static const char *Dtool_BSPLoader_find_leaf_155_comment = nullptr;
+static const char *Dtool_BSPLoader_find_leaf_156_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int BSPLoader::find_node(LPoint3 const &pos)
  */
-static PyObject *Dtool_BSPLoader_find_node_156(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_BSPLoader_find_node_157(PyObject *self, PyObject *arg) {
   BSPLoader *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_BSPLoader, (void **)&local_this, "BSPLoader.find_node")) {
     return nullptr;
@@ -5635,18 +5647,18 @@ static PyObject *Dtool_BSPLoader_find_node_156(PyObject *self, PyObject *arg) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_find_node_156_comment =
+static const char *Dtool_BSPLoader_find_node_157_comment =
   "C++ Interface:\n"
   "find_node(const BSPLoader self, const LPoint3f pos)\n";
 #else
-static const char *Dtool_BSPLoader_find_node_156_comment = nullptr;
+static const char *Dtool_BSPLoader_find_node_157_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool BSPLoader::is_cluster_visible(int curr_cluster, int cluster) const
  */
-static PyObject *Dtool_BSPLoader_is_cluster_visible_157(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_BSPLoader_is_cluster_visible_158(PyObject *self, PyObject *args, PyObject *kwds) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5667,18 +5679,18 @@ static PyObject *Dtool_BSPLoader_is_cluster_visible_157(PyObject *self, PyObject
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_is_cluster_visible_157_comment =
+static const char *Dtool_BSPLoader_is_cluster_visible_158_comment =
   "C++ Interface:\n"
   "is_cluster_visible(BSPLoader self, int curr_cluster, int cluster)\n";
 #else
-static const char *Dtool_BSPLoader_is_cluster_visible_157_comment = nullptr;
+static const char *Dtool_BSPLoader_is_cluster_visible_158_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool BSPLoader::pvs_bounds_test(GeometricBoundingVolume const *bounds)
  */
-static PyObject *Dtool_BSPLoader_pvs_bounds_test_158(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_BSPLoader_pvs_bounds_test_159(PyObject *self, PyObject *arg) {
   BSPLoader *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_BSPLoader, (void **)&local_this, "BSPLoader.pvs_bounds_test")) {
     return nullptr;
@@ -5697,18 +5709,18 @@ static PyObject *Dtool_BSPLoader_pvs_bounds_test_158(PyObject *self, PyObject *a
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_pvs_bounds_test_158_comment =
+static const char *Dtool_BSPLoader_pvs_bounds_test_159_comment =
   "C++ Interface:\n"
   "pvs_bounds_test(const BSPLoader self, const GeometricBoundingVolume bounds)\n";
 #else
-static const char *Dtool_BSPLoader_pvs_bounds_test_158_comment = nullptr;
+static const char *Dtool_BSPLoader_pvs_bounds_test_159_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * ConstPointerTo< GeometricBoundingVolume > BSPLoader::make_net_bounds(TransformState const *net_transform, GeometricBoundingVolume const *original)
  */
-static PyObject *Dtool_BSPLoader_make_net_bounds_159(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_BSPLoader_make_net_bounds_160(PyObject *self, PyObject *args, PyObject *kwds) {
   BSPLoader *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_BSPLoader, (void **)&local_this, "BSPLoader.make_net_bounds")) {
     return nullptr;
@@ -5744,18 +5756,18 @@ static PyObject *Dtool_BSPLoader_make_net_bounds_159(PyObject *self, PyObject *a
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_make_net_bounds_159_comment =
+static const char *Dtool_BSPLoader_make_net_bounds_160_comment =
   "C++ Interface:\n"
   "make_net_bounds(const BSPLoader self, const TransformState net_transform, const GeometricBoundingVolume original)\n";
 #else
-static const char *Dtool_BSPLoader_make_net_bounds_159_comment = nullptr;
+static const char *Dtool_BSPLoader_make_net_bounds_160_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline bool BSPLoader::has_active_level(void) const
  */
-static PyObject *Dtool_BSPLoader_has_active_level_160(PyObject *self, PyObject *) {
+static PyObject *Dtool_BSPLoader_has_active_level_161(PyObject *self, PyObject *) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5766,18 +5778,18 @@ static PyObject *Dtool_BSPLoader_has_active_level_160(PyObject *self, PyObject *
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_has_active_level_160_comment =
+static const char *Dtool_BSPLoader_has_active_level_161_comment =
   "C++ Interface:\n"
   "has_active_level(BSPLoader self)\n";
 #else
-static const char *Dtool_BSPLoader_has_active_level_160_comment = nullptr;
+static const char *Dtool_BSPLoader_has_active_level_161_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline bool BSPLoader::has_visibility(void) const
  */
-static PyObject *Dtool_BSPLoader_has_visibility_161(PyObject *self, PyObject *) {
+static PyObject *Dtool_BSPLoader_has_visibility_162(PyObject *self, PyObject *) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5788,18 +5800,18 @@ static PyObject *Dtool_BSPLoader_has_visibility_161(PyObject *self, PyObject *) 
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_has_visibility_161_comment =
+static const char *Dtool_BSPLoader_has_visibility_162_comment =
   "C++ Interface:\n"
   "has_visibility(BSPLoader self)\n";
 #else
-static const char *Dtool_BSPLoader_has_visibility_161_comment = nullptr;
+static const char *Dtool_BSPLoader_has_visibility_162_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void BSPLoader::cleanup(void)
  */
-static PyObject *Dtool_BSPLoader_cleanup_162(PyObject *self, PyObject *) {
+static PyObject *Dtool_BSPLoader_cleanup_163(PyObject *self, PyObject *) {
   BSPLoader *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_BSPLoader, (void **)&local_this, "BSPLoader.cleanup")) {
     return nullptr;
@@ -5810,18 +5822,18 @@ static PyObject *Dtool_BSPLoader_cleanup_162(PyObject *self, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_cleanup_162_comment =
+static const char *Dtool_BSPLoader_cleanup_163_comment =
   "C++ Interface:\n"
   "cleanup(const BSPLoader self)\n";
 #else
-static const char *Dtool_BSPLoader_cleanup_162_comment = nullptr;
+static const char *Dtool_BSPLoader_cleanup_163_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline NodePath BSPLoader::get_result(void) const
  */
-static PyObject *Dtool_BSPLoader_get_result_163(PyObject *self, PyObject *) {
+static PyObject *Dtool_BSPLoader_get_result_164(PyObject *self, PyObject *) {
   BSPLoader *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPLoader)) {
     return nullptr;
@@ -5839,18 +5851,18 @@ static PyObject *Dtool_BSPLoader_get_result_163(PyObject *self, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_result_163_comment =
+static const char *Dtool_BSPLoader_get_result_164_comment =
   "C++ Interface:\n"
   "get_result(BSPLoader self)\n";
 #else
-static const char *Dtool_BSPLoader_get_result_163_comment = nullptr;
+static const char *Dtool_BSPLoader_get_result_164_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * static BSPLoader *BSPLoader::get_global_ptr(void)
  */
-static PyObject *Dtool_BSPLoader_get_global_ptr_164(PyObject *, PyObject *) {
+static PyObject *Dtool_BSPLoader_get_global_ptr_165(PyObject *, PyObject *) {
   // 1-static BSPLoader *BSPLoader::get_global_ptr(void)
   BSPLoader *return_value = BSPLoader::get_global_ptr();
   if (Dtool_CheckErrorOccurred()) {
@@ -5860,11 +5872,11 @@ static PyObject *Dtool_BSPLoader_get_global_ptr_164(PyObject *, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPLoader_get_global_ptr_164_comment =
+static const char *Dtool_BSPLoader_get_global_ptr_165_comment =
   "C++ Interface:\n"
   "get_global_ptr()\n";
 #else
-static const char *Dtool_BSPLoader_get_global_ptr_164_comment = nullptr;
+static const char *Dtool_BSPLoader_get_global_ptr_165_comment = nullptr;
 #endif
 
 /**
@@ -5942,7 +5954,7 @@ static void *Dtool_DowncastInterface_BSPLoader(void *from_this, Dtool_PyTypedObj
  * Python function wrapper for:
  * static TypeHandle BSPCullTraverser::get_class_type(void)
  */
-static PyObject *Dtool_BSPCullTraverser_get_class_type_169(PyObject *, PyObject *) {
+static PyObject *Dtool_BSPCullTraverser_get_class_type_170(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPCullTraverser::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(BSPCullTraverser::get_class_type());
   if (return_value == nullptr) {
@@ -5956,11 +5968,11 @@ static PyObject *Dtool_BSPCullTraverser_get_class_type_169(PyObject *, PyObject 
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPCullTraverser_get_class_type_169_comment =
+static const char *Dtool_BSPCullTraverser_get_class_type_170_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_BSPCullTraverser_get_class_type_169_comment = nullptr;
+static const char *Dtool_BSPCullTraverser_get_class_type_170_comment = nullptr;
 #endif
 
 /**
@@ -6175,7 +6187,7 @@ static void *Dtool_DowncastInterface_BSPCullTraverser(void *from_this, Dtool_PyT
  * Python function wrapper for:
  * static TypeHandle BSPRender::get_class_type(void)
  */
-static PyObject *Dtool_BSPRender_get_class_type_174(PyObject *, PyObject *) {
+static PyObject *Dtool_BSPRender_get_class_type_175(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPRender::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(BSPRender::get_class_type());
   if (return_value == nullptr) {
@@ -6189,11 +6201,11 @@ static PyObject *Dtool_BSPRender_get_class_type_174(PyObject *, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPRender_get_class_type_174_comment =
+static const char *Dtool_BSPRender_get_class_type_175_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_BSPRender_get_class_type_174_comment = nullptr;
+static const char *Dtool_BSPRender_get_class_type_175_comment = nullptr;
 #endif
 
 /**
@@ -6422,7 +6434,7 @@ static void *Dtool_DowncastInterface_BSPRender(void *from_this, Dtool_PyTypedObj
  * Python function wrapper for:
  * static TypeHandle BSPRoot::get_class_type(void)
  */
-static PyObject *Dtool_BSPRoot_get_class_type_178(PyObject *, PyObject *) {
+static PyObject *Dtool_BSPRoot_get_class_type_179(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPRoot::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(BSPRoot::get_class_type());
   if (return_value == nullptr) {
@@ -6436,11 +6448,11 @@ static PyObject *Dtool_BSPRoot_get_class_type_178(PyObject *, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPRoot_get_class_type_178_comment =
+static const char *Dtool_BSPRoot_get_class_type_179_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_BSPRoot_get_class_type_178_comment = nullptr;
+static const char *Dtool_BSPRoot_get_class_type_179_comment = nullptr;
 #endif
 
 /**
@@ -6691,7 +6703,7 @@ static void *Dtool_DowncastInterface_BSPRoot(void *from_this, Dtool_PyTypedObjec
  * Python function wrapper for:
  * static TypeHandle BSPProp::get_class_type(void)
  */
-static PyObject *Dtool_BSPProp_get_class_type_183(PyObject *, PyObject *) {
+static PyObject *Dtool_BSPProp_get_class_type_184(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPProp::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(BSPProp::get_class_type());
   if (return_value == nullptr) {
@@ -6705,11 +6717,11 @@ static PyObject *Dtool_BSPProp_get_class_type_183(PyObject *, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPProp_get_class_type_183_comment =
+static const char *Dtool_BSPProp_get_class_type_184_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_BSPProp_get_class_type_183_comment = nullptr;
+static const char *Dtool_BSPProp_get_class_type_184_comment = nullptr;
 #endif
 
 /**
@@ -6974,7 +6986,7 @@ static void *Dtool_DowncastInterface_BSPProp(void *from_this, Dtool_PyTypedObjec
  * Python function wrapper for:
  * static TypeHandle BSPModel::get_class_type(void)
  */
-static PyObject *Dtool_BSPModel_get_class_type_188(PyObject *, PyObject *) {
+static PyObject *Dtool_BSPModel_get_class_type_189(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPModel::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(BSPModel::get_class_type());
   if (return_value == nullptr) {
@@ -6988,11 +7000,11 @@ static PyObject *Dtool_BSPModel_get_class_type_188(PyObject *, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPModel_get_class_type_188_comment =
+static const char *Dtool_BSPModel_get_class_type_189_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_BSPModel_get_class_type_188_comment = nullptr;
+static const char *Dtool_BSPModel_get_class_type_189_comment = nullptr;
 #endif
 
 /**
@@ -7250,7 +7262,7 @@ static void *Dtool_DowncastInterface_BSPModel(void *from_this, Dtool_PyTypedObje
  * Python function wrapper for:
  * void ShaderPermutations::add_permutation(std::string const &key, std::string const &value = "1")
  */
-static PyObject *Dtool_ShaderPermutations_add_permutation_192(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_ShaderPermutations_add_permutation_193(PyObject *self, PyObject *args, PyObject *kwds) {
   ShaderPermutations *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_ShaderPermutations, (void **)&local_this, "ShaderPermutations.add_permutation")) {
     return nullptr;
@@ -7273,18 +7285,18 @@ static PyObject *Dtool_ShaderPermutations_add_permutation_192(PyObject *self, Py
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderPermutations_add_permutation_192_comment =
+static const char *Dtool_ShaderPermutations_add_permutation_193_comment =
   "C++ Interface:\n"
   "add_permutation(const ShaderPermutations self, str key, str value)\n";
 #else
-static const char *Dtool_ShaderPermutations_add_permutation_192_comment = nullptr;
+static const char *Dtool_ShaderPermutations_add_permutation_193_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void ShaderPermutations::add_input(ShaderInput const &inp, bool important = true)
  */
-static PyObject *Dtool_ShaderPermutations_add_input_193(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_ShaderPermutations_add_input_194(PyObject *self, PyObject *args, PyObject *kwds) {
   ShaderPermutations *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_ShaderPermutations, (void **)&local_this, "ShaderPermutations.add_input")) {
     return nullptr;
@@ -7308,18 +7320,18 @@ static PyObject *Dtool_ShaderPermutations_add_input_193(PyObject *self, PyObject
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderPermutations_add_input_193_comment =
+static const char *Dtool_ShaderPermutations_add_input_194_comment =
   "C++ Interface:\n"
   "add_input(const ShaderPermutations self, const ShaderInput inp, bool important)\n";
 #else
-static const char *Dtool_ShaderPermutations_add_input_193_comment = nullptr;
+static const char *Dtool_ShaderPermutations_add_input_194_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void ShaderPermutations::add_flag(int flag)
  */
-static PyObject *Dtool_ShaderPermutations_add_flag_194(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_ShaderPermutations_add_flag_195(PyObject *self, PyObject *arg) {
   ShaderPermutations *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_ShaderPermutations, (void **)&local_this, "ShaderPermutations.add_flag")) {
     return nullptr;
@@ -7345,11 +7357,11 @@ static PyObject *Dtool_ShaderPermutations_add_flag_194(PyObject *self, PyObject 
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderPermutations_add_flag_194_comment =
+static const char *Dtool_ShaderPermutations_add_flag_195_comment =
   "C++ Interface:\n"
   "add_flag(const ShaderPermutations self, int flag)\n";
 #else
-static const char *Dtool_ShaderPermutations_add_flag_194_comment = nullptr;
+static const char *Dtool_ShaderPermutations_add_flag_195_comment = nullptr;
 #endif
 
 /**
@@ -7450,7 +7462,7 @@ static void *Dtool_DowncastInterface_ShaderPermutations(void *from_this, Dtool_P
  * Python function wrapper for:
  * void ShaderSpec::read_shader_files(Filename const &vert_file, Filename const &pixel_file, Filename const &geom_file)
  */
-static PyObject *Dtool_ShaderSpec_read_shader_files_205(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_ShaderSpec_read_shader_files_206(PyObject *self, PyObject *args, PyObject *kwds) {
   ShaderSpec *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_ShaderSpec, (void **)&local_this, "ShaderSpec.read_shader_files")) {
     return nullptr;
@@ -7487,18 +7499,18 @@ static PyObject *Dtool_ShaderSpec_read_shader_files_205(PyObject *self, PyObject
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderSpec_read_shader_files_205_comment =
+static const char *Dtool_ShaderSpec_read_shader_files_206_comment =
   "C++ Interface:\n"
   "read_shader_files(const ShaderSpec self, const Filename vert_file, const Filename pixel_file, const Filename geom_file)\n";
 #else
-static const char *Dtool_ShaderSpec_read_shader_files_205_comment = nullptr;
+static const char *Dtool_ShaderSpec_read_shader_files_206_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * static TypeHandle ShaderSpec::get_class_type(void)
  */
-static PyObject *Dtool_ShaderSpec_get_class_type_206(PyObject *, PyObject *) {
+static PyObject *Dtool_ShaderSpec_get_class_type_207(PyObject *, PyObject *) {
   // 1-static TypeHandle ShaderSpec::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(ShaderSpec::get_class_type());
   if (return_value == nullptr) {
@@ -7512,18 +7524,18 @@ static PyObject *Dtool_ShaderSpec_get_class_type_206(PyObject *, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderSpec_get_class_type_206_comment =
+static const char *Dtool_ShaderSpec_get_class_type_207_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_ShaderSpec_get_class_type_206_comment = nullptr;
+static const char *Dtool_ShaderSpec_get_class_type_207_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * ReferenceCount *ShaderSpec::upcast_to_ReferenceCount(void)
  */
-static PyObject *Dtool_ShaderSpec_upcast_to_ReferenceCount_200(PyObject *self, PyObject *) {
+static PyObject *Dtool_ShaderSpec_upcast_to_ReferenceCount_201(PyObject *self, PyObject *) {
   ShaderSpec *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_ShaderSpec, (void **)&local_this, "ShaderSpec.upcast_to_ReferenceCount")) {
     return nullptr;
@@ -7539,20 +7551,20 @@ static PyObject *Dtool_ShaderSpec_upcast_to_ReferenceCount_200(PyObject *self, P
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderSpec_upcast_to_ReferenceCount_200_comment =
+static const char *Dtool_ShaderSpec_upcast_to_ReferenceCount_201_comment =
   "C++ Interface:\n"
   "upcast_to_ReferenceCount(const ShaderSpec self)\n"
   "\n"
   "upcast from ShaderSpec to ReferenceCount";
 #else
-static const char *Dtool_ShaderSpec_upcast_to_ReferenceCount_200_comment = nullptr;
+static const char *Dtool_ShaderSpec_upcast_to_ReferenceCount_201_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * Namable *ShaderSpec::upcast_to_Namable(void)
  */
-static PyObject *Dtool_ShaderSpec_upcast_to_Namable_203(PyObject *self, PyObject *) {
+static PyObject *Dtool_ShaderSpec_upcast_to_Namable_204(PyObject *self, PyObject *) {
   ShaderSpec *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_ShaderSpec, (void **)&local_this, "ShaderSpec.upcast_to_Namable")) {
     return nullptr;
@@ -7566,13 +7578,13 @@ static PyObject *Dtool_ShaderSpec_upcast_to_Namable_203(PyObject *self, PyObject
 }
 
 #ifndef NDEBUG
-static const char *Dtool_ShaderSpec_upcast_to_Namable_203_comment =
+static const char *Dtool_ShaderSpec_upcast_to_Namable_204_comment =
   "C++ Interface:\n"
   "upcast_to_Namable(const ShaderSpec self)\n"
   "\n"
   "upcast from ShaderSpec to Namable";
 #else
-static const char *Dtool_ShaderSpec_upcast_to_Namable_203_comment = nullptr;
+static const char *Dtool_ShaderSpec_upcast_to_Namable_204_comment = nullptr;
 #endif
 
 static int Dtool_Init_ShaderSpec(PyObject *self, PyObject *args, PyObject *kwds) {
@@ -7648,7 +7660,7 @@ static void *Dtool_DowncastInterface_ShaderSpec(void *from_this, Dtool_PyTypedOb
  * Python function wrapper for:
  * void BSPShaderGenerator::set_sun_light(NodePath const &np)
  */
-static PyObject *Dtool_BSPShaderGenerator_set_sun_light_211(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_BSPShaderGenerator_set_sun_light_212(PyObject *self, PyObject *arg) {
   BSPShaderGenerator *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_BSPShaderGenerator, (void **)&local_this, "BSPShaderGenerator.set_sun_light")) {
     return nullptr;
@@ -7667,18 +7679,18 @@ static PyObject *Dtool_BSPShaderGenerator_set_sun_light_211(PyObject *self, PyOb
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPShaderGenerator_set_sun_light_211_comment =
+static const char *Dtool_BSPShaderGenerator_set_sun_light_212_comment =
   "C++ Interface:\n"
   "set_sun_light(const BSPShaderGenerator self, const NodePath np)\n";
 #else
-static const char *Dtool_BSPShaderGenerator_set_sun_light_211_comment = nullptr;
+static const char *Dtool_BSPShaderGenerator_set_sun_light_212_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void BSPShaderGenerator::start_update(void)
  */
-static PyObject *Dtool_BSPShaderGenerator_start_update_212(PyObject *self, PyObject *) {
+static PyObject *Dtool_BSPShaderGenerator_start_update_213(PyObject *self, PyObject *) {
   BSPShaderGenerator *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_BSPShaderGenerator, (void **)&local_this, "BSPShaderGenerator.start_update")) {
     return nullptr;
@@ -7689,18 +7701,18 @@ static PyObject *Dtool_BSPShaderGenerator_start_update_212(PyObject *self, PyObj
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPShaderGenerator_start_update_212_comment =
+static const char *Dtool_BSPShaderGenerator_start_update_213_comment =
   "C++ Interface:\n"
   "start_update(const BSPShaderGenerator self)\n";
 #else
-static const char *Dtool_BSPShaderGenerator_start_update_212_comment = nullptr;
+static const char *Dtool_BSPShaderGenerator_start_update_213_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void BSPShaderGenerator::add_shader(PointerTo< ShaderSpec > spec)
  */
-static PyObject *Dtool_BSPShaderGenerator_add_shader_213(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_BSPShaderGenerator_add_shader_214(PyObject *self, PyObject *arg) {
   BSPShaderGenerator *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_BSPShaderGenerator, (void **)&local_this, "BSPShaderGenerator.add_shader")) {
     return nullptr;
@@ -7720,18 +7732,18 @@ static PyObject *Dtool_BSPShaderGenerator_add_shader_213(PyObject *self, PyObjec
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPShaderGenerator_add_shader_213_comment =
+static const char *Dtool_BSPShaderGenerator_add_shader_214_comment =
   "C++ Interface:\n"
   "add_shader(const BSPShaderGenerator self, ShaderSpec spec)\n";
 #else
-static const char *Dtool_BSPShaderGenerator_add_shader_213_comment = nullptr;
+static const char *Dtool_BSPShaderGenerator_add_shader_214_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline bool BSPShaderGenerator::has_shadow_sunlight(void) const
  */
-static PyObject *Dtool_BSPShaderGenerator_has_shadow_sunlight_214(PyObject *self, PyObject *) {
+static PyObject *Dtool_BSPShaderGenerator_has_shadow_sunlight_215(PyObject *self, PyObject *) {
   BSPShaderGenerator *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPShaderGenerator)) {
     return nullptr;
@@ -7742,18 +7754,18 @@ static PyObject *Dtool_BSPShaderGenerator_has_shadow_sunlight_214(PyObject *self
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPShaderGenerator_has_shadow_sunlight_214_comment =
+static const char *Dtool_BSPShaderGenerator_has_shadow_sunlight_215_comment =
   "C++ Interface:\n"
   "has_shadow_sunlight(BSPShaderGenerator self)\n";
 #else
-static const char *Dtool_BSPShaderGenerator_has_shadow_sunlight_214_comment = nullptr;
+static const char *Dtool_BSPShaderGenerator_has_shadow_sunlight_215_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline Texture *BSPShaderGenerator::get_pssm_array_texture(void) const
  */
-static PyObject *Dtool_BSPShaderGenerator_get_pssm_array_texture_215(PyObject *self, PyObject *) {
+static PyObject *Dtool_BSPShaderGenerator_get_pssm_array_texture_216(PyObject *self, PyObject *) {
   BSPShaderGenerator *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPShaderGenerator)) {
     return nullptr;
@@ -7778,18 +7790,18 @@ static PyObject *Dtool_BSPShaderGenerator_get_pssm_array_texture_215(PyObject *s
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPShaderGenerator_get_pssm_array_texture_215_comment =
+static const char *Dtool_BSPShaderGenerator_get_pssm_array_texture_216_comment =
   "C++ Interface:\n"
   "get_pssm_array_texture(BSPShaderGenerator self)\n";
 #else
-static const char *Dtool_BSPShaderGenerator_get_pssm_array_texture_215_comment = nullptr;
+static const char *Dtool_BSPShaderGenerator_get_pssm_array_texture_216_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline NodePath BSPShaderGenerator::get_skybox_root(void) const
  */
-static PyObject *Dtool_BSPShaderGenerator_get_skybox_root_217(PyObject *self, PyObject *) {
+static PyObject *Dtool_BSPShaderGenerator_get_skybox_root_218(PyObject *self, PyObject *) {
   BSPShaderGenerator *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPShaderGenerator)) {
     return nullptr;
@@ -7807,18 +7819,18 @@ static PyObject *Dtool_BSPShaderGenerator_get_skybox_root_217(PyObject *self, Py
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPShaderGenerator_get_skybox_root_217_comment =
+static const char *Dtool_BSPShaderGenerator_get_skybox_root_218_comment =
   "C++ Interface:\n"
   "get_skybox_root(BSPShaderGenerator self)\n";
 #else
-static const char *Dtool_BSPShaderGenerator_get_skybox_root_217_comment = nullptr;
+static const char *Dtool_BSPShaderGenerator_get_skybox_root_218_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline Texture *BSPShaderGenerator::get_skybox_rtt(void) const
  */
-static PyObject *Dtool_BSPShaderGenerator_get_skybox_rtt_218(PyObject *self, PyObject *) {
+static PyObject *Dtool_BSPShaderGenerator_get_skybox_rtt_219(PyObject *self, PyObject *) {
   BSPShaderGenerator *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_BSPShaderGenerator)) {
     return nullptr;
@@ -7843,18 +7855,18 @@ static PyObject *Dtool_BSPShaderGenerator_get_skybox_rtt_218(PyObject *self, PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPShaderGenerator_get_skybox_rtt_218_comment =
+static const char *Dtool_BSPShaderGenerator_get_skybox_rtt_219_comment =
   "C++ Interface:\n"
   "get_skybox_rtt(BSPShaderGenerator self)\n";
 #else
-static const char *Dtool_BSPShaderGenerator_get_skybox_rtt_218_comment = nullptr;
+static const char *Dtool_BSPShaderGenerator_get_skybox_rtt_219_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * static void BSPShaderGenerator::set_identity_cubemap(Texture *tex)
  */
-static PyObject *Dtool_BSPShaderGenerator_set_identity_cubemap_219(PyObject *, PyObject *arg) {
+static PyObject *Dtool_BSPShaderGenerator_set_identity_cubemap_220(PyObject *, PyObject *arg) {
   // 1-static void BSPShaderGenerator::set_identity_cubemap(Texture *tex)
   Texture *arg_this = (Texture *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_Texture, 0, "BSPShaderGenerator.set_identity_cubemap", false, true);
   if (arg_this != nullptr) {
@@ -7869,18 +7881,18 @@ static PyObject *Dtool_BSPShaderGenerator_set_identity_cubemap_219(PyObject *, P
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPShaderGenerator_set_identity_cubemap_219_comment =
+static const char *Dtool_BSPShaderGenerator_set_identity_cubemap_220_comment =
   "C++ Interface:\n"
   "set_identity_cubemap(Texture tex)\n";
 #else
-static const char *Dtool_BSPShaderGenerator_set_identity_cubemap_219_comment = nullptr;
+static const char *Dtool_BSPShaderGenerator_set_identity_cubemap_220_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * static Texture *BSPShaderGenerator::get_identity_cubemap(void)
  */
-static PyObject *Dtool_BSPShaderGenerator_get_identity_cubemap_220(PyObject *, PyObject *) {
+static PyObject *Dtool_BSPShaderGenerator_get_identity_cubemap_221(PyObject *, PyObject *) {
   // 1-static Texture *BSPShaderGenerator::get_identity_cubemap(void)
   Texture *return_value = BSPShaderGenerator::get_identity_cubemap();
   if (return_value != nullptr) {
@@ -7901,18 +7913,18 @@ static PyObject *Dtool_BSPShaderGenerator_get_identity_cubemap_220(PyObject *, P
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPShaderGenerator_get_identity_cubemap_220_comment =
+static const char *Dtool_BSPShaderGenerator_get_identity_cubemap_221_comment =
   "C++ Interface:\n"
   "get_identity_cubemap()\n";
 #else
-static const char *Dtool_BSPShaderGenerator_get_identity_cubemap_220_comment = nullptr;
+static const char *Dtool_BSPShaderGenerator_get_identity_cubemap_221_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * static TypeHandle BSPShaderGenerator::get_class_type(void)
  */
-static PyObject *Dtool_BSPShaderGenerator_get_class_type_221(PyObject *, PyObject *) {
+static PyObject *Dtool_BSPShaderGenerator_get_class_type_222(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPShaderGenerator::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(BSPShaderGenerator::get_class_type());
   if (return_value == nullptr) {
@@ -7926,11 +7938,11 @@ static PyObject *Dtool_BSPShaderGenerator_get_class_type_221(PyObject *, PyObjec
 }
 
 #ifndef NDEBUG
-static const char *Dtool_BSPShaderGenerator_get_class_type_221_comment =
+static const char *Dtool_BSPShaderGenerator_get_class_type_222_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_BSPShaderGenerator_get_class_type_221_comment = nullptr;
+static const char *Dtool_BSPShaderGenerator_get_class_type_222_comment = nullptr;
 #endif
 
 /**
@@ -8620,36 +8632,36 @@ static void *Dtool_DowncastInterface_CSMRenderSpec(void *from_this, Dtool_PyType
  * Python function wrapper for:
  * static void RayTrace::initialize(void)
  */
-static PyObject *Dtool_RayTrace_initialize_239(PyObject *, PyObject *) {
+static PyObject *Dtool_RayTrace_initialize_240(PyObject *, PyObject *) {
   // 1-static void RayTrace::initialize(void)
   RayTrace::initialize();
   return Dtool_Return_None();
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTrace_initialize_239_comment =
+static const char *Dtool_RayTrace_initialize_240_comment =
   "C++ Interface:\n"
   "initialize()\n";
 #else
-static const char *Dtool_RayTrace_initialize_239_comment = nullptr;
+static const char *Dtool_RayTrace_initialize_240_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * static void RayTrace::destruct(void)
  */
-static PyObject *Dtool_RayTrace_destruct_240(PyObject *, PyObject *) {
+static PyObject *Dtool_RayTrace_destruct_241(PyObject *, PyObject *) {
   // 1-static void RayTrace::destruct(void)
   RayTrace::destruct();
   return Dtool_Return_None();
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTrace_destruct_240_comment =
+static const char *Dtool_RayTrace_destruct_241_comment =
   "C++ Interface:\n"
   "destruct()\n";
 #else
-static const char *Dtool_RayTrace_destruct_240_comment = nullptr;
+static const char *Dtool_RayTrace_destruct_241_comment = nullptr;
 #endif
 
 /**
@@ -8750,7 +8762,7 @@ static void *Dtool_DowncastInterface_RayTrace(void *from_this, Dtool_PyTypedObje
  * Python function wrapper for:
  * inline bool RayTraceHitResult::has_hit(void) const
  */
-static PyObject *Dtool_RayTraceHitResult_has_hit_245(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceHitResult_has_hit_246(PyObject *self, PyObject *) {
   RayTraceHitResult *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_RayTraceHitResult)) {
     return nullptr;
@@ -8761,18 +8773,18 @@ static PyObject *Dtool_RayTraceHitResult_has_hit_245(PyObject *self, PyObject *)
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceHitResult_has_hit_245_comment =
+static const char *Dtool_RayTraceHitResult_has_hit_246_comment =
   "C++ Interface:\n"
   "has_hit(RayTraceHitResult self)\n";
 #else
-static const char *Dtool_RayTraceHitResult_has_hit_245_comment = nullptr;
+static const char *Dtool_RayTraceHitResult_has_hit_246_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline LVector3 RayTraceHitResult::get_hit_normal(void) const
  */
-static PyObject *Dtool_RayTraceHitResult_get_hit_normal_246(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceHitResult_get_hit_normal_247(PyObject *self, PyObject *) {
   RayTraceHitResult *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_RayTraceHitResult)) {
     return nullptr;
@@ -8790,18 +8802,18 @@ static PyObject *Dtool_RayTraceHitResult_get_hit_normal_246(PyObject *self, PyOb
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceHitResult_get_hit_normal_246_comment =
+static const char *Dtool_RayTraceHitResult_get_hit_normal_247_comment =
   "C++ Interface:\n"
   "get_hit_normal(RayTraceHitResult self)\n";
 #else
-static const char *Dtool_RayTraceHitResult_get_hit_normal_246_comment = nullptr;
+static const char *Dtool_RayTraceHitResult_get_hit_normal_247_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline LVector2 RayTraceHitResult::get_uv(void) const
  */
-static PyObject *Dtool_RayTraceHitResult_get_uv_247(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceHitResult_get_uv_248(PyObject *self, PyObject *) {
   RayTraceHitResult *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_RayTraceHitResult)) {
     return nullptr;
@@ -8819,18 +8831,18 @@ static PyObject *Dtool_RayTraceHitResult_get_uv_247(PyObject *self, PyObject *) 
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceHitResult_get_uv_247_comment =
+static const char *Dtool_RayTraceHitResult_get_uv_248_comment =
   "C++ Interface:\n"
   "get_uv(RayTraceHitResult self)\n";
 #else
-static const char *Dtool_RayTraceHitResult_get_uv_247_comment = nullptr;
+static const char *Dtool_RayTraceHitResult_get_uv_248_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline unsigned int RayTraceHitResult::get_prim_id(void) const
  */
-static PyObject *Dtool_RayTraceHitResult_get_prim_id_248(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceHitResult_get_prim_id_249(PyObject *self, PyObject *) {
   RayTraceHitResult *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_RayTraceHitResult)) {
     return nullptr;
@@ -8844,18 +8856,18 @@ static PyObject *Dtool_RayTraceHitResult_get_prim_id_248(PyObject *self, PyObjec
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceHitResult_get_prim_id_248_comment =
+static const char *Dtool_RayTraceHitResult_get_prim_id_249_comment =
   "C++ Interface:\n"
   "get_prim_id(RayTraceHitResult self)\n";
 #else
-static const char *Dtool_RayTraceHitResult_get_prim_id_248_comment = nullptr;
+static const char *Dtool_RayTraceHitResult_get_prim_id_249_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline unsigned int RayTraceHitResult::get_geom_id(void) const
  */
-static PyObject *Dtool_RayTraceHitResult_get_geom_id_249(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceHitResult_get_geom_id_250(PyObject *self, PyObject *) {
   RayTraceHitResult *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_RayTraceHitResult)) {
     return nullptr;
@@ -8869,18 +8881,18 @@ static PyObject *Dtool_RayTraceHitResult_get_geom_id_249(PyObject *self, PyObjec
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceHitResult_get_geom_id_249_comment =
+static const char *Dtool_RayTraceHitResult_get_geom_id_250_comment =
   "C++ Interface:\n"
   "get_geom_id(RayTraceHitResult self)\n";
 #else
-static const char *Dtool_RayTraceHitResult_get_geom_id_249_comment = nullptr;
+static const char *Dtool_RayTraceHitResult_get_geom_id_250_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline float RayTraceHitResult::get_hit_fraction(void) const
  */
-static PyObject *Dtool_RayTraceHitResult_get_hit_fraction_250(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceHitResult_get_hit_fraction_251(PyObject *self, PyObject *) {
   RayTraceHitResult *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_RayTraceHitResult)) {
     return nullptr;
@@ -8894,11 +8906,11 @@ static PyObject *Dtool_RayTraceHitResult_get_hit_fraction_250(PyObject *self, Py
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceHitResult_get_hit_fraction_250_comment =
+static const char *Dtool_RayTraceHitResult_get_hit_fraction_251_comment =
   "C++ Interface:\n"
   "get_hit_fraction(RayTraceHitResult self)\n";
 #else
-static const char *Dtool_RayTraceHitResult_get_hit_fraction_250_comment = nullptr;
+static const char *Dtool_RayTraceHitResult_get_hit_fraction_251_comment = nullptr;
 #endif
 
 /**
@@ -8999,7 +9011,7 @@ static void *Dtool_DowncastInterface_RayTraceHitResult(void *from_this, Dtool_Py
  * Python function wrapper for:
  * void RayTraceScene::add_geometry(RayTraceGeometry *geom)
  */
-static PyObject *Dtool_RayTraceScene_add_geometry_254(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_RayTraceScene_add_geometry_255(PyObject *self, PyObject *arg) {
   RayTraceScene *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceScene, (void **)&local_this, "RayTraceScene.add_geometry")) {
     return nullptr;
@@ -9019,18 +9031,18 @@ static PyObject *Dtool_RayTraceScene_add_geometry_254(PyObject *self, PyObject *
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceScene_add_geometry_254_comment =
+static const char *Dtool_RayTraceScene_add_geometry_255_comment =
   "C++ Interface:\n"
   "add_geometry(const RayTraceScene self, RayTraceGeometry geom)\n";
 #else
-static const char *Dtool_RayTraceScene_add_geometry_254_comment = nullptr;
+static const char *Dtool_RayTraceScene_add_geometry_255_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void RayTraceScene::remove_geometry(RayTraceGeometry *geom)
  */
-static PyObject *Dtool_RayTraceScene_remove_geometry_255(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_RayTraceScene_remove_geometry_256(PyObject *self, PyObject *arg) {
   RayTraceScene *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceScene, (void **)&local_this, "RayTraceScene.remove_geometry")) {
     return nullptr;
@@ -9050,18 +9062,18 @@ static PyObject *Dtool_RayTraceScene_remove_geometry_255(PyObject *self, PyObjec
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceScene_remove_geometry_255_comment =
+static const char *Dtool_RayTraceScene_remove_geometry_256_comment =
   "C++ Interface:\n"
   "remove_geometry(const RayTraceScene self, RayTraceGeometry geom)\n";
 #else
-static const char *Dtool_RayTraceScene_remove_geometry_255_comment = nullptr;
+static const char *Dtool_RayTraceScene_remove_geometry_256_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void RayTraceScene::remove_all(void)
  */
-static PyObject *Dtool_RayTraceScene_remove_all_256(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceScene_remove_all_257(PyObject *self, PyObject *) {
   RayTraceScene *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceScene, (void **)&local_this, "RayTraceScene.remove_all")) {
     return nullptr;
@@ -9072,18 +9084,18 @@ static PyObject *Dtool_RayTraceScene_remove_all_256(PyObject *self, PyObject *) 
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceScene_remove_all_256_comment =
+static const char *Dtool_RayTraceScene_remove_all_257_comment =
   "C++ Interface:\n"
   "remove_all(const RayTraceScene self)\n";
 #else
-static const char *Dtool_RayTraceScene_remove_all_256_comment = nullptr;
+static const char *Dtool_RayTraceScene_remove_all_257_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline RayTraceHitResult RayTraceScene::trace_line(LPoint3 const &start, LPoint3 const &end, BitMask32 const &mask)
  */
-static PyObject *Dtool_RayTraceScene_trace_line_258(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_RayTraceScene_trace_line_259(PyObject *self, PyObject *args, PyObject *kwds) {
   RayTraceScene *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceScene, (void **)&local_this, "RayTraceScene.trace_line")) {
     return nullptr;
@@ -9127,18 +9139,18 @@ static PyObject *Dtool_RayTraceScene_trace_line_258(PyObject *self, PyObject *ar
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceScene_trace_line_258_comment =
+static const char *Dtool_RayTraceScene_trace_line_259_comment =
   "C++ Interface:\n"
   "trace_line(const RayTraceScene self, const LPoint3f start, const LPoint3f end, const BitMask mask)\n";
 #else
-static const char *Dtool_RayTraceScene_trace_line_258_comment = nullptr;
+static const char *Dtool_RayTraceScene_trace_line_259_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * RayTraceHitResult RayTraceScene::trace_ray(LPoint3 const &origin, LVector3 const &direction, float distance, BitMask32 const &mask)
  */
-static PyObject *Dtool_RayTraceScene_trace_ray_259(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_RayTraceScene_trace_ray_260(PyObject *self, PyObject *args, PyObject *kwds) {
   RayTraceScene *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceScene, (void **)&local_this, "RayTraceScene.trace_ray")) {
     return nullptr;
@@ -9183,18 +9195,18 @@ static PyObject *Dtool_RayTraceScene_trace_ray_259(PyObject *self, PyObject *arg
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceScene_trace_ray_259_comment =
+static const char *Dtool_RayTraceScene_trace_ray_260_comment =
   "C++ Interface:\n"
   "trace_ray(const RayTraceScene self, const LPoint3f origin, const LVector3f direction, float distance, const BitMask mask)\n";
 #else
-static const char *Dtool_RayTraceScene_trace_ray_259_comment = nullptr;
+static const char *Dtool_RayTraceScene_trace_ray_260_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void RayTraceScene::set_build_quality(int quality)
  */
-static PyObject *Dtool_RayTraceScene_set_build_quality_260(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_RayTraceScene_set_build_quality_261(PyObject *self, PyObject *arg) {
   RayTraceScene *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceScene, (void **)&local_this, "RayTraceScene.set_build_quality")) {
     return nullptr;
@@ -9220,18 +9232,18 @@ static PyObject *Dtool_RayTraceScene_set_build_quality_260(PyObject *self, PyObj
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceScene_set_build_quality_260_comment =
+static const char *Dtool_RayTraceScene_set_build_quality_261_comment =
   "C++ Interface:\n"
   "set_build_quality(const RayTraceScene self, int quality)\n";
 #else
-static const char *Dtool_RayTraceScene_set_build_quality_260_comment = nullptr;
+static const char *Dtool_RayTraceScene_set_build_quality_261_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void RayTraceScene::update(void)
  */
-static PyObject *Dtool_RayTraceScene_update_261(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceScene_update_262(PyObject *self, PyObject *) {
   RayTraceScene *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceScene, (void **)&local_this, "RayTraceScene.update")) {
     return nullptr;
@@ -9242,18 +9254,18 @@ static PyObject *Dtool_RayTraceScene_update_261(PyObject *self, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceScene_update_261_comment =
+static const char *Dtool_RayTraceScene_update_262_comment =
   "C++ Interface:\n"
   "update(const RayTraceScene self)\n";
 #else
-static const char *Dtool_RayTraceScene_update_261_comment = nullptr;
+static const char *Dtool_RayTraceScene_update_262_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline RayTraceGeometry *RayTraceScene::get_geometry(unsigned int geom_id)
  */
-static PyObject *Dtool_RayTraceScene_get_geometry_262(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_RayTraceScene_get_geometry_263(PyObject *self, PyObject *arg) {
   RayTraceScene *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceScene, (void **)&local_this, "RayTraceScene.get_geometry")) {
     return nullptr;
@@ -9293,11 +9305,11 @@ static PyObject *Dtool_RayTraceScene_get_geometry_262(PyObject *self, PyObject *
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceScene_get_geometry_262_comment =
+static const char *Dtool_RayTraceScene_get_geometry_263_comment =
   "C++ Interface:\n"
   "get_geometry(const RayTraceScene self, int geom_id)\n";
 #else
-static const char *Dtool_RayTraceScene_get_geometry_262_comment = nullptr;
+static const char *Dtool_RayTraceScene_get_geometry_263_comment = nullptr;
 #endif
 
 /**
@@ -9407,7 +9419,7 @@ static void *Dtool_DowncastInterface_RayTraceScene(void *from_this, Dtool_PyType
  * Python function wrapper for:
  * static TypeHandle RayTraceGeometry::get_class_type(void)
  */
-static PyObject *Dtool_RayTraceGeometry_get_class_type_264(PyObject *, PyObject *) {
+static PyObject *Dtool_RayTraceGeometry_get_class_type_265(PyObject *, PyObject *) {
   // 1-static TypeHandle RayTraceGeometry::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(RayTraceGeometry::get_class_type());
   if (return_value == nullptr) {
@@ -9421,11 +9433,11 @@ static PyObject *Dtool_RayTraceGeometry_get_class_type_264(PyObject *, PyObject 
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceGeometry_get_class_type_264_comment =
+static const char *Dtool_RayTraceGeometry_get_class_type_265_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_RayTraceGeometry_get_class_type_264_comment = nullptr;
+static const char *Dtool_RayTraceGeometry_get_class_type_265_comment = nullptr;
 #endif
 
 /**
@@ -9433,7 +9445,7 @@ static const char *Dtool_RayTraceGeometry_get_class_type_264_comment = nullptr;
  * inline void RayTraceGeometry::set_mask(BitMask32 const &mask)
  * void RayTraceGeometry::set_mask(unsigned int mask)
  */
-static PyObject *Dtool_RayTraceGeometry_set_mask_265(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_RayTraceGeometry_set_mask_266(PyObject *self, PyObject *arg) {
   RayTraceGeometry *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceGeometry, (void **)&local_this, "RayTraceGeometry.set_mask")) {
     return nullptr;
@@ -9484,19 +9496,19 @@ static PyObject *Dtool_RayTraceGeometry_set_mask_265(PyObject *self, PyObject *a
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceGeometry_set_mask_265_comment =
+static const char *Dtool_RayTraceGeometry_set_mask_266_comment =
   "C++ Interface:\n"
   "set_mask(const RayTraceGeometry self, const BitMask mask)\n"
   "set_mask(const RayTraceGeometry self, int mask)\n";
 #else
-static const char *Dtool_RayTraceGeometry_set_mask_265_comment = nullptr;
+static const char *Dtool_RayTraceGeometry_set_mask_266_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline BitMask32 RayTraceGeometry::get_mask(void) const
  */
-static PyObject *Dtool_RayTraceGeometry_get_mask_266(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceGeometry_get_mask_267(PyObject *self, PyObject *) {
   RayTraceGeometry *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_RayTraceGeometry)) {
     return nullptr;
@@ -9514,18 +9526,18 @@ static PyObject *Dtool_RayTraceGeometry_get_mask_266(PyObject *self, PyObject *)
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceGeometry_get_mask_266_comment =
+static const char *Dtool_RayTraceGeometry_get_mask_267_comment =
   "C++ Interface:\n"
   "get_mask(RayTraceGeometry self)\n";
 #else
-static const char *Dtool_RayTraceGeometry_get_mask_266_comment = nullptr;
+static const char *Dtool_RayTraceGeometry_get_mask_267_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * inline unsigned int RayTraceGeometry::get_geom_id(void) const
  */
-static PyObject *Dtool_RayTraceGeometry_get_geom_id_267(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceGeometry_get_geom_id_268(PyObject *self, PyObject *) {
   RayTraceGeometry *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_RayTraceGeometry)) {
     return nullptr;
@@ -9539,18 +9551,18 @@ static PyObject *Dtool_RayTraceGeometry_get_geom_id_267(PyObject *self, PyObject
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceGeometry_get_geom_id_267_comment =
+static const char *Dtool_RayTraceGeometry_get_geom_id_268_comment =
   "C++ Interface:\n"
   "get_geom_id(RayTraceGeometry self)\n";
 #else
-static const char *Dtool_RayTraceGeometry_get_geom_id_267_comment = nullptr;
+static const char *Dtool_RayTraceGeometry_get_geom_id_268_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void RayTraceGeometry::set_build_quality(int quality)
  */
-static PyObject *Dtool_RayTraceGeometry_set_build_quality_268(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_RayTraceGeometry_set_build_quality_269(PyObject *self, PyObject *arg) {
   RayTraceGeometry *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceGeometry, (void **)&local_this, "RayTraceGeometry.set_build_quality")) {
     return nullptr;
@@ -9576,18 +9588,18 @@ static PyObject *Dtool_RayTraceGeometry_set_build_quality_268(PyObject *self, Py
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceGeometry_set_build_quality_268_comment =
+static const char *Dtool_RayTraceGeometry_set_build_quality_269_comment =
   "C++ Interface:\n"
   "set_build_quality(const RayTraceGeometry self, int quality)\n";
 #else
-static const char *Dtool_RayTraceGeometry_set_build_quality_268_comment = nullptr;
+static const char *Dtool_RayTraceGeometry_set_build_quality_269_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * virtual void RayTraceGeometry::build(void) = 0
  */
-static PyObject *Dtool_RayTraceGeometry_build_269(PyObject *self, PyObject *) {
+static PyObject *Dtool_RayTraceGeometry_build_270(PyObject *self, PyObject *) {
   RayTraceGeometry *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceGeometry, (void **)&local_this, "RayTraceGeometry.build")) {
     return nullptr;
@@ -9598,11 +9610,11 @@ static PyObject *Dtool_RayTraceGeometry_build_269(PyObject *self, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceGeometry_build_269_comment =
+static const char *Dtool_RayTraceGeometry_build_270_comment =
   "C++ Interface:\n"
   "build(const RayTraceGeometry self)\n";
 #else
-static const char *Dtool_RayTraceGeometry_build_269_comment = nullptr;
+static const char *Dtool_RayTraceGeometry_build_270_comment = nullptr;
 #endif
 
 static int Dtool_Init_RayTraceGeometry(PyObject *self, PyObject *args, PyObject *kwds) {
@@ -9706,7 +9718,7 @@ static void *Dtool_DowncastInterface_RayTraceGeometry(void *from_this, Dtool_PyT
  * Python function wrapper for:
  * static TypeHandle RayTraceTriangleMesh::get_class_type(void)
  */
-static PyObject *Dtool_RayTraceTriangleMesh_get_class_type_271(PyObject *, PyObject *) {
+static PyObject *Dtool_RayTraceTriangleMesh_get_class_type_272(PyObject *, PyObject *) {
   // 1-static TypeHandle RayTraceTriangleMesh::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(RayTraceTriangleMesh::get_class_type());
   if (return_value == nullptr) {
@@ -9720,18 +9732,18 @@ static PyObject *Dtool_RayTraceTriangleMesh_get_class_type_271(PyObject *, PyObj
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceTriangleMesh_get_class_type_271_comment =
+static const char *Dtool_RayTraceTriangleMesh_get_class_type_272_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_RayTraceTriangleMesh_get_class_type_271_comment = nullptr;
+static const char *Dtool_RayTraceTriangleMesh_get_class_type_272_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void RayTraceTriangleMesh::add_triangle(LPoint3 const &p1, LPoint3 const &p2, LPoint3 const &p3)
  */
-static PyObject *Dtool_RayTraceTriangleMesh_add_triangle_273(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_RayTraceTriangleMesh_add_triangle_274(PyObject *self, PyObject *args, PyObject *kwds) {
   RayTraceTriangleMesh *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceTriangleMesh, (void **)&local_this, "RayTraceTriangleMesh.add_triangle")) {
     return nullptr;
@@ -9768,18 +9780,18 @@ static PyObject *Dtool_RayTraceTriangleMesh_add_triangle_273(PyObject *self, PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceTriangleMesh_add_triangle_273_comment =
+static const char *Dtool_RayTraceTriangleMesh_add_triangle_274_comment =
   "C++ Interface:\n"
   "add_triangle(const RayTraceTriangleMesh self, const LPoint3f p1, const LPoint3f p2, const LPoint3f p3)\n";
 #else
-static const char *Dtool_RayTraceTriangleMesh_add_triangle_273_comment = nullptr;
+static const char *Dtool_RayTraceTriangleMesh_add_triangle_274_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void RayTraceTriangleMesh::add_triangles_from_geom(Geom const *geom, TransformState const *ts = nullptr)
  */
-static PyObject *Dtool_RayTraceTriangleMesh_add_triangles_from_geom_274(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_RayTraceTriangleMesh_add_triangles_from_geom_275(PyObject *self, PyObject *args, PyObject *kwds) {
   RayTraceTriangleMesh *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_RayTraceTriangleMesh, (void **)&local_this, "RayTraceTriangleMesh.add_triangles_from_geom")) {
     return nullptr;
@@ -9807,11 +9819,11 @@ static PyObject *Dtool_RayTraceTriangleMesh_add_triangles_from_geom_274(PyObject
 }
 
 #ifndef NDEBUG
-static const char *Dtool_RayTraceTriangleMesh_add_triangles_from_geom_274_comment =
+static const char *Dtool_RayTraceTriangleMesh_add_triangles_from_geom_275_comment =
   "C++ Interface:\n"
   "add_triangles_from_geom(const RayTraceTriangleMesh self, const Geom geom, const TransformState ts)\n";
 #else
-static const char *Dtool_RayTraceTriangleMesh_add_triangles_from_geom_274_comment = nullptr;
+static const char *Dtool_RayTraceTriangleMesh_add_triangles_from_geom_275_comment = nullptr;
 #endif
 
 /**
@@ -10097,7 +10109,7 @@ static void *Dtool_DowncastInterface_SkyBoxSpec(void *from_this, Dtool_PyTypedOb
  * Python function wrapper for:
  * static ConstPointerTo< RenderEffect > AmbientBoostEffect::make(void)
  */
-static PyObject *Dtool_AmbientBoostEffect_make_281(PyObject *, PyObject *) {
+static PyObject *Dtool_AmbientBoostEffect_make_282(PyObject *, PyObject *) {
   // 1-static ConstPointerTo< RenderEffect > AmbientBoostEffect::make(void)
   ConstPointerTo< RenderEffect > return_value = AmbientBoostEffect::make();
   if (Dtool_CheckErrorOccurred()) {
@@ -10115,18 +10127,18 @@ static PyObject *Dtool_AmbientBoostEffect_make_281(PyObject *, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_AmbientBoostEffect_make_281_comment =
+static const char *Dtool_AmbientBoostEffect_make_282_comment =
   "C++ Interface:\n"
   "make()\n";
 #else
-static const char *Dtool_AmbientBoostEffect_make_281_comment = nullptr;
+static const char *Dtool_AmbientBoostEffect_make_282_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * static TypeHandle AmbientBoostEffect::get_class_type(void)
  */
-static PyObject *Dtool_AmbientBoostEffect_get_class_type_282(PyObject *, PyObject *) {
+static PyObject *Dtool_AmbientBoostEffect_get_class_type_283(PyObject *, PyObject *) {
   // 1-static TypeHandle AmbientBoostEffect::get_class_type(void)
   TypeHandle *return_value = new TypeHandle(AmbientBoostEffect::get_class_type());
   if (return_value == nullptr) {
@@ -10140,11 +10152,11 @@ static PyObject *Dtool_AmbientBoostEffect_get_class_type_282(PyObject *, PyObjec
 }
 
 #ifndef NDEBUG
-static const char *Dtool_AmbientBoostEffect_get_class_type_282_comment =
+static const char *Dtool_AmbientBoostEffect_get_class_type_283_comment =
   "C++ Interface:\n"
   "get_class_type()\n";
 #else
-static const char *Dtool_AmbientBoostEffect_get_class_type_282_comment = nullptr;
+static const char *Dtool_AmbientBoostEffect_get_class_type_283_comment = nullptr;
 #endif
 
 static int Dtool_Init_AmbientBoostEffect(PyObject *self, PyObject *args, PyObject *kwds) {
@@ -12414,43 +12426,45 @@ static PyMethodDef Dtool_Methods_BSPLoader[] = {
   {"getEntityKeyvalues", (PyCFunction) &Dtool_BSPLoader_get_entity_keyvalues_144, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_keyvalues_144_comment},
   {"link_cent_to_pyent", (PyCFunction) &Dtool_BSPLoader_link_cent_to_pyent_145, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_link_cent_to_pyent_145_comment},
   {"linkCentToPyent", (PyCFunction) &Dtool_BSPLoader_link_cent_to_pyent_145, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_link_cent_to_pyent_145_comment},
-  {"get_num_entities", &Dtool_BSPLoader_get_num_entities_146, METH_NOARGS, (const char *)Dtool_BSPLoader_get_num_entities_146_comment},
-  {"getNumEntities", &Dtool_BSPLoader_get_num_entities_146, METH_NOARGS, (const char *)Dtool_BSPLoader_get_num_entities_146_comment},
-  {"get_entity_value", (PyCFunction) &Dtool_BSPLoader_get_entity_value_147, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_147_comment},
-  {"getEntityValue", (PyCFunction) &Dtool_BSPLoader_get_entity_value_147, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_147_comment},
-  {"get_entity_value_float", (PyCFunction) &Dtool_BSPLoader_get_entity_value_float_148, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_float_148_comment},
-  {"getEntityValueFloat", (PyCFunction) &Dtool_BSPLoader_get_entity_value_float_148, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_float_148_comment},
-  {"get_entity_value_int", (PyCFunction) &Dtool_BSPLoader_get_entity_value_int_149, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_int_149_comment},
-  {"getEntityValueInt", (PyCFunction) &Dtool_BSPLoader_get_entity_value_int_149, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_int_149_comment},
-  {"get_entity_value_vector", (PyCFunction) &Dtool_BSPLoader_get_entity_value_vector_150, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_vector_150_comment},
-  {"getEntityValueVector", (PyCFunction) &Dtool_BSPLoader_get_entity_value_vector_150, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_vector_150_comment},
-  {"get_entity_value_color", (PyCFunction) &Dtool_BSPLoader_get_entity_value_color_151, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_color_151_comment},
-  {"getEntityValueColor", (PyCFunction) &Dtool_BSPLoader_get_entity_value_color_151, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_color_151_comment},
-  {"get_entity", &Dtool_BSPLoader_get_entity_152, METH_O, (const char *)Dtool_BSPLoader_get_entity_152_comment},
-  {"getEntity", &Dtool_BSPLoader_get_entity_152, METH_O, (const char *)Dtool_BSPLoader_get_entity_152_comment},
-  {"get_model", &Dtool_BSPLoader_get_model_153, METH_O, (const char *)Dtool_BSPLoader_get_model_153_comment},
-  {"getModel", &Dtool_BSPLoader_get_model_153, METH_O, (const char *)Dtool_BSPLoader_get_model_153_comment},
-  {"get_c_entity", &Dtool_BSPLoader_get_c_entity_154, METH_O, (const char *)Dtool_BSPLoader_get_c_entity_154_comment},
-  {"getCEntity", &Dtool_BSPLoader_get_c_entity_154, METH_O, (const char *)Dtool_BSPLoader_get_c_entity_154_comment},
-  {"find_leaf", &Dtool_BSPLoader_find_leaf_155, METH_O, (const char *)Dtool_BSPLoader_find_leaf_155_comment},
-  {"findLeaf", &Dtool_BSPLoader_find_leaf_155, METH_O, (const char *)Dtool_BSPLoader_find_leaf_155_comment},
-  {"find_node", &Dtool_BSPLoader_find_node_156, METH_O, (const char *)Dtool_BSPLoader_find_node_156_comment},
-  {"findNode", &Dtool_BSPLoader_find_node_156, METH_O, (const char *)Dtool_BSPLoader_find_node_156_comment},
-  {"is_cluster_visible", (PyCFunction) &Dtool_BSPLoader_is_cluster_visible_157, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_is_cluster_visible_157_comment},
-  {"isClusterVisible", (PyCFunction) &Dtool_BSPLoader_is_cluster_visible_157, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_is_cluster_visible_157_comment},
-  {"pvs_bounds_test", &Dtool_BSPLoader_pvs_bounds_test_158, METH_O, (const char *)Dtool_BSPLoader_pvs_bounds_test_158_comment},
-  {"pvsBoundsTest", &Dtool_BSPLoader_pvs_bounds_test_158, METH_O, (const char *)Dtool_BSPLoader_pvs_bounds_test_158_comment},
-  {"make_net_bounds", (PyCFunction) &Dtool_BSPLoader_make_net_bounds_159, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_make_net_bounds_159_comment},
-  {"makeNetBounds", (PyCFunction) &Dtool_BSPLoader_make_net_bounds_159, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_make_net_bounds_159_comment},
-  {"has_active_level", &Dtool_BSPLoader_has_active_level_160, METH_NOARGS, (const char *)Dtool_BSPLoader_has_active_level_160_comment},
-  {"hasActiveLevel", &Dtool_BSPLoader_has_active_level_160, METH_NOARGS, (const char *)Dtool_BSPLoader_has_active_level_160_comment},
-  {"has_visibility", &Dtool_BSPLoader_has_visibility_161, METH_NOARGS, (const char *)Dtool_BSPLoader_has_visibility_161_comment},
-  {"hasVisibility", &Dtool_BSPLoader_has_visibility_161, METH_NOARGS, (const char *)Dtool_BSPLoader_has_visibility_161_comment},
-  {"cleanup", &Dtool_BSPLoader_cleanup_162, METH_NOARGS, (const char *)Dtool_BSPLoader_cleanup_162_comment},
-  {"get_result", &Dtool_BSPLoader_get_result_163, METH_NOARGS, (const char *)Dtool_BSPLoader_get_result_163_comment},
-  {"getResult", &Dtool_BSPLoader_get_result_163, METH_NOARGS, (const char *)Dtool_BSPLoader_get_result_163_comment},
-  {"get_global_ptr", &Dtool_BSPLoader_get_global_ptr_164, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPLoader_get_global_ptr_164_comment},
-  {"getGlobalPtr", &Dtool_BSPLoader_get_global_ptr_164, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPLoader_get_global_ptr_164_comment},
+  {"remove_py_entity", &Dtool_BSPLoader_remove_py_entity_146, METH_O, (const char *)Dtool_BSPLoader_remove_py_entity_146_comment},
+  {"removePyEntity", &Dtool_BSPLoader_remove_py_entity_146, METH_O, (const char *)Dtool_BSPLoader_remove_py_entity_146_comment},
+  {"get_num_entities", &Dtool_BSPLoader_get_num_entities_147, METH_NOARGS, (const char *)Dtool_BSPLoader_get_num_entities_147_comment},
+  {"getNumEntities", &Dtool_BSPLoader_get_num_entities_147, METH_NOARGS, (const char *)Dtool_BSPLoader_get_num_entities_147_comment},
+  {"get_entity_value", (PyCFunction) &Dtool_BSPLoader_get_entity_value_148, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_148_comment},
+  {"getEntityValue", (PyCFunction) &Dtool_BSPLoader_get_entity_value_148, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_148_comment},
+  {"get_entity_value_float", (PyCFunction) &Dtool_BSPLoader_get_entity_value_float_149, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_float_149_comment},
+  {"getEntityValueFloat", (PyCFunction) &Dtool_BSPLoader_get_entity_value_float_149, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_float_149_comment},
+  {"get_entity_value_int", (PyCFunction) &Dtool_BSPLoader_get_entity_value_int_150, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_int_150_comment},
+  {"getEntityValueInt", (PyCFunction) &Dtool_BSPLoader_get_entity_value_int_150, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_int_150_comment},
+  {"get_entity_value_vector", (PyCFunction) &Dtool_BSPLoader_get_entity_value_vector_151, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_vector_151_comment},
+  {"getEntityValueVector", (PyCFunction) &Dtool_BSPLoader_get_entity_value_vector_151, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_vector_151_comment},
+  {"get_entity_value_color", (PyCFunction) &Dtool_BSPLoader_get_entity_value_color_152, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_color_152_comment},
+  {"getEntityValueColor", (PyCFunction) &Dtool_BSPLoader_get_entity_value_color_152, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_get_entity_value_color_152_comment},
+  {"get_entity", &Dtool_BSPLoader_get_entity_153, METH_O, (const char *)Dtool_BSPLoader_get_entity_153_comment},
+  {"getEntity", &Dtool_BSPLoader_get_entity_153, METH_O, (const char *)Dtool_BSPLoader_get_entity_153_comment},
+  {"get_model", &Dtool_BSPLoader_get_model_154, METH_O, (const char *)Dtool_BSPLoader_get_model_154_comment},
+  {"getModel", &Dtool_BSPLoader_get_model_154, METH_O, (const char *)Dtool_BSPLoader_get_model_154_comment},
+  {"get_c_entity", &Dtool_BSPLoader_get_c_entity_155, METH_O, (const char *)Dtool_BSPLoader_get_c_entity_155_comment},
+  {"getCEntity", &Dtool_BSPLoader_get_c_entity_155, METH_O, (const char *)Dtool_BSPLoader_get_c_entity_155_comment},
+  {"find_leaf", &Dtool_BSPLoader_find_leaf_156, METH_O, (const char *)Dtool_BSPLoader_find_leaf_156_comment},
+  {"findLeaf", &Dtool_BSPLoader_find_leaf_156, METH_O, (const char *)Dtool_BSPLoader_find_leaf_156_comment},
+  {"find_node", &Dtool_BSPLoader_find_node_157, METH_O, (const char *)Dtool_BSPLoader_find_node_157_comment},
+  {"findNode", &Dtool_BSPLoader_find_node_157, METH_O, (const char *)Dtool_BSPLoader_find_node_157_comment},
+  {"is_cluster_visible", (PyCFunction) &Dtool_BSPLoader_is_cluster_visible_158, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_is_cluster_visible_158_comment},
+  {"isClusterVisible", (PyCFunction) &Dtool_BSPLoader_is_cluster_visible_158, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_is_cluster_visible_158_comment},
+  {"pvs_bounds_test", &Dtool_BSPLoader_pvs_bounds_test_159, METH_O, (const char *)Dtool_BSPLoader_pvs_bounds_test_159_comment},
+  {"pvsBoundsTest", &Dtool_BSPLoader_pvs_bounds_test_159, METH_O, (const char *)Dtool_BSPLoader_pvs_bounds_test_159_comment},
+  {"make_net_bounds", (PyCFunction) &Dtool_BSPLoader_make_net_bounds_160, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_make_net_bounds_160_comment},
+  {"makeNetBounds", (PyCFunction) &Dtool_BSPLoader_make_net_bounds_160, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_BSPLoader_make_net_bounds_160_comment},
+  {"has_active_level", &Dtool_BSPLoader_has_active_level_161, METH_NOARGS, (const char *)Dtool_BSPLoader_has_active_level_161_comment},
+  {"hasActiveLevel", &Dtool_BSPLoader_has_active_level_161, METH_NOARGS, (const char *)Dtool_BSPLoader_has_active_level_161_comment},
+  {"has_visibility", &Dtool_BSPLoader_has_visibility_162, METH_NOARGS, (const char *)Dtool_BSPLoader_has_visibility_162_comment},
+  {"hasVisibility", &Dtool_BSPLoader_has_visibility_162, METH_NOARGS, (const char *)Dtool_BSPLoader_has_visibility_162_comment},
+  {"cleanup", &Dtool_BSPLoader_cleanup_163, METH_NOARGS, (const char *)Dtool_BSPLoader_cleanup_163_comment},
+  {"get_result", &Dtool_BSPLoader_get_result_164, METH_NOARGS, (const char *)Dtool_BSPLoader_get_result_164_comment},
+  {"getResult", &Dtool_BSPLoader_get_result_164, METH_NOARGS, (const char *)Dtool_BSPLoader_get_result_164_comment},
+  {"get_global_ptr", &Dtool_BSPLoader_get_global_ptr_165, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPLoader_get_global_ptr_165_comment},
+  {"getGlobalPtr", &Dtool_BSPLoader_get_global_ptr_165, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPLoader_get_global_ptr_165_comment},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -12618,8 +12632,8 @@ static void Dtool_PyModuleClassInit_BSPLoader(PyObject *module) {
  * Python method tables for BSPCullTraverser (BSPCullTraverser)
  */
 static PyMethodDef Dtool_Methods_BSPCullTraverser[] = {
-  {"get_class_type", &Dtool_BSPCullTraverser_get_class_type_169, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPCullTraverser_get_class_type_169_comment},
-  {"getClassType", &Dtool_BSPCullTraverser_get_class_type_169, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPCullTraverser_get_class_type_169_comment},
+  {"get_class_type", &Dtool_BSPCullTraverser_get_class_type_170, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPCullTraverser_get_class_type_170_comment},
+  {"getClassType", &Dtool_BSPCullTraverser_get_class_type_170, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPCullTraverser_get_class_type_170_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -12815,8 +12829,8 @@ static void Dtool_PyModuleClassInit_BSPCullTraverser(PyObject *module) {
  * Python method tables for BSPRender (BSPRender)
  */
 static PyMethodDef Dtool_Methods_BSPRender[] = {
-  {"get_class_type", &Dtool_BSPRender_get_class_type_174, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPRender_get_class_type_174_comment},
-  {"getClassType", &Dtool_BSPRender_get_class_type_174, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPRender_get_class_type_174_comment},
+  {"get_class_type", &Dtool_BSPRender_get_class_type_175, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPRender_get_class_type_175_comment},
+  {"getClassType", &Dtool_BSPRender_get_class_type_175, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPRender_get_class_type_175_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -13019,8 +13033,8 @@ static void Dtool_PyModuleClassInit_BSPRender(PyObject *module) {
  * Python method tables for BSPRoot (BSPRoot)
  */
 static PyMethodDef Dtool_Methods_BSPRoot[] = {
-  {"get_class_type", &Dtool_BSPRoot_get_class_type_178, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPRoot_get_class_type_178_comment},
-  {"getClassType", &Dtool_BSPRoot_get_class_type_178, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPRoot_get_class_type_178_comment},
+  {"get_class_type", &Dtool_BSPRoot_get_class_type_179, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPRoot_get_class_type_179_comment},
+  {"getClassType", &Dtool_BSPRoot_get_class_type_179, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPRoot_get_class_type_179_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -13216,8 +13230,8 @@ static void Dtool_PyModuleClassInit_BSPRoot(PyObject *module) {
  * Python method tables for BSPProp (BSPProp)
  */
 static PyMethodDef Dtool_Methods_BSPProp[] = {
-  {"get_class_type", &Dtool_BSPProp_get_class_type_183, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPProp_get_class_type_183_comment},
-  {"getClassType", &Dtool_BSPProp_get_class_type_183, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPProp_get_class_type_183_comment},
+  {"get_class_type", &Dtool_BSPProp_get_class_type_184, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPProp_get_class_type_184_comment},
+  {"getClassType", &Dtool_BSPProp_get_class_type_184, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPProp_get_class_type_184_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -13413,8 +13427,8 @@ static void Dtool_PyModuleClassInit_BSPProp(PyObject *module) {
  * Python method tables for BSPModel (BSPModel)
  */
 static PyMethodDef Dtool_Methods_BSPModel[] = {
-  {"get_class_type", &Dtool_BSPModel_get_class_type_188, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPModel_get_class_type_188_comment},
-  {"getClassType", &Dtool_BSPModel_get_class_type_188, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPModel_get_class_type_188_comment},
+  {"get_class_type", &Dtool_BSPModel_get_class_type_189, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPModel_get_class_type_189_comment},
+  {"getClassType", &Dtool_BSPModel_get_class_type_189, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPModel_get_class_type_189_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -13610,12 +13624,12 @@ static void Dtool_PyModuleClassInit_BSPModel(PyObject *module) {
  * Python method tables for ShaderPermutations (ShaderPermutations)
  */
 static PyMethodDef Dtool_Methods_ShaderPermutations[] = {
-  {"add_permutation", (PyCFunction) &Dtool_ShaderPermutations_add_permutation_192, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderPermutations_add_permutation_192_comment},
-  {"addPermutation", (PyCFunction) &Dtool_ShaderPermutations_add_permutation_192, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderPermutations_add_permutation_192_comment},
-  {"add_input", (PyCFunction) &Dtool_ShaderPermutations_add_input_193, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderPermutations_add_input_193_comment},
-  {"addInput", (PyCFunction) &Dtool_ShaderPermutations_add_input_193, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderPermutations_add_input_193_comment},
-  {"add_flag", &Dtool_ShaderPermutations_add_flag_194, METH_O, (const char *)Dtool_ShaderPermutations_add_flag_194_comment},
-  {"addFlag", &Dtool_ShaderPermutations_add_flag_194, METH_O, (const char *)Dtool_ShaderPermutations_add_flag_194_comment},
+  {"add_permutation", (PyCFunction) &Dtool_ShaderPermutations_add_permutation_193, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderPermutations_add_permutation_193_comment},
+  {"addPermutation", (PyCFunction) &Dtool_ShaderPermutations_add_permutation_193, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderPermutations_add_permutation_193_comment},
+  {"add_input", (PyCFunction) &Dtool_ShaderPermutations_add_input_194, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderPermutations_add_input_194_comment},
+  {"addInput", (PyCFunction) &Dtool_ShaderPermutations_add_input_194, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderPermutations_add_input_194_comment},
+  {"add_flag", &Dtool_ShaderPermutations_add_flag_195, METH_O, (const char *)Dtool_ShaderPermutations_add_flag_195_comment},
+  {"addFlag", &Dtool_ShaderPermutations_add_flag_195, METH_O, (const char *)Dtool_ShaderPermutations_add_flag_195_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -13812,14 +13826,14 @@ static void Dtool_PyModuleClassInit_ShaderPermutations(PyObject *module) {
  * Python method tables for ShaderSpec (ShaderSpec)
  */
 static PyMethodDef Dtool_Methods_ShaderSpec[] = {
-  {"read_shader_files", (PyCFunction) &Dtool_ShaderSpec_read_shader_files_205, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderSpec_read_shader_files_205_comment},
-  {"readShaderFiles", (PyCFunction) &Dtool_ShaderSpec_read_shader_files_205, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderSpec_read_shader_files_205_comment},
-  {"get_class_type", &Dtool_ShaderSpec_get_class_type_206, METH_NOARGS | METH_STATIC, (const char *)Dtool_ShaderSpec_get_class_type_206_comment},
-  {"getClassType", &Dtool_ShaderSpec_get_class_type_206, METH_NOARGS | METH_STATIC, (const char *)Dtool_ShaderSpec_get_class_type_206_comment},
-  {"upcast_to_ReferenceCount", &Dtool_ShaderSpec_upcast_to_ReferenceCount_200, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_ReferenceCount_200_comment},
-  {"upcastToReferenceCount", &Dtool_ShaderSpec_upcast_to_ReferenceCount_200, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_ReferenceCount_200_comment},
-  {"upcast_to_Namable", &Dtool_ShaderSpec_upcast_to_Namable_203, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_Namable_203_comment},
-  {"upcastToNamable", &Dtool_ShaderSpec_upcast_to_Namable_203, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_Namable_203_comment},
+  {"read_shader_files", (PyCFunction) &Dtool_ShaderSpec_read_shader_files_206, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderSpec_read_shader_files_206_comment},
+  {"readShaderFiles", (PyCFunction) &Dtool_ShaderSpec_read_shader_files_206, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_ShaderSpec_read_shader_files_206_comment},
+  {"get_class_type", &Dtool_ShaderSpec_get_class_type_207, METH_NOARGS | METH_STATIC, (const char *)Dtool_ShaderSpec_get_class_type_207_comment},
+  {"getClassType", &Dtool_ShaderSpec_get_class_type_207, METH_NOARGS | METH_STATIC, (const char *)Dtool_ShaderSpec_get_class_type_207_comment},
+  {"upcast_to_ReferenceCount", &Dtool_ShaderSpec_upcast_to_ReferenceCount_201, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_ReferenceCount_201_comment},
+  {"upcastToReferenceCount", &Dtool_ShaderSpec_upcast_to_ReferenceCount_201, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_ReferenceCount_201_comment},
+  {"upcast_to_Namable", &Dtool_ShaderSpec_upcast_to_Namable_204, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_Namable_204_comment},
+  {"upcastToNamable", &Dtool_ShaderSpec_upcast_to_Namable_204, METH_NOARGS, (const char *)Dtool_ShaderSpec_upcast_to_Namable_204_comment},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -14023,26 +14037,26 @@ static void Dtool_PyModuleClassInit_ShaderSpec(PyObject *module) {
  * Python method tables for BSPShaderGenerator (BSPShaderGenerator)
  */
 static PyMethodDef Dtool_Methods_BSPShaderGenerator[] = {
-  {"set_sun_light", &Dtool_BSPShaderGenerator_set_sun_light_211, METH_O, (const char *)Dtool_BSPShaderGenerator_set_sun_light_211_comment},
-  {"setSunLight", &Dtool_BSPShaderGenerator_set_sun_light_211, METH_O, (const char *)Dtool_BSPShaderGenerator_set_sun_light_211_comment},
-  {"start_update", &Dtool_BSPShaderGenerator_start_update_212, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_start_update_212_comment},
-  {"startUpdate", &Dtool_BSPShaderGenerator_start_update_212, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_start_update_212_comment},
-  {"add_shader", &Dtool_BSPShaderGenerator_add_shader_213, METH_O, (const char *)Dtool_BSPShaderGenerator_add_shader_213_comment},
-  {"addShader", &Dtool_BSPShaderGenerator_add_shader_213, METH_O, (const char *)Dtool_BSPShaderGenerator_add_shader_213_comment},
-  {"has_shadow_sunlight", &Dtool_BSPShaderGenerator_has_shadow_sunlight_214, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_has_shadow_sunlight_214_comment},
-  {"hasShadowSunlight", &Dtool_BSPShaderGenerator_has_shadow_sunlight_214, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_has_shadow_sunlight_214_comment},
-  {"get_pssm_array_texture", &Dtool_BSPShaderGenerator_get_pssm_array_texture_215, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_pssm_array_texture_215_comment},
-  {"getPssmArrayTexture", &Dtool_BSPShaderGenerator_get_pssm_array_texture_215, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_pssm_array_texture_215_comment},
-  {"get_skybox_root", &Dtool_BSPShaderGenerator_get_skybox_root_217, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_skybox_root_217_comment},
-  {"getSkyboxRoot", &Dtool_BSPShaderGenerator_get_skybox_root_217, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_skybox_root_217_comment},
-  {"get_skybox_rtt", &Dtool_BSPShaderGenerator_get_skybox_rtt_218, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_skybox_rtt_218_comment},
-  {"getSkyboxRtt", &Dtool_BSPShaderGenerator_get_skybox_rtt_218, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_skybox_rtt_218_comment},
-  {"set_identity_cubemap", &Dtool_BSPShaderGenerator_set_identity_cubemap_219, METH_O | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_set_identity_cubemap_219_comment},
-  {"setIdentityCubemap", &Dtool_BSPShaderGenerator_set_identity_cubemap_219, METH_O | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_set_identity_cubemap_219_comment},
-  {"get_identity_cubemap", &Dtool_BSPShaderGenerator_get_identity_cubemap_220, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_get_identity_cubemap_220_comment},
-  {"getIdentityCubemap", &Dtool_BSPShaderGenerator_get_identity_cubemap_220, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_get_identity_cubemap_220_comment},
-  {"get_class_type", &Dtool_BSPShaderGenerator_get_class_type_221, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_get_class_type_221_comment},
-  {"getClassType", &Dtool_BSPShaderGenerator_get_class_type_221, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_get_class_type_221_comment},
+  {"set_sun_light", &Dtool_BSPShaderGenerator_set_sun_light_212, METH_O, (const char *)Dtool_BSPShaderGenerator_set_sun_light_212_comment},
+  {"setSunLight", &Dtool_BSPShaderGenerator_set_sun_light_212, METH_O, (const char *)Dtool_BSPShaderGenerator_set_sun_light_212_comment},
+  {"start_update", &Dtool_BSPShaderGenerator_start_update_213, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_start_update_213_comment},
+  {"startUpdate", &Dtool_BSPShaderGenerator_start_update_213, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_start_update_213_comment},
+  {"add_shader", &Dtool_BSPShaderGenerator_add_shader_214, METH_O, (const char *)Dtool_BSPShaderGenerator_add_shader_214_comment},
+  {"addShader", &Dtool_BSPShaderGenerator_add_shader_214, METH_O, (const char *)Dtool_BSPShaderGenerator_add_shader_214_comment},
+  {"has_shadow_sunlight", &Dtool_BSPShaderGenerator_has_shadow_sunlight_215, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_has_shadow_sunlight_215_comment},
+  {"hasShadowSunlight", &Dtool_BSPShaderGenerator_has_shadow_sunlight_215, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_has_shadow_sunlight_215_comment},
+  {"get_pssm_array_texture", &Dtool_BSPShaderGenerator_get_pssm_array_texture_216, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_pssm_array_texture_216_comment},
+  {"getPssmArrayTexture", &Dtool_BSPShaderGenerator_get_pssm_array_texture_216, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_pssm_array_texture_216_comment},
+  {"get_skybox_root", &Dtool_BSPShaderGenerator_get_skybox_root_218, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_skybox_root_218_comment},
+  {"getSkyboxRoot", &Dtool_BSPShaderGenerator_get_skybox_root_218, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_skybox_root_218_comment},
+  {"get_skybox_rtt", &Dtool_BSPShaderGenerator_get_skybox_rtt_219, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_skybox_rtt_219_comment},
+  {"getSkyboxRtt", &Dtool_BSPShaderGenerator_get_skybox_rtt_219, METH_NOARGS, (const char *)Dtool_BSPShaderGenerator_get_skybox_rtt_219_comment},
+  {"set_identity_cubemap", &Dtool_BSPShaderGenerator_set_identity_cubemap_220, METH_O | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_set_identity_cubemap_220_comment},
+  {"setIdentityCubemap", &Dtool_BSPShaderGenerator_set_identity_cubemap_220, METH_O | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_set_identity_cubemap_220_comment},
+  {"get_identity_cubemap", &Dtool_BSPShaderGenerator_get_identity_cubemap_221, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_get_identity_cubemap_221_comment},
+  {"getIdentityCubemap", &Dtool_BSPShaderGenerator_get_identity_cubemap_221, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_get_identity_cubemap_221_comment},
+  {"get_class_type", &Dtool_BSPShaderGenerator_get_class_type_222, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_get_class_type_222_comment},
+  {"getClassType", &Dtool_BSPShaderGenerator_get_class_type_222, METH_NOARGS | METH_STATIC, (const char *)Dtool_BSPShaderGenerator_get_class_type_222_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -15200,8 +15214,8 @@ static void Dtool_PyModuleClassInit_CSMRenderSpec(PyObject *module) {
  * Python method tables for RayTrace (RayTrace)
  */
 static PyMethodDef Dtool_Methods_RayTrace[] = {
-  {"initialize", &Dtool_RayTrace_initialize_239, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTrace_initialize_239_comment},
-  {"destruct", &Dtool_RayTrace_destruct_240, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTrace_destruct_240_comment},
+  {"initialize", &Dtool_RayTrace_initialize_240, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTrace_initialize_240_comment},
+  {"destruct", &Dtool_RayTrace_destruct_241, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTrace_destruct_241_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -15354,18 +15368,18 @@ static void Dtool_PyModuleClassInit_RayTrace(PyObject *module) {
  * Python method tables for RayTraceHitResult (RayTraceHitResult)
  */
 static PyMethodDef Dtool_Methods_RayTraceHitResult[] = {
-  {"has_hit", &Dtool_RayTraceHitResult_has_hit_245, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_has_hit_245_comment},
-  {"hasHit", &Dtool_RayTraceHitResult_has_hit_245, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_has_hit_245_comment},
-  {"get_hit_normal", &Dtool_RayTraceHitResult_get_hit_normal_246, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_hit_normal_246_comment},
-  {"getHitNormal", &Dtool_RayTraceHitResult_get_hit_normal_246, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_hit_normal_246_comment},
-  {"get_uv", &Dtool_RayTraceHitResult_get_uv_247, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_uv_247_comment},
-  {"getUv", &Dtool_RayTraceHitResult_get_uv_247, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_uv_247_comment},
-  {"get_prim_id", &Dtool_RayTraceHitResult_get_prim_id_248, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_prim_id_248_comment},
-  {"getPrimId", &Dtool_RayTraceHitResult_get_prim_id_248, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_prim_id_248_comment},
-  {"get_geom_id", &Dtool_RayTraceHitResult_get_geom_id_249, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_geom_id_249_comment},
-  {"getGeomId", &Dtool_RayTraceHitResult_get_geom_id_249, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_geom_id_249_comment},
-  {"get_hit_fraction", &Dtool_RayTraceHitResult_get_hit_fraction_250, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_hit_fraction_250_comment},
-  {"getHitFraction", &Dtool_RayTraceHitResult_get_hit_fraction_250, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_hit_fraction_250_comment},
+  {"has_hit", &Dtool_RayTraceHitResult_has_hit_246, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_has_hit_246_comment},
+  {"hasHit", &Dtool_RayTraceHitResult_has_hit_246, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_has_hit_246_comment},
+  {"get_hit_normal", &Dtool_RayTraceHitResult_get_hit_normal_247, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_hit_normal_247_comment},
+  {"getHitNormal", &Dtool_RayTraceHitResult_get_hit_normal_247, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_hit_normal_247_comment},
+  {"get_uv", &Dtool_RayTraceHitResult_get_uv_248, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_uv_248_comment},
+  {"getUv", &Dtool_RayTraceHitResult_get_uv_248, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_uv_248_comment},
+  {"get_prim_id", &Dtool_RayTraceHitResult_get_prim_id_249, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_prim_id_249_comment},
+  {"getPrimId", &Dtool_RayTraceHitResult_get_prim_id_249, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_prim_id_249_comment},
+  {"get_geom_id", &Dtool_RayTraceHitResult_get_geom_id_250, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_geom_id_250_comment},
+  {"getGeomId", &Dtool_RayTraceHitResult_get_geom_id_250, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_geom_id_250_comment},
+  {"get_hit_fraction", &Dtool_RayTraceHitResult_get_hit_fraction_251, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_hit_fraction_251_comment},
+  {"getHitFraction", &Dtool_RayTraceHitResult_get_hit_fraction_251, METH_NOARGS, (const char *)Dtool_RayTraceHitResult_get_hit_fraction_251_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -15518,21 +15532,21 @@ static void Dtool_PyModuleClassInit_RayTraceHitResult(PyObject *module) {
  * Python method tables for RayTraceScene (RayTraceScene)
  */
 static PyMethodDef Dtool_Methods_RayTraceScene[] = {
-  {"add_geometry", &Dtool_RayTraceScene_add_geometry_254, METH_O, (const char *)Dtool_RayTraceScene_add_geometry_254_comment},
-  {"addGeometry", &Dtool_RayTraceScene_add_geometry_254, METH_O, (const char *)Dtool_RayTraceScene_add_geometry_254_comment},
-  {"remove_geometry", &Dtool_RayTraceScene_remove_geometry_255, METH_O, (const char *)Dtool_RayTraceScene_remove_geometry_255_comment},
-  {"removeGeometry", &Dtool_RayTraceScene_remove_geometry_255, METH_O, (const char *)Dtool_RayTraceScene_remove_geometry_255_comment},
-  {"remove_all", &Dtool_RayTraceScene_remove_all_256, METH_NOARGS, (const char *)Dtool_RayTraceScene_remove_all_256_comment},
-  {"removeAll", &Dtool_RayTraceScene_remove_all_256, METH_NOARGS, (const char *)Dtool_RayTraceScene_remove_all_256_comment},
-  {"trace_line", (PyCFunction) &Dtool_RayTraceScene_trace_line_258, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceScene_trace_line_258_comment},
-  {"traceLine", (PyCFunction) &Dtool_RayTraceScene_trace_line_258, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceScene_trace_line_258_comment},
-  {"trace_ray", (PyCFunction) &Dtool_RayTraceScene_trace_ray_259, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceScene_trace_ray_259_comment},
-  {"traceRay", (PyCFunction) &Dtool_RayTraceScene_trace_ray_259, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceScene_trace_ray_259_comment},
-  {"set_build_quality", &Dtool_RayTraceScene_set_build_quality_260, METH_O, (const char *)Dtool_RayTraceScene_set_build_quality_260_comment},
-  {"setBuildQuality", &Dtool_RayTraceScene_set_build_quality_260, METH_O, (const char *)Dtool_RayTraceScene_set_build_quality_260_comment},
-  {"update", &Dtool_RayTraceScene_update_261, METH_NOARGS, (const char *)Dtool_RayTraceScene_update_261_comment},
-  {"get_geometry", &Dtool_RayTraceScene_get_geometry_262, METH_O, (const char *)Dtool_RayTraceScene_get_geometry_262_comment},
-  {"getGeometry", &Dtool_RayTraceScene_get_geometry_262, METH_O, (const char *)Dtool_RayTraceScene_get_geometry_262_comment},
+  {"add_geometry", &Dtool_RayTraceScene_add_geometry_255, METH_O, (const char *)Dtool_RayTraceScene_add_geometry_255_comment},
+  {"addGeometry", &Dtool_RayTraceScene_add_geometry_255, METH_O, (const char *)Dtool_RayTraceScene_add_geometry_255_comment},
+  {"remove_geometry", &Dtool_RayTraceScene_remove_geometry_256, METH_O, (const char *)Dtool_RayTraceScene_remove_geometry_256_comment},
+  {"removeGeometry", &Dtool_RayTraceScene_remove_geometry_256, METH_O, (const char *)Dtool_RayTraceScene_remove_geometry_256_comment},
+  {"remove_all", &Dtool_RayTraceScene_remove_all_257, METH_NOARGS, (const char *)Dtool_RayTraceScene_remove_all_257_comment},
+  {"removeAll", &Dtool_RayTraceScene_remove_all_257, METH_NOARGS, (const char *)Dtool_RayTraceScene_remove_all_257_comment},
+  {"trace_line", (PyCFunction) &Dtool_RayTraceScene_trace_line_259, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceScene_trace_line_259_comment},
+  {"traceLine", (PyCFunction) &Dtool_RayTraceScene_trace_line_259, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceScene_trace_line_259_comment},
+  {"trace_ray", (PyCFunction) &Dtool_RayTraceScene_trace_ray_260, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceScene_trace_ray_260_comment},
+  {"traceRay", (PyCFunction) &Dtool_RayTraceScene_trace_ray_260, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceScene_trace_ray_260_comment},
+  {"set_build_quality", &Dtool_RayTraceScene_set_build_quality_261, METH_O, (const char *)Dtool_RayTraceScene_set_build_quality_261_comment},
+  {"setBuildQuality", &Dtool_RayTraceScene_set_build_quality_261, METH_O, (const char *)Dtool_RayTraceScene_set_build_quality_261_comment},
+  {"update", &Dtool_RayTraceScene_update_262, METH_NOARGS, (const char *)Dtool_RayTraceScene_update_262_comment},
+  {"get_geometry", &Dtool_RayTraceScene_get_geometry_263, METH_O, (const char *)Dtool_RayTraceScene_get_geometry_263_comment},
+  {"getGeometry", &Dtool_RayTraceScene_get_geometry_263, METH_O, (const char *)Dtool_RayTraceScene_get_geometry_263_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -15732,17 +15746,17 @@ static void Dtool_PyModuleClassInit_RayTraceScene(PyObject *module) {
  * Python method tables for RayTraceGeometry (RayTraceGeometry)
  */
 static PyMethodDef Dtool_Methods_RayTraceGeometry[] = {
-  {"get_class_type", &Dtool_RayTraceGeometry_get_class_type_264, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTraceGeometry_get_class_type_264_comment},
-  {"getClassType", &Dtool_RayTraceGeometry_get_class_type_264, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTraceGeometry_get_class_type_264_comment},
-  {"set_mask", &Dtool_RayTraceGeometry_set_mask_265, METH_O, (const char *)Dtool_RayTraceGeometry_set_mask_265_comment},
-  {"setMask", &Dtool_RayTraceGeometry_set_mask_265, METH_O, (const char *)Dtool_RayTraceGeometry_set_mask_265_comment},
-  {"get_mask", &Dtool_RayTraceGeometry_get_mask_266, METH_NOARGS, (const char *)Dtool_RayTraceGeometry_get_mask_266_comment},
-  {"getMask", &Dtool_RayTraceGeometry_get_mask_266, METH_NOARGS, (const char *)Dtool_RayTraceGeometry_get_mask_266_comment},
-  {"get_geom_id", &Dtool_RayTraceGeometry_get_geom_id_267, METH_NOARGS, (const char *)Dtool_RayTraceGeometry_get_geom_id_267_comment},
-  {"getGeomId", &Dtool_RayTraceGeometry_get_geom_id_267, METH_NOARGS, (const char *)Dtool_RayTraceGeometry_get_geom_id_267_comment},
-  {"set_build_quality", &Dtool_RayTraceGeometry_set_build_quality_268, METH_O, (const char *)Dtool_RayTraceGeometry_set_build_quality_268_comment},
-  {"setBuildQuality", &Dtool_RayTraceGeometry_set_build_quality_268, METH_O, (const char *)Dtool_RayTraceGeometry_set_build_quality_268_comment},
-  {"build", &Dtool_RayTraceGeometry_build_269, METH_NOARGS, (const char *)Dtool_RayTraceGeometry_build_269_comment},
+  {"get_class_type", &Dtool_RayTraceGeometry_get_class_type_265, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTraceGeometry_get_class_type_265_comment},
+  {"getClassType", &Dtool_RayTraceGeometry_get_class_type_265, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTraceGeometry_get_class_type_265_comment},
+  {"set_mask", &Dtool_RayTraceGeometry_set_mask_266, METH_O, (const char *)Dtool_RayTraceGeometry_set_mask_266_comment},
+  {"setMask", &Dtool_RayTraceGeometry_set_mask_266, METH_O, (const char *)Dtool_RayTraceGeometry_set_mask_266_comment},
+  {"get_mask", &Dtool_RayTraceGeometry_get_mask_267, METH_NOARGS, (const char *)Dtool_RayTraceGeometry_get_mask_267_comment},
+  {"getMask", &Dtool_RayTraceGeometry_get_mask_267, METH_NOARGS, (const char *)Dtool_RayTraceGeometry_get_mask_267_comment},
+  {"get_geom_id", &Dtool_RayTraceGeometry_get_geom_id_268, METH_NOARGS, (const char *)Dtool_RayTraceGeometry_get_geom_id_268_comment},
+  {"getGeomId", &Dtool_RayTraceGeometry_get_geom_id_268, METH_NOARGS, (const char *)Dtool_RayTraceGeometry_get_geom_id_268_comment},
+  {"set_build_quality", &Dtool_RayTraceGeometry_set_build_quality_269, METH_O, (const char *)Dtool_RayTraceGeometry_set_build_quality_269_comment},
+  {"setBuildQuality", &Dtool_RayTraceGeometry_set_build_quality_269, METH_O, (const char *)Dtool_RayTraceGeometry_set_build_quality_269_comment},
+  {"build", &Dtool_RayTraceGeometry_build_270, METH_NOARGS, (const char *)Dtool_RayTraceGeometry_build_270_comment},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -15936,12 +15950,12 @@ static void Dtool_PyModuleClassInit_RayTraceGeometry(PyObject *module) {
  * Python method tables for RayTraceTriangleMesh (RayTraceTriangleMesh)
  */
 static PyMethodDef Dtool_Methods_RayTraceTriangleMesh[] = {
-  {"get_class_type", &Dtool_RayTraceTriangleMesh_get_class_type_271, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTraceTriangleMesh_get_class_type_271_comment},
-  {"getClassType", &Dtool_RayTraceTriangleMesh_get_class_type_271, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTraceTriangleMesh_get_class_type_271_comment},
-  {"add_triangle", (PyCFunction) &Dtool_RayTraceTriangleMesh_add_triangle_273, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceTriangleMesh_add_triangle_273_comment},
-  {"addTriangle", (PyCFunction) &Dtool_RayTraceTriangleMesh_add_triangle_273, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceTriangleMesh_add_triangle_273_comment},
-  {"add_triangles_from_geom", (PyCFunction) &Dtool_RayTraceTriangleMesh_add_triangles_from_geom_274, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceTriangleMesh_add_triangles_from_geom_274_comment},
-  {"addTrianglesFromGeom", (PyCFunction) &Dtool_RayTraceTriangleMesh_add_triangles_from_geom_274, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceTriangleMesh_add_triangles_from_geom_274_comment},
+  {"get_class_type", &Dtool_RayTraceTriangleMesh_get_class_type_272, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTraceTriangleMesh_get_class_type_272_comment},
+  {"getClassType", &Dtool_RayTraceTriangleMesh_get_class_type_272, METH_NOARGS | METH_STATIC, (const char *)Dtool_RayTraceTriangleMesh_get_class_type_272_comment},
+  {"add_triangle", (PyCFunction) &Dtool_RayTraceTriangleMesh_add_triangle_274, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceTriangleMesh_add_triangle_274_comment},
+  {"addTriangle", (PyCFunction) &Dtool_RayTraceTriangleMesh_add_triangle_274, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceTriangleMesh_add_triangle_274_comment},
+  {"add_triangles_from_geom", (PyCFunction) &Dtool_RayTraceTriangleMesh_add_triangles_from_geom_275, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceTriangleMesh_add_triangles_from_geom_275_comment},
+  {"addTrianglesFromGeom", (PyCFunction) &Dtool_RayTraceTriangleMesh_add_triangles_from_geom_275, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_RayTraceTriangleMesh_add_triangles_from_geom_275_comment},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -16324,9 +16338,9 @@ static void Dtool_PyModuleClassInit_SkyBoxSpec(PyObject *module) {
  * Python method tables for AmbientBoostEffect (AmbientBoostEffect)
  */
 static PyMethodDef Dtool_Methods_AmbientBoostEffect[] = {
-  {"make", &Dtool_AmbientBoostEffect_make_281, METH_NOARGS | METH_STATIC, (const char *)Dtool_AmbientBoostEffect_make_281_comment},
-  {"get_class_type", &Dtool_AmbientBoostEffect_get_class_type_282, METH_NOARGS | METH_STATIC, (const char *)Dtool_AmbientBoostEffect_get_class_type_282_comment},
-  {"getClassType", &Dtool_AmbientBoostEffect_get_class_type_282, METH_NOARGS | METH_STATIC, (const char *)Dtool_AmbientBoostEffect_get_class_type_282_comment},
+  {"make", &Dtool_AmbientBoostEffect_make_282, METH_NOARGS | METH_STATIC, (const char *)Dtool_AmbientBoostEffect_make_282_comment},
+  {"get_class_type", &Dtool_AmbientBoostEffect_get_class_type_283, METH_NOARGS | METH_STATIC, (const char *)Dtool_AmbientBoostEffect_get_class_type_283_comment},
+  {"getClassType", &Dtool_AmbientBoostEffect_get_class_type_283, METH_NOARGS | METH_STATIC, (const char *)Dtool_AmbientBoostEffect_get_class_type_283_comment},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -16739,7 +16753,7 @@ extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, nullp
 extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, imports};
 #endif
 static InterrogateModuleDef _in_module_def = {
-  1553442943,  /* file_identifier */
+  1553530802,  /* file_identifier */
   "bsp",  /* library_name */
   "t5GT",  /* library_hash_name */
   "bsp",  /* module_name */
@@ -16749,7 +16763,7 @@ static InterrogateModuleDef _in_module_def = {
   nullptr,  /* fptrs */
   0,  /* num_fptrs */
   1,  /* first_index */
-  661  /* next_index */
+  663  /* next_index */
 };
 
 Configure(_in_configure_bsp);
