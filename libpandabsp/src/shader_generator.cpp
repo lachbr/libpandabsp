@@ -155,6 +155,8 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePa
                 // Automatically generate shaders for the shadow scene using the CSMRender shader.
                 CPT( RenderAttrib ) shattr = ShaderAttrib::make();
                 shattr = DCAST( ShaderAttrib, shattr )->set_shader_auto();
+                shattr = DCAST( ShaderAttrib, shattr )->set_flag( ShaderAttrib::F_hardware_skinning,
+                        ConfigVariableBool( "hardware-animated-vertices", false ) );
                 state = state->set_attrib( shattr, 10 );
                 state = state->set_attrib( BSPMaterialAttrib::make_override_shader( BSPMaterial::get_from_file(
                         "phase_14/materials/csm_shadow.mat"
