@@ -103,7 +103,35 @@ SHADERFEATURE_PARSE_FUNC( BaseTextureFeature )
                                         << "BaseTextureFeature: unknown wrap mode `" << wrapmode << "`\n";
                         }
                 }
-                
+                else
+                {
+                        if ( mat->has_keyvalue( "$basetexture_wrapu" ) )
+                        {
+                                const std::string &wrapmode = mat->get_keyvalue( "$basetexture_wrapu" );
+                                if ( wrapmode == "clamp" )
+                                        base_texture->set_wrap_u( SamplerState::WM_clamp );
+                                else if ( wrapmode == "repeat" )
+                                        base_texture->set_wrap_u( SamplerState::WM_repeat );
+                                else
+                                {
+                                        bspmaterial_cat.warning()
+                                                << "BaseTextureFeature: unknown wrap mode `" << wrapmode << "`\n";
+                                }
+                        }
+                        if ( mat->has_keyvalue( "$basetexture_wrapv" ) )
+                        {
+                                const std::string &wrapmode = mat->get_keyvalue( "$basetexture_wrapv" );
+                                if ( wrapmode == "clamp" )
+                                        base_texture->set_wrap_v( SamplerState::WM_clamp );
+                                else if ( wrapmode == "repeat" )
+                                        base_texture->set_wrap_v( SamplerState::WM_repeat );
+                                else
+                                {
+                                        bspmaterial_cat.warning()
+                                                << "BaseTextureFeature: unknown wrap mode `" << wrapmode << "`\n";
+                                }
+                        }
+                }
         }
 }
 

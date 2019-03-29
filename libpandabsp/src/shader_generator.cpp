@@ -178,36 +178,6 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePa
                 dr->set_camera( _pssm_rig->get_camera( 0 ) );
                 dr->set_sort( -10000 );
         }
-
-        FrameBufferProperties fbp;
-        fbp.set_depth_bits( 8 );
-        fbp.set_back_buffers( 0 );
-        fbp.set_force_hardware( true );
-        fbp.set_rgba_bits( 8, 8, 8, 8 );
-        fbp.set_stencil_bits( 0 );
-        fbp.set_float_color( false );
-        fbp.set_float_depth( false );
-        fbp.set_stereo( false );
-        fbp.set_accum_bits( 0 );
-        fbp.set_aux_float( 0 );
-        fbp.set_aux_rgba( 0 );
-        fbp.set_aux_hrgba( 0 );
-        fbp.set_coverage_samples( 0 );
-        fbp.set_multisamples( 0 );
-        _skybox_root = NodePath( "skybox" );
-        _skybox_root.set_shader_auto();
-        _skybox_camera = new Camera( "skybox_camera" );
-        _skybox_root.attach_new_node( _skybox_camera );
-        PT( GraphicsOutput ) skyboxbuf = _gsg->get_engine()->get_window( 0 )->make_texture_buffer( "skybox", 2048, 2048, nullptr, false, &fbp );
-        skyboxbuf->set_sort( -1000 );
-        skyboxbuf->set_clear_color_active( false );
-        skyboxbuf->set_clear_stencil_active( false );
-        PT( DisplayRegion ) dr = skyboxbuf->make_display_region();
-        dr->set_sort( -1000 );
-        dr->set_camera( NodePath( _skybox_camera ) );
-        dr->set_clear_color_active( false );
-        dr->set_clear_stencil_active( false );
-        _skybox_rtt = skyboxbuf->get_texture();
 }
 
 /**
@@ -268,14 +238,6 @@ AsyncTask::DoneStatus BSPShaderGenerator::update_pssm( GenericAsyncTask *task, v
 
                 self->_pssm_rig->update( self->_camera, self->_sun_vector, bounds );
         }
-
-        // Keep same rotation as the real camera
-        NodePath( self->_skybox_camera ).set_hpr( self->_render, self->_camera.get_hpr( self->_render ) );
-
-        // Same lens properties, too.
-        Lens *maincamlens = DCAST( Camera, self->_camera.get_child( 0 ).node() )->get_lens();
-        self->_skybox_camera->get_lens()->set_aspect_ratio( maincamlens->get_aspect_ratio() );
-        self->_skybox_camera->get_lens()->set_min_fov( maincamlens->get_min_fov() );
 
         return AsyncTask::DS_cont;
 }

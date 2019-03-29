@@ -18,7 +18,7 @@ ShaderPermutations SkyBoxSpec::setup_permutations( const BSPMaterial *mat,
 {
         ShaderPermutations result = ShaderSpec::setup_permutations( mat, rs, anim, generator );
 
-        result.add_input( ShaderInput( "skyboxRTT", generator->get_skybox_rtt() ) );
+        result.add_input( ShaderInput( "skyboxSampler", generator->get_identity_cubemap() ) );
 
         return result;
 }
