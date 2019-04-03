@@ -192,6 +192,8 @@ static PStatCollector wsp_trav_collector( "Cull:BSP:WorldSpawn:TraverseLeafs" );
 static PStatCollector wsp_geom_traverse_collector( "Cull:BSP:WorldSpawn:TraverseLeafGeoms" );
 static PStatCollector wsp_make_cullableobject_collector( "Cull:BSP:WorldSpawn:MakeCullableObject" );
 
+static const std::string mainpass_name = "__mainpass__";
+
 // For worldspawn rendering
 static byte *visited = new byte[MAX_MAP_FACES];
 
@@ -216,7 +218,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                 }
 
                 if ( node->is_of_type( BSPModel::get_class_type() ) &&
-                     node->get_name() == "model-0" )
+                        node->get_name() == "model-0" )
                 {
                         wsp_trav_collector.start();
 
@@ -266,13 +268,16 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                                         wsp_record_collector.stop();
                                 }
                         }
-                        
+
                         _loader->_leaf_aabb_lock.release();
 
                         wsp_trav_collector.stop();
                 }
-                else if ( node->is_of_type( ModelRoot::get_class_type() ) )
+                else if ( node->is_of_type( ModelRoot::get_class_type() ) &&
+                        get_scene()->get_camera_node()->has_tag( mainpass_name ) )
                 {
+                        // Only run this logic on the main Camera.
+
                         // This signifies the root of a model...
                         // we should follow this convention.
 
