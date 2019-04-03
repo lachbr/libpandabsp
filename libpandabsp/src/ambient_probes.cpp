@@ -554,6 +554,11 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
         float atten_factor = exp( -cfg_lightinterp.get_value() * dt );
 
         LPoint3 curr_net = curr_trans->get_pos();
+        // Push the Z up a tiny bit.
+        // Initially, the position might be a bit under the ground, making the model
+        // be in the incorrect leaf, giving incorrect ambient.
+        curr_net[2] += ON_EPSILON;
+
         int leaf_id = _loader->find_leaf( curr_net );
 
         if ( pos_changed )
