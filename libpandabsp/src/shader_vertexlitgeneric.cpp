@@ -189,7 +189,6 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                 const LightAttrib *la;
                 rs->get_attrib_def( la );
                 size_t num_lights = la->get_num_on_lights();
-                PTA_int light_types = PTA_int::empty_array( num_lights );
                 if ( num_lights > 0 )
                 {
                         need_eye_normal = true;
@@ -201,23 +200,6 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                         ss << num_lights;
                         result.permutations["NUM_LIGHTS"] = ss.str();
                 }
-                for ( size_t i = 0; i < num_lights; i++ )
-                {
-                        TypeHandle type = DCAST( PandaNode, la->get_on_light( i ).node() )->get_class_type();
-                        if ( type.is_derived_from( DirectionalLight::get_class_type() ) )
-                        {
-                                light_types[i] = 0;
-                        }
-                        else if ( type.is_derived_from( PointLight::get_class_type() ) )
-                        {
-                                light_types[i] = 2;
-                        }
-                        else if ( type.is_derived_from( Spotlight::get_class_type() ) )
-                        {
-                                light_types[i] = 3;
-                        }
-                }
-                result.add_input( ShaderInput( "lightTypes", light_types ), false );
         }
         else
         {
