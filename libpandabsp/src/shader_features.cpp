@@ -214,9 +214,6 @@ SHADERFEATURE_SETUP_FUNC( EnvmapFeature )
                 }
 
                 perms.add_input( ShaderInput( "envmapTint", envmap_tint ) );
-
-                // For PBR Image-Based Lighting
-                perms.add_input( ShaderInput( "brdfLUTSampler", get_brdf_lut() ) );
         }
 }
 
