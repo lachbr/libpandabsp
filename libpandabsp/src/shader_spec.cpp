@@ -88,6 +88,7 @@ ShaderPermutations ShaderSpec::setup_permutations( const BSPMaterial *mat,
                                                    BSPShaderGenerator *generator )
 {
         ShaderPermutations result;
+        result.add_permutation( "SHADER_QUALITY", generator->get_shader_quality() );
         return result;
 }
 
@@ -99,9 +100,7 @@ void ShaderSpec::add_fog( const RenderState *rs, ShaderPermutations &perms )
         const FogAttrib *fog;
         if ( rs->get_attrib( fog ) && !fog->is_off() )
         {
-                std::stringstream fss;
-                fss << (int)fog->get_fog()->get_mode();
-                perms.add_permutation( "FOG", fss.str() );
+                perms.add_permutation( "FOG", (int)fog->get_fog()->get_mode() );
         }
 }
 
@@ -140,12 +139,8 @@ bool ShaderSpec::add_csm( ShaderPermutations &result, BSPShaderGenerator *genera
 
                 float xel_size = 1.0 / pssm_size.get_value();
 
-                std::stringstream ss;
-                ss << xel_size * softness_factor.get_value();
-                result.permutations["SHADOW_BLUR"] = ss.str();
-                std::stringstream size_ss;
-                size_ss << xel_size;
-                result.permutations["SHADOW_TEXEL_SIZE"] = size_ss.str();
+                result.add_permutation( "SHADOW_BLUR", xel_size * softness_factor.get_value() );
+                result.add_permutation( "SHADOW_TEXEL_SIZE", xel_size );
 
                 if ( normal_offset_uv_space.get_value() )
                         result.add_permutation( "NORMAL_OFFSET_UV_SPACE" );
@@ -172,9 +167,7 @@ bool ShaderSpec::add_clip_planes( const RenderState *rs, ShaderPermutations &per
         const ClipPlaneAttrib *clip_plane;
         rs->get_attrib_def( clip_plane );
 
-        std::stringstream ss;
-        ss << clip_plane->get_num_on_planes();
-        perms.add_permutation( "NUM_CLIP_PLANES", ss.str() );
+        perms.add_permutation( "NUM_CLIP_PLANES", clip_plane->get_num_on_planes() );
 
         return clip_plane->get_num_on_planes() > 0;
 }
@@ -195,9 +188,7 @@ void ShaderSpec::add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPer
                 {
                         num_transforms = anim.get_num_transforms();
                 }
-                std::stringstream ss;
-                ss << num_transforms;
-                perms.permutations["NUM_TRANSFORMS"] = ss.str();
+                perms.add_permutation( "NUM_TRANSFORMS", num_transforms );
 
                 if ( anim.get_indexed_transforms() )
                 {

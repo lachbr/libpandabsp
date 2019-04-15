@@ -56,9 +56,17 @@ public:
 
 PUBLISHED:
 
-        void add_permutation( const std::string &key, const std::string &value = "1" )
+        INLINE void add_permutation( const std::string &key, const std::string &value = "1" )
         {
                 permutations[key] = value;
+        }
+
+        template<class T>
+        INLINE void add_permutation( const std::string &key, const T &value )
+        {
+                std::stringstream ss;
+                ss << value;
+                add_permutation( key, ss.str() );
         }
 
         void add_input( const ShaderInput &inp, bool important = true )

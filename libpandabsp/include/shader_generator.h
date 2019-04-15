@@ -41,6 +41,13 @@ NotifyCategoryDeclNoExport(bspShaderGenerator);
 
 class nodeshaderinput_t;
 
+enum
+{
+        SHADERQUALITY_LOW,
+        SHADERQUALITY_MEDIUM,
+        SHADERQUALITY_HIGH,
+};
+
 class BSPShaderGenerator : public ShaderGenerator
 {
 PUBLISHED:
@@ -68,6 +75,12 @@ PUBLISHED:
                 return _pssm_rig;
         }
 
+        void set_shader_quality( int quality );
+        INLINE int get_shader_quality() const
+        {
+                return _shader_quality;
+        }
+
         static void set_identity_cubemap( Texture *tex );
         static Texture *get_identity_cubemap();
 
@@ -89,6 +102,7 @@ private:
 
         static AsyncTask::DoneStatus update_pssm( GenericAsyncTask *task, void *data );
 
+        int _shader_quality;
         bool _has_shadow_sunlight;
         WeakNodePath _sunlight;
         PT( GenericAsyncTask ) _update_task;

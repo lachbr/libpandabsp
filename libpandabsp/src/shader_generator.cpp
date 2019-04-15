@@ -80,7 +80,8 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePa
         _pssm_split_texture_array( nullptr ),
         _pssm_layered_buffer( nullptr ),
         _sunlight( NodePath() ),
-        _has_shadow_sunlight( false )
+        _has_shadow_sunlight( false ),
+        _shader_quality( SHADERQUALITY_HIGH )
 {
         // Shadows need to be updated before literally anything else.
         // Any RTT of the main scene should happen after shadows are updated.
@@ -178,6 +179,12 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePa
                 dr->set_camera( _pssm_rig->get_camera( 0 ) );
                 dr->set_sort( -10000 );
         }
+}
+
+void BSPShaderGenerator::set_shader_quality( int quality )
+{
+        _shader_quality = quality;
+        _gsg->mark_rehash_generated_shaders();
 }
 
 /**
