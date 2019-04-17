@@ -41,12 +41,14 @@ NotifyCategoryDeclNoExport(bspShaderGenerator);
 
 class nodeshaderinput_t;
 
-enum
+BEGIN_PUBLISH
+enum ShaderQuality
 {
         SHADERQUALITY_LOW,
         SHADERQUALITY_MEDIUM,
         SHADERQUALITY_HIGH,
 };
+END_PUBLISH
 
 class BSPShaderGenerator : public ShaderGenerator
 {
