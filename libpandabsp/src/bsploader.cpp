@@ -1440,7 +1440,10 @@ void BSPLoader::make_pyent( CBaseEntity *cent, PyObject *py_ent, const string &c
                 if ( obj == nullptr )
                         PyErr_PrintEx( 1 );
                 Py_INCREF( obj );
+                // Give the python entity a handle to the c entity.
                 PyObject_SetAttrString( obj, "cEntity", py_ent );
+                // Precache all resources the entity will use.
+                PyObject_CallMethod( obj, "precache", NULL );
                 // Don't call load just yet, we need to have all of the entities created first, because some
                 // entities rely on others.
                 _py_entities.push_back( obj );
