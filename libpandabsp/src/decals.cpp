@@ -17,6 +17,10 @@
 
 #include <cardMaker.h>
 #include <configVariableInt.h>
+#include <modelRoot.h>
+
+static ConfigVariableInt decals_max( "decals_max", 20 );
+static ConfigVariableBool decals_remove_overlapping( "decals_remove_overlapping", true );
 
 /**
  * Trace a decal onto the world.
@@ -41,7 +45,8 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
         cm.set_has_uvs( true );
         cm.set_has_normals( true );
         cm.set_uv_range( LTexCoord( 0, 0 ), LTexCoord( 1, 1 ) );
-        NodePath decalnp = _loader->get_result().attach_new_node( cm.generate() );
+        NodePath decalroot = _loader->get_result().attach_new_node( new ModelRoot( "decal" ) );
+        NodePath decalnp = decalroot.attach_new_node( cm.generate() );
         decalnp.set_depth_offset( 1, 1 );
         decalnp.look_at( -decal_dir );
         decalnp.set_r( rotate );
@@ -51,32 +56,35 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
         if ( mat->has_transparency() )
                 decalnp.set_transparency( TransparencyAttrib::M_dual, 1 );
         decalnp.flatten_strong();
-        decalnp.set_pos( decal_origin );
+        decalroot.set_pos( decal_origin );
 
         LPoint3 mins, maxs;
-        decalnp.calc_tight_bounds( mins, maxs );
+        decalroot.calc_tight_bounds( mins, maxs );
         PT( BoundingBox ) bounds = new BoundingBox( mins, maxs );
 
-        for ( int i = (int)_decals.size() - 1; i >= 0; i-- )
+        if ( decals_remove_overlapping.get_value() )
         {
-                Decal *other = _decals[i];
-
-                // Check if we overlap with this decal.
-                //
-                // Only remove this decal if it is smaller than the decal
-                // we are wanting to create over it, and it is not a static
-                // decal (placed by the level designer, etc).
-                if ( other->bounds->contains( bounds ) != BoundingVolume::IF_no_intersection &&
-                        other->bounds->get_volume() <= bounds->get_volume() &&
-                        ( other->flags & DECALFLAGS_STATIC ) == 0 )
+                for ( int i = (int)_decals.size() - 1; i >= 0; i-- )
                 {
-                        if ( !other->decalnp.is_empty() )
-                                other->decalnp.remove_node();
-                        _decals.erase( std::find( _decals.begin(), _decals.end(), other ) );
+                        Decal *other = _decals[i];
+
+                        // Check if we overlap with this decal.
+                        //
+                        // Only remove this decal if it is smaller than the decal
+                        // we are wanting to create over it, and it is not a static
+                        // decal (placed by the level designer, etc).
+                        if ( other->bounds->contains( bounds ) != BoundingVolume::IF_no_intersection &&
+                                other->bounds->get_volume() <= bounds->get_volume() &&
+                                ( other->flags & DECALFLAGS_STATIC ) == 0 )
+                        {
+                                if ( !other->decalnp.is_empty() )
+                                        other->decalnp.remove_node();
+                                _decals.erase( std::find( _decals.begin(), _decals.end(), other ) );
+                        }
                 }
         }
 
-        if ( _decals.size() == ConfigVariableInt( "decals_max", 20 ).get_value() )
+        if ( _decals.size() == decals_max.get_value() )
         {
                 // Remove the oldest decal to make space for the new one.
                 Decal *d = _decals.back();
@@ -86,12 +94,12 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
         }
 
         PT( Decal ) decal = new Decal;
-        decal->decalnp = decalnp;
+        decal->decalnp = decalroot;
         decal->bounds = bounds;
         decal->flags = DECALFLAGS_NONE;
         _decals.push_front( decal );
 
-        return decalnp;
+        return decalroot;
 }
 
 void DecalManager::cleanup()

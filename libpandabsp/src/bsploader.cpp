@@ -580,7 +580,7 @@ void BSPLoader::make_faces()
                 name << "model-" << modelnum;
                 PT( BSPModel ) bspmdl = new BSPModel( name.str() );
                 NodePath modelroot = _result.attach_new_node( bspmdl );
-                modelroot.set_shader_auto();
+                modelroot.set_shader_auto( 1 );
 
                 _model_origins[modelroot] = ( ( ( mins + maxs ) / 2.0 ) + origin ) / 16.0;
 
@@ -966,7 +966,7 @@ void BSPLoader::load_static_props()
                 PT( BSPProp ) propnode = new BSPProp( prop->name );
                 propnode->set_preserve_transform( ModelNode::PT_local );
                 NodePath propnp = _result.attach_new_node( propnode );
-                propnp.set_shader_auto();
+                propnp.set_shader_auto( 1 );
                 PT( PandaNode ) proproot = Loader::get_global_ptr()->load_sync( prop->name );
                 if ( proproot == nullptr )
                 {
@@ -1687,7 +1687,6 @@ bool BSPLoader::read( const Filename &file )
                 SceneGraphReducer gr;
                 gr.apply_attribs( _result.node() );
 
-                _result.set_shader_off();
                 _result.set_attrib( BSPFaceAttrib::make_default(), 1 );
         }
         else
