@@ -453,29 +453,17 @@ CPT( BSPMaterial ) BSPLoader::try_load_texref( texref_t *tref )
         return nullptr;
 }
 
-/**
- * Generates the least amount of data possible for geometry on the AI side.
- * Used for generating the navmesh. We don't need to make the faces in the same
- * manner as the client, since all we need are the triangle data.
- */
-void BSPLoader::make_faces_ai()
+NodePath BSPLoader::make_faces_ai_base( const std::string &name, const vector_string &include_entities )
 {
-        bspfile_cat.info()
-                << "Making faces for AI...\n";
-
-        PT( EggData ) data = new EggData;
-        PT( EggVertexPool ) vpool = new EggVertexPool( "facevpool" );
-        data->add_child( vpool );
+        NodePath ret = NodePath( new BSPModel( name ) );
 
         for ( int entnum = 0; entnum < _bspdata->numentities; entnum++ )
         {
                 entity_t *ent = _bspdata->entities + entnum;
-                const char *classname = ValueForKey( ent, "classname" );
+                std::string classname = ValueForKey( ent, "classname" );
 
                 if ( entnum != 0 &&
-                     strncmp( classname, "func_wall", 9 ) &&
-                     strncmp( classname, "func_detail", 11 ) &&
-                     strncmp( classname, "func_illusionary", 16 ) )
+                     std::find( include_entities.begin(), include_entities.end(), classname ) == include_entities.end() )
                 {
                         continue;
                 }
@@ -490,6 +478,10 @@ void BSPLoader::make_faces_ai()
 
                 for ( int facenum = mdl->firstface; facenum < mdl->firstface + mdl->numfaces; facenum++ )
                 {
+                        PT( EggData ) data = new EggData;
+                        PT( EggVertexPool ) vpool = new EggVertexPool( "facevpool" );
+                        data->add_child( vpool );
+
                         PT( EggPolygon ) poly = new EggPolygon;
                         data->add_child( poly );
                         dface_t *face = _bspdata->dfaces + facenum;
@@ -498,7 +490,8 @@ void BSPLoader::make_faces_ai()
 
                         CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
                         contents_t contents = ContentsFromName( bspmat->get_contents().c_str() );
-                        if ( contents == CONTENTS_SKY || contents == CONTENTS_NULL )
+                        if ( ( contents & ( CONTENTS_SOLID | CONTENTS_WATER | CONTENTS_TRANSLUCENT |
+                                CONTENTS_NULL | CONTENTS_EMPTY | CONTENTS_LAVA | CONTENTS_SLIME ) ) == 0 )
                         {
                                 continue;
                         }
@@ -534,14 +527,46 @@ void BSPLoader::make_faces_ai()
                                         }
                                 }
                         }
+
+                        data->remove_unused_vertices( true );
+                        data->remove_invalid_primitives( true );
+
+                        LNormald norm;
+                        poly->calculate_normal( norm );
+                        int face_type = BSPFaceAttrib::FACETYPE_WALL;
+                        if ( norm.almost_equal( LNormald::up(), 0.5 ) )
+                                face_type = BSPFaceAttrib::FACETYPE_FLOOR;
+
+                        NodePath geom = ret.attach_new_node( load_egg_data( data ) );
+                        geom.set_attrib( BSPFaceAttrib::make( bspmat->get_surface_prop(), face_type ) );
+                        geom.set_attrib( BSPMaterialAttrib::make( bspmat ) );
+                        geom.clear_model_nodes();
+                        geom.flatten_strong();
                 }
-                
+
         }
 
-        data->remove_unused_vertices( true );
-        data->remove_invalid_primitives( true );
+        ret.clear_model_nodes();
+        flatten_node( ret );
+        
+        return ret;
+}
 
-        _result.attach_new_node( load_egg_data( data ) );
+/**
+ * Generates the least amount of data possible for geometry on the AI side.
+ * Used for generating the navmesh. We don't need to make the faces in the same
+ * manner as the client, since all we need are the triangle data.
+ */
+void BSPLoader::make_faces_ai()
+{
+        bspfile_cat.info()
+                << "Making faces for AI...\n";
+
+        make_faces_ai_base( "navmesh", { "func_wall", "func_detail", "func_illusionary", "func_clip", "func_npc_clip" } )
+                .reparent_to( _result );
+        make_faces_ai_base( "hull", { "func_wall", "func_detail", "func_illusionary", "func_clip" } )
+                .reparent_to( _result );
+        
         _result.set_scale( 1 / 16.0 );
         _result.clear_model_nodes();
         flatten_node( _result );
@@ -551,6 +576,10 @@ void BSPLoader::make_faces()
 {
         bspfile_cat.info()
                 << "Making faces...\n";
+
+        NodePath hull = make_faces_ai_base( "hull", { "func_wall", "func_detail", "func_illusionary", "func_clip", "func_player_clip" } );
+        hull.reparent_to( _result );
+        hull.hide();
 
         // build table of per-face beginning index into vertnormalindices
         int face_vertnormalindices[MAX_MAP_FACES];
@@ -601,7 +630,8 @@ void BSPLoader::make_faces()
 
                         CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
                         contents_t contents = ContentsFromName( bspmat->get_contents().c_str() );
-                        if ( contents == CONTENTS_NULL )
+                        std::cout << texref->name << " " << contents << std::endl;
+                        if ( ( contents & ( CONTENTS_SOLID | CONTENTS_WATER | CONTENTS_SKY | CONTENTS_TRANSLUCENT ) ) == 0 )
                         {
                                 continue;
                         }
@@ -609,7 +639,6 @@ void BSPLoader::make_faces()
                         bool skip = false;
 
                         bool mat_normalmap = bspmat->has_keyvalue( "$bumpmap" );
-                        string surfaceprop = bspmat->get_surface_prop();
 
                         bool has_lighting = ( face->lightofs != -1 && _want_lightmaps ) && !skip && bspmat->get_shader() == "LightmappedGeneric";
                         if ( has_lighting &&
@@ -747,8 +776,6 @@ void BSPLoader::make_faces()
 
                         centroid /= verts;
 
-                        int face_type = BSPFaceAttrib::FACETYPE_WALL;
-
                         bool recv_projshadows = false;
                         if ( poly_normal.almost_equal( LNormald::up(), 0.5 ) )
                         {
@@ -756,7 +783,6 @@ void BSPLoader::make_faces()
                                 // Give it the ground bin.
                                 poly->set_bin( "ground" );
                                 poly->set_draw_order( 18 );
-                                face_type = BSPFaceAttrib::FACETYPE_FLOOR;
                                 if ( _want_shadows )
                                 {
                                         recv_projshadows = true;
@@ -818,12 +844,7 @@ void BSPLoader::make_faces()
                                 {
                                         PT( Geom ) geom = gn->modify_geom( j );
                                         geom->set_bounds_type( BoundingVolume::BT_box );
-                                        CPT( RenderAttrib ) bca = BSPFaceAttrib::make( surfaceprop, face_type );
-                                        CPT( RenderState ) old_state = gn->get_geom_state( j );
-                                        CPT( RenderState ) new_state = old_state->add_attrib( bca, 1 );
-
                                         gn->set_geom( j, geom );
-                                        gn->set_geom_state( j, new_state );
                                 }
                         }
 

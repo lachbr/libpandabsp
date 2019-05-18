@@ -310,7 +310,10 @@ public:
 private:
         
         void make_faces();
+
         void make_faces_ai();
+        NodePath make_faces_ai_base( const std::string &name, const vector_string &include_entities );
+
 	void load_entities();
         void load_static_props();
         void load_cubemaps();
