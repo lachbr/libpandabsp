@@ -31,7 +31,7 @@ LightmapPalettizer::LightmapPalettizer( const BSPLoader *loader ) :
 {
 }
 
-INLINE PNMImage lightmap_img_for_face( const BSPLoader *loader, const dface_t *face, int lmnum = 0 )
+INLINE PNMImage lightmap_img_for_face( const BSPLoader *loader, const dface_t *face, int lmnum = 0, bool bounced = false )
 {
         int width = face->lightmap_size[0] + 1;
         int height = face->lightmap_size[1] + 1;
@@ -50,28 +50,16 @@ INLINE PNMImage lightmap_img_for_face( const BSPLoader *loader, const dface_t *f
 
         int luxel = 0;
 
-        int bump_sample_count = face->bumped_lightmap ? NUM_BUMP_VECTS + 1 : 1;
-
         for ( int y = 0; y < height; y++ )
         {
                 for ( int x = 0; x < width; x++ )
                 {
-                        LRGBColor luxel_col( 1, 1, 1 );
-
-                        // To get the final pixel color, multiply all of the individual lightstyle samples together.
-                        for ( int lightstyle = 0; lightstyle < 4; lightstyle++ )
-                        {
-                                if ( face->styles[lightstyle] == 0xFF )
-                                {
-                                        // Doesn't have this lightstyle.
-                                        continue;
-                                }
-
-                                colorrgbexp32_t *sample = SampleLightmap( loader->get_bspdata(), face, luxel, lightstyle, lmnum );
-
-                                luxel_col.componentwise_mult( color_shift_pixel( sample, loader->get_gamma() ) );
-
-                        }
+                        colorrgbexp32_t *sample;
+                        if ( !bounced )
+                                sample = SampleLightmap( loader->get_bspdata(), face, luxel, 0, lmnum );
+                        else
+                                sample = SampleBouncedLightmap( loader->get_bspdata(), face, luxel );
+                        LRGBColor luxel_col = color_shift_pixel( sample, loader->get_gamma() );
 
                         img.set_xel( x, y, luxel_col );
                         luxel++;
@@ -102,16 +90,17 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
 
                 LightmapSource src;
                 src.facenum = facenum;
+                src.lightmap_img[0] = lightmap_img_for_face( _loader, face, 0, true ); // bounced lightmap
                 if ( face->bumped_lightmap )
                 {
                         for ( int n = 0; n < NUM_BUMP_VECTS + 1; n++ )
                         {
-                                src.lightmap_img[n] = lightmap_img_for_face( _loader, face, n );
+                                src.lightmap_img[n + 1] = lightmap_img_for_face( _loader, face, n );
                         }
                 }
                 else
                 {
-                        src.lightmap_img[0] = lightmap_img_for_face( _loader, face, 0 );
+                        src.lightmap_img[1] = lightmap_img_for_face( _loader, face, 0 );
                 }
                 
                 _sources.push_back( src );
@@ -165,14 +154,14 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
 
                 PT( LightmapPaletteDirectory::LightmapPaletteEntry ) entry = new LightmapPaletteDirectory::LightmapPaletteEntry;
 
-                for ( int n = 0; n < NUM_BUMP_VECTS + 1; n++ )
+                for ( int n = 0; n < NUM_LIGHTMAPS; n++ )
                 {
                         pal->palette_img[n] = PNMImage( width, height );
                         pal->palette_img[n].fill( 0.0 );
                 }
 
                 entry->palette_tex = new Texture;
-                entry->palette_tex->setup_2d_texture_array( width, height, NUM_BUMP_VECTS + 1, Texture::T_float, Texture::F_rgb );
+                entry->palette_tex->setup_2d_texture_array( width, height, NUM_LIGHTMAPS, Texture::T_float, Texture::F_rgb );
                 entry->palette_tex->set_minfilter( SamplerState::FT_linear_mipmap_linear );
                 entry->palette_tex->set_magfilter( SamplerState::FT_linear );
 
@@ -196,6 +185,17 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
                         face_entry->palette_size[0] = width;
                         face_entry->palette_size[1] = height;
 
+                        // Bounced
+                        for ( int y = 0; y < lmheight; y++ )
+                        {
+                                for ( int x = 0; x < lmwidth; x++ )
+                                {
+                                        pal->palette_img[0].set_xel( x + xshift, y + yshift,
+                                                rotated ? src->lightmap_img[0].get_xel( y, x ) :
+                                                src->lightmap_img[0].get_xel( x, y ) );
+                                }
+                        }
+
                         if ( _loader->get_bspdata()->dfaces[src->facenum].bumped_lightmap )
                         {
                                 for ( int n = 0; n < NUM_BUMP_VECTS + 1; n++ )
@@ -204,9 +204,9 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
                                         {
                                                 for ( int x = 0; x < lmwidth; x++ )
                                                 {
-                                                        pal->palette_img[n].set_xel( x + xshift, y + yshift,
-                                                                                     rotated ? src->lightmap_img[n].get_xel( y, x ) :
-                                                                                     src->lightmap_img[n].get_xel( x, y ) );
+                                                        pal->palette_img[n + 1].set_xel( x + xshift, y + yshift,
+                                                                                     rotated ? src->lightmap_img[n + 1].get_xel( y, x ) :
+                                                                                     src->lightmap_img[n + 1].get_xel( x, y ) );
                                                 }
                                         }
                                 }
@@ -218,9 +218,9 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
                                 {
                                         for ( int x = 0; x < lmwidth; x++ )
                                         {
-                                                pal->palette_img[0].set_xel( x + xshift, y + yshift,
-                                                                             rotated ? src->lightmap_img[0].get_xel( y, x ) :
-                                                                             src->lightmap_img[0].get_xel( x, y ) );
+                                                pal->palette_img[1].set_xel( x + xshift, y + yshift,
+                                                                             rotated ? src->lightmap_img[1].get_xel( y, x ) :
+                                                                             src->lightmap_img[1].get_xel( x, y ) );
                                         }
                                 }
                         }
@@ -233,7 +233,7 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
                 }
 
                 // load all palette images into our array texture
-                for ( int n = 0; n < NUM_BUMP_VECTS + 1; n++ )
+                for ( int n = 0; n < NUM_LIGHTMAPS; n++ )
                 {
                         entry->palette_tex->load( pal->palette_img[n], n, 0 );
                 }

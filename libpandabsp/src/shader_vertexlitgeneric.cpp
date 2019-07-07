@@ -78,10 +78,10 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         bool disable_alpha_write = false;
         bool calc_primary_alpha = false;
 
-        bool need_tbn = false;
-        bool need_world_position = false;
-        bool need_world_normal = false;
-        bool need_world_vec = false;
+        bool need_tbn = true;
+        bool need_world_position = true;
+        bool need_world_normal = true;
+        bool need_world_vec = true;
         bool need_eye_vec = true;
         bool need_eye_position = true;
         bool need_eye_normal = true;
@@ -160,18 +160,10 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                 }
         }
 
-        if ( outputs & AuxBitplaneAttrib::ABO_aux_glow )
-        {
-                result.add_permutation( "HAVE_AUX_GLOW" );
-        }
         if ( outputs & AuxBitplaneAttrib::ABO_aux_normal )
         {
                 need_eye_normal = true;
                 result.add_permutation( "HAVE_AUX_NORMAL" );
-        }
-        if ( outputs & AuxBitplaneAttrib::ABO_glow )
-        {
-                result.add_permutation( "HAVE_GLOW" );
         }
 
         if ( have_alpha_blend || have_alpha_test )
@@ -191,6 +183,7 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                 size_t num_lights = la->get_num_on_lights();
                 if ( num_lights > 0 )
                 {
+			need_world_vec = true;
                         need_eye_normal = true;
                         need_eye_position = true;
 
@@ -209,6 +202,7 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                 // Make sure there is no setLightOff()
                 if ( !la->has_all_off() )
                 {
+			need_world_vec = true;
                         need_eye_normal = true;
                         need_eye_position = true;
                         need_world_normal = true; // for ambient cube
@@ -218,12 +212,11 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                         stringstream nlss;
                         nlss << MAX_TOTAL_LIGHTS;
                         result.add_permutation( "NUM_LIGHTS", nlss.str() );
-                        result.add_permutation( "AMBIENT_CUBE" );
                 }
 
         }
 
-        if ( add_csm( result, generator ) )
+        if ( add_csm( rs, result, generator ) )
         {
                 need_world_normal = true;
                 need_world_position = true;
@@ -275,8 +268,6 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         if ( need_tbn )
         {
                 result.add_permutation( "NEED_TBN" );
-                result.add_permutation( "TANGENTNAME", "p3d_Tangent" );
-                result.add_permutation( "BINORMALNAME", "p3d_Binormal" );
         }
 
         if ( need_eye_normal )
@@ -302,4 +293,37 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
 
         // Done!
         return result;
+}
+
+void VertexLitGenericSpec::add_precache_combos( ShaderPrecacheCombos &combos )
+{
+	ShaderSpec::add_precache_combos( combos );
+
+	combos.add_bool( "NEED_WORLD_POSITION", true );
+	combos.add_bool( "NEED_EYE_POSITION", true );
+	combos.add_bool( "NEED_EYE_VEC", true );
+	combos.add_bool( "NEED_WORLD_VEC", true );
+	combos.add_bool( "NEED_WORLD_NORMAL", true );
+	combos.add_bool( "NEED_EYE_NORMAL", true );
+	combos.add_bool( "NEED_TBN", true );
+	combos.add_bool( "HDR", true );
+	combos.add_bool( "LIGHTING" );
+	combos.add_bool( "BSP_LIGHTING", true );
+	//combos.add_bool( "CALC_PRIMARY_ALPHA" );
+	//combos.add_bool( "HAVE_AUX_NORMAL" );
+	combos.add_bool( "BASETEXTURE" );
+	combos.add_bool( "BUMPMAP" );
+	combos.add_bool( "RIMLIGHT" );
+	combos.add_bool( "ARME" );
+	combos.add_bool( "LIGHTWARP" );
+	combos.add_bool( "HALFLAMBERT" );
+	combos.add_bool( "SELFILLUM" );
+	combos.add_bool( "ENVMAP" );
+	combos.add_bool( "HARDWARE_SKINNING", true );
+	combos.add_bool( "INDEXED_TRANSFORMS" );
+	combos.add_bool( "NEED_COLOR" );
+	combos.add_bool( "COLOR_VERTEX" );
+	combos.add_bool( "COLOR_FLAT" );
+
+	combos.add( "NUM_LIGHTS", 8, 8 );
 }

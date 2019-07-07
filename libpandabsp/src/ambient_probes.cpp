@@ -182,7 +182,7 @@ void AmbientProbeManager::process_ambient_probes()
                         VectorScale( light->pos, 1 / 16.0, light->pos );
 
                         light->leaf = _loader->find_leaf( light->pos );
-                        light->color = color_from_value( ValueForKey( ent, "_light" ) ).get_xyz();
+                        light->color = color_from_value( ValueForKey( ent, "_light" ), true, true ).get_xyz();
                         light->type = lighttype_from_classname( classname );
 
                         lightfalloffparams_t params = GetLightFalloffParams( ent, light->color );
@@ -638,9 +638,9 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                 input->occluded_lights.reset();
 
                 // Update local light sources
-                pvector<light_t *> locallights = _light_pvs[leaf_id];
+                input->locallights = _light_pvs[leaf_id];
                 // Sort local lights from closest to furthest distance from node, we will choose the two closest lights.
-                std::sort( locallights.begin(), locallights.end(), [curr_net]( const light_t *a, const light_t *b )
+                std::sort( input->locallights.begin(), input->locallights.end(), [curr_net]( const light_t *a, const light_t *b )
                 {
                         return ( a->pos - curr_net ).length_squared() < ( b->pos - curr_net ).length_squared();
                 } );
@@ -650,11 +650,10 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                 {
                         // If we hit the sky from current position, sunlight takes
                         // precedence over all other local light sources.
-                        locallights.insert( locallights.begin(), _sunlight );
+			input->locallights.insert( input->locallights.begin(), _sunlight );
                         sky_idx = 0;
                 }
 
-                input->locallights = locallights;
                 input->sky_idx = sky_idx;
         }
         update_locallights_collector.stop();
@@ -859,7 +858,7 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
 
         if ( input->ambient_boost )
         {
-                memcpy( input->ambient_cube.p(), input->boxcolor_boosted, sizeof( LVector3 ) * 6 ); // no boost
+                memcpy( input->ambient_cube.p(), input->boxcolor_boosted, sizeof( LVector3 ) * 6 ); // boost
         }
         else
         {

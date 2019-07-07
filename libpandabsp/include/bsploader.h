@@ -152,7 +152,7 @@ public:
 	{
 		init_type(); return get_class_type();
 	}
-
+	
 private:
 	static TypeHandle _type_handle;
 	static int _attrib_slot;
@@ -209,7 +209,6 @@ PUBLISHED:
 
         void set_want_shadows( bool flag );
         void set_shadow_dir( const LVector3 &dir );
-        void set_shadow_color( const LColor &color );
 
         int extract_modelnum( int entnum );
         void get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs );
@@ -260,7 +259,7 @@ PUBLISHED:
         int find_node( const LPoint3 &pos );
         bool is_cluster_visible( int curr_cluster, int cluster ) const;
 
-        bool pvs_bounds_test( const GeometricBoundingVolume *bounds );
+        bool pvs_bounds_test( const GeometricBoundingVolume *bounds, unsigned int required_leaf_flags = 0u );
         CPT( GeometricBoundingVolume ) make_net_bounds( const TransformState *net_transform,
                                                         const GeometricBoundingVolume *original );
 
@@ -280,6 +279,26 @@ PUBLISHED:
                 return _result;
         }
 
+	INLINE void set_current_leaf( int leaf )
+	{
+		update_leaf( leaf );
+	}
+	INLINE int get_current_leaf() const
+	{
+		return _curr_leaf_idx;
+	}
+	INLINE int get_num_visleafs() const
+	{
+		return _bspdata->dmodels[0].visleafs + 1;
+	}
+	INLINE LPoint3 get_leaf_center( int leaf ) const
+	{
+		BoundingBox *bbox = _leaf_bboxs[leaf];
+		return bbox->get_approx_center();
+	}
+
+	void update();
+
         static BSPLoader *get_global_ptr();
 
 PUBLISHED:
@@ -293,11 +312,6 @@ PUBLISHED:
 	};
 
 public:
-	INLINE pvector<BoundingBox *> get_visible_leaf_bboxs() const
-        {
-                LightReMutexHolder holder( _leaf_aabb_lock );
-                return _visible_leaf_bboxs;
-        }
         INLINE bspdata_t *get_bspdata() const
         {
                 return _bspdata;
@@ -306,8 +320,18 @@ public:
         {
                 return _colldata;
         }
+	INLINE entity_t *get_light_environment() const
+	{
+		return _light_environment;
+	}
+        INLINE AmbientProbeManager *get_ambient_probe_mgr()
+        {
+                return &_amb_probe_mgr;
+        }
 
 private:
+
+	void update_leaf( int leaf );
         
         void make_faces();
 
@@ -338,7 +362,6 @@ private:
 
         cubemap_t *find_closest_cubemap( const LPoint3 &pos );
 
-        void update();
         static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
 
 private:
@@ -350,10 +373,8 @@ private:
 	NodePath _render;
         NodePath _fake_dl;
         LVector3 _shadow_dir;
-        LColor _shadow_color;
         bool _want_shadows;
         entity_t *_light_environment;
-        entity_t *_shadow_control;
         bool _wireframe;
 	Filename _materials_file;
         PN_stdfloat _gamma;
@@ -367,7 +388,13 @@ private:
         bool _active_level;
         bool _ai;
 	int _physics_type;
-	pvector<BoundingBox *> _visible_leaf_bboxs;
+
+	struct visibleleafdata_t
+	{
+		BoundingBox *bbox;
+		int flags;
+	};
+	pvector<visibleleafdata_t> _visible_leaf_bboxs;
         pvector<int> _visible_leafs;
 	int _curr_leaf_idx;
         Filename _map_file;
@@ -425,6 +452,6 @@ private:
         LightReMutex _leaf_aabb_lock;
 };
 
-extern LColor color_from_value( const std::string &value, bool scale = true );
+extern LColor color_from_value( const std::string &value, bool scale = true, bool gamma = false );
 
 #endif // BSPLOADER_H

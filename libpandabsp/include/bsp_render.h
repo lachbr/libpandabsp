@@ -18,6 +18,9 @@
 #include <cullTraverser.h>
 #include <cullableObject.h>
 
+#include "bspfile.h"
+#include "shader_generator.h"
+
 class BSPLoader;
 class nodeshaderinput_t;
 
@@ -36,6 +39,31 @@ protected:
 private:
         INLINE void add_geomnode_for_draw( GeomNode *node, CullTraverserData &data );
         static CPT( RenderState ) get_depth_offset_state();
+
+	INLINE bool has_camera_bits( unsigned int bits ) const
+	{
+		return ( get_camera_mask() & bits ) != 0u;
+	}
+
+	INLINE bool needs_lighting() const
+	{
+		return has_camera_bits( CAMERA_MASK_LIGHTING );
+	}
+	INLINE bool needs_culling() const
+	{
+		return has_camera_bits( CAMERA_MASK_CULLING );
+	}
+
+	/**
+	 * Returns the flags that must be set on a leaf for it to be
+	 * rendered by the current camera.
+	 */
+	INLINE unsigned int get_required_leaf_flags() const
+	{
+		//if ( has_camera_bits( CAMERA_SHADOW ) )
+		//	return LEAF_FLAGS_SKY2D;
+		return 0u;
+	}
 
 private:
         BSPLoader *_loader;

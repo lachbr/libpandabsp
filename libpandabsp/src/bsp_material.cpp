@@ -138,7 +138,42 @@ const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
         Parser p( toks );
 
         Object obj = p._base_objects[0];
-        mat->set_shader( obj.name ); // ->VertexLitGeneric<- {...}
+	if ( obj.name == "patch" )
+	{
+		if ( Parser::has_property( obj, "$include" ) )
+		{
+			string include_file = Parser::get_property_value( obj, "$include" );
+			const BSPMaterial *include_mat = get_from_file( include_file );
+			if ( !include_mat )
+			{
+				bspmaterial_cat.error()
+					<< "Could not load $include material `" << include_file
+					<< "` referenced by patch material `" << file << "`\n";
+				return nullptr;
+			}
+
+			// Use the shader from the included material
+			mat->set_shader( include_mat->get_shader() );
+
+			// Put the included material's properties in front of the patch.
+			// This way, the patch material's properties will be iterated over last
+			// and be able to override the include material.
+			for ( size_t i = 0; i < include_mat->get_num_keyvalues(); i++ )
+			{
+				mat->set_keyvalue( include_mat->get_key( i ), include_mat->get_value( i ) );
+			}
+		}
+		else
+		{
+			bspmaterial_cat.error()
+				<< "Patch material " << file << " didn't provide an $include\n";
+			return nullptr;
+		}
+	}
+	else
+	{
+		mat->set_shader( obj.name ); // ->VertexLitGeneric<- {...}
+	}
         pvector<Property> props = p.get_properties( obj );
         for ( size_t i = 0; i < props.size(); i++ )
         {

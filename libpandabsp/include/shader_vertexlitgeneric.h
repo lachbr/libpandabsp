@@ -43,6 +43,8 @@ public:
                                                  BSPShaderGenerator *generator );
 
         virtual PT( ShaderConfig ) make_new_config();
+
+	virtual void add_precache_combos( ShaderPrecacheCombos &combos );
 };
 
 #endif // SHADER_VERTEXLITGENERIC_H

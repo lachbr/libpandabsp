@@ -106,6 +106,18 @@ PUBLISHED:
         {
                 return _shader_keyvalues.get_data( _shader_keyvalues.find( key ) );
         }
+	INLINE size_t get_num_keyvalues() const
+	{
+		return _shader_keyvalues.size();
+	}
+	INLINE const std::string &get_key( size_t i ) const
+	{
+		return _shader_keyvalues.get_key( i );
+	}
+	INLINE const std::string &get_value( size_t i ) const
+	{
+		return _shader_keyvalues.get_data( i );
+	}
 
         INLINE int get_keyvalue_int( const std::string &key ) const
         {
@@ -263,7 +275,7 @@ public:
                 RenderAttrib::init_type();
                 register_type( _type_handle, "BSPMaterialAttrib",
                                RenderAttrib::get_class_type() );
-                _attrib_slot = register_slot( _type_handle, 100, new BSPMaterialAttrib );
+                _attrib_slot = register_slot( _type_handle, -1, new BSPMaterialAttrib );
         }
         virtual TypeHandle get_type() const
         {

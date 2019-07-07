@@ -21,6 +21,9 @@
 class BSPLoader;
 class TexturePacker;
 
+//#define NUM_LIGHTMAPS 1 + ((NUM_BUMP_VECTS + 1) * 2)
+#define NUM_LIGHTMAPS 1 + (NUM_BUMP_VECTS + 1)
+
 struct LightmapPaletteDirectory
 {
         struct LightmapPaletteEntry : public ReferenceCount
@@ -44,11 +47,11 @@ struct LightmapPaletteDirectory
 struct LightmapSource
 {
         int facenum;
-        PNMImage lightmap_img[NUM_BUMP_VECTS + 1];
+        PNMImage lightmap_img[NUM_LIGHTMAPS];
 
         LightmapSource()
         {
-                for ( int i = 0; i < NUM_BUMP_VECTS + 1; i++ )
+                for ( int i = 0; i < NUM_LIGHTMAPS; i++ )
                 {
                         lightmap_img[i] = PNMImage( 1, 1 );
                 }
@@ -58,11 +61,11 @@ struct LightmapSource
 struct Palette
 {
         pvector<LightmapSource *> sources;
-        PNMImage palette_img[NUM_BUMP_VECTS + 1];
+        PNMImage palette_img[NUM_LIGHTMAPS];
         TexturePacker *packer;
         Palette()
         {
-                for ( int i = 0; i < NUM_BUMP_VECTS + 1; i++ )
+                for ( int i = 0; i < NUM_LIGHTMAPS; i++ )
                 {
                         palette_img[i] = PNMImage( 1, 1 );
                 }

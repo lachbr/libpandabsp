@@ -35,8 +35,6 @@ extern ConfigVariableDouble ambient_light_scale;
 
 #define DEFAULT_SHADER "UnlitNoMat"
 
-static const BitMask32 shadow_camera_mask = BitMask32::bit( 5 );
-
 NotifyCategoryDeclNoExport(bspShaderGenerator);
 
 class nodeshaderinput_t;
@@ -48,7 +46,22 @@ enum ShaderQuality
         SHADERQUALITY_MEDIUM,
         SHADERQUALITY_HIGH,
 };
+
+enum CameraBits
+{
+	CAMERA_MAIN		= 1 << 0,
+	CAMERA_SHADOW		= 1 << 1,
+	CAMERA_REFLECTION	= 1 << 2,
+	CAMERA_REFRACTION	= 1 << 3,
+	CAMERA_VIEWMODEL	= 1 << 4,
+	CAMERA_COMPUTE		= 1 << 5,
+};
 END_PUBLISH
+
+// Which cameras need lighting information?
+#define CAMERA_MASK_LIGHTING ( CAMERA_MAIN | CAMERA_REFLECTION | CAMERA_REFRACTION | CAMERA_VIEWMODEL )
+// Which cameras should use view frustum culling?
+#define CAMERA_MASK_CULLING ( CAMERA_MAIN | CAMERA_REFLECTION | CAMERA_REFRACTION )
 
 class BSPShaderGenerator : public ShaderGenerator
 {
@@ -85,6 +98,8 @@ PUBLISHED:
 
         static void set_identity_cubemap( Texture *tex );
         static Texture *get_identity_cubemap();
+
+	static CPT( Shader ) make_shader( const ShaderSpec *spec, const ShaderPermutations &perms );
 
 private:
         struct SplitShadowMap

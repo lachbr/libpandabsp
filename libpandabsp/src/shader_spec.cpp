@@ -10,6 +10,7 @@
 #include "shader_spec.h"
 #include "shader_generator.h"
 #include "bsp_material.h"
+#include "bsploader.h"
 
 #include <virtualFileSystem.h>
 
@@ -128,7 +129,7 @@ void ShaderSpec::add_color( const RenderState *rs, ShaderPermutations &perms )
 
 #include "pssmCameraRig.h"
 
-bool ShaderSpec::add_csm( ShaderPermutations &result, BSPShaderGenerator *generator )
+bool ShaderSpec::add_csm( const RenderState *rs, ShaderPermutations &result, BSPShaderGenerator *generator )
 {
         if ( generator->has_shadow_sunlight() )
         {
@@ -147,11 +148,13 @@ bool ShaderSpec::add_csm( ShaderPermutations &result, BSPShaderGenerator *genera
 
                 result.add_input( ShaderInput( "pssmSplitSampler", generator->get_pssm_array_texture() ) );
                 result.add_input( ShaderInput( "pssmMVPs", generator->get_pssm_rig()->get_mvp_array() ) );
-                result.add_input( ShaderInput( "sunVector", generator->get_pssm_rig()->get_sun_vector() ) );
 
-                result.add_input( ShaderInput( "ambientLightIdentifier", ambient_light_identifier.get_value().get_xyz() ) );
-                result.add_input( ShaderInput( "ambientLightMin", ambient_light_min.get_value().get_xyz() ) );
-                result.add_input( ShaderInput( "ambientLightScale", LVector2( ambient_light_scale ) ) );
+                BSPLoader *loader = BSPLoader::get_global_ptr();
+                result.add_input( ShaderInput( "sunVector", generator->get_pssm_rig()->get_sun_vector() ) );
+                if ( loader->get_ambient_probe_mgr()->get_sunlight() )
+                        result.add_input( ShaderInput( "sunColor", loader->get_ambient_probe_mgr()->get_sunlight()->color ) );
+                else
+                        result.add_input( ShaderInput( "sunColor", LVector3( 1, 1, 1 ) ) );
 
                 return true;
         }
@@ -195,6 +198,78 @@ void ShaderSpec::add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPer
                         perms.permutations["INDEXED_TRANSFORMS"] = "1";
                 }
         }
+}
+
+void ShaderSpec::r_precache( ShaderPrecacheCombos &combos )
+{
+	size_t n = combos.combos.size();
+
+	int *indices = new int[n];
+	memset( indices, 0, sizeof( int ) * n );
+
+	int permutations = 0;
+
+	while ( 1 )
+	{
+		ShaderPermutations perms;
+		for ( int i = 0; i < n; i++ )
+		{
+			if ( combos.combos[i].is_bool && combos.combos[i].min_val + indices[n] == 0 )
+				continue;
+			perms.add_permutation( combos.combos[i].combo_name,
+				combos.combos[i].min_val + indices[n] );
+		}
+
+		BSPShaderGenerator::make_shader( this, perms );
+		permutations++;
+		std::cout << "\tCompiled " << permutations << " permutations\n";
+
+		int next = n - 1;
+		while ( next >= 0 && indices[next] + 1 >= ( combos.combos[next].max_val - combos.combos[next].min_val ) + 1 )
+		{
+			next--;
+		}
+
+		if ( next < 0 )
+		{
+			delete[] indices;
+			return;
+		}
+			
+
+		indices[next]++;
+
+		for (int i = next + 1; i < n; i++ )
+		{
+			indices[i] = 0;
+		}
+	}
+
+}
+
+void ShaderSpec::precache()
+{
+	ShaderPrecacheCombos combos;
+	add_precache_combos( combos );
+
+	int total_combos = 0;
+	for ( size_t i = 0; i < combos.combos.size(); i++ )
+	{
+		int possibilities = ( combos.combos[i].max_val - combos.combos[i].min_val ) + 1;
+		if ( total_combos == 0 )
+			total_combos += possibilities;
+		else
+			total_combos *= possibilities;
+	}
+
+	std::cout << "Precaching " << total_combos << " static combos for shader " << get_name() << std::endl;
+
+	r_precache( combos );
+}
+
+void ShaderSpec::add_precache_combos( ShaderPrecacheCombos &combos )
+{
+	combos.add( "SHADER_QUALITY", 2, 2 );
 }
 
 //=================================================================================================

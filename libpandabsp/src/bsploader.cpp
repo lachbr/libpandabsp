@@ -776,17 +776,12 @@ void BSPLoader::make_faces()
 
                         centroid /= verts;
 
-                        bool recv_projshadows = false;
                         if ( poly_normal.almost_equal( LNormald::up(), 0.5 ) )
                         {
                                 // A polygon facing upwards could be considered a ground.
                                 // Give it the ground bin.
                                 poly->set_bin( "ground" );
                                 poly->set_draw_order( 18 );
-                                if ( _want_shadows )
-                                {
-                                        recv_projshadows = true;
-                                }
                         }
 
                         data->recompute_tangent_binormal( GlobPattern( "*" ) );
@@ -870,10 +865,21 @@ LColor color_from_rgb_scalar( vec_t *color )
                        1.0 );
 }
 
-LColor color_from_value( const string &value, bool scale )
+LColor color_from_value( const string &value, bool scale, bool gamma )
 {
         double r, g, b, s;
         sscanf( value.c_str(), "%lf %lf %lf %lf", &r, &g, &b, &s );
+
+	r /= 255.0;
+	g /= 255.0;
+	b /= 255.0;
+
+	if ( gamma )
+	{
+		r = pow( r, 2.2f );
+		g = pow( g, 2.2f );
+		b = pow( b, 2.2f );
+	}
 
         if ( scale )
         {
@@ -881,10 +887,6 @@ LColor color_from_value( const string &value, bool scale )
                 g *= s / 255.0;
                 b *= s / 255.0;
         }
-
-        r /= 255.0;
-        g /= 255.0;
-        b /= 255.0;
 
         LColor col( r, g, b, 1.0 );
 
@@ -1015,7 +1017,7 @@ void BSPLoader::load_static_props()
                 if ( prop->lightsrc != -1 )
                 {
                         lightsrc = _bspdata->entities + prop->lightsrc;
-                        lightsrc_col = color_from_value( ValueForKey( lightsrc, "_light" ) );
+                        lightsrc_col = color_from_value( ValueForKey( lightsrc, "_light" ), true, true );
                 }
 
                 if ( prop->first_vertex_data != -1 &&
@@ -1243,14 +1245,14 @@ void BSPLoader::load_static_props()
                         propmdl.flatten_strong();
                 }
 
-                propnp.hide( shadow_camera_mask );
+                //propnp.hide( CAMBITS_SHADOW );
 
                 // No lightmap shadows,
                 // but depth-map shadows?
                 if ( ( prop->flags & STATICPROPFLAGS_LIGHTMAPSHADOWS ) == 0 &&
                         ( prop->flags & STATICPROPFLAGS_REALSHADOWS ) != 0 )
                 {
-                        propnp.show_through( shadow_camera_mask );
+                        propnp.show_through( CAMERA_SHADOW );
                 }
 
                 // only do group flattening if the prop doesn't
@@ -1390,8 +1392,8 @@ void BSPLoader::load_entities()
                         }
                         else
                         {
-                                if ( classname == "shadow_control" )
-                                        _shadow_control = ent;
+				if ( classname == "light_environment" )
+					_light_environment = ent;
 
                                 // We don't know what this entity is exactly, maybe they linked it to a python class.
                                 // It didn't start with func_, so we can assume it's just a point entity.
@@ -1490,7 +1492,7 @@ bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
         {
                 return true;
         }
-        if ( curr_cluster == cluster )
+        if ( curr_cluster == cluster || curr_cluster == 0 )
         {
                 return true;
         }
@@ -1505,52 +1507,57 @@ bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
         return dat != 0;
 }
 
+void BSPLoader::update_leaf( int leaf )
+{
+	LightReMutexHolder holder( _leaf_aabb_lock );
+
+	_curr_leaf_idx = leaf;
+	_visible_leaf_bboxs.clear();
+	_visible_leafs.clear();
+
+	// Add ourselves to the visible list.
+	_visible_leaf_bboxs.push_back( { _leaf_bboxs[leaf], _bspdata->dleafs[leaf].flags } );
+	_visible_leafs.push_back( leaf );
+
+	if ( _vis_leafs )
+	{
+		_leaf_visnp[leaf].set_color_scale( LColor( 0, 1, 0, 1 ), 1 );
+	}
+
+	for ( int i = 1; i < _bspdata->dmodels[0].visleafs + 1; i++ )
+	{
+		if ( i == leaf )
+		{
+			continue;
+		}
+		const dleaf_t *pleaf = &_bspdata->dleafs[i];
+		if ( is_cluster_visible( leaf, i ) )
+		{
+			if ( _vis_leafs )
+			{
+				_leaf_visnp[i].set_color_scale( LColor( 0, 0, 1, 1 ), 1 );
+			}
+			_visible_leaf_bboxs.push_back( { _leaf_bboxs[i], pleaf->flags } );
+			_visible_leafs.push_back( i );
+		}
+		else
+		{
+			if ( _vis_leafs )
+			{
+				_leaf_visnp[i].set_color_scale( LColor( 1, 0, 0, 1 ), 1 );
+			}
+		}
+	}
+}
+
 void BSPLoader::update()
 {
         // Update visibility
 
-        LightReMutexHolder holder( _leaf_aabb_lock );
-
         int curr_leaf_idx = find_leaf( _camera.get_pos( _render ) );
         if ( curr_leaf_idx != _curr_leaf_idx )
         {
-                _curr_leaf_idx = curr_leaf_idx;
-                _visible_leaf_bboxs.clear();
-                _visible_leafs.clear();
-
-                // Add ourselves to the visible list.
-                _visible_leaf_bboxs.push_back( _leaf_bboxs[curr_leaf_idx] );
-                _visible_leafs.push_back( curr_leaf_idx );
-
-                if ( _vis_leafs )
-                {
-                        _leaf_visnp[curr_leaf_idx].set_color_scale( LColor( 0, 1, 0, 1 ), 1 );
-                }
-
-                for ( int i = 1; i < _bspdata->dmodels[0].visleafs + 1; i++ )
-                {
-                        if ( i == curr_leaf_idx )
-                        {
-                                continue;
-                        }
-                        const dleaf_t *leaf = &_bspdata->dleafs[i];
-                        if ( is_cluster_visible( curr_leaf_idx, i ) )
-                        {
-                                if ( _vis_leafs )
-                                {
-                                        _leaf_visnp[i].set_color_scale( LColor( 0, 0, 1, 1 ), 1 );
-                                }
-                                _visible_leaf_bboxs.push_back( _leaf_bboxs[i] );
-                                _visible_leafs.push_back( i );
-                        }
-                        else
-                        {
-                                if ( _vis_leafs )
-                                {
-                                        _leaf_visnp[i].set_color_scale( LColor( 1, 0, 0, 1 ), 1 );
-                                }
-                        }
-                }
+		update_leaf( curr_leaf_idx );
         }
 }
 
@@ -1743,25 +1750,12 @@ bool BSPLoader::read( const Filename &file )
 
                 // Don't let the static brushes cast depth-map shadows,
                 // they have lightmap shadows.
-                get_model( 0 ).hide( shadow_camera_mask );
+                //get_model( 0 ).hide( CAMBITS_SHADOW );
 
-                // Check if we are casting real-time shadows
-                if ( _want_shadows && _shgen )
+                // Check if we are casting cascaded shadows
+                if ( _want_shadows && _shgen && _amb_probe_mgr.get_sunlight() )
                 {
-                        if ( _shadow_control )
-                        {
-                                vec3_t dir;
-                                GetVectorForKey( _shadow_control, "angles", dir );
-                                float temp = dir[1];
-                                dir[1] = dir[0];
-                                dir[0] = temp;
-                                _shadow_dir = angles_to_vector( dir );
-                                _shadow_color = color_from_value( ValueForKey( _shadow_control, "color" ) );
-                        }
-                        else if ( _amb_probe_mgr.get_sunlight() )
-                        {
-                                _shadow_dir = -_amb_probe_mgr.get_sunlight()->direction.get_xyz();
-                        }
+                         _shadow_dir = -_amb_probe_mgr.get_sunlight()->direction.get_xyz();
 
                         // Create a fake DirectionalLight to contain the direction
                         PT( DirectionalLight ) dl = new DirectionalLight( "fake-dl" );
@@ -1770,6 +1764,11 @@ bool BSPLoader::read( const Filename &file )
                         _fake_dl = NodePath( dl );
                         _shgen->set_sun_light( _fake_dl );
                 }
+		else
+		{
+			// No cascaded shadows
+			_shgen->set_sun_light( NodePath() );
+		}
 
                 _update_task = new GenericAsyncTask( file.get_basename_wo_extension() + "-updateTask", update_task, this );
                 AsyncTaskManager::get_global_ptr()->add( _update_task );
@@ -1856,9 +1855,8 @@ void BSPLoader::do_optimizations()
         // List of potentially visible Geoms in each leaf
         // ( concatenation of Geoms in that leaf + Geoms of leafs in PVS )
         _leaf_world_geoms.clear();
-        _leaf_world_geoms.resize( numvisleafs );
+        _leaf_world_geoms.resize( numvisleafs + 1 );
 
-        // not including the solid leaf 0
         for ( int leafnum = 1; leafnum < numvisleafs; leafnum++ )
         {
                 // Build a list of worldspawn Geoms that we can render from this leaf.
@@ -1896,7 +1894,7 @@ void BSPLoader::do_optimizations()
                 leafnode.flatten_strong();
 
                 // We've created a batched list of Geoms to render when we are in this leaf.
-                _leaf_world_geoms[leafnum] = lgn->get_geoms();
+		_leaf_world_geoms[leafnum] = lgn->get_geoms();
         }
 
         _result.premunge_scene( _win->get_gsg() );
@@ -2021,9 +2019,7 @@ void BSPLoader::cleanup()
 
         _decal_mgr.cleanup();
 
-        _shadow_color = default_shadow_color;
         _shadow_dir = default_shadow_dir;
-        _shadow_control = nullptr;
         _light_environment = nullptr;
 
         _map_file = Filename();
@@ -2118,9 +2114,7 @@ BSPLoader::BSPLoader() :
         _shgen( nullptr ),
         _ai( false ),
         _light_environment( nullptr ),
-        _shadow_control( nullptr ),
         _shadow_dir( default_shadow_dir ),
-        _shadow_color( default_shadow_color ),
         _want_shadows( false ),
         _wireframe( false ),
         _bspdata( nullptr ),
@@ -2143,14 +2137,15 @@ void BSPLoader::set_want_shadows( bool flag )
         _want_shadows = flag;
 }
 
-void BSPLoader::set_shadow_color( const LColor &color )
-{
-        _shadow_color = color;
-}
-
 void BSPLoader::set_shadow_dir( const LVector3 &dir )
 {
         _shadow_dir = dir;
+
+	if ( _shgen && _shgen->has_shadow_sunlight() && !_fake_dl.is_empty() )
+	{
+		DCAST( DirectionalLight, _fake_dl.node() )->set_direction( dir );
+		_shgen->set_sun_light( _fake_dl );
+	}
 }
 
 /**
@@ -2335,15 +2330,25 @@ BSPLoader *BSPLoader::get_global_ptr()
 /**
  * Checks if the specified bounding volume intersects any
  * of the potentially visible leaf bounding boxes.
+ *
+ * required_leaf_flags - What flags should be set on the leaf for it to pass?
  */
-bool BSPLoader::pvs_bounds_test( const GeometricBoundingVolume *bounds )
+bool BSPLoader::pvs_bounds_test( const GeometricBoundingVolume *bounds, unsigned int required_leaf_flags )
 {
         LightReMutexHolder holder( _leaf_aabb_lock );
 
         size_t num_aabbs = _visible_leaf_bboxs.size();
         for ( size_t i = 0; i < num_aabbs; i++ )
         {
-                if ( _visible_leaf_bboxs[i]->contains( bounds ) != BoundingVolume::IF_no_intersection )
+		const visibleleafdata_t &data = _visible_leaf_bboxs[i];
+
+		if ( required_leaf_flags != 0 && ( data.flags & required_leaf_flags ) == 0 )
+		{
+			// Leaf doesn't have a flag set that is needed for the test to pass.
+			continue;
+		}
+
+                if (data.bbox->contains( bounds ) != BoundingVolume::IF_no_intersection )
                 {
                         // Bounds intersected one of the potentially visible leafs.
                         return true;

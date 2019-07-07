@@ -169,7 +169,7 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePa
                 for ( int i = 0; i < pssm_splits; i++ )
                 {
                         Camera *cam = DCAST( Camera, _pssm_rig->get_camera( i ).node() );
-                        cam->set_camera_mask( shadow_camera_mask );
+                        cam->set_camera_mask( CAMERA_SHADOW );
                 }
 
                 PT( DisplayRegion ) dr = _pssm_layered_buffer->make_display_region();
@@ -195,6 +195,7 @@ void BSPShaderGenerator::set_shader_quality( int quality )
 void BSPShaderGenerator::add_shader( PT( ShaderSpec ) shader )
 {
         _shaders[shader->get_name()] = shader;
+	//shader->precache();
 }
 
 void BSPShaderGenerator::set_sun_light( const NodePath &np )
@@ -374,35 +375,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs
 
         synthesize_collector.start();
 
-        stringstream defines;
-        for ( auto itr = permutations.permutations.begin(); itr != permutations.permutations.end(); ++itr )
-        {
-                defines << "#define " << itr->first << " " << itr->second << "\n";
-        }
-
-        stringstream vshader, gshader, fshader;
-
-        // Slip the defines into the shader source.
-        if ( spec->_vertex.has )
-        {
-                vshader << spec->_vertex.before_defines
-                        << "\n" << defines.str()
-                        << spec->_vertex.after_defines;
-        }
-        if ( spec->_geom.has )
-        {
-                gshader << spec->_geom.before_defines
-                        << "\n" << defines.str()
-                        << spec->_geom.after_defines;
-        }
-        if ( spec->_pixel.has )
-        {
-                fshader << spec->_pixel.before_defines
-                        << "\n" << defines.str()
-                        << spec->_pixel.after_defines;
-        }
-
-        PT( Shader ) shader = Shader::make( Shader::SL_GLSL, vshader.str(), fshader.str(), gshader.str() );
+	CPT( Shader ) shader = make_shader( spec, permutations );
 
         nassertr( shader != nullptr, nullptr );
 
@@ -449,4 +422,37 @@ Texture *BSPShaderGenerator::get_identity_cubemap()
         }
 
         return _identity_cubemap;
+}
+
+CPT( Shader ) BSPShaderGenerator::make_shader( const ShaderSpec *spec, const ShaderPermutations &perms )
+{
+	stringstream defines;
+	for ( auto itr = perms.permutations.begin(); itr != perms.permutations.end(); ++itr )
+	{
+		defines << "#define " << itr->first << " " << itr->second << "\n";
+	}
+
+	stringstream vshader, gshader, fshader;
+
+	// Slip the defines into the shader source.
+	if ( spec->_vertex.has )
+	{
+		vshader << spec->_vertex.before_defines
+			<< "\n" << defines.str()
+			<< spec->_vertex.after_defines;
+	}
+	if ( spec->_geom.has )
+	{
+		gshader << spec->_geom.before_defines
+			<< "\n" << defines.str()
+			<< spec->_geom.after_defines;
+	}
+	if ( spec->_pixel.has )
+	{
+		fshader << spec->_pixel.before_defines
+			<< "\n" << defines.str()
+			<< spec->_pixel.after_defines;
+	}
+
+	return Shader::make( Shader::SL_GLSL, vshader.str(), fshader.str(), gshader.str() );
 }

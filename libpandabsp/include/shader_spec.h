@@ -20,6 +20,47 @@ class RenderState;
 class BSPShaderGenerator;
 class BSPMaterial;
 
+struct ShaderPrecacheCombo_t
+{
+	std::string combo_name;
+	int min_val;
+	int max_val;
+	bool is_bool;
+};
+
+struct ShaderPrecacheComboCondition_t
+{
+	std::string combo_name;
+	int val;
+};
+
+struct ShaderPrecacheComboSkipCondition_t
+{
+	pvector<ShaderPrecacheComboCondition_t> conditions;
+};
+
+class ShaderPrecacheCombos
+{
+public:
+	void add( const std::string &name, int min, int max )
+	{
+		combos.push_back( { name, min, max, false } );
+	}
+	void add_bool( const std::string &name, bool always_true = false )
+	{
+		if ( always_true )
+			combos.push_back( { name, 1, 1, true } );
+		else
+			combos.push_back( { name, 0, 1, true } );
+	}
+	void skip( const ShaderPrecacheComboSkipCondition_t &skip )
+	{
+		skips.push_back( skip );
+	}
+	pvector<ShaderPrecacheCombo_t> combos;
+	pvector<ShaderPrecacheComboSkipCondition_t> skips;
+};
+
 class ShaderConfig : public ReferenceCount
 {
 public:
@@ -169,14 +210,16 @@ PUBLISHED:
 public:
         virtual ShaderPermutations setup_permutations( const BSPMaterial *mat, const RenderState *state,
                                                  const GeomVertexAnimationSpec &anim, BSPShaderGenerator *generator );
-        
+
+	virtual void add_precache_combos( ShaderPrecacheCombos &combos );
+	virtual void precache();
 
         ShaderConfig *get_shader_config( const BSPMaterial *mat );
         virtual PT( ShaderConfig ) make_new_config() = 0;
 
         static void add_fog( const RenderState *rs, ShaderPermutations &perms );
         static void add_color( const RenderState *rs, ShaderPermutations &perms );
-        static bool add_csm( ShaderPermutations &perms, BSPShaderGenerator *generator );
+        static bool add_csm( const RenderState *rs, ShaderPermutations &perms, BSPShaderGenerator *generator );
         static bool add_clip_planes( const RenderState *rs, ShaderPermutations &perms );
         static void add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPermutations &perms );
 
@@ -203,6 +246,8 @@ public:
         }
 
 private:
+	void r_precache( ShaderPrecacheCombos &combos );
+
         static TypeHandle _type_handle;
 };
 

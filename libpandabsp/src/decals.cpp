@@ -6,7 +6,7 @@
  * @author Brian Lach
  * @date March 08, 2019
  *
- * @desc Decals!
+ * @desc Decals on the world! TODO: clip the verts
  *
  */
 
@@ -14,6 +14,7 @@
 #include "bsp_trace.h"
 #include "bsploader.h"
 #include "bsp_material.h"
+#include "shader_generator.h"
 
 #include <cardMaker.h>
 #include <configVariableInt.h>
@@ -98,6 +99,9 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
         decal->bounds = bounds;
         decal->flags = DECALFLAGS_NONE;
         _decals.push_front( decal );
+        
+        // Decals should not cast shadows
+        decalroot.hide( CAMERA_SHADOW );
 
         return decalroot;
 }
