@@ -10,6 +10,7 @@
 */
 
 #include "bsp_trace.h"
+#include "bsploader.h"
 
 #include <pstatTimer.h>
 #include <pstatCollector.h>
@@ -758,4 +759,55 @@ collbspdata_t *SetupCollisionBSPData( const bspdata_t *bspdata )
         }
 
         return cdata;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+// BSPTrace
+
+BSPTrace::BSPTrace( BSPLoader *loader ) :
+	_loader( loader )
+{
+	RayTrace::initialize();
+	_scene = new RayTraceScene;
+	_scene->set_build_quality( RayTraceScene::BUILD_QUALITY_HIGH );
+}
+
+void BSPTrace::add_dmodel( const dmodel_t *model, unsigned int mask )
+{
+	nassertv( _scene != nullptr );
+
+	const bspdata_t *data = _loader->get_bspdata();
+
+	for ( int facenum = 0; facenum < model->numfaces; facenum++ )
+	{
+		const dface_t *face = &data->dfaces[model->firstface + facenum];
+
+		PT( RayTraceTriangleMesh ) geom = new RayTraceTriangleMesh;
+		geom->set_build_quality( RayTraceScene::BUILD_QUALITY_HIGH );
+		geom->set_mask( mask );
+
+		int ntris = face->numedges - 2;
+		for ( int tri = 0; tri < ntris; tri++ )
+		{
+			geom->add_triangle( VertCoord( data, face, 0 ),
+				VertCoord( data, face, ( tri + 1 ) % face->numedges ),
+				VertCoord( data, face, ( tri + 2 ) % face->numedges ) );
+		}
+
+		geom->build();
+
+		_scene->add_geometry( geom );
+		_geom_handles.push_back( geom );
+
+		_dface_map[geom->get_geom_id()] = face;
+	}
+
+	_scene->update();
+}
+
+void BSPTrace::clear()
+{
+	_scene->remove_all();
+	_dface_map.clear();
+	_geom_handles.clear();
 }

@@ -278,13 +278,15 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
 					}
 					wsp_ctest_collector.stop();
 
-					if ( _loader->get_wireframe() && has_camera_bits( CAMERA_MAIN ) )
-					{
-						CPT( RenderAttrib ) wfattr = RenderModeAttrib::make( RenderModeAttrib::M_filled_wireframe,
-							0.5, true, brush_wf_color );
-						CPT( RenderState ) wfstate = RenderState::make( wfattr, 1 );
-						world_state = world_state->compose( wfstate );
-					}
+					//if ( _loader->get_wireframe() && has_camera_bits( CAMERA_MAIN ) )
+					//{
+					//	//std::cout << "Composing world wireframe" << std::endl;
+					//	CPT( RenderAttrib ) wfattr = RenderModeAttrib::make( RenderModeAttrib::M_filled_wireframe,
+					//		0.5, true, brush_wf_color );
+					//	CPT( RenderState ) wfstate = RenderState::make_empty();
+					//	wfstate = wfstate->set_attrib( wfattr, 10 );
+					//	world_state = world_state->compose( wfstate );
+					//}
 
 					wsp_make_cullableobject_collector.start();
 					// Go ahead and render this worldspawn Geom.

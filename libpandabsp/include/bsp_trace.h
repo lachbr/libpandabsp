@@ -10,8 +10,13 @@
 #ifndef BSP_TRACE_H
 #define BSP_TRACE_H
 
+#ifndef CPPPARSER
+
 #include <winding.h>
 #include <bsptools.h>
+#include "raytrace.h"
+
+struct bspdata_t;
 
 /**
  * Enumerates the BSP tree checking for intersections with any non TEX_SPECIAL faces.
@@ -25,8 +30,6 @@ public:
         virtual bool enumerate_node( int node_id, const Ray &ray, float f, int context );
 
 };
-
-struct bspdata_t;
 
 struct cboxbrush_t
 {
@@ -51,5 +54,50 @@ extern collbspdata_t *SetupCollisionBSPData( const bspdata_t *bspdata );
 
 extern void CM_BoxTrace( const Ray &ray, int headnode, int brushmask,
                          bool compute_endpoint, const collbspdata_t *bspdata, Trace &trace );
+
+class BSPLoader;
+
+enum
+{
+	TRACETYPE_WORLD = 1 << 0,
+	TRACETYPE_DETAIL = 1 << 1,
+};
+
+class BSPTrace : public ReferenceCount
+{
+public:
+	BSPTrace( BSPLoader *loader );
+
+	void add_dmodel( const dmodel_t *model, unsigned int mask );
+
+	INLINE RayTraceScene *get_scene() const
+	{
+		return _scene;
+	}
+
+	INLINE const dface_t *lookup_dface( int geom_id )
+	{
+		int idx = _dface_map.find( geom_id );
+		if ( idx == -1 )
+			return nullptr;
+		return _dface_map.get_data( idx );
+	}
+
+	void clear();
+
+private:
+	PT( RayTraceScene ) _scene;
+	pvector<PT( RayTraceGeometry )> _geom_handles;
+	typedef SimpleHashMap<int, const dface_t *, int_hash> RT_DFaceMap;
+	RT_DFaceMap _dface_map;
+
+	BSPLoader *_loader;
+};
+
+#else
+
+class BSPTrace;
+
+#endif
 
 #endif // BSP_TRACE_H

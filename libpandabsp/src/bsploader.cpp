@@ -9,8 +9,6 @@
 
 #include "bsploader.h"
 
-#include "bsp_trace.h"
-
 #include "bsp_render.h"
 #include "bspfile.h"
 #include "entity.h"
@@ -296,72 +294,76 @@ LTexCoord BSPLoader::get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool li
         return LTexCoord( s_vec.dot( vert_pos ) + s_dist, t_vec.dot( vert_pos ) + t_dist );
 }
 
-LTexCoord get_lightcoords( texinfo_t *texinfo, dvertex_t *vert, dface_t *face, FaceLightmapData *ld )
+/**
+ * Returns lightmap coordinates for a point on a face.
+ */
+LTexCoord BSPLoader::get_lightcoords( int facenum, const LVector3 &point )
 {
-        float *vpos = vert->point;
-        LVector3 vec( vpos[0], vpos[1], vpos[2] );
+	const dface_t *face = _bspdata->dfaces + facenum;
+	const texinfo_t *texinfo = _bspdata->texinfo + face->texinfo;
+	LightmapPaletteDirectory::LightmapFacePaletteEntry *faceentry = _lightmap_dir.face_index[facenum];
 
-        float s_scale, t_scale;
-        float s_offset, t_offset;
-        LTexCoord lightcoord;
+	float s_scale, t_scale;
+	float s_offset, t_offset;
+	LTexCoord lightcoord;
 
-        bool flipped = ld->faceentry != nullptr && ld->faceentry->flipped;
+	bool flipped = faceentry != nullptr && faceentry->flipped;
 
-        int texsize[2];
-        texsize[0] = flipped ? face->lightmap_size[1] : face->lightmap_size[0];
-        texsize[1] = flipped ? face->lightmap_size[0] : face->lightmap_size[1];
-        int texmins[2];
-        texmins[0] = flipped ? face->lightmap_mins[1] : face->lightmap_mins[0];
-        texmins[1] = flipped ? face->lightmap_mins[0] : face->lightmap_mins[1];        
+	int texsize[2];
+	texsize[0] = flipped ? face->lightmap_size[1] : face->lightmap_size[0];
+	texsize[1] = flipped ? face->lightmap_size[0] : face->lightmap_size[1];
+	int texmins[2];
+	texmins[0] = flipped ? face->lightmap_mins[1] : face->lightmap_mins[0];
+	texmins[1] = flipped ? face->lightmap_mins[0] : face->lightmap_mins[1];
 
-        if ( ld->faceentry != nullptr )
-        {
-                s_scale = 1.0 / (float)ld->faceentry->palette_size[0];
-                s_offset = (float)ld->faceentry->xshift * s_scale;
-        }
-        else
-        {
-                s_scale = 1.0;
-                s_offset = 0.0;
-        }
-        s_scale = texsize[0] * s_scale;
+	if ( faceentry != nullptr )
+	{
+		s_scale = 1.0 / (float)faceentry->palette_size[0];
+		s_offset = (float)faceentry->xshift * s_scale;
+	}
+	else
+	{
+		s_scale = 1.0;
+		s_offset = 0.0;
+	}
+	s_scale = texsize[0] * s_scale;
 
-        if ( ld->faceentry != nullptr )
-        {
-                t_scale = 1.0 / -(float)ld->faceentry->palette_size[1];
-                t_offset = (float)ld->faceentry->yshift * t_scale;
-        }
-        else
-        {
-                t_scale = -1.0;
-                t_offset = 0.0;
-        }
-        t_scale = texsize[1] * t_scale;        
+	if ( faceentry != nullptr )
+	{
+		t_scale = 1.0 / -(float)faceentry->palette_size[1];
+		t_offset = (float)faceentry->yshift * t_scale;
+	}
+	else
+	{
+		t_scale = -1.0;
+		t_offset = 0.0;
+	}
+	t_scale = texsize[1] * t_scale;
 
-        lightcoord[0] = DotProduct( vec, texinfo->lightmap_vecs[0] ) +
-                texinfo->lightmap_vecs[0][3];
-        lightcoord[1] = DotProduct( vec, texinfo->lightmap_vecs[1] ) +
-                texinfo->lightmap_vecs[1][3];
+	lightcoord[0] = DotProduct( point, texinfo->lightmap_vecs[0] ) +
+		texinfo->lightmap_vecs[0][3];
+	lightcoord[1] = DotProduct( point, texinfo->lightmap_vecs[1] ) +
+		texinfo->lightmap_vecs[1][3];
 
-        if ( flipped )
-        {
-                float tmp = lightcoord[1];
-                lightcoord[1] = lightcoord[0];
-                lightcoord[0] = tmp;
-        }
+	if ( flipped )
+	{
+		float tmp = lightcoord[1];
+		lightcoord[1] = lightcoord[0];
+		lightcoord[0] = tmp;
+	}
 
-        lightcoord[0] -= texmins[0];
-        lightcoord[0] += 0.5;
-        lightcoord[0] /= texsize[0];
-        
-        lightcoord[1] -= texmins[1];
-        lightcoord[1] += 0.5;
-        lightcoord[1] /= texsize[1];
+	lightcoord[0] -= texmins[0];
+	lightcoord[0] += 0.5;
+	lightcoord[0] /= texsize[0];
 
-        lightcoord[0] = s_offset + lightcoord[0] * s_scale;
-        lightcoord[1] = t_offset + lightcoord[1] * t_scale;
+	lightcoord[1] -= texmins[1];
+	lightcoord[1] += 0.5;
+	lightcoord[1] /= texsize[1];
 
-        return lightcoord;
+	lightcoord[0] = s_offset + lightcoord[0] * s_scale;
+	lightcoord[1] = t_offset + lightcoord[1] * t_scale;
+
+	return lightcoord;
 }
 
 PT( EggVertex ) BSPLoader::make_vertex_ai( EggVertexPool *vpool, EggPolygon *poly, dedge_t *edge, int k )
@@ -378,6 +380,7 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
                                         dface_t *face, int k, FaceLightmapData *ld,
                                         Texture *tex )
 {
+	int facenum = face - _bspdata->dfaces;
         dvertex_t *vert = &_bspdata->dvertexes[edge->v[k]];
         float *vpos = vert->point;
         PT( EggVertex ) v = new EggVertex;
@@ -394,7 +397,7 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
 
         // Texture and lightmap coordinates
         LTexCoord uv = get_vertex_uv( texinfo, vert );
-        LTexCoord luv = get_lightcoords( texinfo, vert, face, ld );
+	LTexCoord luv = get_lightcoords( facenum, LVector3( vpos[0], vpos[1], vpos[2] ) );
         LTexCoordd df_uv( uv.get_x() / df_width, -uv.get_y() / df_height );
         LTexCoordd lm_uv( luv[0], luv[1] );
 #if 0
@@ -496,36 +499,27 @@ NodePath BSPLoader::make_faces_ai_base( const std::string &name, const vector_st
                                 continue;
                         }
 
-                        int last_edge = face->firstedge + face->numedges;
-                        int first_edge = face->firstedge;
-                        for ( int j = last_edge - 1; j >= first_edge; j-- )
+                        for ( int j = face->numedges - 1; j >= 0; j-- )
                         {
-                                int surf_edge = _bspdata->dsurfedges[j];
+                                int surf_edge = _bspdata->dsurfedges[face->firstedge + j];
 
                                 dedge_t *edge;
-                                if ( surf_edge >= 0 )
-                                        edge = &_bspdata->dedges[surf_edge];
-                                else
-                                        edge = &_bspdata->dedges[-surf_edge];
-
-                                if ( surf_edge < 0 )
-                                {
-                                        for ( int k = 0; k < 2; k++ )
-                                        {
-                                                PT( EggVertex ) v = make_vertex_ai( vpool, poly, edge, k );
-                                                vpool->add_vertex( v );
-                                                poly->add_vertex( v );
-                                        }
-                                }
-                                else
-                                {
-                                        for ( int k = 1; k >= 0; k-- )
-                                        {
-                                                PT( EggVertex ) v = make_vertex_ai( vpool, poly, edge, k );
-                                                vpool->add_vertex( v );
-                                                poly->add_vertex( v );
-                                        }
-                                }
+				int index;
+				if ( surf_edge >= 0 )
+				{
+					edge = &_bspdata->dedges[surf_edge];
+					index = 0;
+				}
+                                        
+				else
+				{
+					edge = &_bspdata->dedges[-surf_edge];
+					index = 1;
+				}
+                                
+				PT( EggVertex ) v = make_vertex_ai( vpool, poly, edge, index );
+				vpool->add_vertex( v );
+				poly->add_vertex( v );
                         }
 
                         data->remove_unused_vertices( true );
@@ -552,6 +546,28 @@ NodePath BSPLoader::make_faces_ai_base( const std::string &name, const vector_st
         return ret;
 }
 
+static void get_model_data( const dmodel_t *model, LVector3 &center )
+{
+	const float *florigin = model->origin;
+	const float *flmins = model->mins;
+	const float *flmaxs = model->maxs;
+	LVector3 origin( florigin[0], florigin[1], florigin[2] );
+	LVector3 mins( flmins[0], flmins[1], flmins[2] );
+	LVector3 maxs( flmaxs[0], flmaxs[1], flmaxs[2] );
+	center = ( ( ( mins + maxs ) / 2.0 ) + origin ) / 16.0f;
+}
+
+static NodePath setup_model( int modelnum, NodePath parent )
+{
+	stringstream name;
+	name << "model-" << modelnum;
+	PT( BSPModel ) bspmdl = new BSPModel( name.str() );
+	NodePath modelroot = parent.attach_new_node( bspmdl );
+	modelroot.set_shader_auto( 1 );
+
+	return modelroot;
+}
+
 /**
  * Generates the least amount of data possible for geometry on the AI side.
  * Used for generating the navmesh. We don't need to make the faces in the same
@@ -566,10 +582,21 @@ void BSPLoader::make_faces_ai()
                 .reparent_to( _result );
         make_faces_ai_base( "hull", { "func_wall", "func_detail", "func_illusionary", "func_clip" } )
                 .reparent_to( _result );
-        
+
         _result.set_scale( 1 / 16.0 );
         _result.clear_model_nodes();
         flatten_node( _result );
+
+	for ( int modelnum = 0; modelnum < _bspdata->nummodels; modelnum++ )
+	{
+		const dmodel_t *model = _bspdata->dmodels + modelnum;
+		LVector3 center;
+		get_model_data( model, center );
+		NodePath modelroot = setup_model( modelnum, _result );
+		_model_origins[modelroot] = center;
+		modelroot.set_pos( center );
+		_model_roots.push_back( modelroot );
+	}
 }
 
 void BSPLoader::make_faces()
@@ -596,22 +623,13 @@ void BSPLoader::make_faces()
         for ( int modelnum = 0; modelnum < _bspdata->nummodels; modelnum++ )
         {
                 dmodel_t *model = &_bspdata->dmodels[modelnum];
-                int firstface = model->firstface;
-                int numfaces = model->numfaces;
-                float *florigin = model->origin;
-                float *flmins = model->mins;
-                float *flmaxs = model->maxs;
-                LPoint3 origin( florigin[0], florigin[1], florigin[2] );
-                LPoint3 mins( flmins[0], flmins[1], flmins[2] );
-                LPoint3 maxs( flmaxs[0], flmaxs[1], flmaxs[2] );
+		int firstface = model->firstface;
+		int numfaces = model->numfaces;
 
-                stringstream name;
-                name << "model-" << modelnum;
-                PT( BSPModel ) bspmdl = new BSPModel( name.str() );
-                NodePath modelroot = _result.attach_new_node( bspmdl );
-                modelroot.set_shader_auto( 1 );
-
-                _model_origins[modelroot] = ( ( ( mins + maxs ) / 2.0 ) + origin ) / 16.0;
+		LVector3 center;
+		get_model_data( model, center );
+		NodePath modelroot = setup_model( modelnum, _result );
+		_model_origins[modelroot] = center;
 
                 for ( int facenum = firstface; facenum < firstface + numfaces; facenum++ )
                 {
@@ -662,70 +680,19 @@ void BSPLoader::make_faces()
                         bool has_transparency = bspmat->has_transparency();
 
                         LightmapPaletteDirectory::LightmapFacePaletteEntry *lmfaceentry = _lightmap_dir.face_index[facenum];
-
-                        /* ************* FROM P3RAD ************* */
-
                         FaceLightmapData ld;
-
-                        ld.mins[0] = ld.mins[1] = 999999.0;
-                        ld.maxs[0] = ld.maxs[1] = -99999.0;
-
-                        for ( int i = 0; i < face->numedges; i++ )
-                        {
-                                int edge_idx = _bspdata->dsurfedges[face->firstedge + i];
-                                dedge_t *edge;
-                                dvertex_t *vert;
-                                if ( edge_idx >= 0 )
-                                {
-                                        edge = &_bspdata->dedges[edge_idx];
-                                        vert = &_bspdata->dvertexes[edge->v[0]];
-                                }
-                                else
-                                {
-                                        edge = &_bspdata->dedges[-edge_idx];
-                                        vert = &_bspdata->dvertexes[edge->v[1]];
-                                }
-
-                                LTexCoord uv = get_vertex_uv( texinfo, vert, true );
-
-                                if ( uv.get_x() < ld.mins[0] )
-                                        ld.mins[0] = uv.get_x();
-                                else if ( uv.get_x() > ld.maxs[0] )
-                                        ld.maxs[0] = uv.get_x();
-
-                                if ( uv.get_y() < ld.mins[1] )
-                                        ld.mins[1] = uv.get_y();
-                                else if ( uv.get_y() > ld.maxs[1] )
-                                        ld.maxs[1] = uv.get_y();
-                        }
-
-                        ld.texmins[0] = floor( ld.mins[0] );
-                        ld.texmins[1] = floor( ld.mins[1] );
-                        ld.texmaxs[0] = ceil( ld.maxs[0] );
-                        ld.texmaxs[1] = ceil( ld.maxs[1] );
-
-                        ld.texsize[0] = floor( (double)( ld.texmaxs[0] - ld.texmins[0] ) + 1 );
-                        ld.texsize[1] = floor( (double)( ld.texmaxs[1] - ld.texmins[1] ) + 1 );
-
-                        ld.midpolys[0] = ( ld.mins[0] + ld.maxs[0] ) / 2.0;
-                        ld.midpolys[1] = ( ld.mins[1] + ld.maxs[1] ) / 2.0;
-                        ld.midtexs[0] = ld.texsize[0] / 2.0;
-                        ld.midtexs[1] = ld.texsize[1] / 2.0;
-
                         ld.faceentry = lmfaceentry;
 
                         LNormald poly_normal( 0 );
                         LVertexd centroid( 0 );
                         int verts = 0;
 
-                        int last_edge = face->firstedge + face->numedges;
-                        int first_edge = face->firstedge;
-                        for ( int j = last_edge - 1; j >= first_edge; j-- )
+                        for ( int j = face->numedges - 1; j >= 0; j-- )
                         {
                                 LNormald normal( 0 );
                                 if ( face_vertnormalindices[facenum] != -1 )
                                 {
-                                        int vert_normal_idx = face_vertnormalindices[facenum] + ( j - first_edge );
+                                        int vert_normal_idx = face_vertnormalindices[facenum] + j;
                                         vec3_t normalf_v;
                                         VectorCopy( _bspdata->vertnormals[_bspdata->vertnormalindices[vert_normal_idx]].point, normalf_v );
                                         normal = LNormald( normalf_v[0], normalf_v[1], normalf_v[2] );
@@ -733,40 +700,27 @@ void BSPLoader::make_faces()
 
                                 poly_normal += normal;
 
-                                int surf_edge = _bspdata->dsurfedges[j];
-
+                                int surf_edge = _bspdata->dsurfedges[face->firstedge + j];
                                 dedge_t *edge;
-                                if ( surf_edge >= 0 )
-                                        edge = &_bspdata->dedges[surf_edge];
-                                else
-                                        edge = &_bspdata->dedges[-surf_edge];
+				int index;
+				if ( surf_edge >= 0 )
+				{
+					edge = &_bspdata->dedges[surf_edge];
+					index = 0;
+				}   
+				else
+				{
+					edge = &_bspdata->dedges[-surf_edge];
+					index = 1;
+				}
 
-                                if ( surf_edge < 0 )
-                                {
-                                        for ( int k = 0; k < 2; k++ )
-                                        {
-                                                PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
-                                                                                 face, k, &ld, tex );
-                                                v->set_normal( normal );
-                                                vpool->add_vertex( v );
-                                                poly->add_vertex( v );
-                                                centroid += v->get_pos3();
-                                                verts++;
-                                        }
-                                }
-                                else
-                                {
-                                        for ( int k = 1; k >= 0; k-- )
-                                        {
-                                                PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
-                                                                                 face, k, &ld, tex );
-                                                v->set_normal( normal );
-                                                vpool->add_vertex( v );
-                                                poly->add_vertex( v );
-                                                centroid += v->get_pos3();
-                                                verts++;
-                                        }
-                                }
+				PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
+					face, index, &ld, tex );
+				v->set_normal( normal );
+				vpool->add_vertex( v );
+				poly->add_vertex( v );
+				centroid += v->get_pos3();
+				verts++;
                         }
 
                         data->remove_unused_vertices( true );
@@ -1303,6 +1257,7 @@ void BSPLoader::load_entities()
                 entity_t *ent = &_bspdata->entities[entnum];
 
                 string classname = ValueForKey( ent, "classname" );
+		const char *psz_classname = classname.c_str();
                 string id = ValueForKey( ent, "id" );
 
                 vec_t origin[3];
@@ -1422,8 +1377,20 @@ void BSPLoader::load_entities()
                                         }
                                         else
                                         {
-                                                PT( CPointEntity ) entity = new CPointEntity;
-                                                entity->set_data( entnum, ent, this );
+						PT( CBaseEntity ) entity;
+						if ( !strncmp( psz_classname, "func_", 5 ) )
+						{
+							int modelnum = extract_modelnum( entnum );
+							entity = new CBrushEntity;
+							DCAST( CBrushEntity, entity )->set_data( entnum, ent, this, modelnum,
+								_bspdata->dmodels + modelnum, get_model( modelnum ) );
+						}
+						else
+						{
+							entity = new CPointEntity;
+							DCAST( CPointEntity, entity )->set_data( entnum, ent, this );
+						}
+                                                
                                                 _class_entities.push_back( entity );
                                                 Py_INCREF( ret );
                                                 _py_entities.push_back( ret );
@@ -1776,7 +1743,14 @@ bool BSPLoader::read( const Filename &file )
 
         _colldata = SetupCollisionBSPData( _bspdata );
 
+	setup_raytrace_environment();
+
         return true;
+}
+
+void BSPLoader::setup_raytrace_environment()
+{
+	_trace->add_dmodel( &_bspdata->dmodels[0], TRACETYPE_WORLD );
 }
 
 void BSPLoader::do_optimizations()
@@ -2017,6 +1991,9 @@ void BSPLoader::cleanup()
 
         _active_level = false;
 
+	// Clear raytracing scene
+	_trace->clear();
+
         _decal_mgr.cleanup();
 
         _shadow_dir = default_shadow_dir;
@@ -2096,29 +2073,30 @@ void BSPLoader::cleanup()
 
 BSPLoader::BSPLoader() :
 #ifdef HAVE_PYTHON
-        _sv_ent_dispatch( nullptr ),
+	_sv_ent_dispatch( nullptr ),
 #endif
-        _update_task( nullptr ),
-        _win( nullptr ),
-        _has_pvs_data( false ),
-        _want_visibility( true ),
-        _physics_type( PT_panda ),
-        _vis_leafs( false ),
-        _want_lightmaps( true ),
-        _curr_leaf_idx( -1 ),
-        _leaf_aabb_lock( "leafAABBMutex" ),
-        _gamma( DEFAULT_GAMMA ),
-        _amb_probe_mgr( this ),
-        _decal_mgr( this ),
-        _active_level( false ),
-        _shgen( nullptr ),
-        _ai( false ),
-        _light_environment( nullptr ),
-        _shadow_dir( default_shadow_dir ),
-        _want_shadows( false ),
-        _wireframe( false ),
-        _bspdata( nullptr ),
-        _colldata( nullptr )
+	_update_task( nullptr ),
+	_win( nullptr ),
+	_has_pvs_data( false ),
+	_want_visibility( true ),
+	_physics_type( PT_panda ),
+	_vis_leafs( false ),
+	_want_lightmaps( true ),
+	_curr_leaf_idx( -1 ),
+	_leaf_aabb_lock( "leafAABBMutex" ),
+	_gamma( DEFAULT_GAMMA ),
+	_amb_probe_mgr( this ),
+	_decal_mgr( this ),
+	_active_level( false ),
+	_shgen( nullptr ),
+	_ai( false ),
+	_light_environment( nullptr ),
+	_shadow_dir( default_shadow_dir ),
+	_want_shadows( false ),
+	_wireframe( false ),
+	_bspdata( nullptr ),
+	_colldata( nullptr ),
+	_trace( new BSPTrace( this ) )
 {
 }
 
@@ -2384,11 +2362,8 @@ bool BSPLoader::trace_line( const LPoint3 &start, const LPoint3 &end )
                 return true;
         }
 
-        Ray ray( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, LPoint3::zero(), LPoint3::zero() );
-        Trace trace;
-        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _colldata, trace );
-
-        return !trace.has_hit();
+	RayTraceHitResult res = _trace->get_scene()->trace_line( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, TRACETYPE_WORLD );
+	return !res.has_hit();
 }
 
 /**
@@ -2402,14 +2377,13 @@ LPoint3 BSPLoader::clip_line( const LPoint3 &start, const LPoint3 &end )
                 return end;
         }
 
-        Ray ray( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, LPoint3::zero(), LPoint3::zero() );
-        Trace tr;
-        CM_BoxTrace( ray, 0, CONTENTS_SOLID, false, _colldata, tr );
+	RayTraceHitResult res = _trace->get_scene()->trace_line( ( start + LPoint3( 0, 0, 0.05 ) ) * 16, end * 16, TRACETYPE_WORLD );
+	if ( !res.has_hit() )
+		return end;
 
-        if ( !tr.has_hit() )
-                return end;
-
-        return tr.end_pos;
+	LVector3 clipped;
+	VectorLerp( start, end, res.get_hit_fraction(), clipped );
+	return clipped;
 }
 
 CBaseEntity *BSPLoader::get_c_entity( const int entnum ) const

@@ -35,15 +35,13 @@
 #include "vifparser.h"
 #include "cubemaps.h"
 #include "decals.h"
+#include "raytrace.h"
+#include "bsp_trace.h"
 
 NotifyCategoryDeclNoExport(bspfile);
 
 struct FaceLightmapData
 {
-	double mins[2], maxs[2];
-	int texmins[2], texmaxs[2];
-	int texsize[2];
-	double midpolys[2], midtexs[2];
         LightmapPaletteDirectory::LightmapFacePaletteEntry *faceentry;
 
         FaceLightmapData() :
@@ -297,6 +295,8 @@ PUBLISHED:
 		return bbox->get_approx_center();
 	}
 
+	LTexCoord get_lightcoords( int facenum, const LVector3 &point );
+
 	void update();
 
         static BSPLoader *get_global_ptr();
@@ -328,8 +328,18 @@ public:
         {
                 return &_amb_probe_mgr;
         }
+	INLINE BSPTrace *get_trace() const
+	{
+		return _trace;
+	}
+	INLINE LightmapPaletteDirectory *get_lightmap_dir()
+	{
+		return &_lightmap_dir;
+	}
 
 private:
+
+	void setup_raytrace_environment();
 
 	void update_leaf( int leaf );
         
@@ -388,6 +398,8 @@ private:
         bool _active_level;
         bool _ai;
 	int _physics_type;
+
+	PT( BSPTrace ) _trace;
 
 	struct visibleleafdata_t
 	{
