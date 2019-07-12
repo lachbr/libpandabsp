@@ -40,16 +40,6 @@
 
 NotifyCategoryDeclNoExport(bspfile);
 
-struct FaceLightmapData
-{
-        LightmapPaletteDirectory::LightmapFacePaletteEntry *faceentry;
-
-        FaceLightmapData() :
-                faceentry( nullptr )
-        {
-        }
-};
-
 struct texinfo_s;
 struct dvertex_s;
 struct texref_s;
@@ -158,6 +148,16 @@ private:
 };
 
 struct collbspdata_t;
+
+struct dface_lightmap_info_t
+{
+	float s_scale, t_scale;
+	float s_offset, t_offset;
+	int texmins[2];
+	int texsize[2];
+	bool flipped;
+	LightmapPaletteDirectory::LightmapFacePaletteEntry *palette_entry;
+};
 
 /**
  * Loads and handles the operations of PBSP files.
@@ -367,10 +367,12 @@ private:
 
         PT( EggVertex ) make_vertex( EggVertexPool *vpool, EggPolygon *poly,
                                      dedge_t *edge, texinfo_t *texinfo,
-                                     dface_t *face, int k, FaceLightmapData *ld, Texture *tex );
+                                     dface_t *face, int k, Texture *tex );
         PT( EggVertex ) make_vertex_ai( EggVertexPool *vpool, EggPolygon *poly, dedge_t *edge, int k );
 
         cubemap_t *find_closest_cubemap( const LPoint3 &pos );
+
+	void init_dface_lightmap_info( dface_lightmap_info_t *info, int facenum );
 
         static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
 
@@ -438,6 +440,7 @@ private:
         pmap<NodePath, LPoint3> _model_origins;
 	pvector<PT( CBaseEntity )> _class_entities;
         LightmapPaletteDirectory _lightmap_dir;
+	pvector<dface_lightmap_info_t> _face_lightmap_info;
         AmbientProbeManager _amb_probe_mgr;
         DecalManager _decal_mgr;
         pvector<cubemap_t> _cubemaps;

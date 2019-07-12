@@ -182,7 +182,7 @@ const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
         }
 
         // Figure out these values and store
-        // for easy access elsewhere.
+        // for fast and easy access elsewhere.
         mat->_has_env_cubemap = ( mat->has_keyvalue( "$envmap" ) && mat->get_keyvalue( "$envmap" ) == "env_cubemap" );
         if ( mat->has_keyvalue( "$surfaceprop" ) )
                 mat->_surfaceprop = mat->get_keyvalue( "$surfaceprop" );
@@ -190,6 +190,9 @@ const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
                 mat->_contents = mat->get_keyvalue( "$contents" );
         mat->_has_transparency = ( mat->has_keyvalue( "$translucent" ) && atoi( mat->get_keyvalue( "$translucent" ).c_str() ) == 1 ) ||
                 ( mat->has_keyvalue( "$alpha" ) && atof( mat->get_keyvalue( "$alpha" ).c_str() ) < 1.0 );
+	mat->_has_bumpmap = mat->has_keyvalue( "$bumpmap" );
+	// UNDONE: This is hardcoded, maybe define a global list of lightmapped shaders?
+	mat->_lightmapped = mat->get_shader() == "LightmappedGeneric"; 
 
         _material_cache[file] = mat;
 

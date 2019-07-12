@@ -34,11 +34,17 @@ static PStatCollector decal_trace_collector( "BSP:DecalTrace:FindDecalPosition" 
 static PStatCollector decal_node_collector( "BSP:DecalTrace:DecalNode" );
 static PStatCollector decal_state_collector( "BSP:DecalTrace:DecalState" );
 static PStatCollector decal_add_geom_collector( "BSP:DecalTrace:InsertGeometry" );
+static PStatCollector decal_init_collector( "BSP:DecalTrace:InitDecalInfo" );
 
 static ConfigVariableInt decals_max( "decals_max", 20 );
 static ConfigVariableBool decals_remove_overlapping( "decals_remove_overlapping", true );
 
 static const int MAX_DECALCLIPVERT = 48;
+static const float DECAL_CLIP_EPSILON = 0.01f;
+static const float DECAL_DISTANCE = 4.0f;
+static const float SIN_45_DEGREES = 0.70710678118654752440084436210485f;
+
+static PT( InternalName ) in_texcoord_lightmap = InternalName::get_texcoord_name( "lightmap" );
 
 static PT( GeomVertexFormat ) decal_format_no_lightmap = nullptr;
 static const GeomVertexFormat *get_decal_format_no_lightmap()
@@ -66,7 +72,7 @@ static const GeomVertexFormat *get_decal_format_lightmap()
 		array->add_column( InternalName::get_vertex(), 3, GeomEnums::NT_stdfloat, GeomEnums::C_point );
 		array->add_column( InternalName::get_normal(), 3, GeomEnums::NT_stdfloat, GeomEnums::C_normal );
 		array->add_column( InternalName::get_texcoord(), 2, GeomEnums::NT_stdfloat, GeomEnums::C_texcoord );
-		array->add_column( InternalName::get_texcoord_name( "lightmap" ), 2, GeomEnums::NT_stdfloat, GeomEnums::C_texcoord );
+		array->add_column( in_texcoord_lightmap, 2, GeomEnums::NT_stdfloat, GeomEnums::C_texcoord );
 		decal_format_lightmap = new GeomVertexFormat;
 		decal_format_lightmap->add_array( array );
 		GeomVertexFormat::register_format( decal_format_lightmap );
@@ -120,9 +126,10 @@ struct decalvert_t
 {
 	LVector3 position;
 	LVector2 coords;
-	LVector2 lm_coords;
-	float angle;
 };
+
+static decalvert_t g_DecalClipVerts[MAX_DECALCLIPVERT];
+static decalvert_t g_DecalClipVerts2[MAX_DECALCLIPVERT];
 
 struct decalinfo_t
 {
@@ -134,17 +141,16 @@ struct decalinfo_t
 		data = bspdata;
 		position = pos;
 		decal_scale = LPoint2( 1.0f / ( scale[0] * 16 ), 1.0f / ( scale[1] * 16 ) );
-		decal_size = 1.0f / scale.length();
+		decal_size = 1.0f / decal_scale.length();
 		vert_count = 0;
-		clipped_vert_count = 0;
 
 		material = mat;
 		lightmap = false;
 		bumped_lightmap = false;
-		if ( mat->get_shader() == "LightmappedGeneric" )
+		if ( mat->is_lightmapped() )
 		{
 			lightmap = true;
-			if ( mat->has_keyvalue( "$bumpmap" ) )
+			if ( mat->has_bumpmap() )
 			{
 				bumped_lightmap = true;
 			}
@@ -188,9 +194,6 @@ struct decalinfo_t
 	LVector3 *s_axis;
 	
 	int vert_count;
-	decalvert_t verts[MAX_DECALCLIPVERT];
-	int clipped_vert_count;
-	decalvert_t clipped_verts[MAX_DECALCLIPVERT];
 
 	const BSPMaterial *material;
 	bool lightmap;
@@ -261,7 +264,6 @@ static inline void Intersect( Clipper &clip, decalvert_t *one, decalvert_t *two,
 	float t = Clipper::Clip( one, two );
 
 	VectorLerp( one->position, two->position, t, out->position );
-	Vector2DLerp( one->lm_coords, two->lm_coords, t, out->lm_coords );
 	Vector2DLerp( one->coords, two->coords, t, out->coords );
 }
 
@@ -311,8 +313,6 @@ static inline int SHClip( decalvert_t *pDecalClipVerts, int vertCount,
 
 	return outCount;
 }
-
-static const float SIN_45_DEGREES = ( 0.70710678118654752440084436210485f );
 
 void R_DecalComputeBasis( decalinfo_t *decal )
 {
@@ -402,14 +402,14 @@ void R_SetupDecalClip( decalinfo_t *decal )
 
 void R_AddDecalVert( decalinfo_t *decal, const dvertex_t *vert, int idx )
 {
-	VectorCopy( vert->point, decal->verts[idx].position );
-	decal->verts[idx].coords[0] = decal->verts[idx].position.dot( decal->texture_space_basis[0] ) - decal->delta[0] + 0.5f;
-	decal->verts[idx].coords[1] = decal->verts[idx].position.dot( decal->texture_space_basis[1] ) - decal->delta[1] + 0.5f;
+	VectorCopy( vert->point, g_DecalClipVerts[idx].position );
+	g_DecalClipVerts[idx].coords[0] = g_DecalClipVerts[idx].position.dot( decal->texture_space_basis[0] ) - decal->delta[0] + 0.5f;
+	g_DecalClipVerts[idx].coords[1] = g_DecalClipVerts[idx].position.dot( decal->texture_space_basis[1] ) - decal->delta[1] + 0.5f;
 }
 
 void R_SetupDecalVertsForSurface( decalinfo_t *decal )
 {
-	int vert = 0;
+	decal->vert_count = 0;
 
 	for ( int nedge = 0; nedge < decal->face->numedges; nedge++ )
 	{
@@ -427,16 +427,9 @@ void R_SetupDecalVertsForSurface( decalinfo_t *decal )
 			index = 1;
 		}
 
-		R_AddDecalVert( decal, decal->data->dvertexes + edge->v[index], vert++ );
+		R_AddDecalVert( decal, decal->data->dvertexes + edge->v[index], decal->vert_count++ );
 	}
-	decal->vert_count = vert;
 }
-
-const float DECAL_CLIP_EPSILON = 0.01f;
-const float DECAL_DISTANCE = 4.0f;
-
-static decalvert_t g_DecalClipVerts[MAX_DECALCLIPVERT];
-static decalvert_t g_DecalClipVerts2[MAX_DECALCLIPVERT];
 
 void R_DoDecalSHClip( decalinfo_t *info )
 {
@@ -446,11 +439,11 @@ void R_DoDecalSHClip( decalinfo_t *info )
 	CPlane_Bottom bottom;
 	
 	// Clip the polygon to the decal texture space
-	int out_count = SHClip( info->verts, info->vert_count, g_DecalClipVerts2, top );
+	int out_count = SHClip( g_DecalClipVerts, info->vert_count, g_DecalClipVerts2, top );
 	out_count = SHClip( g_DecalClipVerts2, out_count, g_DecalClipVerts, left );
 	out_count = SHClip( g_DecalClipVerts, out_count, g_DecalClipVerts2, right );
-	out_count = SHClip( g_DecalClipVerts2, out_count, info->clipped_verts, bottom );
-	info->clipped_vert_count = out_count;
+	out_count = SHClip( g_DecalClipVerts2, out_count, g_DecalClipVerts, bottom );
+	info->vert_count = out_count;
 }
 
 void R_DecalSurface( const dface_t *face, decalinfo_t *pinfo )
@@ -458,15 +451,13 @@ void R_DecalSurface( const dface_t *face, decalinfo_t *pinfo )
 	BSPLoader *loader = BSPLoader::get_global_ptr();
 	int facenum = face - pinfo->data->dfaces;
 
-	decalinfo_t &info = ( *pinfo );
-
 	pinfo->change_surface( face );
 
 	R_SetupDecalClip( pinfo );
 	R_SetupDecalVertsForSurface( pinfo );
 	R_DoDecalSHClip( pinfo );
 
-	if ( info.clipped_vert_count == 0 )
+	if ( pinfo->vert_count == 0 )
 		return;
 
 	////////////////////////////////////////////////////////////////////////////////////
@@ -482,13 +473,13 @@ void R_DecalSurface( const dface_t *face, decalinfo_t *pinfo )
 	GeomVertexWriter lm_uv_writer;
 	if ( pinfo->lightmap )
 	{
-		lm_uv_writer = GeomVertexWriter( pinfo->vdata, InternalName::get_texcoord_name( "lightmap" ) );
+		lm_uv_writer = GeomVertexWriter( pinfo->vdata, in_texcoord_lightmap );
 		lm_uv_writer.set_row( first_row );
 	}
 
-	for ( int i = info.clipped_vert_count - 1; i >= 0; i-- )
+	for ( int i = pinfo->vert_count - 1; i >= 0; i-- )
 	{
-		decalvert_t *cvert = info.clipped_verts + i;
+		decalvert_t *cvert = g_DecalClipVerts + i;
 
 		vtx_writer.add_data3f( cvert->position / 16.0f );
 		norm_writer.add_data3f( pinfo->surface_normal );
@@ -502,13 +493,13 @@ void R_DecalSurface( const dface_t *face, decalinfo_t *pinfo )
 	}
 
 	PT( GeomTriangles ) tris = new GeomTriangles( GeomEnums::UH_static );
-	int ntris = info.clipped_vert_count - 2;
+	int ntris = pinfo->vert_count - 2;
 	for ( int tri = 0; tri < ntris; tri++ )
 	{
 		tris->add_vertices(
 			first_row,
-			first_row + ( ( tri + 1 ) % info.clipped_vert_count ),
-			first_row + ( ( tri + 2 ) % info.clipped_vert_count )
+			first_row + ( ( tri + 1 ) % pinfo->vert_count ),
+			first_row + ( ( tri + 2 ) % pinfo->vert_count )
 		);
 	}
 	tris->close_primitive();
@@ -598,11 +589,13 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
 
 	const BSPMaterial *mat = BSPMaterial::get_from_file( decal_material );
 
+	decal_init_collector.start();
 	decalinfo_t info(
 		decal_origin,
 		decal_scale,
 		mat,
 		_loader->get_bspdata() );
+	decal_init_collector.stop();
 	
 	decal_node_collector.start();
 	R_DecalNode( 0, &info );

@@ -61,27 +61,31 @@ class EXPCL_PANDABSP BSPMaterial : public TypedReferenceCount
 #endif
 {
 PUBLISHED:
-        INLINE explicit BSPMaterial( const std::string &name = "material" ) :
-                TypedReferenceCount(),
-                _has_env_cubemap( false ),
-                _cached_env_cubemap( false ),
-                _has_transparency( false ),
-                _shader_name( name ),
-                _surfaceprop( "default" ),
-                _contents( "solid" )
+	INLINE explicit BSPMaterial( const std::string &name = "material" ) :
+		TypedReferenceCount(),
+		_has_env_cubemap( false ),
+		_cached_env_cubemap( false ),
+		_has_transparency( false ),
+		_shader_name( name ),
+		_surfaceprop( "default" ),
+		_contents( "solid" ),
+		_has_bumpmap( false ),
+		_lightmapped( false )
         {
         }
 
-        INLINE BSPMaterial( const BSPMaterial &copy ) :
-                TypedReferenceCount( copy ),
-                _shader_name( copy._shader_name ),
-                _shader_keyvalues( copy._shader_keyvalues ),
-                _file( copy._file ),
-                _has_env_cubemap( copy._has_env_cubemap ),
-                _cached_env_cubemap( copy._cached_env_cubemap ),
-                _surfaceprop( copy._surfaceprop ),
-                _contents( copy._contents ),
-                _has_transparency( copy._has_transparency )
+	INLINE BSPMaterial( const BSPMaterial &copy ) :
+		TypedReferenceCount( copy ),
+		_shader_name( copy._shader_name ),
+		_shader_keyvalues( copy._shader_keyvalues ),
+		_file( copy._file ),
+		_has_env_cubemap( copy._has_env_cubemap ),
+		_cached_env_cubemap( copy._cached_env_cubemap ),
+		_surfaceprop( copy._surfaceprop ),
+		_contents( copy._contents ),
+		_has_transparency( copy._has_transparency ),
+		_lightmapped( copy._lightmapped ),
+		_has_bumpmap( copy._has_bumpmap )
         {
         }
 
@@ -96,6 +100,8 @@ PUBLISHED:
                 _surfaceprop = copy._surfaceprop;
                 _contents = copy._contents;
                 _has_transparency = copy._has_transparency;
+		_lightmapped = copy._lightmapped;
+		_has_bumpmap = copy._has_bumpmap;
         }
 
         INLINE void set_keyvalue( const std::string &key, const std::string &value )
@@ -167,6 +173,16 @@ PUBLISHED:
                 return _contents;
         }
 
+	INLINE bool is_lightmapped() const
+	{
+		return _lightmapped;
+	}
+
+	INLINE bool has_bumpmap() const
+	{
+		return _has_bumpmap;
+	}
+
         static const BSPMaterial *get_from_file( const Filename &file );
 
 private:
@@ -175,6 +191,8 @@ private:
         bool _has_env_cubemap;
         bool _cached_env_cubemap;
         bool _has_transparency;
+	bool _lightmapped;
+	bool _has_bumpmap;
         std::string _surfaceprop;
         std::string _contents;
         SimpleHashMap<std::string, std::string, string_hash> _shader_keyvalues;

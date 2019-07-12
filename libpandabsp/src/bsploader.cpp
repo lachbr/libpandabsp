@@ -301,67 +301,32 @@ LTexCoord BSPLoader::get_lightcoords( int facenum, const LVector3 &point )
 {
 	const dface_t *face = _bspdata->dfaces + facenum;
 	const texinfo_t *texinfo = _bspdata->texinfo + face->texinfo;
-	LightmapPaletteDirectory::LightmapFacePaletteEntry *faceentry = _lightmap_dir.face_index[facenum];
+	dface_lightmap_info_t *lminfo = _face_lightmap_info.data() + facenum;
 
-	float s_scale, t_scale;
-	float s_offset, t_offset;
 	LTexCoord lightcoord;
-
-	bool flipped = faceentry != nullptr && faceentry->flipped;
-
-	int texsize[2];
-	texsize[0] = flipped ? face->lightmap_size[1] : face->lightmap_size[0];
-	texsize[1] = flipped ? face->lightmap_size[0] : face->lightmap_size[1];
-	int texmins[2];
-	texmins[0] = flipped ? face->lightmap_mins[1] : face->lightmap_mins[0];
-	texmins[1] = flipped ? face->lightmap_mins[0] : face->lightmap_mins[1];
-
-	if ( faceentry != nullptr )
-	{
-		s_scale = 1.0 / (float)faceentry->palette_size[0];
-		s_offset = (float)faceentry->xshift * s_scale;
-	}
-	else
-	{
-		s_scale = 1.0;
-		s_offset = 0.0;
-	}
-	s_scale = texsize[0] * s_scale;
-
-	if ( faceentry != nullptr )
-	{
-		t_scale = 1.0 / -(float)faceentry->palette_size[1];
-		t_offset = (float)faceentry->yshift * t_scale;
-	}
-	else
-	{
-		t_scale = -1.0;
-		t_offset = 0.0;
-	}
-	t_scale = texsize[1] * t_scale;
 
 	lightcoord[0] = DotProduct( point, texinfo->lightmap_vecs[0] ) +
 		texinfo->lightmap_vecs[0][3];
 	lightcoord[1] = DotProduct( point, texinfo->lightmap_vecs[1] ) +
 		texinfo->lightmap_vecs[1][3];
 
-	if ( flipped )
+	if ( lminfo->flipped )
 	{
 		float tmp = lightcoord[1];
 		lightcoord[1] = lightcoord[0];
 		lightcoord[0] = tmp;
 	}
 
-	lightcoord[0] -= texmins[0];
+	lightcoord[0] -= lminfo->texmins[0];
 	lightcoord[0] += 0.5;
-	lightcoord[0] /= texsize[0];
+	lightcoord[0] /= lminfo->texsize[0];
 
-	lightcoord[1] -= texmins[1];
+	lightcoord[1] -= lminfo->texmins[1];
 	lightcoord[1] += 0.5;
-	lightcoord[1] /= texsize[1];
+	lightcoord[1] /= lminfo->texsize[1];
 
-	lightcoord[0] = s_offset + lightcoord[0] * s_scale;
-	lightcoord[1] = t_offset + lightcoord[1] * t_scale;
+	lightcoord[0] = lminfo->s_offset + lightcoord[0] * lminfo->s_scale;
+	lightcoord[1] = lminfo->t_offset + lightcoord[1] * lminfo->t_scale;
 
 	return lightcoord;
 }
@@ -377,8 +342,7 @@ PT( EggVertex ) BSPLoader::make_vertex_ai( EggVertexPool *vpool, EggPolygon *pol
 
 PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
                                         dedge_t *edge, texinfo_t *texinfo,
-                                        dface_t *face, int k, FaceLightmapData *ld,
-                                        Texture *tex )
+                                        dface_t *face, int k, Texture *tex )
 {
 	int facenum = face - _bspdata->dfaces;
         dvertex_t *vert = &_bspdata->dvertexes[edge->v[k]];
@@ -400,33 +364,6 @@ PT( EggVertex ) BSPLoader::make_vertex( EggVertexPool *vpool, EggPolygon *poly,
 	LTexCoord luv = get_lightcoords( facenum, LVector3( vpos[0], vpos[1], vpos[2] ) );
         LTexCoordd df_uv( uv.get_x() / df_width, -uv.get_y() / df_height );
         LTexCoordd lm_uv( luv[0], luv[1] );
-#if 0
-        LTexCoordd lm_uv( 0, 0 );
-        if ( ld->faceentry != nullptr )
-        {
-                // This face has an entry in a lightmap palette.
-                // Transform the UVs.
-
-                double midtexs[2];
-                midtexs[0] = ld->faceentry->flipped ? ld->midtexs[1] : ld->midtexs[0];
-                midtexs[1] = ld->faceentry->flipped ? ld->midtexs[0] : ld->midtexs[1];
-                double midpolys[2];
-                midpolys[0] = ld->faceentry->flipped ? ld->midpolys[1] : ld->midpolys[0];
-                midpolys[1] = ld->faceentry->flipped ? ld->midpolys[0] : ld->midpolys[1];
-                double dluv[2];
-                dluv[0] = ld->faceentry->flipped ? luv[1] : luv[0];
-                dluv[1] = ld->faceentry->flipped ? luv[0] : luv[1];
-                int texsize[2];
-                texsize[0] = ld->faceentry->flipped ? face->lightmap_size[1] : face->lightmap_size[0];
-                texsize[1] = ld->faceentry->flipped ? face->lightmap_size[0] : face->lightmap_size[1];
-
-                lm_uv.set( ( midtexs[0] + ld->faceentry->xshift + ( dluv[0] - midpolys[0] ) ),
-                          ( midtexs[1] + ld->faceentry->yshift + ( dluv[1] - midpolys[1] ) ) );
-
-                lm_uv[0] /= ld->faceentry->palette_size[0];
-                lm_uv[1] /= -ld->faceentry->palette_size[1];
-        }
-#endif
 
         v->set_uv( df_uv );
         v->set_uv( "lightmap", lm_uv );
@@ -599,10 +536,50 @@ void BSPLoader::make_faces_ai()
 	}
 }
 
+void BSPLoader::init_dface_lightmap_info( dface_lightmap_info_t *info, int facenum )
+{
+	const dface_t *face = _bspdata->dfaces + facenum;
+
+	info->palette_entry = _lightmap_dir.face_index[facenum];
+
+	info->flipped = info->palette_entry != nullptr && info->palette_entry->flipped;
+
+	info->texsize[0] = info->flipped ? face->lightmap_size[1] : face->lightmap_size[0];
+	info->texsize[1] = info->flipped ? face->lightmap_size[0] : face->lightmap_size[1];
+	info->texmins[0] = info->flipped ? face->lightmap_mins[1] : face->lightmap_mins[0];
+	info->texmins[1] = info->flipped ? face->lightmap_mins[0] : face->lightmap_mins[1];
+
+	if ( info->palette_entry != nullptr )
+	{
+		info->s_scale = 1.0 / (float)info->palette_entry->palette_size[0];
+		info->s_offset = (float)info->palette_entry->xshift * info->s_scale;
+	}
+	else
+	{
+		info->s_scale = 1.0;
+		info->s_offset = 0.0;
+	}
+	info->s_scale = info->texsize[0] * info->s_scale;
+
+	if ( info->palette_entry != nullptr )
+	{
+		info->t_scale = 1.0 / -(float)info->palette_entry->palette_size[1];
+		info->t_offset = (float)info->palette_entry->yshift * info->t_scale;
+	}
+	else
+	{
+		info->t_scale = -1.0;
+		info->t_offset = 0.0;
+	}
+	info->t_scale = info->texsize[1] * info->t_scale;
+}
+
 void BSPLoader::make_faces()
 {
         bspfile_cat.info()
                 << "Making faces...\n";
+
+	_face_lightmap_info.resize( _bspdata->numfaces );
 
         NodePath hull = make_faces_ai_base( "hull", { "func_wall", "func_detail", "func_illusionary", "func_clip", "func_player_clip" } );
         hull.reparent_to( _result );
@@ -679,9 +656,9 @@ void BSPLoader::make_faces()
                         }
                         bool has_transparency = bspmat->has_transparency();
 
-                        LightmapPaletteDirectory::LightmapFacePaletteEntry *lmfaceentry = _lightmap_dir.face_index[facenum];
-                        FaceLightmapData ld;
-                        ld.faceentry = lmfaceentry;
+			dface_lightmap_info_t lminfo;
+			init_dface_lightmap_info( &lminfo, facenum );
+			_face_lightmap_info[facenum] = lminfo;
 
                         LNormald poly_normal( 0 );
                         LVertexd centroid( 0 );
@@ -715,7 +692,7 @@ void BSPLoader::make_faces()
 				}
 
 				PT( EggVertex ) v = make_vertex( vpool, poly, edge, texinfo,
-					face, index, &ld, tex );
+					face, index, tex );
 				v->set_normal( normal );
 				vpool->add_vertex( v );
 				poly->add_vertex( v );
@@ -751,13 +728,13 @@ void BSPLoader::make_faces()
                         {
                                 if ( face->bumped_lightmap && bspmat->has_keyvalue( "$bumpmap" ) )
                                 {
-                                        faceroot.set_texture( TextureStages::get_bumped_lightmap(),
-                                                                lmfaceentry->palette->palette_tex );
+					faceroot.set_texture( TextureStages::get_bumped_lightmap(),
+						lminfo.palette_entry->palette->palette_tex );
                                 }
                                 else
                                 {
                                         faceroot.set_texture( TextureStages::get_lightmap(),
-                                                              lmfaceentry->palette->palette_tex );
+						lminfo.palette_entry->palette->palette_tex );
                                 }
                         }
 
@@ -2053,6 +2030,7 @@ void BSPLoader::cleanup()
         _lightmap_dir.face_index.clear();
         _lightmap_dir.face_entries.clear();
         _lightmap_dir.entries.clear();
+	_face_lightmap_info.clear();
 
         if ( !_fake_dl.is_empty() )
                 _fake_dl.remove_node();
