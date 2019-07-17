@@ -217,11 +217,12 @@ public:
         ShaderConfig *get_shader_config( const BSPMaterial *mat );
         virtual PT( ShaderConfig ) make_new_config() = 0;
 
-        static void add_fog( const RenderState *rs, ShaderPermutations &perms );
+        static bool add_fog( const RenderState *rs, ShaderPermutations &perms, BSPShaderGenerator *generator );
         static void add_color( const RenderState *rs, ShaderPermutations &perms );
         static bool add_csm( const RenderState *rs, ShaderPermutations &perms, BSPShaderGenerator *generator );
         static bool add_clip_planes( const RenderState *rs, ShaderPermutations &perms );
         static void add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPermutations &perms );
+	static bool add_alpha_test( const RenderState *rs, ShaderPermutations &perms );
 
         typedef SimpleHashMap<const BSPMaterial *, PT( ShaderConfig ), pointer_hash> ConfigCache;
         ConfigCache _config_cache;

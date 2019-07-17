@@ -45,6 +45,7 @@ ShaderPermutations UnlitNoMatSpec::setup_permutations( const BSPMaterial *mat,
         add_color( rs, result );
 
         add_hw_skinning( anim, result );
+	add_alpha_test( rs, result );
 
         return result;
 }

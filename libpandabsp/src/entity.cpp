@@ -9,6 +9,7 @@
 
 #include "entity.h"
 #include "bsploader.h"
+#include "bounding_kdop.h"
 
 TypeDef( CBaseEntity );
 TypeDef( CPointEntity );
@@ -75,7 +76,7 @@ CBoundsEntity::CBoundsEntity() :
 {
 }
 
-BoundingBox *CBoundsEntity::get_bounds() const
+BoundingKDOP *CBoundsEntity::get_bounds() const
 {
         return _bounds;
 }
@@ -86,12 +87,25 @@ void CBoundsEntity::fillin_bounds( LPoint3 &mins, LPoint3 &maxs )
         maxs.set( _mdl->maxs[0] / 16.0, _mdl->maxs[1] / 16.0, _mdl->maxs[2] / 16.0 );
 }
 
+bool CBoundsEntity::is_inside( const LPoint3 &pt ) const
+{
+	int leaf = _loader->find_leaf( pt, _mdl->headnode[0] );
+	return leaf == 0;
+}
+
 void CBoundsEntity::set_data( int entnum, entity_t *ent, BSPLoader *loader, dmodel_t *mdl )
 {
         CBaseEntity::set_data( entnum, ent, loader );
         _mdl = mdl;
-        _bounds = new BoundingBox( LPoint3( mdl->mins[0] / 16.0, mdl->mins[1] / 16.0, mdl->mins[2] / 16.0 ),
-                                   LPoint3( mdl->maxs[0] / 16.0, mdl->maxs[1] / 16.0, mdl->maxs[2] / 16.0 ) );
+
+	pvector<LPlane> planes;
+	for ( int facenum = 0; facenum < mdl->numfaces; facenum++ )
+	{
+		const dface_t *face = loader->get_bspdata()->dfaces + ( mdl->firstface + facenum );
+		const dplane_t *plane = loader->get_bspdata()->dplanes + face->planenum;
+		planes.push_back( LPlane( plane->normal[0], plane->normal[1], plane->normal[2], plane->dist / 16.0f ) );
+	}
+	_bounds = new BoundingKDOP( planes );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

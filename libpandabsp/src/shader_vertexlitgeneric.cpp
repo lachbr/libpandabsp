@@ -82,28 +82,9 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         bool need_world_position = true;
         bool need_world_normal = true;
         bool need_world_vec = true;
-        bool need_eye_vec = true;
-        bool need_eye_position = true;
-        bool need_eye_normal = true;
-
-        if ( conf->envmap.has_feature )
-        {
-                need_eye_vec = true;
-                need_world_normal = true;
-                need_world_position = true;
-                need_world_vec = true;
-                need_eye_normal = true;
-        }
-        if ( conf->bumpmap.has_feature )
-        {
-                need_tbn = true;
-                need_eye_normal = true;
-        }
-        if ( conf->rimlight.has_feature )
-        {
-                need_world_normal = true;
-                need_world_vec = true;
-        }
+        bool need_eye_vec = false;
+        bool need_eye_position = false;
+        bool need_eye_normal = false;
 
         // verify_enforce_attrib_lock();
         const AuxBitplaneAttrib *aux_bitplane;
@@ -111,15 +92,7 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
         int outputs = aux_bitplane->get_outputs();
 
         // Decide whether or not we need alpha testing or alpha blending.
-        bool have_alpha_test = false;
         bool have_alpha_blend = false;
-        const AlphaTestAttrib *alpha_test;
-        rs->get_attrib_def( alpha_test );
-        if ( alpha_test->get_mode() != RenderAttrib::M_none &&
-             alpha_test->get_mode() != RenderAttrib::M_always )
-        {
-                have_alpha_test = true;
-        }
         const ColorBlendAttrib *color_blend;
         rs->get_attrib_def( color_blend );
         if ( color_blend->get_mode() != ColorBlendAttrib::M_none )
@@ -145,30 +118,14 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                         disable_alpha_write = true;
                         result.add_flag( ShaderAttrib::F_disable_alpha_write );
                 }
-                else if ( have_alpha_test )
-                {
-                        // Subsume the alpha test in our shader.
-                        std::stringstream ss;
-                        ss << alpha_test->get_mode();
-                        result.add_permutation( "ALPHA_TEST", ss.str() );
-
-                        std::stringstream rss;
-                        rss << alpha_test->get_reference_alpha();
-                        result.add_permutation( "ALPHA_TEST_REF", rss.str() );
-
-                        result.add_flag( ShaderAttrib::F_subsume_alpha_test );
-                }
         }
+
+	add_alpha_test( rs, result );
 
         if ( outputs & AuxBitplaneAttrib::ABO_aux_normal )
         {
                 need_eye_normal = true;
                 result.add_permutation( "HAVE_AUX_NORMAL" );
-        }
-
-        if ( have_alpha_blend || have_alpha_test )
-        {
-                result.add_permutation( "CALC_PRIMARY_ALPHA" );
         }
 
         add_color( rs, result );
@@ -184,8 +141,7 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                 if ( num_lights > 0 )
                 {
 			need_world_vec = true;
-                        need_eye_normal = true;
-                        need_eye_position = true;
+			need_world_normal = true;
 
                         result.add_permutation( "LIGHTING" );
 
@@ -203,8 +159,6 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                 if ( !la->has_all_off() )
                 {
 			need_world_vec = true;
-                        need_eye_normal = true;
-                        need_eye_position = true;
                         need_world_normal = true; // for ambient cube
 
                         result.add_permutation( "LIGHTING" );
@@ -258,7 +212,10 @@ ShaderPermutations VertexLitGenericSpec::setup_permutations( const BSPMaterial *
                 need_eye_position = true;
         }
 
-        add_fog( rs, result );
+	if ( add_fog( rs, result, generator ) )
+	{
+		need_eye_position = true;
+	}
 
         add_hw_skinning( anim, result );
 

@@ -452,7 +452,7 @@ INLINE bool AmbientProbeManager::is_light_visible( const LPoint3 &point, const l
 
 INLINE LMatrix4 pack_lightdata( const light_t *light )
 {
-        return LMatrix4( light->eye_pos, light->eye_direction, light->falloff, light->color );
+        return LMatrix4( light->pos, light->direction, light->falloff, light->color );
 }
 
 INLINE LMatrix4 pack_lightdata2( const light_t *light )

@@ -93,9 +93,10 @@ ShaderPermutations LightmappedGenericSpec::setup_permutations( const BSPMaterial
                 }
         }
 
-        add_fog( rs, result );
+        add_fog( rs, result, generator );
         add_csm( rs, result, generator );
         add_clip_planes( rs, result );
+	add_alpha_test( rs, result );
 
         return result;
 }

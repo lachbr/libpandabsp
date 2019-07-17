@@ -39,8 +39,9 @@ ShaderPermutations UnlitGenericSpec::setup_permutations( const BSPMaterial *mat,
         conf->alpha.add_permutations( result );
 
         add_color( rs, result );
-        add_fog( rs, result );
+        add_fog( rs, result, generator );
         add_hw_skinning( anim, result );
+	add_alpha_test( rs, result );
 
         return result;
 }

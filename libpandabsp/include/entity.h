@@ -11,6 +11,7 @@
 #define ENTITY_H
 
 #include "config_bsp.h"
+#include "bounding_kdop.h"
 
 #ifndef CPPPARSER
 #include "bspfile.h"
@@ -18,7 +19,6 @@
 
 #include <nodePath.h>
 #include <typedReferenceCount.h>
-#include <boundingBox.h>
 
 class BSPLoader;
 
@@ -68,11 +68,8 @@ class EXPCL_PANDABSP CBoundsEntity : public CBaseEntity
 PUBLISHED:
         CBoundsEntity();
 
-        BoundingBox *get_bounds() const;
-        INLINE bool is_inside( const LPoint3 &pos ) const
-        {
-                return _bounds->contains( pos ) != BoundingVolume::IF_no_intersection;
-        }
+        BoundingKDOP *get_bounds() const;
+	bool is_inside( const LPoint3 &pos ) const;
 
         void fillin_bounds( LPoint3 &mins, LPoint3 &maxs );
 
@@ -80,7 +77,7 @@ public:
         void set_data( int entnum, entity_t *t, BSPLoader *loader, dmodel_t *mdl );
 
 private:
-        PT( BoundingBox ) _bounds;
+        PT( BoundingKDOP ) _bounds;
         dmodel_t *_mdl;
 };
 

@@ -128,13 +128,6 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                         continue;
                 }
 
-                CPT( RenderState ) state = data._state->compose( geoms.get_geom_state( i ) );
-                if ( needs_culling() && state->has_cull_callback() && !state->cull_callback( this, data ) )
-                {
-                        // Cull.
-                        continue;
-                }
-
 		if ( has_camera_bits( CAMERA_SHADOW ) )
 		{
 			if ( geom->get_primitive_type() != Geom::PT_polygons )
@@ -143,6 +136,13 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
 				continue;
 			}
 		}
+
+                CPT( RenderState ) state = data._state->compose( geoms.get_geom_state( i ) );
+                if ( needs_culling() && state->has_cull_callback() && !state->cull_callback( this, data ) )
+                {
+                        // Cull.
+                        continue;
+                }
 
                 // Cull the Geom bounding volume against the view frustum andor the cull
                 // planes.  Don't bother unless we've got more than one Geom, since
@@ -205,9 +205,6 @@ static PStatCollector wsp_record_collector( "Cull:BSP:WorldSpawn:RecordGeom" );
 static PStatCollector wsp_trav_collector( "Cull:BSP:WorldSpawn:TraverseLeafs" );
 static PStatCollector wsp_geom_traverse_collector( "Cull:BSP:WorldSpawn:TraverseLeafGeoms" );
 static PStatCollector wsp_make_cullableobject_collector( "Cull:BSP:WorldSpawn:MakeCullableObject" );
-
-// For worldspawn rendering
-static byte *visited = new byte[MAX_MAP_FACES];
 
 void BSPCullTraverser::traverse_below( CullTraverserData &data )
 {
@@ -416,10 +413,10 @@ bool BSPRender::cull_callback( CullTraverser *trav, CullTraverserData &data )
 		// Not for shadow passes though (doesn't need lighting information)
 		//
 		// TODO: perform lighting calculations in world space so we don't even have to do this
-		if ( ( trav->get_camera_mask() & CAMERA_MAIN ) != 0u )
-		{
-			loader->_amb_probe_mgr.xform_lights( trav->get_scene()->get_cs_world_transform() );
-		}
+		//if ( ( trav->get_camera_mask() & CAMERA_MAIN ) != 0u )
+		//{
+		//	loader->_amb_probe_mgr.xform_lights( trav->get_scene()->get_cs_world_transform() );
+		//}
 
                 BSPCullTraverser bsp_trav( trav, _loader );
                 bsp_trav.local_object();

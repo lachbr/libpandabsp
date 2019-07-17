@@ -95,14 +95,18 @@ ShaderPermutations ShaderSpec::setup_permutations( const BSPMaterial *mat,
 
 #include <fogAttrib.h>
 
-void ShaderSpec::add_fog( const RenderState *rs, ShaderPermutations &perms )
+bool ShaderSpec::add_fog( const RenderState *rs, ShaderPermutations &perms,
+	BSPShaderGenerator *generator )
 {
         // Check for fog.
-        const FogAttrib *fog;
-        if ( rs->get_attrib( fog ) && !fog->is_off() )
+        if ( generator->get_fog() )
         {
-                perms.add_permutation( "FOG", (int)fog->get_fog()->get_mode() );
+                perms.add_permutation( "FOG", generator->get_fog()->get_mode() );
+		perms.add_input( ShaderInput( "fogData", generator->get_fog_data() ) );
+		return true;
         }
+
+	return false;
 }
 
 #include <colorAttrib.h>
@@ -198,6 +202,27 @@ void ShaderSpec::add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPer
                         perms.permutations["INDEXED_TRANSFORMS"] = "1";
                 }
         }
+}
+
+#include <alphaTestAttrib.h>
+
+bool ShaderSpec::add_alpha_test( const RenderState *rs, ShaderPermutations &perms )
+{
+	const AlphaTestAttrib *alpha_test;
+	rs->get_attrib_def( alpha_test );
+	if ( alpha_test->get_mode() != RenderAttrib::M_none &&
+		alpha_test->get_mode() != RenderAttrib::M_always )
+	{
+		// Subsume the alpha test in our shader.
+		perms.add_permutation( "ALPHA_TEST", alpha_test->get_mode() );
+		perms.add_permutation( "ALPHA_TEST_REF", alpha_test->get_reference_alpha() );
+
+		perms.add_flag( ShaderAttrib::F_subsume_alpha_test );
+
+		return true;
+	}
+
+	return false;
 }
 
 void ShaderSpec::r_precache( ShaderPrecacheCombos &combos )

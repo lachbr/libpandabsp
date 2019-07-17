@@ -253,7 +253,7 @@ PUBLISHED:
                 return find_leaf( np.get_pos( _result ) );
         }
         
-	int find_leaf( const LPoint3 &pos );
+	int find_leaf( const LPoint3 &pos, int headnode = 0 );
         int find_node( const LPoint3 &pos );
         bool is_cluster_visible( int curr_cluster, int cluster ) const;
 

@@ -43,7 +43,6 @@ public:
         {
         }
 
-PUBLISHED:
         BoundingKDOP( const pvector<LPlane> &planes );
 
 public:

@@ -28,6 +28,10 @@
 #include <pStatCollector.h>
 #include <pStatTimer.h>
 #include <depthOffsetAttrib.h>
+#include <colorBlendAttrib.h>
+#include <alphaTestAttrib.h>
+#include <depthWriteAttrib.h>
+#include <colorWriteAttrib.h>
 
 static PStatCollector decal_collector( "BSP:DecalTrace" );
 static PStatCollector decal_trace_collector( "BSP:DecalTrace:FindDecalPosition" );
@@ -46,21 +50,23 @@ static const float SIN_45_DEGREES = 0.70710678118654752440084436210485f;
 
 static PT( InternalName ) in_texcoord_lightmap = InternalName::get_texcoord_name( "lightmap" );
 
-static PT( GeomVertexFormat ) decal_format_no_lightmap = nullptr;
+//static PT( GeomVertexFormat ) decal_format_no_lightmap = nullptr;
 static const GeomVertexFormat *get_decal_format_no_lightmap()
 {
-	if ( !decal_format_no_lightmap )
-	{
-		PT( GeomVertexArrayFormat ) array = new GeomVertexArrayFormat;
-		array->add_column( InternalName::get_vertex(), 3, GeomEnums::NT_stdfloat, GeomEnums::C_point );
-		array->add_column( InternalName::get_normal(), 3, GeomEnums::NT_stdfloat, GeomEnums::C_normal );
-		array->add_column( InternalName::get_texcoord(), 2, GeomEnums::NT_stdfloat, GeomEnums::C_texcoord );
-		decal_format_no_lightmap = new GeomVertexFormat;
-		decal_format_no_lightmap->add_array( array );
-		GeomVertexFormat::register_format( decal_format_no_lightmap );
-	}
+	//if ( !decal_format_no_lightmap )
+	//{
+	//	PT( GeomVertexArrayFormat ) array = new GeomVertexArrayFormat;
+	//	array->add_column( InternalName::get_vertex(), 3, GeomEnums::NT_stdfloat, GeomEnums::C_point );
+	//	array->add_column( InternalName::get_normal(), 3, GeomEnums::NT_stdfloat, GeomEnums::C_normal );
+	//	array->add_column( InternalName::get_texcoord(), 2, GeomEnums::NT_stdfloat, GeomEnums::C_texcoord );
+	//	decal_format_no_lightmap = new GeomVertexFormat;
+	//	decal_format_no_lightmap->add_array( array );
+	//	GeomVertexFormat::register_format( decal_format_no_lightmap );
+	//}
 
-	return decal_format_no_lightmap;
+	//return decal_format_no_lightmap;
+
+	return GeomVertexFormat::get_v3n3t2();
 }
 
 static PT( GeomVertexFormat ) decal_format_lightmap = nullptr;
@@ -81,14 +87,16 @@ static const GeomVertexFormat *get_decal_format_lightmap()
 	return decal_format_lightmap;
 }
 
-static CPT( RenderAttrib ) depth_offset_attrib = nullptr;
-static const RenderAttrib *get_depth_offset_attrib()
-{
-	if ( !depth_offset_attrib )
-	{
-		depth_offset_attrib = DepthOffsetAttrib::make( 1 );
-	}
-	return depth_offset_attrib;
+#define GET_ATTRIB(varname) get_ ##varname ## _attrib()
+#define DEFINE_ATTRIB(varname, decl) \
+static CPT(RenderAttrib) varname ## _attrib = nullptr; \
+static const RenderAttrib *get_ ##varname ## _attrib() \
+{ \
+	if (!varname ## _attrib) \
+	{ \
+		varname ## _attrib = decl;\
+	} \
+	return varname ## _attrib;\
 }
 
 static CPT( RenderAttrib ) auto_shader_attrib = nullptr;
@@ -102,25 +110,15 @@ static const RenderAttrib *get_auto_shader_attrib()
 	return auto_shader_attrib;
 }
 
-static CPT( RenderAttrib ) dual_transparency_attrib = nullptr;
-static const RenderAttrib *get_dual_transparency_attrib()
-{
-	if ( !dual_transparency_attrib )
-	{
-		dual_transparency_attrib = TransparencyAttrib::make( TransparencyAttrib::M_dual );
-	}
-	return dual_transparency_attrib;
-}
+DEFINE_ATTRIB( depth_offset, DepthOffsetAttrib::make( 1 ) )
+DEFINE_ATTRIB( transparency, TransparencyAttrib::make( TransparencyAttrib::M_alpha ) )
+DEFINE_ATTRIB( no_transparency, TransparencyAttrib::make( TransparencyAttrib::M_none ) )
+DEFINE_ATTRIB( decal_modulate, ColorBlendAttrib::make( ColorBlendAttrib::M_add,
+	ColorBlendAttrib::O_fbuffer_color, ColorBlendAttrib::O_incoming_color ) )
+DEFINE_ATTRIB( decal_alpha, AlphaTestAttrib::make( AlphaTestAttrib::M_greater, 0.0f ) )
+DEFINE_ATTRIB( depth_write_off, DepthWriteAttrib::make( DepthWriteAttrib::M_off ) )
+DEFINE_ATTRIB( no_alpha_write, ColorWriteAttrib::make( ColorWriteAttrib::C_rgb ) )
 
-static CPT( RenderAttrib ) no_transparency_attrib = nullptr;
-static const RenderAttrib *get_no_transparency_attrib()
-{
-	if ( !no_transparency_attrib )
-	{
-		no_transparency_attrib = TransparencyAttrib::make( TransparencyAttrib::M_none );
-	}
-	return no_transparency_attrib;
-}
 
 struct decalvert_t
 {
@@ -613,15 +611,24 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
 	// Enable transparency
 	if ( mat->has_transparency() )
 	{
-		transparency = get_dual_transparency_attrib();
+		transparency = GET_ATTRIB( transparency );
 	}
 	else
 	{
-		transparency = get_no_transparency_attrib();
+		transparency = GET_ATTRIB( no_transparency );
 	}
 
-	CPT( RenderState ) decal_state = RenderState::make( get_depth_offset_attrib(), 
-		get_auto_shader_attrib(), bma, transparency, 1 );
+	const RenderAttrib *attribs[] = {
+		GET_ATTRIB( depth_offset ),
+		GET_ATTRIB( auto_shader ),
+		bma,
+		transparency,
+		//GET_ATTRIB( depth_write_off ),
+		GET_ATTRIB( no_alpha_write ), // don't write to dest alpha
+		GET_ATTRIB( decal_alpha ),
+	};
+
+	CPT( RenderState ) decal_state = RenderState::make( attribs, ARRAYSIZE( attribs ), 1 );
 
 	// Bind lightmaps if needed
 	if ( info.lightmap )
@@ -630,18 +637,24 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
 		Texture *lm_tex = entry->palette_tex;
 
 		CPT( RenderAttrib ) lightmap_tex_attr = TextureAttrib::make();
-		if ( info.bumped_lightmap )
-		{
-			lightmap_tex_attr = DCAST( TextureAttrib, lightmap_tex_attr )->
-				add_on_stage( TextureStages::get_bumped_lightmap(), lm_tex );
-		}
-		else
-		{
+		//if ( info.bumped_lightmap )
+		//{
+		//	lightmap_tex_attr = DCAST( TextureAttrib, lightmap_tex_attr )->
+		//		add_on_stage( TextureStages::get_bumped_lightmap(), lm_tex );
+		//}
+		//else
+		//{
 			lightmap_tex_attr = DCAST( TextureAttrib, lightmap_tex_attr )->
 				add_on_stage( TextureStages::get_lightmap(), lm_tex );
-		}
+		//}
 
 		decal_state = decal_state->set_attrib( lightmap_tex_attr );
+	}
+
+	// Yikes
+	if ( info.material->get_shader() == "DecalModulate" )
+	{
+		decal_state = decal_state->set_attrib( GET_ATTRIB( decal_modulate ) );
 	}
 
 	decal_state_collector.stop();

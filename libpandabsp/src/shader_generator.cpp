@@ -70,19 +70,22 @@ PT( Texture ) BSPShaderGenerator::_identity_cubemap = nullptr;
 NotifyCategoryDef( bspShaderGenerator, "" );
 
 BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePath &camera, const NodePath &render ) :
-        ShaderGenerator( gsg ),
-        _gsg( gsg ),
-        _update_task( new GenericAsyncTask( "PSSMShaderGenerator_update_pssm", update_pssm, this ) ),
-        _pssm_rig( new PSSMCameraRig( pssm_splits, this ) ),
-        _camera( camera ),
-        _render( render ),
-        _sun_vector( 0 ),
-        _pssm_split_texture_array( nullptr ),
-        _pssm_layered_buffer( nullptr ),
-        _sunlight( NodePath() ),
-        _has_shadow_sunlight( false ),
-        _shader_quality( SHADERQUALITY_HIGH )
+	ShaderGenerator( gsg ),
+	_gsg( gsg ),
+	_update_task( new GenericAsyncTask( "PSSMShaderGenerator_update_pssm", update_pssm, this ) ),
+	_pssm_rig( new PSSMCameraRig( pssm_splits, this ) ),
+	_camera( camera ),
+	_render( render ),
+	_sun_vector( 0 ),
+	_pssm_split_texture_array( nullptr ),
+	_pssm_layered_buffer( nullptr ),
+	_sunlight( NodePath() ),
+	_has_shadow_sunlight( false ),
+	_shader_quality( SHADERQUALITY_HIGH ),
+	_fog( nullptr )
 {
+	_pta_fogdata = PTA_LVecBase4f::empty_array( 2 );
+
         // Shadows need to be updated before literally anything else.
         // Any RTT of the main scene should happen after shadows are updated.
         _update_task->set_sort( -10000 );
@@ -246,6 +249,20 @@ AsyncTask::DoneStatus BSPShaderGenerator::update_pssm( GenericAsyncTask *task, v
 
                 self->_pssm_rig->update( self->_camera, self->_sun_vector, bounds );
         }
+
+	if ( self->_fog )
+	{
+		self->_pta_fogdata[0] = self->_fog->get_color();
+
+		self->_pta_fogdata[1][0] = self->_fog->get_exp_density();
+
+		float start, stop;
+		self->_fog->get_linear_range( start, stop );
+		self->_pta_fogdata[1][1] = start;
+		self->_pta_fogdata[1][2] = stop;
+
+		self->_pta_fogdata[1][3] = 1.0f;//self->_fog->get_linear
+	}
 
         return AsyncTask::DS_cont;
 }

@@ -16,6 +16,7 @@
 #include <weakNodePath.h>
 #include <configVariableColor.h>
 #include <camera.h>
+#include <fog.h>
 
 #include "shader_spec.h"
 
@@ -96,6 +97,25 @@ PUBLISHED:
                 return _shader_quality;
         }
 
+	INLINE void set_fog( Fog *fog )
+	{
+		_fog = fog;
+		_render.set_fog( _fog );
+	}
+	INLINE void clear_fog()
+	{
+		_fog = nullptr;
+		_render.clear_fog();
+	}
+	INLINE Fog *get_fog() const
+	{
+		return _fog;
+	}
+	INLINE PTA_LVecBase4f get_fog_data() const
+	{
+		return _pta_fogdata;
+	}
+
         static void set_identity_cubemap( Texture *tex );
         static Texture *get_identity_cubemap();
 
@@ -116,6 +136,9 @@ private:
         pvector<SplitShadowMap> _split_maps;
 
         PSSMCameraRig *_pssm_rig;
+
+	PT( Fog ) _fog;
+	PTA_LVecBase4f _pta_fogdata;
 
         static AsyncTask::DoneStatus update_pssm( GenericAsyncTask *task, void *data );
 

@@ -194,14 +194,14 @@ NotifyCategoryDef( bspfile, "" );
 
 BSPLoader *BSPLoader::_global_ptr = nullptr;
 
-int BSPLoader::find_leaf( const LPoint3 &pos )
+int BSPLoader::find_leaf( const LPoint3 &pos, int headnode )
 {
         if ( !_active_level )
         {
                 return 0;
         }
 
-        int i = 0;
+	int i = headnode;
 
         // Walk the BSP tree to find the index of the leaf which contains the specified
         // position.
@@ -1247,20 +1247,8 @@ void BSPLoader::load_entities()
 
                 if ( !_ai )
                 {
-                        if ( classname == "env_fog" )
-                        {
-                                // Fog
-                                PN_stdfloat density = FloatForKey( ent, "fogdensity" );
-                                LColor fog_color = color_from_value( ValueForKey( ent, "fogcolor" ) );
-                                PT( Fog ) fog = new Fog( "env_fog" );
-                                fog->set_exp_density( density );
-                                fog->set_color( fog_color );
-                                NodePath fognp = _render.attach_new_node( fog );
-                                _render.set_fog( fog );
-                                _nodepath_entities.push_back( fognp );
-                        }
-                        else if ( !strncmp( classname.c_str(), "trigger_", 8 ) ||
-                                  !strncmp( classname.c_str(), "func_water", 10 ) )
+                        if ( !strncmp( classname.c_str(), "trigger_", 8 ) ||
+                             !strncmp( classname.c_str(), "func_water", 10 ) )
                         {
                                 // This is a bounds entity. We do not actually care about the geometry,
                                 // but the mins and maxs of the model. We will use that to create
