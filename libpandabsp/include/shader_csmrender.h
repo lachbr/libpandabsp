@@ -19,10 +19,8 @@ PUBLISHED:
         CSMRenderSpec();
 
 public:
-        virtual ShaderPermutations setup_permutations( const BSPMaterial *mat,
-                                                       const RenderState *rs,
-                                                       const GeomVertexAnimationSpec &anim,
-                                                       BSPShaderGenerator *generator );
+	virtual void setup_permutations( ShaderPermutations &perms, const BSPMaterial *mat, const RenderState *state,
+		const GeomVertexAnimationSpec &anim, BSPShaderGenerator *generator );
         virtual PT( ShaderConfig ) make_new_config();
 };
 

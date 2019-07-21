@@ -57,6 +57,12 @@ enum CameraBits
 	CAMERA_VIEWMODEL	= 1 << 4,
 	CAMERA_COMPUTE		= 1 << 5,
 };
+
+enum AuxBits
+{
+	AUXBITS_NORMAL = 1 << 0,
+	AUXBITS_ARME = 1 << 1,
+};
 END_PUBLISH
 
 // Which cameras need lighting information?
@@ -116,10 +122,19 @@ PUBLISHED:
 		return _pta_fogdata;
 	}
 
+	INLINE void set_exposure_texture( Texture *tex )
+	{
+		_exposure_texture = tex;
+	}
+	INLINE Texture *get_exposure_texture() const
+	{
+		return _exposure_texture;
+	}
+
         static void set_identity_cubemap( Texture *tex );
         static Texture *get_identity_cubemap();
 
-	static CPT( Shader ) make_shader( const ShaderSpec *spec, const ShaderPermutations &perms );
+	static CPT( Shader ) make_shader( const ShaderSpec *spec, const ShaderPermutations *perms );
 
 private:
         struct SplitShadowMap
@@ -139,6 +154,8 @@ private:
 
 	PT( Fog ) _fog;
 	PTA_LVecBase4f _pta_fogdata;
+
+	PT( Texture ) _exposure_texture;
 
         static AsyncTask::DoneStatus update_pssm( GenericAsyncTask *task, void *data );
 

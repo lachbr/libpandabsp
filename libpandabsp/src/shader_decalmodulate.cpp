@@ -7,14 +7,12 @@ DecalModulateSpec::DecalModulateSpec() :
 	set_name( "DecalModulate" );
 }
 
-ShaderPermutations DecalModulateSpec::setup_permutations( const BSPMaterial *mat,
-	const RenderState *rs,
+void DecalModulateSpec::setup_permutations( ShaderPermutations &result,
+	const BSPMaterial *mat,
+	const RenderState *state,
 	const GeomVertexAnimationSpec &anim,
 	BSPShaderGenerator *generator )
 {
-	ShaderPermutations result = UnlitGenericSpec::setup_permutations( mat, rs, anim, generator );
-
+	UnlitGenericSpec::setup_permutations( result, mat, state, anim, generator );
 	result.add_permutation( "IS_DECAL_MODULATE" );
-
-	return result;
 }

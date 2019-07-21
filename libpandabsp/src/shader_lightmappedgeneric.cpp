@@ -36,26 +36,20 @@ LightmappedGenericSpec::LightmappedGenericSpec() :
 
 string get_texcoord( int n )
 {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "p3d_MultiTexCoord" << n;
         return ss.str();
 }
 
-ShaderPermutations LightmappedGenericSpec::setup_permutations( const BSPMaterial *mat,
-                                                               const RenderState *rs,
-                                                               const GeomVertexAnimationSpec &anim,
-                                                               BSPShaderGenerator *generator )
+void LightmappedGenericSpec::setup_permutations( ShaderPermutations &result,
+	const BSPMaterial *mat,
+	const RenderState *rs,
+	const GeomVertexAnimationSpec &anim,
+	BSPShaderGenerator *generator )
 {
+	ShaderSpec::setup_permutations( result, mat, rs, anim, generator );
+
         LMGConfig *conf = (LMGConfig *)get_shader_config( mat );
-
-        ShaderPermutations result = ShaderSpec::setup_permutations( mat, rs, anim, generator );
-
-        const LightRampAttrib *lra;
-        rs->get_attrib_def( lra );
-        if ( lra->get_mode() != LightRampAttrib::LRT_default )
-        {
-                result.add_permutation( "HDR" );
-        }
 
         conf->basetexture.add_permutations( result );
         conf->alpha.add_permutations( result );
@@ -97,8 +91,7 @@ ShaderPermutations LightmappedGenericSpec::setup_permutations( const BSPMaterial
         add_csm( rs, result, generator );
         add_clip_planes( rs, result );
 	add_alpha_test( rs, result );
-
-        return result;
+	add_aux_bits( rs, result );
 }
 
 PT( ShaderConfig ) LightmappedGenericSpec::make_new_config()

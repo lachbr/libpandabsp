@@ -27,13 +27,15 @@ PT( ShaderConfig ) UnlitGenericSpec::make_new_config()
         return new ULGConfig;
 }
 
-ShaderPermutations UnlitGenericSpec::setup_permutations( const BSPMaterial *mat,
-                                                         const RenderState *rs,
-                                                         const GeomVertexAnimationSpec &anim,
-                                                         BSPShaderGenerator *generator )
+void UnlitGenericSpec::setup_permutations( ShaderPermutations &result,
+	const BSPMaterial *mat,
+	const RenderState *rs,
+	const GeomVertexAnimationSpec &anim,
+	BSPShaderGenerator *generator )
 {
+	ShaderSpec::setup_permutations( result, mat, rs, anim, generator );
+
         ULGConfig *conf = (ULGConfig *)get_shader_config( mat );
-        ShaderPermutations result = ShaderSpec::setup_permutations( mat, rs, anim, generator );
 
         conf->basetexture.add_permutations( result );
         conf->alpha.add_permutations( result );
@@ -42,7 +44,6 @@ ShaderPermutations UnlitGenericSpec::setup_permutations( const BSPMaterial *mat,
         add_fog( rs, result, generator );
         add_hw_skinning( anim, result );
 	add_alpha_test( rs, result );
-
-        return result;
+	add_aux_bits( rs, result );
 }
 

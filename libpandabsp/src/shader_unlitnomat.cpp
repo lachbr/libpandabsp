@@ -24,12 +24,13 @@ UnlitNoMatSpec::UnlitNoMatSpec() :
 {
 }
 
-ShaderPermutations UnlitNoMatSpec::setup_permutations( const BSPMaterial *mat,
-                                                       const RenderState *rs,
-                                                       const GeomVertexAnimationSpec &anim,
-                                                       BSPShaderGenerator *generator )
+void UnlitNoMatSpec::setup_permutations( ShaderPermutations &result,
+	const BSPMaterial *mat,
+	const RenderState *rs,
+	const GeomVertexAnimationSpec &anim,
+	BSPShaderGenerator *generator )
 {
-        ShaderPermutations result = ShaderSpec::setup_permutations( mat, rs, anim, generator );
+	ShaderSpec::setup_permutations( result, mat, rs, anim, generator );
 
         // check for a single texture applied through setTexture()
         const TextureAttrib *ta;
@@ -46,8 +47,7 @@ ShaderPermutations UnlitNoMatSpec::setup_permutations( const BSPMaterial *mat,
 
         add_hw_skinning( anim, result );
 	add_alpha_test( rs, result );
-
-        return result;
+	add_aux_bits( rs, result );
 }
 
 PT( ShaderConfig ) UnlitNoMatSpec::make_new_config()

@@ -13,6 +13,7 @@
 #include "bsploader.h"
 
 #include <virtualFileSystem.h>
+#include <colorBlendAttrib.h>
 
 void ShaderSpec::ShaderSource::read( const Filename &file )
 {
@@ -83,14 +84,39 @@ ShaderConfig *ShaderSpec::get_shader_config( const BSPMaterial *mat )
         return _config_cache.get_data( idx );
 }
 
-ShaderPermutations ShaderSpec::setup_permutations( const BSPMaterial *mat,
-                                                   const RenderState *state,
-                                                   const GeomVertexAnimationSpec &anim, 
-                                                   BSPShaderGenerator *generator )
+void ShaderSpec::setup_permutations( ShaderPermutations &result,
+	const BSPMaterial *mat,
+	const RenderState *state,
+	const GeomVertexAnimationSpec &anim,
+	BSPShaderGenerator *generator )
 {
-        ShaderPermutations result;
         result.add_permutation( "SHADER_QUALITY", generator->get_shader_quality() );
-        return result;
+
+	const LightRampAttrib *lra;
+	state->get_attrib_def( lra );
+	if ( lra->get_mode() != LightRampAttrib::LRT_default )
+	{
+		result.add_permutation( "HDR" );
+		result.add_input( ShaderInput( "_exposureSampler", generator->get_exposure_texture() ) );
+	}
+
+	const ColorBlendAttrib *cba;
+	state->get_attrib_def( cba );
+	if ( cba->get_mode() != ColorBlendAttrib::M_none )
+	{
+		if ( cba->get_mode() == ColorBlendAttrib::M_add &&
+		     cba->get_operand_a() == ColorBlendAttrib::O_one &&
+		     cba->get_operand_b() == ColorBlendAttrib::O_one )
+		{
+			result.add_permutation( "BLEND_ADDITIVE" );
+		}
+		else if ( cba->get_mode() == ColorBlendAttrib::M_add &&
+			  cba->get_operand_a() == ColorBlendAttrib::O_fbuffer_color &&
+			  cba->get_operand_b() == ColorBlendAttrib::O_incoming_color )
+		{
+			result.add_permutation( "BLEND_MODULATE" );
+		}
+	}
 }
 
 #include <fogAttrib.h>
@@ -101,7 +127,7 @@ bool ShaderSpec::add_fog( const RenderState *rs, ShaderPermutations &perms,
         // Check for fog.
         if ( generator->get_fog() )
         {
-                perms.add_permutation( "FOG", generator->get_fog()->get_mode() );
+                perms.add_permutation( "FOG", (int)generator->get_fog()->get_mode() );
 		perms.add_input( ShaderInput( "fogData", generator->get_fog_data() ) );
 		return true;
         }
@@ -131,6 +157,28 @@ void ShaderSpec::add_color( const RenderState *rs, ShaderPermutations &perms )
         }
 }
 
+#include <auxBitplaneAttrib.h>
+
+bool ShaderSpec::add_aux_bits( const RenderState *rs, ShaderPermutations &perms )
+{
+	bool has_them = false;
+
+	const AuxBitplaneAttrib *aba;
+	rs->get_attrib_def( aba );
+	if ( ( aba->get_outputs() & AUXBITS_NORMAL ) != 0 )
+	{
+		perms.add_permutation( "NEED_AUX_NORMAL" );
+		has_them = true;
+	}
+	if ( ( aba->get_outputs() & AUXBITS_ARME ) != 0 )
+	{
+		perms.add_permutation( "NEED_AUX_ARME" );
+		has_them = true;
+	}
+
+	return has_them;
+}
+
 #include "pssmCameraRig.h"
 
 bool ShaderSpec::add_csm( const RenderState *rs, ShaderPermutations &result, BSPShaderGenerator *generator )
@@ -138,9 +186,9 @@ bool ShaderSpec::add_csm( const RenderState *rs, ShaderPermutations &result, BSP
         if ( generator->has_shadow_sunlight() )
         {
                 result.add_permutation( "HAS_SHADOW_SUNLIGHT" );
-                result.permutations["PSSM_SPLITS"] = pssm_splits.get_string_value();
-                result.permutations["DEPTH_BIAS"] = depth_bias.get_string_value();
-                result.permutations["NORMAL_OFFSET_SCALE"] = normal_offset_scale.get_string_value();
+		result.add_permutation( "PSSM_SPLITS", pssm_splits.get_string_value() );
+		result.add_permutation( "DEPTH_BIAS", depth_bias.get_string_value() );
+		result.add_permutation( "NORMAL_OFFSET_SCALE", normal_offset_scale.get_string_value() );
 
                 float xel_size = 1.0 / pssm_size.get_value();
 
@@ -185,7 +233,7 @@ void ShaderSpec::add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPer
         if ( anim.get_animation_type() == GeomEnums::AT_hardware &&
                 anim.get_num_transforms() > 0 )
         {
-                perms.permutations["HARDWARE_SKINNING"] = "1";
+		perms.add_permutation( "HARDWARE_SKINNING" );
                 int num_transforms;
                 if ( anim.get_indexed_transforms() )
                 {
@@ -199,7 +247,7 @@ void ShaderSpec::add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPer
 
                 if ( anim.get_indexed_transforms() )
                 {
-                        perms.permutations["INDEXED_TRANSFORMS"] = "1";
+			perms.add_permutation( "INDEXED_TRANSFORMS" );
                 }
         }
 }
@@ -237,15 +285,16 @@ void ShaderSpec::r_precache( ShaderPrecacheCombos &combos )
 	while ( 1 )
 	{
 		ShaderPermutations perms;
+		perms.local_object();
 		for ( int i = 0; i < n; i++ )
 		{
 			if ( combos.combos[i].is_bool && combos.combos[i].min_val + indices[n] == 0 )
 				continue;
 			perms.add_permutation( combos.combos[i].combo_name,
-				combos.combos[i].min_val + indices[n] );
+					       combos.combos[i].min_val + indices[n] );
 		}
 
-		BSPShaderGenerator::make_shader( this, perms );
+		BSPShaderGenerator::make_shader( this, &perms );
 		permutations++;
 		std::cout << "\tCompiled " << permutations << " permutations\n";
 

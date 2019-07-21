@@ -19,6 +19,7 @@
 
 #include <bitset>
 
+#include "glow_node.h"
 #include "shader_generator.h"
 
 static PStatCollector pvs_test_geom_collector( "Cull:BSP:AddForDraw:Geom_LeafBoundsIntersect" );
@@ -192,6 +193,10 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                 makecullable_geomnode_collector.start();
                 CullableObject *object =
                         new CullableObject( std::move( geom ), std::move( state ), internal_transform );
+		if ( has_camera_bits( CAMERA_MAIN ) && node->is_of_type( GlowNode::get_class_type() ) )
+		{
+			object->set_draw_callback( new GlowNode::DrawCallback( DCAST( GlowNode, node ) ) );
+		}
                 get_cull_handler()->record_object( object, this );
                 makecullable_geomnode_collector.stop();
                 _geoms_pcollector.add_level( 1 );

@@ -16,6 +16,10 @@
 #include <shaderAttrib.h>
 #include <geomVertexAnimationSpec.h>
 
+#include <unordered_map>
+
+#define SHADER_PERMS_UNORDERED_MAP
+
 class RenderState;
 class BSPShaderGenerator;
 class BSPMaterial;
@@ -70,111 +74,85 @@ public:
 /**
  * Represents a list of #defines and variable inputs to a shader that is being generated.
  */
-class ShaderPermutations
+class ShaderPermutations : public ReferenceCount
 {
+#ifdef SHADER_PERMS_UNORDERED_MAP
 public:
-        pmap<std::string, std::string> permutations;
+	class Hasher
+	{
+	public:
+		INLINE size_t operator ()( const CPT( ShaderPermutations ) &perms ) const
+		{
+			return perms->hash;
+		}
+	};
 
-        vector_int flags;
+	class Compare
+	{
+	public:
+		INLINE bool operator ()( const CPT( ShaderPermutations ) &a, const CPT( ShaderPermutations ) &b ) const
+		{
+			return a->hash == b->hash;
+		}
+	};
+#endif
 
-        struct Input
-        {
-                bool important;
-                ShaderInput input;
+public:
+	std::ostringstream permutations_stream;
+	std::string permutations;
 
-                bool operator == ( const Input &other )
-                {
-                        return ( input == other.input );
-                }
+	int flags;
+	vector_int flag_indices;
 
-                bool operator <( const Input &other )
-                {
-                        return input < other.input;
-                }
-        };
+	pvector<ShaderInput> inputs;
 
-        pmap<std::string, Input> inputs;
+	size_t hash;
 
 PUBLISHED:
 
-        INLINE void add_permutation( const std::string &key, const std::string &value = "1" )
-        {
-                permutations[key] = value;
-        }
+	INLINE ShaderPermutations() :
+		ReferenceCount()
+	{
+		// This should be enough for most shaders
+		inputs.reserve( 32 );
+		flag_indices.reserve( 32 );
+		hash = 0u;
+		flags = 0;
+	}
 
         template<class T>
         INLINE void add_permutation( const std::string &key, const T &value )
         {
-                std::stringstream ss;
-                ss << value;
-                add_permutation( key, ss.str() );
+		permutations_stream << "#define " << key << " " << value << "\n";
         }
 
-        void add_input( const ShaderInput &inp, bool important = true )
+	INLINE void add_permutation( const std::string &key, const std::string &value = "1" )
+	{
+		add_permutation<std::string>( key, value );
+	}
+
+	INLINE void complete()
+	{
+		permutations = permutations_stream.str();
+		hash = string_hash::add_hash( hash, permutations );
+		hash = int_hash::add_hash( hash, flags );
+	}
+
+	INLINE void add_input( const ShaderInput &inp )
         {
-                Input input;
-                input.input = inp;
-                input.important = important;
-                inputs[inp.get_name()->get_name()] = input;
+		hash = inp.add_hash( hash );
+		inputs.push_back( inp );
         }
 
-        void add_flag( int flag )
+        INLINE void add_flag( int flag )
         {
-                flags.push_back( flag );
+		flags |= ( 1 << flag );
+		flag_indices.push_back( flag );
         }
 
-        bool operator < ( const ShaderPermutations &other ) const
+        INLINE size_t get_hash() const
         {
-                if ( permutations.size() != other.permutations.size() )
-                {
-                        return permutations.size() < other.permutations.size();
-                }
-                auto itr = permutations.begin();
-                auto itr2 = other.permutations.begin();
-                for ( ; itr != permutations.end(); itr++, itr2++ )
-                {
-                        if ( itr->first != itr2->first )
-                        {
-                                return itr->first < itr2->first;
-                        }
-                        if ( itr->second != itr2->second )
-                        {
-                                return itr->second < itr2->second;
-                        }
-                }
-                if ( inputs.size() != other.inputs.size() )
-                {
-                        return inputs.size() < other.inputs.size();
-                }
-
-                auto iitr = inputs.begin();
-                auto iitr2 = other.inputs.begin();
-                for ( ; iitr != inputs.end(); iitr++, iitr2++ )
-                {
-                        const Input &a = iitr->second;
-                        const Input &b = iitr2->second;
-                        if ( !a.important )
-                        {
-                                continue;
-                        }
-                        if ( a.input != b.input )
-                        {
-                                return a.input < b.input;
-                        }
-                }
-                if ( flags.size() != other.flags.size() )
-                {
-                        return flags.size() < other.flags.size();
-                }
-                for ( size_t i = 0; i < flags.size(); i++ )
-                {
-                        if ( flags[i] != other.flags[i] )
-                        {
-                                return flags[i] < other.flags[i];
-                        }
-                }
-
-                return flags < other.flags;
+		return hash;
         }
 };
 
@@ -208,8 +186,8 @@ PUBLISHED:
                                 const Filename &pixel_file, const Filename &geom_file );
 
 public:
-        virtual ShaderPermutations setup_permutations( const BSPMaterial *mat, const RenderState *state,
-                                                 const GeomVertexAnimationSpec &anim, BSPShaderGenerator *generator );
+	virtual void setup_permutations( ShaderPermutations &perms, const BSPMaterial *mat, const RenderState *state,
+		const GeomVertexAnimationSpec &anim, BSPShaderGenerator *generator );
 
 	virtual void add_precache_combos( ShaderPrecacheCombos &combos );
 	virtual void precache();
@@ -223,10 +201,17 @@ public:
         static bool add_clip_planes( const RenderState *rs, ShaderPermutations &perms );
         static void add_hw_skinning( const GeomVertexAnimationSpec &anim, ShaderPermutations &perms );
 	static bool add_alpha_test( const RenderState *rs, ShaderPermutations &perms );
+	static bool add_aux_bits( const RenderState *rs, ShaderPermutations &perms );
 
         typedef SimpleHashMap<const BSPMaterial *, PT( ShaderConfig ), pointer_hash> ConfigCache;
         ConfigCache _config_cache;
-        typedef pmap<ShaderPermutations, CPT( ShaderAttrib )> GeneratedShaders;
+
+#ifdef SHADER_PERMS_UNORDERED_MAP
+	typedef std::unordered_map<CPT( ShaderPermutations ), CPT( ShaderAttrib ), ShaderPermutations::Hasher, ShaderPermutations::Compare> GeneratedShaders;
+#else
+	typedef indirect_method_hash<const ShaderPermutations *, std::equal_to<const ShaderPermutations *>> ShaderPermutationHashMethod;
+	typedef SimpleHashMap<CPT( ShaderPermutations ), CPT( ShaderAttrib ), ShaderPermutationHashMethod> GeneratedShaders;
+#endif
         GeneratedShaders _generated_shaders;
         
         ShaderSource _vertex;

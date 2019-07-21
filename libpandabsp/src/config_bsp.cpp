@@ -18,6 +18,7 @@
 #include "bounding_kdop.h"
 #include "raytrace.h"
 #include "ambient_boost_effect.h"
+#include "glow_node.h"
 
 ConfigureDef( config_bsp );
 ConfigureFn( config_bsp )
@@ -43,6 +44,7 @@ void init_libpandabsp()
         BSPProp::init_type();
         BSPModel::init_type();
         BSPShaderGenerator::init_type();
+	GlowNode::init_type();
 
         AmbientBoostEffect::init_type();
         AmbientBoostEffect::register_with_read_factory();

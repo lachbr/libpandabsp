@@ -16,14 +16,15 @@ CSMRenderSpec::CSMRenderSpec() :
 {
 }
 
-ShaderPermutations CSMRenderSpec::setup_permutations( const BSPMaterial *mat,
-                                                      const RenderState *rs,
-                                                      const GeomVertexAnimationSpec &anim,
-                                                      BSPShaderGenerator *generator )
+void CSMRenderSpec::setup_permutations( ShaderPermutations &result,
+	const BSPMaterial *mat,
+	const RenderState *state,
+	const GeomVertexAnimationSpec &anim,
+	BSPShaderGenerator *generator )
 {
-        CSMRenderConfig *conf = (CSMRenderConfig *)get_shader_config( mat );
+	ShaderSpec::setup_permutations( result, mat, state, anim, generator );
 
-        ShaderPermutations result = ShaderSpec::setup_permutations( mat, rs, anim, generator );
+        CSMRenderConfig *conf = (CSMRenderConfig *)get_shader_config( mat );
 
         conf->basetexture.add_permutations( result );
         conf->alpha.add_permutations( result );
@@ -31,8 +32,6 @@ ShaderPermutations CSMRenderSpec::setup_permutations( const BSPMaterial *mat,
         add_hw_skinning( anim, result );
 
         result.add_input( ShaderInput( "split_mvps", generator->get_pssm_rig()->get_mvp_array() ) );
-
-        return result;
 }
 
 PT( ShaderConfig ) CSMRenderSpec::make_new_config()

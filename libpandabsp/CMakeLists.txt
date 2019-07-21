@@ -86,6 +86,7 @@ target_link_libraries(libpandabsp libpanda.lib
 							python27.lib
                             embree3.lib
                             tbb.lib
-                            tbbmalloc.lib)
+                            tbbmalloc.lib
+							libpandagl.lib)
                             
 add_dependencies(libpandabsp vifparser)

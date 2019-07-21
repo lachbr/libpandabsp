@@ -11,16 +11,17 @@ SkyBoxSpec::SkyBoxSpec() :
 {
 }
 
-ShaderPermutations SkyBoxSpec::setup_permutations( const BSPMaterial *mat,
-        const RenderState *rs,
-        const GeomVertexAnimationSpec &anim,
-        BSPShaderGenerator *generator )
+void SkyBoxSpec::setup_permutations( ShaderPermutations &result,
+	const BSPMaterial *mat,
+	const RenderState *rs,
+	const GeomVertexAnimationSpec &anim,
+	BSPShaderGenerator *generator )
 {
-        ShaderPermutations result = ShaderSpec::setup_permutations( mat, rs, anim, generator );
+	ShaderSpec::setup_permutations( result, mat, rs, anim, generator );
 
         result.add_input( ShaderInput( "skyboxSampler", generator->get_identity_cubemap() ) );
 
-        return result;
+	add_aux_bits( rs, result );
 }
 
 PT( ShaderConfig ) SkyBoxSpec::make_new_config()

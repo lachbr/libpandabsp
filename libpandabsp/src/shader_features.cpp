@@ -30,7 +30,7 @@ static Texture *get_brdf_lut()
 
 INLINE static std::string convert_to_string( float value )
 {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << value;
         return ss.str();
 }

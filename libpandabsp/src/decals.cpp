@@ -6,7 +6,7 @@
  * @author Brian Lach
  * @date March 08, 2019
  *
- * @desc Decals on the world! TODO: clip the verts
+ * @desc Decals on the world!
  *
  */
 
@@ -32,6 +32,7 @@
 #include <alphaTestAttrib.h>
 #include <depthWriteAttrib.h>
 #include <colorWriteAttrib.h>
+#include <rigidBodyCombiner.h>
 
 static PStatCollector decal_collector( "BSP:DecalTrace" );
 static PStatCollector decal_trace_collector( "BSP:DecalTrace:FindDecalPosition" );
@@ -39,6 +40,7 @@ static PStatCollector decal_node_collector( "BSP:DecalTrace:DecalNode" );
 static PStatCollector decal_state_collector( "BSP:DecalTrace:DecalState" );
 static PStatCollector decal_add_geom_collector( "BSP:DecalTrace:InsertGeometry" );
 static PStatCollector decal_init_collector( "BSP:DecalTrace:InitDecalInfo" );
+static PStatCollector decal_collect( "BSP:DecalTrace:BatchDecals" );
 
 static ConfigVariableInt decals_max( "decals_max", 20 );
 static ConfigVariableBool decals_remove_overlapping( "decals_remove_overlapping", true );
@@ -50,23 +52,9 @@ static const float SIN_45_DEGREES = 0.70710678118654752440084436210485f;
 
 static PT( InternalName ) in_texcoord_lightmap = InternalName::get_texcoord_name( "lightmap" );
 
-//static PT( GeomVertexFormat ) decal_format_no_lightmap = nullptr;
 static const GeomVertexFormat *get_decal_format_no_lightmap()
 {
-	//if ( !decal_format_no_lightmap )
-	//{
-	//	PT( GeomVertexArrayFormat ) array = new GeomVertexArrayFormat;
-	//	array->add_column( InternalName::get_vertex(), 3, GeomEnums::NT_stdfloat, GeomEnums::C_point );
-	//	array->add_column( InternalName::get_normal(), 3, GeomEnums::NT_stdfloat, GeomEnums::C_normal );
-	//	array->add_column( InternalName::get_texcoord(), 2, GeomEnums::NT_stdfloat, GeomEnums::C_texcoord );
-	//	decal_format_no_lightmap = new GeomVertexFormat;
-	//	decal_format_no_lightmap->add_array( array );
-	//	GeomVertexFormat::register_format( decal_format_no_lightmap );
-	//}
-
-	//return decal_format_no_lightmap;
-
-	return GeomVertexFormat::get_v3n3t2();
+	return GeomVertexFormat::get_v3n3c4t2();
 }
 
 static PT( GeomVertexFormat ) decal_format_lightmap = nullptr;
@@ -77,6 +65,7 @@ static const GeomVertexFormat *get_decal_format_lightmap()
 		PT( GeomVertexArrayFormat ) array = new GeomVertexArrayFormat;
 		array->add_column( InternalName::get_vertex(), 3, GeomEnums::NT_stdfloat, GeomEnums::C_point );
 		array->add_column( InternalName::get_normal(), 3, GeomEnums::NT_stdfloat, GeomEnums::C_normal );
+		array->add_column( InternalName::get_color(), 4, GeomEnums::NT_stdfloat, GeomEnums::C_color );
 		array->add_column( InternalName::get_texcoord(), 2, GeomEnums::NT_stdfloat, GeomEnums::C_texcoord );
 		array->add_column( in_texcoord_lightmap, 2, GeomEnums::NT_stdfloat, GeomEnums::C_texcoord );
 		decal_format_lightmap = new GeomVertexFormat;
@@ -114,11 +103,11 @@ DEFINE_ATTRIB( depth_offset, DepthOffsetAttrib::make( 1 ) )
 DEFINE_ATTRIB( transparency, TransparencyAttrib::make( TransparencyAttrib::M_alpha ) )
 DEFINE_ATTRIB( no_transparency, TransparencyAttrib::make( TransparencyAttrib::M_none ) )
 DEFINE_ATTRIB( decal_modulate, ColorBlendAttrib::make( ColorBlendAttrib::M_add,
-	ColorBlendAttrib::O_fbuffer_color, ColorBlendAttrib::O_incoming_color ) )
+						       ColorBlendAttrib::O_fbuffer_color, ColorBlendAttrib::O_incoming_color ) )
 DEFINE_ATTRIB( decal_alpha, AlphaTestAttrib::make( AlphaTestAttrib::M_greater, 0.0f ) )
 DEFINE_ATTRIB( depth_write_off, DepthWriteAttrib::make( DepthWriteAttrib::M_off ) )
 DEFINE_ATTRIB( no_alpha_write, ColorWriteAttrib::make( ColorWriteAttrib::C_rgb ) )
-
+DEFINE_ATTRIB( vertex_color, ColorAttrib::make_vertex() )
 
 struct decalvert_t
 {
@@ -131,7 +120,7 @@ static decalvert_t g_DecalClipVerts2[MAX_DECALCLIPVERT];
 
 struct decalinfo_t
 {
-	decalinfo_t( const LPoint3 &pos, const LVector2 &scale, const BSPMaterial *mat, const bspdata_t *bspdata )
+	decalinfo_t( const LPoint3 &pos, const LVector2 &scale, const LColorf &color, const BSPMaterial *mat, const bspdata_t *bspdata )
 	{
 		s_axis = nullptr;
 		face = nullptr;
@@ -140,6 +129,7 @@ struct decalinfo_t
 		position = pos;
 		decal_scale = LPoint2( 1.0f / ( scale[0] * 16 ), 1.0f / ( scale[1] * 16 ) );
 		decal_size = 1.0f / decal_scale.length();
+		decal_color = color;
 		vert_count = 0;
 
 		material = mat;
@@ -182,6 +172,7 @@ struct decalinfo_t
 	LVector2 decal_scale;
 	float decal_size;
 	const bspdata_t *data;
+	LColor decal_color;
 
 	//////////////////////////////////////////////////
 	// Updated for each surface being decalled
@@ -468,6 +459,8 @@ void R_DecalSurface( const dface_t *face, decalinfo_t *pinfo )
 	norm_writer.set_row( first_row );
 	GeomVertexWriter uv_writer( pinfo->vdata, InternalName::get_texcoord() );
 	uv_writer.set_row( first_row );
+	GeomVertexWriter col_writer( pinfo->vdata, InternalName::get_color() );
+	col_writer.set_row( first_row );
 	GeomVertexWriter lm_uv_writer;
 	if ( pinfo->lightmap )
 	{
@@ -482,6 +475,7 @@ void R_DecalSurface( const dface_t *face, decalinfo_t *pinfo )
 		vtx_writer.add_data3f( cvert->position / 16.0f );
 		norm_writer.add_data3f( pinfo->surface_normal );
 		uv_writer.add_data2f( cvert->coords );
+		col_writer.add_data4f( pinfo->decal_color );
 		if ( pinfo->lightmap )
 		{
 			lm_uv_writer.add_data2f( loader->get_lightcoords( facenum, cvert->position ) );
@@ -562,8 +556,8 @@ void R_DecalNode( int nodenum, decalinfo_t *info )
 /**
  * Trace a decal onto the world.
  */
-NodePath DecalManager::decal_trace( const std::string &decal_material, const LPoint2 &decal_scale,
-        float rotate, const LPoint3 &start, const LPoint3 &end )
+void DecalManager::decal_trace( const std::string &decal_material, const LPoint2 &decal_scale,
+        float rotate, const LPoint3 &start, const LPoint3 &end, const LColorf &decal_color )
 {
 	PStatTimer timer( decal_collector );
 
@@ -576,7 +570,7 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
 		RayTraceHitResult tr = _loader->get_trace()->get_scene()->trace_line( start * 16, end * 16, TRACETYPE_WORLD );
 		// Do we have a surface to decal?
 		if ( !tr.has_hit() )
-			return NodePath();
+			return;
 
 		VectorLerp( start, end, tr.get_hit_fraction(), decal_origin );
 		decal_origin *= 16.0f;
@@ -591,6 +585,7 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
 	decalinfo_t info(
 		decal_origin,
 		decal_scale,
+		decal_color,
 		mat,
 		_loader->get_bspdata() );
 	decal_init_collector.stop();
@@ -607,9 +602,11 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
 	// Set the desired material
 	CPT( RenderAttrib ) bma = BSPMaterialAttrib::make( mat );
 
+	bool is_decal_modulate = mat->get_shader() == "DecalModulate";
+
 	const RenderAttrib *transparency;
 	// Enable transparency
-	if ( mat->has_transparency() )
+	if ( mat->has_transparency() && !is_decal_modulate )
 	{
 		transparency = GET_ATTRIB( transparency );
 	}
@@ -623,9 +620,10 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
 		GET_ATTRIB( auto_shader ),
 		bma,
 		transparency,
-		//GET_ATTRIB( depth_write_off ),
+		GET_ATTRIB( depth_write_off ),
 		GET_ATTRIB( no_alpha_write ), // don't write to dest alpha
 		GET_ATTRIB( decal_alpha ),
+		GET_ATTRIB( vertex_color )
 	};
 
 	CPT( RenderState ) decal_state = RenderState::make( attribs, ARRAYSIZE( attribs ), 1 );
@@ -652,7 +650,7 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
 	}
 
 	// Yikes
-	if ( info.material->get_shader() == "DecalModulate" )
+	if ( is_decal_modulate )
 	{
 		decal_state = decal_state->set_attrib( GET_ATTRIB( decal_modulate ) );
 	}
@@ -662,7 +660,7 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
 	decal_add_geom_collector.start();
 	PT( GeomNode ) decal_geomnode = new GeomNode( "decal" );
 	decal_geomnode->add_geom( info.geom, decal_state );
-	NodePath decalnp = _loader->get_result().attach_new_node( decal_geomnode );
+	NodePath decalnp = _decal_root.attach_new_node( decal_geomnode );
 	decal_add_geom_collector.stop();
 
 	///////////////////////////////////////////////////////////////////////////////////////
@@ -711,7 +709,10 @@ NodePath DecalManager::decal_trace( const std::string &decal_material, const LPo
         // Decals should not cast shadows
         decalnp.hide( CAMERA_SHADOW );
 
-        return decalnp;
+	decal_collect.start();
+	_decal_rbc->collect();
+	decal_collect.stop();
+	//_decal_rbc->get_internal_scene().ls();
 }
 
 void DecalManager::cleanup()
@@ -723,4 +724,21 @@ void DecalManager::cleanup()
                         d->decalnp.remove_node();
         }
         _decals.clear();
+
+	if ( !_decal_root.is_empty() )
+		_decal_root.remove_node();
+	_decal_rbc = nullptr;
+}
+
+void DecalManager::init()
+{
+	_decal_rbc = new RigidBodyCombiner( "decal-root" );
+	_decal_root = NodePath( _decal_rbc );
+	_decal_root.reparent_to( _loader->get_result() );
+	_decal_root.hide( CAMERA_SHADOW );
+}
+
+DecalManager::DecalManager( BSPLoader *loader ) :
+	_loader( loader )
+{
 }

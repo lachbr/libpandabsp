@@ -195,10 +195,10 @@ PUBLISHED:
                 return _camera;
         }
 
-        INLINE NodePath trace_decal( const std::string &decal_material, const LPoint2 &decal_scale,
-                float rotate, const LPoint3 &start, const LPoint3 &end )
+	INLINE void trace_decal( const std::string &decal_material, const LPoint2 &decal_scale,
+		float rotate, const LPoint3 &start, const LPoint3 &end, const LColorf &decal_color = LColorf( 1 ) )
         {
-                return _decal_mgr.decal_trace( decal_material, decal_scale, rotate, start, end );
+                _decal_mgr.decal_trace( decal_material, decal_scale, rotate, start, end, decal_color );
         }
 
         Texture *get_closest_cubemap_texture( const LPoint3 &pos );

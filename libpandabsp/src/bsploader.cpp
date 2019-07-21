@@ -496,7 +496,7 @@ static void get_model_data( const dmodel_t *model, LVector3 &center )
 
 static NodePath setup_model( int modelnum, NodePath parent )
 {
-	stringstream name;
+	std::ostringstream name;
 	name << "model-" << modelnum;
 	PT( BSPModel ) bspmdl = new BSPModel( name.str() );
 	NodePath modelroot = parent.attach_new_node( bspmdl );
@@ -1201,7 +1201,7 @@ void BSPLoader::load_static_props()
                         int leaf = 0;
                         if ( leaf2props.find( leaf ) == -1 )
                         {
-                                stringstream ss;
+                                std::ostringstream ss;
                                 ss << "propGroupLeaf" << leaf;
                                 leaf2props.store( leaf, _result.attach_new_node( new BSPProp( ss.str() ) ) );
                         }
@@ -1648,6 +1648,8 @@ bool BSPLoader::read( const Filename &file )
                 gr.apply_attribs( _result.node() );
 
                 _result.set_attrib( BSPFaceAttrib::make_default(), 1 );
+
+		_decal_mgr.init();
         }
         else
         {
@@ -2184,7 +2186,7 @@ NodePath BSPLoader::get_entity( int entnum ) const
 
 NodePath BSPLoader::get_model( int modelnum ) const
 {
-        stringstream search;
+        std::ostringstream search;
         search << "**/model-" << modelnum;
         return _result.find( search.str() );
 }

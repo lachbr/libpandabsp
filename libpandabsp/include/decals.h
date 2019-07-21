@@ -15,6 +15,7 @@
 #include <pdeque.h>
 #include <nodePath.h>
 #include <boundingBox.h>
+#include <rigidBodyCombiner.h>
 
 class BSPLoader;
 
@@ -35,18 +36,25 @@ public:
 class DecalManager
 {
 public:
-        INLINE DecalManager( BSPLoader *loader ) :
-                _loader( loader )
-        {
-        }
+	DecalManager( BSPLoader *loader );
+
+	void init();
 
         // Trace a decal onto the world
-        NodePath decal_trace( const std::string &decal_material, const LPoint2 &decal_scale,
-                float rotate, const LPoint3 &start, const LPoint3 &end );
+	void decal_trace( const std::string &decal_material, const LPoint2 &decal_scale,
+		float rotate, const LPoint3 &start, const LPoint3 &end,
+		const LColorf &decal_color = LColorf( 1 ) );
 
         void cleanup();
 
+	INLINE NodePath get_decal_root() const
+	{
+		return _decal_root;
+	}
+
 private:
+	PT( RigidBodyCombiner ) _decal_rbc;
+	NodePath _decal_root;
         BSPLoader *_loader;
         pdeque<PT( Decal )> _decals;
 };

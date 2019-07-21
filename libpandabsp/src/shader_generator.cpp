@@ -46,9 +46,12 @@
 
 using namespace std;
 
-static PStatCollector findmatshader_collector( "*:Munge:PSSMShaderGen:FindMatShader" );
-static PStatCollector lookup_collector( "*:Munge:PSSMShaderGen:Lookup" );
-static PStatCollector synthesize_collector( "*:Munge:PSSMShaderGen:Synthesize" );
+static PStatCollector findmatshader_collector( "*:Munge:BSPShaderGen:FindMatShader" );
+static PStatCollector lookup_collector( "*:Munge:BSPShaderGen:Lookup" );
+static PStatCollector synthesize_collector( "*:Munge:BSPShaderGen:CreateShader" );
+static PStatCollector gen_perms_collector( "*:Munge:BSPShaderGen:SetupPermutations" );
+static PStatCollector complete_perms_collector( "*:Munge:BSPShaderGen:CompletePermutations" );
+static PStatCollector make_attrib_collector( "*:Munge:BSPShaderGen:SetupShaderAttrib" );
 
 ConfigVariableInt pssm_splits( "pssm-splits", 3 );
 ConfigVariableInt pssm_size( "pssm-size", 1024 );
@@ -82,7 +85,8 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePa
 	_sunlight( NodePath() ),
 	_has_shadow_sunlight( false ),
 	_shader_quality( SHADERQUALITY_HIGH ),
-	_fog( nullptr )
+	_fog( nullptr ),
+	_exposure_texture( nullptr )
 {
 	_pta_fogdata = PTA_LVecBase4f::empty_array( 2 );
 
@@ -339,6 +343,16 @@ CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs
                 {
                         shader_name = DEFAULT_SHADER;
                 }
+		else
+		{
+			// Another hack. Switch to UnlitGeneric if setLightOff() was set on a VertexLitGeneric material.
+			const LightAttrib *la;
+			rs->get_attrib_def( la );
+			if ( la->has_all_off() && shader_name == "VertexLitGeneric" )
+			{
+				shader_name = "UnlitGeneric";
+			}
+		}
         }
 
         if ( _shaders.find( shader_name ) == _shaders.end() )
@@ -346,7 +360,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs
                 // We haven't heard about this shader, they must've not called
                 // add_shader().
 
-                std::stringstream msg;
+                std::ostringstream msg;
                 msg << "Don't know about shader `" << shader_name << "`";
                 if ( mat )
                 {
@@ -367,51 +381,57 @@ CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs
 
         findmatshader_collector.stop();
 
-        ShaderPermutations permutations;
+	PT( ShaderPermutations ) permutations = new ShaderPermutations;
         ShaderSpec *spec;
 
+        spec = _shaders[shader_name];
+
+	gen_perms_collector.start();
+        spec->setup_permutations( *permutations, mat, rs, anim, this );
+	gen_perms_collector.stop();
+
+	complete_perms_collector.start();
+	permutations->complete();
+	complete_perms_collector.stop();
+
+        if ( cache_shaders )
         {
-                PStatTimer timer( lookup_collector );
-
-                spec = _shaders[shader_name];
-                permutations = spec->setup_permutations( mat, rs, anim, this );
-
-                if ( cache_shaders )
+		PStatTimer timer( lookup_collector );
+#ifdef SHADER_PERMS_UNORDERED_MAP
+                auto itr = spec->_generated_shaders.find( permutations );
+                if ( itr != spec->_generated_shaders.end() )
                 {
-                        auto itr = spec->_generated_shaders.find( permutations );
-                        if ( itr != spec->_generated_shaders.end() )
-                        {
-                                CPT( ShaderAttrib ) shattr = itr->second;
-                                shattr = DCAST( ShaderAttrib, apply_node_inputs( rs, shattr ) );
+			CPT( ShaderAttrib ) shattr = itr->second;
+#else
+		int itr = spec->_generated_shaders.find( permutations );
+		if ( itr != -1 )
+		{
+			CPT( ShaderAttrib ) shattr = spec->_generated_shaders.get_data( itr );
+#endif
+                        shattr = DCAST( ShaderAttrib, apply_node_inputs( rs, shattr ) );
 
-                                return shattr;
-                        }
+                        return shattr;
                 }
-
         }
 
-        synthesize_collector.start();
-
+	synthesize_collector.start();
 	CPT( Shader ) shader = make_shader( spec, permutations );
+	synthesize_collector.stop();
 
         nassertr( shader != nullptr, nullptr );
+
+	make_attrib_collector.start();
 
         CPT( RenderAttrib ) shattr = ShaderAttrib::make( shader );
 
         // Add any inputs from the permutations.
-        pvector<ShaderInput> perm_inputs;
-        perm_inputs.reserve( permutations.inputs.size() );
-        for ( auto itr = permutations.inputs.begin(); itr != permutations.inputs.end(); itr++ )
-        {
-                perm_inputs.push_back( itr->second.input );
-        }
-        shattr = DCAST( ShaderAttrib, shattr )->set_shader_inputs( perm_inputs );
-
+        shattr = DCAST( ShaderAttrib, shattr )->set_shader_inputs( permutations->inputs );
         // Also any flags.
-        for ( size_t i = 0; i < permutations.flags.size(); i++ )
-        {
-                shattr = DCAST( ShaderAttrib, shattr )->set_flag( permutations.flags[i], true );
-        }
+	size_t nflags = permutations->flag_indices.size();
+	for ( size_t i = 0; i < nflags; i++ )
+	{
+		shattr = DCAST( ShaderAttrib, shattr )->set_flag( permutations->flag_indices[i], true );
+	}
 
         CPT( ShaderAttrib ) attr = DCAST( ShaderAttrib, shattr );
 
@@ -421,7 +441,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs
         shattr = apply_node_inputs( rs, shattr );
         attr = DCAST( ShaderAttrib, shattr );
 
-        synthesize_collector.stop();
+	make_attrib_collector.stop();
 
         return attr;
 }
@@ -441,33 +461,27 @@ Texture *BSPShaderGenerator::get_identity_cubemap()
         return _identity_cubemap;
 }
 
-CPT( Shader ) BSPShaderGenerator::make_shader( const ShaderSpec *spec, const ShaderPermutations &perms )
+CPT( Shader ) BSPShaderGenerator::make_shader( const ShaderSpec *spec, const ShaderPermutations *perms )
 {
-	stringstream defines;
-	for ( auto itr = perms.permutations.begin(); itr != perms.permutations.end(); ++itr )
-	{
-		defines << "#define " << itr->first << " " << itr->second << "\n";
-	}
-
-	stringstream vshader, gshader, fshader;
+	std::ostringstream vshader, gshader, fshader;
 
 	// Slip the defines into the shader source.
 	if ( spec->_vertex.has )
 	{
 		vshader << spec->_vertex.before_defines
-			<< "\n" << defines.str()
+			<< "\n" << perms->permutations
 			<< spec->_vertex.after_defines;
 	}
 	if ( spec->_geom.has )
 	{
 		gshader << spec->_geom.before_defines
-			<< "\n" << defines.str()
+			<< "\n" << perms->permutations
 			<< spec->_geom.after_defines;
 	}
 	if ( spec->_pixel.has )
 	{
 		fshader << spec->_pixel.before_defines
-			<< "\n" << defines.str()
+			<< "\n" << perms->permutations
 			<< spec->_pixel.after_defines;
 	}
 
