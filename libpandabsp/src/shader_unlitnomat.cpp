@@ -35,12 +35,25 @@ void UnlitNoMatSpec::setup_permutations( ShaderPermutations &result,
         // check for a single texture applied through setTexture()
         const TextureAttrib *ta;
         rs->get_attrib_def( ta );
-        if ( ta->get_num_on_stages() > 0 &&
-             ta->get_on_texture( ta->get_on_stage( 0 ) ) != nullptr )
-        {
-                // we have a texture
-                result.add_permutation( "HAS_TEXTURE" );
-        }
+	if ( ta->get_num_on_stages() )
+	{
+		Texture *tex = ta->get_on_texture( ta->get_on_stage( 0 ) );
+		if ( tex != nullptr )
+		{
+			// Convert from gamma to linear in shader
+			enable_srgb_read( tex, true );
+			switch ( tex->get_format() )
+			{
+			case Texture::F_luminance:
+			case Texture::F_luminance_alpha:
+			case Texture::F_luminance_alphamask:
+				// sigh
+				result.add_permutation( "BASETEXTURE_IS_LUMINANCE" );
+				break;
+			}
+			result.add_permutation( "HAS_TEXTURE" );
+		}
+	}
 
         // check for setColor()
         add_color( rs, result );

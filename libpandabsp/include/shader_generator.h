@@ -84,6 +84,11 @@ PUBLISHED:
 
         void add_shader( PT( ShaderSpec ) spec );
 
+	INLINE LVector3 get_sun_vector() const
+	{
+		return _sun_vector;
+	}
+
         INLINE bool has_shadow_sunlight() const
         {
                 return _has_shadow_sunlight;
@@ -122,13 +127,13 @@ PUBLISHED:
 		return _pta_fogdata;
 	}
 
-	INLINE void set_exposure_texture( Texture *tex )
+	INLINE void set_exposure_adustment( float exposure )
 	{
-		_exposure_texture = tex;
+		_exposure_adjustment[0] = exposure;
 	}
-	INLINE Texture *get_exposure_texture() const
+	INLINE PTA_float get_exposure_adjustment() const
 	{
-		return _exposure_texture;
+		return _exposure_adjustment;
 	}
 
         static void set_identity_cubemap( Texture *tex );
@@ -155,7 +160,7 @@ private:
 	PT( Fog ) _fog;
 	PTA_LVecBase4f _pta_fogdata;
 
-	PT( Texture ) _exposure_texture;
+	PTA_float _exposure_adjustment;
 
         static AsyncTask::DoneStatus update_pssm( GenericAsyncTask *task, void *data );
 

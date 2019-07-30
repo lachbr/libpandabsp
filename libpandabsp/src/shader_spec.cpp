@@ -97,7 +97,7 @@ void ShaderSpec::setup_permutations( ShaderPermutations &result,
 	if ( lra->get_mode() != LightRampAttrib::LRT_default )
 	{
 		result.add_permutation( "HDR" );
-		result.add_input( ShaderInput( "_exposureSampler", generator->get_exposure_texture() ) );
+		result.add_input( ShaderInput( "_exposureAdjustment", generator->get_exposure_adjustment() ) );
 	}
 
 	const ColorBlendAttrib *cba;
@@ -124,8 +124,10 @@ void ShaderSpec::setup_permutations( ShaderPermutations &result,
 bool ShaderSpec::add_fog( const RenderState *rs, ShaderPermutations &perms,
 	BSPShaderGenerator *generator )
 {
+	const FogAttrib *fa;
+	rs->get_attrib_def( fa );
         // Check for fog.
-        if ( generator->get_fog() )
+        if ( generator->get_fog() && !fa->is_off() )
         {
                 perms.add_permutation( "FOG", (int)generator->get_fog()->get_mode() );
 		perms.add_input( ShaderInput( "fogData", generator->get_fog_data() ) );
@@ -139,22 +141,6 @@ bool ShaderSpec::add_fog( const RenderState *rs, ShaderPermutations &perms,
 
 void ShaderSpec::add_color( const RenderState *rs, ShaderPermutations &perms )
 {
-        // Determine whether or not vertex colors or flat colors are present.
-        const ColorAttrib *color;
-        rs->get_attrib_def( color );
-        ColorAttrib::Type ctype = color->get_color_type();
-        if ( ctype != ColorAttrib::T_off )
-        {
-                perms.add_permutation( "NEED_COLOR" );
-                if ( ctype == ColorAttrib::T_flat )
-                {
-                        perms.add_permutation( "COLOR_FLAT" );
-                }
-                else if ( ctype == ColorAttrib::T_vertex )
-                {
-                        perms.add_permutation( "COLOR_VERTEX" );
-                }
-        }
 }
 
 #include <auxBitplaneAttrib.h>
@@ -347,3 +333,48 @@ void ShaderSpec::add_precache_combos( ShaderPrecacheCombos &combos )
 }
 
 //=================================================================================================
+
+#include <pnmImage.h>
+
+void enable_srgb_read( Texture *tex, bool enable )
+{
+	if ( !tex )
+		return;
+
+	if ( enable )
+	{
+		switch ( tex->get_num_components() )
+		{
+		case 4:
+			tex->set_format( Texture::F_srgb_alpha );
+			break;
+		case 3:
+			tex->set_format( Texture::F_srgb );
+			break;
+		//case 2:
+		//	tex->set_format( Texture::F_sluminance_alpha );
+		//	break;
+		//case 1:
+		//	tex->set_format( Texture::F_sluminance );
+		//	break;
+		}
+	}
+	else
+	{
+		switch ( tex->get_num_components() )
+		{
+		case 4:
+			tex->set_format( Texture::F_rgba );
+			break;
+		case 3:
+			tex->set_format( Texture::F_rgb );
+			break;
+		case 2:
+			tex->set_format( Texture::F_luminance_alpha );
+			break;
+		case 1:
+			tex->set_format( Texture::F_luminance );
+			break;
+		}
+	}
+}

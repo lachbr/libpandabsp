@@ -380,8 +380,9 @@ void AmbientProbeManager::load_cubemaps()
                 // insert into k-d tree
                 envmap_points.push_back( { cm->pos[0], cm->pos[1], cm->pos[2] } );
 
+		// Cubemap is in linear space.
                 cm->cubemap_tex = new Texture( "cubemap_tex" );
-                cm->cubemap_tex->setup_cube_map( dcm->size, Texture::T_unsigned_byte, Texture::F_rgb );
+                cm->cubemap_tex->setup_cube_map( dcm->size, Texture::T_unsigned_short, Texture::F_rgb );
                 cm->cubemap_tex->set_wrap_u( SamplerState::WM_clamp );
                 cm->cubemap_tex->set_wrap_v( SamplerState::WM_clamp );
                 cm->cubemap_tex->set_keep_ram_image( true );
@@ -398,6 +399,8 @@ void AmbientProbeManager::load_cubemaps()
                         int xel = 0;
 
                         PNMImage img( dcm->size, dcm->size );
+			img.set_color_space( ColorSpace::CS_linear );
+			img.set_maxval( USHRT_MAX );
                         img.fill( 0 );
 
                         for ( int y = 0; y < dcm->size; y++ )
@@ -415,6 +418,8 @@ void AmbientProbeManager::load_cubemaps()
                         cm->cubemap_tex->load( img, j, 0 );
                         cm->cubemap_images[j] = img;
                 }
+
+		cm->cubemap_tex->write( std::cout, 0 );
 
                 _cubemaps.push_back( cm );
         }
@@ -598,7 +603,8 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                         {
                                 loadcubemap_collector.start();
                                 input->cubemap = cm;
-                                input->cubemap_tex->setup_cube_map( cm->size, Texture::T_unsigned_byte, Texture::F_rgb );
+				// Cubemap is in linear space
+                                input->cubemap_tex->setup_cube_map( cm->size, Texture::T_unsigned_short, Texture::F_rgb );
                                 input->cubemap_tex->set_ram_image( cm->cubemap_tex->get_ram_image(),
                                                                    cm->cubemap_tex->get_ram_image_compression(),
                                                                    cm->cubemap_tex->get_ram_image_size() );

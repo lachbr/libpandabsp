@@ -337,7 +337,17 @@ public:
 		return &_lightmap_dir;
 	}
 
+	INLINE const dmodel_t *dmodel_for_dface( const dface_t *dface ) const
+	{
+		auto itr = _dface_dmodels.find( dface );
+		if ( itr != _dface_dmodels.end() )
+			return itr->second;
+
+		return nullptr;
+	}
+
 private:
+	void spawn_entities();
 
 	void setup_raytrace_environment();
 
@@ -426,6 +436,7 @@ private:
         PyObject *_sv_ent_dispatch;
         pmap<string, PyTypeObject *> _svent_to_class;
 
+	std::unordered_map<const dface_t *, const dmodel_t *> _dface_dmodels;
         pmap<texref_t *, CPT( BSPMaterial )> _texref_materials;
         vector<uint8_t *> _leaf_pvs;
 	pvector<NodePath> _leaf_visnp;

@@ -84,6 +84,9 @@ SHADERFEATURE_PARSE_FUNC( BaseTextureFeature )
                         base_texture = TexturePool::load_texture( mat->get_keyvalue( "$basetexture" ) );
                 }
 
+		// Convert color texture from gamma to linear when reading in shader
+		enable_srgb_read( base_texture, true );
+
                 if ( mat->has_keyvalue( "$basetexture_wrap" ) )
                 {
                         const std::string &wrapmode = mat->get_keyvalue( "$basetexture_wrap" );
@@ -140,6 +143,15 @@ SHADERFEATURE_SETUP_FUNC( BaseTextureFeature )
         if ( has_feature && base_texture )
         {
                 perms.add_permutation( "BASETEXTURE" );
+		switch ( base_texture->get_format() )
+		{
+		case Texture::F_luminance:
+		case Texture::F_luminance_alpha:
+		case Texture::F_luminance_alphamask:
+			// sigh
+			perms.add_permutation( "BASETEXTURE_IS_LUMINANCE" );
+			break;
+		}
                 perms.add_input( ShaderInput( "baseTextureSampler", base_texture ) );
         }
 }
@@ -190,6 +202,7 @@ SHADERFEATURE_PARSE_FUNC( EnvmapFeature )
                 {
                         envmap_texture = TexturePool::load_cube_map( envmap );
                         envmap_texture->set_minfilter( SamplerState::FT_linear_mipmap_linear );
+			enable_srgb_read( envmap_texture, true );
                 }
 
                 if ( mat->has_keyvalue( "$envmaptint" ) )
@@ -314,6 +327,7 @@ SHADERFEATURE_PARSE_FUNC( LightwarpFeature )
                 lightwarp_tex = TexturePool::load_texture( mat->get_keyvalue( "$lightwarp" ) );
                 lightwarp_tex->set_wrap_u( SamplerState::WM_clamp );
                 lightwarp_tex->set_wrap_v( SamplerState::WM_clamp );
+		enable_srgb_read( lightwarp_tex, true );
         }
 }
 
@@ -322,6 +336,14 @@ SHADERFEATURE_SETUP_FUNC( LightwarpFeature )
         if ( has_feature && lightwarp_tex )
         {
                 perms.add_permutation( "LIGHTWARP" );
+		switch ( lightwarp_tex->get_format() )
+		{
+		case Texture::F_luminance:
+		case Texture::F_luminance_alpha:
+		case Texture::F_luminance_alphamask:
+			perms.add_permutation( "LIGHTWARP_IS_LUMINANCE" );
+			break;
+		}
                 perms.add_input( ShaderInput( "lightwarpSampler", lightwarp_tex ) );
         }
 }

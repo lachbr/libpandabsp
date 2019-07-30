@@ -237,4 +237,6 @@ private:
         static TypeHandle _type_handle;
 };
 
+void enable_srgb_read( Texture *tex, bool enable );
+
 #endif // SHADER_SPEC_H

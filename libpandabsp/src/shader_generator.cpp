@@ -85,10 +85,11 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePa
 	_sunlight( NodePath() ),
 	_has_shadow_sunlight( false ),
 	_shader_quality( SHADERQUALITY_HIGH ),
-	_fog( nullptr ),
-	_exposure_texture( nullptr )
+	_fog( nullptr )
 {
 	_pta_fogdata = PTA_LVecBase4f::empty_array( 2 );
+	_exposure_adjustment = PTA_float::empty_array( 1 );
+	_exposure_adjustment[0] = 1.0f;
 
         // Shadows need to be updated before literally anything else.
         // Any RTT of the main scene should happen after shadows are updated.
@@ -449,6 +450,7 @@ CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs
 void BSPShaderGenerator::set_identity_cubemap( Texture *tex )
 {
         _identity_cubemap = tex;
+	enable_srgb_read( tex, true );
 }
 
 Texture *BSPShaderGenerator::get_identity_cubemap()
@@ -456,6 +458,7 @@ Texture *BSPShaderGenerator::get_identity_cubemap()
         if ( !_identity_cubemap )
         {
                 _identity_cubemap = TexturePool::load_cube_map( "phase_14/maps/defaultcubemap/defaultcubemap_#.jpg" );
+		enable_srgb_read( _identity_cubemap, true );
         }
 
         return _identity_cubemap;

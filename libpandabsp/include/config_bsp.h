@@ -24,6 +24,25 @@
 
 ConfigureDecl( config_bsp, EXPCL_PANDABSP, EXPTP_PANDABSP );
 
+#define TypeDecl2(classname, parentname1, parentname2)\
+private:\
+    static TypeHandle _type_handle;\
+public:\
+  static TypeHandle get_class_type() {\
+    return _type_handle;\
+  }\
+  static void init_type() {\
+    parentname1::init_type();\
+    parentname2::init_type();\
+    register_type(_type_handle, #classname,\
+                  parentname1::get_class_type(),\
+		  parentname2::get_class_type());\
+  }\
+  virtual TypeHandle get_type() const {\
+    return classname::get_class_type();\
+  }\
+  virtual TypeHandle force_init_type() { init_type(); return get_class_type(); }
+
 #define TypeDecl(classname, parentname)\
 private:\
     static TypeHandle _type_handle;\

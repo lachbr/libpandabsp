@@ -103,7 +103,7 @@ DEFINE_ATTRIB( depth_offset, DepthOffsetAttrib::make( 1 ) )
 DEFINE_ATTRIB( transparency, TransparencyAttrib::make( TransparencyAttrib::M_alpha ) )
 DEFINE_ATTRIB( no_transparency, TransparencyAttrib::make( TransparencyAttrib::M_none ) )
 DEFINE_ATTRIB( decal_modulate, ColorBlendAttrib::make( ColorBlendAttrib::M_add,
-						       ColorBlendAttrib::O_fbuffer_color, ColorBlendAttrib::O_incoming_color ) )
+						       ColorBlendAttrib::O_fbuffer_color, ColorBlendAttrib::O_incoming_color) )
 DEFINE_ATTRIB( decal_alpha, AlphaTestAttrib::make( AlphaTestAttrib::M_greater, 0.0f ) )
 DEFINE_ATTRIB( depth_write_off, DepthWriteAttrib::make( DepthWriteAttrib::M_off ) )
 DEFINE_ATTRIB( no_alpha_write, ColorWriteAttrib::make( ColorWriteAttrib::C_rgb ) )
@@ -564,13 +564,22 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
 	///////////////////////////////////////////////////////////////////////////////////////
         // Find the surface to decal
 	LVector3 decal_origin;
+	int headnode = 0;
 	{
 		PStatTimer trace_timer( decal_trace_collector );
 
-		RayTraceHitResult tr = _loader->get_trace()->get_scene()->trace_line( start * 16, end * 16, TRACETYPE_WORLD );
+		RayTraceHitResult tr = _loader->get_trace()->get_scene()->trace_line( start * 16, end * 16, TRACETYPE_WORLD | TRACETYPE_DETAIL );
 		// Do we have a surface to decal?
 		if ( !tr.has_hit() )
 			return;
+
+		const dface_t *face = _loader->get_trace()->lookup_dface( tr.get_geom_id() );
+		if ( face )
+		{
+			const dmodel_t *model = _loader->dmodel_for_dface( face );
+			if ( model )
+				headnode = model->headnode[0];
+		}
 
 		VectorLerp( start, end, tr.get_hit_fraction(), decal_origin );
 		decal_origin *= 16.0f;
@@ -591,7 +600,7 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
 	decal_init_collector.stop();
 	
 	decal_node_collector.start();
-	R_DecalNode( 0, &info );
+	R_DecalNode( headnode, &info );
 	decal_node_collector.stop();
 
 	///////////////////////////////////////////////////////////////////////////////////////
@@ -606,7 +615,7 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
 
 	const RenderAttrib *transparency;
 	// Enable transparency
-	if ( mat->has_transparency() && !is_decal_modulate )
+	if ( mat->has_transparency() )
 	{
 		transparency = GET_ATTRIB( transparency );
 	}

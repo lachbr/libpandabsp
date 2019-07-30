@@ -19,6 +19,12 @@
 #include "raytrace.h"
 #include "ambient_boost_effect.h"
 #include "glow_node.h"
+#include "postprocess/postprocess.h"
+#include "postprocess/hdr.h"
+#include "postprocess/bloom.h"
+
+#include <texturePool.h>
+#include "texture_filter.h"
 
 ConfigureDef( config_bsp );
 ConfigureFn( config_bsp )
@@ -62,4 +68,13 @@ void init_libpandabsp()
         RayTrace::initialize();
         RayTraceGeometry::init_type();
         RayTraceTriangleMesh::init_type();
+
+	PostProcessPass::init_type();
+	PostProcessEffect::init_type();
+
+	HDRPass::init_type();
+	BloomEffect::init_type();
+
+	BSPTextureFilter::init_type();
+	TexturePool::get_global_ptr()->register_filter( new BSPTextureFilter );
 }

@@ -18,6 +18,7 @@
 #include "cubemaps.h"
 #include "shader_generator.h"
 #include "bsptools.h"
+#include "postprocess/hdr.h"
 
 #include <array>
 #include <bitset>
@@ -64,9 +65,13 @@
 #include <cullBinAttrib.h>
 #include <materialAttrib.h>
 #include <materialPool.h>
+#include <pnmFileTypeTGA.h>
+#include <pnmFileTypePfm.h>
 
 static LVector3 default_shadow_dir( 0.5, 0, -0.9 );
 static LVector4 default_shadow_color( 0.5, 0.5, 0.5, 1.0 );
+
+static ConfigVariableBool dumpcubemaps( "dumpcubemaps", false );
 
 #define DEFAULT_BRUSH_SHADER "LightmappedGeneric"
 
@@ -615,6 +620,7 @@ void BSPLoader::make_faces()
                         data->add_child( vpool );
 
                         dface_t *face = &_bspdata->dfaces[facenum];
+			_dface_dmodels[face] = model;
 
                         PT( EggPolygon ) poly = new EggPolygon;
                         data->add_child( poly );
@@ -625,7 +631,6 @@ void BSPLoader::make_faces()
 
                         CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
                         contents_t contents = ContentsFromName( bspmat->get_contents().c_str() );
-                        std::cout << texref->name << " " << contents << std::endl;
                         if ( ( contents & ( CONTENTS_SOLID | CONTENTS_WATER | CONTENTS_SKY | CONTENTS_TRANSLUCENT ) ) == 0 )
                         {
                                 continue;
@@ -722,7 +727,14 @@ void BSPLoader::make_faces()
                         if ( has_transparency )
                         {
                                 faceroot.set_transparency( TransparencyAttrib::M_dual, 1 );
-                        }   
+                        }  
+
+			if ( ( contents & CONTENTS_SKY ) != 0 )
+			{
+				// Draw 2D skybox faces first, and don't write depth
+				faceroot.set_bin( "background", 0 );
+				faceroot.set_depth_write( false );
+			}
 
                         if ( has_lighting )
                         {
@@ -1367,12 +1379,17 @@ void BSPLoader::load_entities()
                 }
                 
         }
+}
 
-        // Now load all of the entities at the application level.
-        for ( size_t i = 0; i < _py_entities.size(); i++ )
-        {
-                PyObject_CallMethod( _py_entities[i], "load", NULL );
-        }
+void BSPLoader::spawn_entities()
+{
+#ifdef HAVE_PYTHON
+	// Now load all of the entities at the application level.
+	for ( size_t i = 0; i < _py_entities.size(); i++ )
+	{
+		PyObject_CallMethod( _py_entities[i], "load", NULL );
+	}
+#endif
 }
 
 #ifdef HAVE_PYTHON
@@ -1712,12 +1729,29 @@ bool BSPLoader::read( const Filename &file )
 
 	setup_raytrace_environment();
 
+	spawn_entities();
+
         return true;
 }
 
 void BSPLoader::setup_raytrace_environment()
 {
 	_trace->add_dmodel( &_bspdata->dmodels[0], TRACETYPE_WORLD );
+
+	// Add in func_walls
+	for ( int i = 1; i < _bspdata->numentities; i++ )
+	{
+		const entity_t *ent = _bspdata->entities + i;
+		const char *classname = ValueForKey( ent, "classname" );
+		if ( !strncmp( classname, "func_wall", 9 ) )
+		{
+			int modelnum = extract_modelnum( i );
+			if ( modelnum != -1 )
+			{
+				_trace->add_dmodel( _bspdata->dmodels + modelnum, TRACETYPE_DETAIL );
+			}
+		}
+	}
 }
 
 void BSPLoader::do_optimizations()
@@ -1881,15 +1915,30 @@ void BSPLoader::build_cubemaps()
 
         // make the camera that will render the 6 faces of each cubemap_tex
         PT( Camera ) cam = new Camera( "cubemap_cam" );
+	cam->set_initial_state( _render.get_state() );
         PT( PerspectiveLens ) lens = new PerspectiveLens;
         lens->set_fov( 90, 90 );
         cam->set_lens( lens );
         cam->set_scene( _result );
         NodePath camnp = _result.attach_new_node( cam );
 
-        PT( GraphicsOutput ) buf;
-        PT( DisplayRegion ) dr;
-        PNMImage img;
+	FrameBufferProperties fbprops;
+	fbprops.set_rgb_color( true );
+	fbprops.set_depth_bits( 24 );
+	fbprops.set_rgba_bits( 16, 16, 16, 8 );
+	fbprops.set_force_hardware( true );
+	fbprops.set_srgb_color( false );
+	WindowProperties winprops;
+	winprops.set_size( LVector2i( 128, 128 ) );
+	int flags = GraphicsPipe::BF_refuse_window | GraphicsPipe::BF_size_square;
+	PT( GraphicsOutput ) buf = _win->get_engine()->make_output( _win->get_pipe(), "cubemap-render",
+								    0, fbprops, winprops, flags,
+								    _win->get_gsg(), _win );
+	nassertv( buf != nullptr );
+	PT( GraphicsBuffer ) cmbuf = DCAST( GraphicsBuffer, buf );
+	PT( DisplayRegion ) dr = buf->make_display_region();
+	dr->set_camera( camnp );
+
         dcubemap_t *cm;
 
         static const LVector3 dirs[6] = {
@@ -1903,46 +1952,104 @@ void BSPLoader::build_cubemaps()
                 
         };
 
+	// Disable auto-exposure, we will automatically adjust exposure
+	// when rendering the cubemaps.
+	bool old_hdr_auto_exposure = hdr_auto_exposure;
+	hdr_auto_exposure = false;
+
         for ( size_t i = 0; i < _bspdata->cubemaps.size(); i++ )
         {
                 cm = &_bspdata->cubemaps[i];
-
-                buf = _win->make_texture_buffer( "cubemap_buf", cm->size, cm->size );
-                dr = buf->make_display_region();
-                dr->set_camera( camnp );
-
-                camnp.set_pos( cm->pos[0] / 16.0, cm->pos[1] / 16.0, cm->pos[2] / 16.0 );
+		camnp.set_pos( cm->pos[0] / 16.0, cm->pos[1] / 16.0, cm->pos[2] / 16.0 );
+		cmbuf->set_size( cm->size, cm->size );
 
                 for ( int j = 0; j < 6; j++ )
                 {
-                        img.clear();
+			PNMFileTypeTGA ftype;
+
+			PNMImage hdr_map( cm->size, cm->size );
+			hdr_map.fill( 0 );
+			hdr_map.set_color_space( ColorSpace::CS_linear );
+			hdr_map.set_maxval( USHRT_MAX );
 
                         camnp.set_hpr( dirs[j] );
 
-                        _win->get_engine()->open_windows();
-                        _win->get_engine()->render_frame();
-                        _win->get_engine()->render_frame();
-                        _win->get_engine()->sync_frame();
+			// We are going to need to render multiple exposures
+			float exposure			= 16.0f;
+			bool over_exposed_texels	= true;
+			while ( over_exposed_texels && ( exposure > 0.05f ) )
+			{
+				_shgen->set_exposure_adustment( exposure );
 
-                        buf->get_screenshot( img );
-                        
-                        // save out the cubemap_tex face
-                        cm->imgofs[j] = _bspdata->cubemapdata.size();
-                        for ( int y = 0; y < img.get_y_size(); y++ )
-                        {
-                                for ( int x = 0; x < img.get_x_size(); x++ )
-                                {
-                                        LRGBColor col = img.get_xel( x, y );
-                                        colorrgbexp32_t out;
-                                        VectorToColorRGBExp32( col, out );
-                                        _bspdata->cubemapdata.push_back( out );
-                                }
-                        }
+				_win->get_engine()->render_frame();
+				_win->get_engine()->sync_frame();
+
+				PNMImage ldr_map( cm->size, cm->size );
+				ldr_map.set_color_space( ColorSpace::CS_linear );
+				ldr_map.set_maxval( USHRT_MAX );
+				buf->get_screenshot( ldr_map );
+
+				float scale = 1.0f / exposure;
+				over_exposed_texels = false;
+
+				for ( int x = 0; x < hdr_map.get_x_size(); x++ )
+				{
+					for ( int y = 0; y < hdr_map.get_y_size(); y++ )
+					{
+						LRGBColorf ldr_col = ldr_map.get_xel( x, y );
+						LRGBColorf hdr_col = hdr_map.get_xel( x, y );
+						for ( int c = 0; c < 3; c++ )
+						{
+							float texel = ldr_col[c];
+							if ( texel > 0.98f )
+								over_exposed_texels = true;
+							texel *= scale;
+							
+							hdr_col[c] = std::max( hdr_col[c], texel );
+						}
+						hdr_map.set_xel( x, y, hdr_col );
+					}
+				}
+
+				exposure *= 0.75f;
+
+				if ( dumpcubemaps )
+				{
+					ldr_map.apply_exponent( 1.0 / 2.2 );
+					std::ostringstream ldrname;
+					ldrname << "CM_" << cm->pos[0] << "." << cm->pos[1] << "." << cm->pos[2] << "_" << j << ".ldr.tga";
+					ldr_map.write( Filename::from_os_specific( ldrname.str() ), &ftype );
+				}
+			}
+
+			// save out the cubemap_tex face
+			cm->imgofs[j] = _bspdata->cubemapdata.size();
+			for ( int y = 0; y < hdr_map.get_y_size(); y++ )
+			{
+				for ( int x = 0; x < hdr_map.get_x_size(); x++ )
+				{
+					LRGBColor col = hdr_map.get_xel( x, y );
+					colorrgbexp32_t out;
+					VectorToColorRGBExp32( col, out );
+					_bspdata->cubemapdata.push_back( out );
+				}
+			}
+
+			if ( dumpcubemaps )
+			{
+				hdr_map.apply_exponent( 1.0 / 2.2 );
+				std::ostringstream hdrname;
+				hdrname << "CM_" << cm->pos[0] << "." << cm->pos[1] << "." << cm->pos[2] << "_" << j << ".hdr.tga";
+				hdr_map.write( Filename::from_os_specific( hdrname.str() ), &ftype );
+			}
                 }
-
-                _win->remove_display_region( dr );
-                _win->get_engine()->remove_window( buf );
         }
+
+	buf->remove_display_region( dr );
+	_win->get_engine()->remove_window( buf );
+	camnp.remove_node();
+
+	hdr_auto_exposure = old_hdr_auto_exposure;
 
         // save bsp file
         bspfile_cat.info()
@@ -1960,6 +2067,8 @@ void BSPLoader::cleanup()
 
 	// Clear raytracing scene
 	_trace->clear();
+
+	_dface_dmodels.clear();
 
         _decal_mgr.cleanup();
 
@@ -2176,7 +2285,7 @@ LColor BSPLoader::get_entity_value_color( int entnum, const char *key, bool scal
 {
         entity_t *ent = &_bspdata->entities[entnum];
 
-        return color_from_value( ValueForKey( ent, key ), scale );
+        return color_from_value( ValueForKey( ent, key ), scale, true );
 }
 
 NodePath BSPLoader::get_entity( int entnum ) const

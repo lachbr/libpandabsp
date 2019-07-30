@@ -20,7 +20,7 @@
 #include <renderModeAttrib.h>
 
 static ConfigVariableDouble r_glow_fadetime( "r_glow_fadetime", 0.1 );
-static ConfigVariableDouble r_glow_querysize( "r_glow_querysize", 16.0 );
+ConfigVariableDouble r_glow_querysize( "r_glow_querysize", 16.0 );
 
 static int calc_num_pixels( float point_size )
 {
@@ -29,22 +29,24 @@ static int calc_num_pixels( float point_size )
 
 TypeDef( GlowNode );
 
-GlowNode::GlowNode( const std::string &name ) :
+GlowNode::GlowNode( const std::string &name, float query_size ) :
 	GeomNode( name ),
 	_ctx( nullptr ),
 	_occlusion_query_point( nullptr ),
 	_occlusion_query_pixels( 0 ),
-	_occlusion_query_point_pixels( 0 )
+	_occlusion_query_point_pixels( 0 ),
+	_query_size( query_size )
 {
 	setup_occlusion_query_geom();
 }
 
-GlowNode::GlowNode( const GeomNode &copy ) :
+GlowNode::GlowNode( const GeomNode &copy, float query_size ) :
 	GeomNode( copy ),
 	_ctx( nullptr ),
 	_occlusion_query_point( nullptr ),
 	_occlusion_query_pixels( 0 ),
-	_occlusion_query_point_pixels( 0 )
+	_occlusion_query_point_pixels( 0 ),
+	_query_size( query_size )
 {
 	setup_occlusion_query_geom();
 }
@@ -71,9 +73,9 @@ void GlowNode::setup_occlusion_query_geom()
 	_occlusion_query_point_state = RenderState::make( DepthTestAttrib::make_default(),
 							  DepthWriteAttrib::make( DepthWriteAttrib::M_off ),
 							  ColorWriteAttrib::make( ColorWriteAttrib::C_off ),
-							  RenderModeAttrib::make( RenderModeAttrib::M_point, r_glow_querysize ) );
+							  RenderModeAttrib::make( RenderModeAttrib::M_point, _query_size ) );
 
-	_occlusion_query_point_pixels = calc_num_pixels( r_glow_querysize );
+	_occlusion_query_point_pixels = calc_num_pixels( _query_size );
 	
 }
 

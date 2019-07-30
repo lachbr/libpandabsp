@@ -1,0 +1,44 @@
+#ifndef POSTPROCESS_EFFECT_H
+#define POSTPROCESS_EFFECT_H
+
+#include "config_bsp.h"
+
+#include <referenceCount.h>
+#include <namable.h>
+#include <simpleHashMap.h>
+#include <pointerTo.h>
+
+class PostProcessPass;
+class PostProcess;
+class GraphicsOutput;
+class Texture;
+
+class PostProcessEffect : public ReferenceCount, public Namable
+{
+	TypeDecl2( PostProcessEffect, ReferenceCount, Namable );
+
+PUBLISHED:
+	INLINE PostProcessEffect( PostProcess *pp, const std::string &name = "effect" ) :
+		Namable( name ),
+		_pp( pp )
+	{
+	}
+
+	virtual Texture *get_final_texture() = 0;
+
+	void add_pass( PostProcessPass *pass );
+	void remove_pass( PostProcessPass *pass );
+	PostProcessPass *get_pass( const std::string &name );
+
+	virtual void setup();
+	virtual void update();
+	void window_event( GraphicsOutput *win );
+
+	virtual void shutdown();
+
+protected:
+	PostProcess *_pp;
+	SimpleHashMap<std::string, PT( PostProcessPass ), string_hash> _passes;
+};
+
+#endif // POSTPROCESS_EFFECT_H

@@ -14,5 +14,7 @@ void DecalModulateSpec::setup_permutations( ShaderPermutations &result,
 	BSPShaderGenerator *generator )
 {
 	UnlitGenericSpec::setup_permutations( result, mat, state, anim, generator );
+	ULGConfig *conf = (ULGConfig *)get_shader_config( mat );
+	enable_srgb_read( conf->basetexture.base_texture, false );
 	result.add_permutation( "IS_DECAL_MODULATE" );
 }

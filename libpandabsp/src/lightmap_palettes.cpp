@@ -47,6 +47,9 @@ INLINE PNMImage lightmap_img_for_face( const BSPLoader *loader, const dface_t *f
         }
 
         PNMImage img( width, height );
+	img.fill( 0 );
+	img.set_color_space( ColorSpace::CS_linear );
+	img.set_maxval( USHRT_MAX ); // ensure we get 16-bit color depth
 
         int luxel = 0;
 
@@ -59,7 +62,11 @@ INLINE PNMImage lightmap_img_for_face( const BSPLoader *loader, const dface_t *f
                                 sample = SampleLightmap( loader->get_bspdata(), face, luxel, 0, lmnum );
                         else
                                 sample = SampleBouncedLightmap( loader->get_bspdata(), face, luxel );
-                        LRGBColor luxel_col = color_shift_pixel( sample, loader->get_gamma() );
+
+			// Luxel is in linear-space.
+			LVector3 luxel_col;
+			ColorRGBExp32ToVector( *sample, luxel_col );
+			luxel_col /= 255.0f;
 
                         img.set_xel( x, y, luxel_col );
                         luxel++;
@@ -157,11 +164,13 @@ LightmapPaletteDirectory LightmapPalettizer::palettize_lightmaps()
                 for ( int n = 0; n < NUM_LIGHTMAPS; n++ )
                 {
                         pal->palette_img[n] = PNMImage( width, height );
+			pal->palette_img[n].set_color_space( ColorSpace::CS_linear );
+			pal->palette_img[n].set_maxval( USHRT_MAX );
                         pal->palette_img[n].fill( 0.0 );
                 }
 
                 entry->palette_tex = new Texture;
-                entry->palette_tex->setup_2d_texture_array( width, height, NUM_LIGHTMAPS, Texture::T_float, Texture::F_rgb );
+                entry->palette_tex->setup_2d_texture_array( width, height, NUM_LIGHTMAPS, Texture::T_unsigned_short, Texture::F_rgb );
                 entry->palette_tex->set_minfilter( SamplerState::FT_linear_mipmap_linear );
                 entry->palette_tex->set_magfilter( SamplerState::FT_linear );
 

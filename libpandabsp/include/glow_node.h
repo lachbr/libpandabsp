@@ -9,6 +9,8 @@
 #include <geom.h>
 #include <renderState.h>
 
+extern ConfigVariableDouble r_glow_querysize;
+
 /**
  * This is a specialization on GeomNode that uses a pixel occlusion query
  * to determine if the Geoms on the node should be rendered.
@@ -20,8 +22,8 @@ class GlowNode : public GeomNode
 	TypeDecl( GlowNode, GeomNode );
 
 PUBLISHED:
-	GlowNode( const std::string &name );
-	GlowNode( const GeomNode &copy );
+	GlowNode( const std::string &name, float query_size = r_glow_querysize );
+	GlowNode( const GeomNode &copy, float query_size = r_glow_querysize );
 
 public:
 	class DrawCallback : public CallbackObject
@@ -42,6 +44,8 @@ public:
 private:
 	void draw_callback( CallbackData *data );
 	void setup_occlusion_query_geom();
+
+	float _query_size;
 
 	CPT( Geom ) _occlusion_query_point;
 	CPT( RenderState ) _occlusion_query_point_state;
