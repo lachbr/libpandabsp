@@ -4,6 +4,8 @@ file (GLOB KD_SRCS "kdtree/*.cpp")
 file (GLOB KD_HDRS "kdtree/*.h")
 file (GLOB DX11_SRCS "dxgsg11/*.cpp")
 file (GLOB DX11_HDRS "dxgsg11/*.h")
+file (GLOB PP_HDRS "include/postprocess/*.h")
+file (GLOB PP_SRCS "src/postprocess/*.cpp")
 
 file (GLOB CM_SRCS "../../panda_hl_bsp_tools/common/*.cpp")
 file (GLOB CM_INC "../../panda_hl_bsp_tools/common/*.h")
@@ -20,6 +22,8 @@ source_group("Source Files\\common\\mathlib" FILES ${SSE_SRCS})
 source_group("Header Files\\common\\mathlib" FILES ${SSE_INC})
 source_group("Header Files\\dxgsg11" FILES ${DX11_HDRS})
 source_group("Source Files\\dxgsg11" FILES ${DX11_SRCS})
+source_group("Source Files\\postprocess" FILES ${PP_SRCS})
+source_group("Header Files\\postprocess" FILES ${PP_HDRS})
 
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type.")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG")
@@ -53,7 +57,7 @@ else ()
     set(OUT_EXT .pyd)
 endif ()
 
-add_library(libpandabsp ${LIB_TYPE} ${SRCS} ${HEADERS} ${CM_INC} ${CM_SRCS} ${SSE_INC} ${SSE_SRCS} ${KD_SRCS} ${KD_HDRS} interrogate.bat)
+add_library(libpandabsp ${LIB_TYPE} ${SRCS} ${HEADERS} ${CM_INC} ${CM_SRCS} ${SSE_INC} ${SSE_SRCS} ${KD_SRCS} ${KD_HDRS} ${PP_SRCS} ${PP_HDRS} interrogate.bat)
 
 set(bsp_suff ${OUT_EXT})
 set(bsp_out bsp)
@@ -82,6 +86,9 @@ target_link_libraries(libpandabsp libpanda.lib
 						    libp3framework.lib
                             libpandaegg.lib
 							libp3interrogatedb.lib
+							interrogatedb.lib
+							libp3pystub.lib
+							core.lib
 							libvif.lib
 							python27.lib
                             embree3.lib

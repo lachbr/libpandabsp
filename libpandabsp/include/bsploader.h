@@ -167,7 +167,31 @@ class EXPCL_PANDABSP BSPLoader
 PUBLISHED:
 	BSPLoader();
 
-        bool read( const Filename &file );
+	void add_dynamic_entity( PyObject *pyent );
+	void remove_dynamic_entity( PyObject *pyent );
+	void mark_entity_preserved( int n, bool preserved = true );
+	INLINE int get_num_entities() const
+	{
+		return _entities.size();
+	}
+	PyObject *get_entity( int n ) const;
+
+	INLINE void set_transition_landmark( const std::string &name,
+					     const LVector3 &origin,
+					     const LVector3 &angles )
+	{
+		// Preserved entity transforms are stored relative to this node,
+		// and applied relative to the destination landmark in the new level.
+		_transition_source_landmark = NodePath( name );
+		_transition_source_landmark.set_pos( origin );
+		_transition_source_landmark.set_hpr( angles );
+	}
+	INLINE void clear_transition_landmark()
+	{
+		_transition_source_landmark = NodePath();
+	}
+
+        bool read( const Filename &file, bool is_transition = false );
 	void do_optimizations();
 
 	void set_gamma( PN_stdfloat gamma, int overbright = 1 );
@@ -234,16 +258,6 @@ PUBLISHED:
         void remove_py_entity( PyObject *ent );
 #endif
 
-	INLINE int get_num_entities() const
-        {
-                return _bspdata->numentities;
-        }
-	string get_entity_value( int entnum, const char *key ) const;
-	float get_entity_value_float( int entnum, const char *key ) const;
-	int get_entity_value_int( int entnum, const char *key ) const;
-	LVector3 get_entity_value_vector( int entnum, const char *key ) const;
-	LColor get_entity_value_color( int entnum, const char *key, bool scale = true ) const;
-	NodePath get_entity( int entnum ) const;
 	NodePath get_model( int modelnum ) const;
 
         CBaseEntity *get_c_entity( const int entnum ) const;
@@ -270,7 +284,7 @@ PUBLISHED:
                 return _active_level && _want_visibility && _has_pvs_data;
         }
 
-	void cleanup();
+	void cleanup( bool is_transition = false );
 
         INLINE NodePath get_result() const
         {
@@ -367,13 +381,12 @@ private:
         void remove_model( int modelnum );
 
 #ifdef HAVE_PYTHON
-	void make_pyent( CBaseEntity *cent, PyObject *pyent, const string &classname );
+	PyObject *make_pyent( PyObject *pyent, const string &classname );
 #endif
 
 	LTexCoord get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool lightmap = false ) const;
 
         CPT( BSPMaterial ) try_load_texref( texref_t *tref );
-        
 
         PT( EggVertex ) make_vertex( EggVertexPool *vpool, EggPolygon *poly,
                                      dedge_t *edge, texinfo_t *texinfo,
@@ -394,6 +407,8 @@ private:
         NodePath _camera;
 	NodePath _render;
         NodePath _fake_dl;
+	NodePath _transition_source_landmark;
+	NodePath _transition_dest_landmark;
         LVector3 _shadow_dir;
         bool _want_shadows;
         entity_t *_light_environment;
@@ -441,15 +456,9 @@ private:
         vector<uint8_t *> _leaf_pvs;
 	pvector<NodePath> _leaf_visnp;
 	pvector<PT( BoundingBox )> _leaf_bboxs;
-#ifdef HAVE_PYTHON
-	pvector<PyObject *> _py_entities;
-	typedef pmap<CBaseEntity *, PyObject *> CEntToPyEnt;
-	CEntToPyEnt _cent_to_pyent;
-#endif
-	pvector<NodePath> _nodepath_entities;
+	pvector<entitydef_t> _entities;
 	pvector<NodePath> _model_roots;
         pmap<NodePath, LPoint3> _model_origins;
-	pvector<PT( CBaseEntity )> _class_entities;
         LightmapPaletteDirectory _lightmap_dir;
 	pvector<dface_lightmap_info_t> _face_lightmap_info;
         AmbientProbeManager _amb_probe_mgr;

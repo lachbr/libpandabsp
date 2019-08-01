@@ -19,13 +19,36 @@
 
 #include <nodePath.h>
 #include <typedReferenceCount.h>
+#include <simpleHashMap.h>
 
 class BSPLoader;
+class CBaseEntity;
 
 #ifdef CPPPARSER
 class entity_t;
 class dmodel_t;
 #endif
+
+struct entitydef_t
+{
+	PT( CBaseEntity ) c_entity;
+#ifdef HAVE_PYTHON
+	PyObject *py_entity;
+#endif
+
+	bool preserved;
+	bool dynamic;
+
+	LMatrix4f landmark_relative_transform;
+
+	entitydef_t( CBaseEntity *cent, PyObject *pent = nullptr, bool dyn = false )
+	{
+		c_entity = cent;
+		py_entity = pent;
+		preserved = false;
+		dynamic = dyn;
+	}
+};
 
 class EXPCL_PANDABSP CBaseEntity : public TypedReferenceCount
 {
@@ -34,16 +57,48 @@ class EXPCL_PANDABSP CBaseEntity : public TypedReferenceCount
 PUBLISHED:
 	CBaseEntity();
 
-	int get_entnum() const;
 	BSPLoader *get_loader() const;
+
+	INLINE std::string get_entity_value( const std::string &key ) const
+	{
+		int itr = _entity_keyvalues.find( key );
+		if ( itr != -1 )
+		{
+			return _entity_keyvalues.get_data( itr );
+		}
+		return "";
+	}
+
+	LVector3 get_entity_value_vector( const std::string &key ) const;
+	LColor get_entity_value_color( const std::string &key, bool scale = true ) const;
+
+	INLINE std::string get_classname() const
+	{
+		return get_entity_value( "classname" );
+	}
+	INLINE std::string get_targetname() const
+	{
+		return get_entity_value( "targetname" );
+	}
+
+	INLINE int get_bsp_entnum() const
+	{
+		return _bsp_entnum;
+	}
 
 public:
 	void set_data( int entnum, entity_t *ent, BSPLoader *loader );
 
 protected:
-	entity_t *_ent;
-	int _entnum;
 	BSPLoader *_loader;
+	// The entity index in the BSP file from which this entity originated.
+	// If this entity was preserved in a level transition, this index
+	// is no longer valid.
+	int _bsp_entnum;
+
+	SimpleHashMap<std::string, std::string, string_hash> _entity_keyvalues;
+
+	friend class BSPLoader;
 };
 
 class EXPCL_PANDABSP CPointEntity : public CBaseEntity
@@ -55,6 +110,13 @@ PUBLISHED:
 
 	LPoint3 get_origin() const;
 	LVector3 get_angles() const;
+
+public:
+	void set_data( int entnum, entity_t *ent, BSPLoader *loader );
+
+private:
+	LPoint3 _origin;
+	LVector3 _angles;
 };
 
 /**
@@ -88,17 +150,15 @@ class EXPCL_PANDABSP CBrushEntity : public CBaseEntity
 PUBLISHED:
 	CBrushEntity();
 	
-	int get_modelnum() const;
 	NodePath get_model_np() const;
 	void get_model_bounds( LPoint3 &mins, LPoint3 &maxs );
 
 public:
-	void set_data( int entnum, entity_t *ent, BSPLoader *loader, int modelnum, dmodel_t *mdl, const NodePath &model );
+	void set_data( int entnum, entity_t *ent, BSPLoader *loader, dmodel_t *mdl, const NodePath &model );
 
 private:
-	
-	int _modelnum;
-	dmodel_t *_mdl;
+	LVector3 _mins;
+	LVector3 _maxs;
 	NodePath _modelnp;
 };
 

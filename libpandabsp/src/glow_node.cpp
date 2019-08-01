@@ -24,7 +24,7 @@ ConfigVariableDouble r_glow_querysize( "r_glow_querysize", 16.0 );
 
 static int calc_num_pixels( float point_size )
 {
-	return (int)roundf( 8 * powf( point_size, 2 ) );
+	return (int)roundf( powf( point_size, 2 ) );
 }
 
 TypeDef( GlowNode );

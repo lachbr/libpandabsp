@@ -1274,11 +1274,11 @@ void BSPLoader::load_entities()
 
                                         PT( CBoundsEntity ) entity = new CBoundsEntity;
                                         entity->set_data( entnum, ent, this, mdl );
-                                        _class_entities.push_back( entity );
 #ifdef HAVE_PYTHON
                                         PyObject *py_ent = DTool_CreatePyInstance<CBoundsEntity>( entity, true );
-                                        make_pyent( entity, py_ent, classname );
+                                        PyObject *linked = make_pyent( py_ent, classname );
 #endif
+					_entities.push_back( entitydef_t( entity, linked ) );
                                 }
                         }
                         else if ( !strncmp( classname.c_str(), "func_", 5 ) )
@@ -1312,14 +1312,12 @@ void BSPLoader::load_entities()
                                         }
 
                                         PT( CBrushEntity ) entity = new CBrushEntity;
-                                        entity->set_data( entnum, ent, this, modelnum, &_bspdata->dmodels[modelnum], modelroot );
-                                        _class_entities.push_back( entity );
-
+                                        entity->set_data( entnum, ent, this, &_bspdata->dmodels[modelnum], modelroot );
 #ifdef HAVE_PYTHON
                                         PyObject *py_ent = DTool_CreatePyInstance<CBrushEntity>( entity, true );
-                                        make_pyent( entity, py_ent, classname );
-
+                                        PyObject *linked = make_pyent( py_ent, classname );
 #endif
+					_entities.push_back( entitydef_t( entity, linked ) );
                                 }
                         }
                         else
@@ -1331,12 +1329,11 @@ void BSPLoader::load_entities()
                                 // It didn't start with func_, so we can assume it's just a point entity.
                                 PT( CPointEntity ) entity = new CPointEntity;
                                 entity->set_data( entnum, ent, this );
-                                _class_entities.push_back( entity );
-
 #ifdef HAVE_PYTHON
-                                PyObject *py_ent = DTool_CreatePyInstance<CPointEntity>( entity, true );
-                                make_pyent( entity, py_ent, classname );
+				PyObject *py_ent = DTool_CreatePyInstance<CPointEntity>( entity, true );
+                                PyObject *linked = make_pyent( py_ent, classname );
 #endif
+				_entities.push_back( entitydef_t( entity, linked ) );
                         }
                 }
                 else
@@ -1350,17 +1347,29 @@ void BSPLoader::load_entities()
                                                                              "Oi", _svent_to_class[classname], entnum );
                                         if ( !ret )
                                         {
-                                                PyErr_Print();
+						PyErr_PrintEx( 1 );
                                         }
                                         else
                                         {
 						PT( CBaseEntity ) entity;
-						if ( !strncmp( psz_classname, "func_", 5 ) )
+						if ( !strncmp( psz_classname, "func_", 5 ) ||
+						     entnum == 0 )
 						{
-							int modelnum = extract_modelnum( entnum );
+							int modelnum;
+							if ( entnum == 0 )
+								modelnum = 0;
+							else
+								modelnum = extract_modelnum( entnum );
 							entity = new CBrushEntity;
-							DCAST( CBrushEntity, entity )->set_data( entnum, ent, this, modelnum,
+							DCAST( CBrushEntity, entity )->set_data( entnum, ent, this,
 								_bspdata->dmodels + modelnum, get_model( modelnum ) );
+						}
+						else if ( !strncmp( classname.c_str(), "trigger_", 8 ) )
+						{
+							int modelnum = extract_modelnum_s( ent );
+							entity = new CBoundsEntity;
+							DCAST( CBoundsEntity, entity )->set_data( entnum, ent, this,
+												  &_bspdata->dmodels[modelnum] );
 						}
 						else
 						{
@@ -1368,10 +1377,8 @@ void BSPLoader::load_entities()
 							DCAST( CPointEntity, entity )->set_data( entnum, ent, this );
 						}
                                                 
-                                                _class_entities.push_back( entity );
-                                                Py_INCREF( ret );
-                                                _py_entities.push_back( ret );
-                                                _cent_to_pyent[entity] = ret;
+						Py_INCREF( ret );
+						_entities.push_back( entitydef_t( entity, ret ) );
                                         }
                                 }
                         }
@@ -1385,9 +1392,16 @@ void BSPLoader::spawn_entities()
 {
 #ifdef HAVE_PYTHON
 	// Now load all of the entities at the application level.
-	for ( size_t i = 0; i < _py_entities.size(); i++ )
+	for ( size_t i = 0; i < _entities.size(); i++ )
 	{
-		PyObject_CallMethod( _py_entities[i], "load", NULL );
+		entitydef_t &ent = _entities[i];
+		if ( ent.py_entity && !ent.dynamic && !ent.preserved )
+		{
+			// This is a newly loaded (not preserved from previous level) entity
+			// that is from the BSP file.
+			PyObject_CallMethod( ent.py_entity, "load", NULL );
+		}
+		
 	}
 #endif
 }
@@ -1403,7 +1417,7 @@ void BSPLoader::link_server_entity_to_class( const string &name, PyTypeObject *t
         _svent_to_class[name] = type;
 }
 
-void BSPLoader::make_pyent( CBaseEntity *cent, PyObject *py_ent, const string &classname )
+PyObject *BSPLoader::make_pyent( PyObject *py_ent, const string &classname )
 {
         if ( _entity_to_class.find( classname ) != _entity_to_class.end() )
         {
@@ -1418,9 +1432,9 @@ void BSPLoader::make_pyent( CBaseEntity *cent, PyObject *py_ent, const string &c
                 PyObject_CallMethod( obj, "precache", NULL );
                 // Don't call load just yet, we need to have all of the entities created first, because some
                 // entities rely on others.
-                _py_entities.push_back( obj );
-                _cent_to_pyent[cent] = obj;
+		return obj;
         }
+	return nullptr;
 }
 #endif
 
@@ -1564,9 +1578,9 @@ void BSPLoader::read_materials_file()
         }
 }
 
-bool BSPLoader::read( const Filename &file )
+bool BSPLoader::read( const Filename &file, bool is_transition )
 {
-        cleanup();
+	cleanup( is_transition );
 
         if ( !_ai )
         {
@@ -1731,7 +1745,92 @@ bool BSPLoader::read( const Filename &file )
 
 	spawn_entities();
 
+	if ( is_transition )
+	{
+		// Find the destination landmark
+		entitydef_t *dest_landmark = nullptr;
+		for ( size_t i = 0; i < _entities.size(); i++ )
+		{
+			entitydef_t &def = _entities[i];
+			if ( !def.c_entity )
+				continue;
+			if ( def.c_entity->get_classname() == "info_landmark" &&
+			     def.c_entity->get_targetname() == _transition_source_landmark.get_name() )
+			{
+				dest_landmark = &def;
+				break;
+			}
+		}
+
+		if ( dest_landmark )
+		{
+			CPointEntity *dest_ent = DCAST( CPointEntity, dest_landmark->c_entity );
+			NodePath dest_landmark_np( "destination_landmark" );
+			dest_landmark_np.set_pos( dest_ent->get_origin() );
+			dest_landmark_np.set_hpr( dest_ent->get_angles() );
+			PyObject *py_dest_landmark_np =
+				DTool_CreatePyInstance( &dest_landmark_np, *(Dtool_PyTypedObject *)dest_landmark_np.get_class_type().get_python_type(), true, true );
+			Py_INCREF( py_dest_landmark_np );
+
+			for ( size_t i = 0; i < _entities.size(); i++ )
+			{
+				entitydef_t &def = _entities[i];
+				if ( def.preserved && def.py_entity )
+				{
+					LMatrix4f mat = def.landmark_relative_transform;
+					PyObject *py_mat = DTool_CreatePyInstance( &mat, *(Dtool_PyTypedObject *)mat.get_class_type().get_python_type(), true, true );
+					Py_INCREF( py_mat );
+
+					PyObject_CallMethod( def.py_entity, "transitionXform", "OO", py_dest_landmark_np, py_mat );
+
+					Py_DECREF( py_mat );
+				}
+			}
+
+			Py_DECREF( py_dest_landmark_np );
+			dest_landmark_np.remove_node();
+		}
+		
+		clear_transition_landmark();
+	}
+
         return true;
+}
+
+void BSPLoader::add_dynamic_entity( PyObject *pyent )
+{
+	_entities.push_back( entitydef_t( nullptr, pyent, true ) );
+}
+
+void BSPLoader::remove_dynamic_entity( PyObject *pyent )
+{
+	auto itr = _entities.end();
+	for ( size_t i = 0; i < _entities.size(); i++ )
+	{
+		const entitydef_t &def = _entities[i];
+		if ( def.py_entity == pyent )
+		{
+			itr = _entities.begin() + i;
+			break;
+		}
+	}
+
+	nassertv( itr != _entities.end() );
+
+	Py_DECREF( itr->py_entity );
+	_entities.erase( itr );
+}
+
+PyObject *BSPLoader::get_entity( int n ) const
+{
+	PyObject *pent = _entities[n].py_entity;
+	Py_INCREF( pent );
+	return pent;
+}
+
+void BSPLoader::mark_entity_preserved( int n, bool preserved )
+{
+	_entities[n].preserved = preserved;
 }
 
 void BSPLoader::setup_raytrace_environment()
@@ -2060,8 +2159,10 @@ void BSPLoader::build_cubemaps()
         
 }
 
-void BSPLoader::cleanup()
+void BSPLoader::cleanup( bool is_transition )
 {
+	if ( !_active_level )
+		return;
 
         _active_level = false;
 
@@ -2108,23 +2209,57 @@ void BSPLoader::cleanup()
 
         _has_pvs_data = false;
 
-        for ( size_t i = 0; i < _nodepath_entities.size(); i++ )
-        {
-                _nodepath_entities[i].remove_node();
-        }
-        _nodepath_entities.clear();
+	// If we are in a transition to another level, unload any entities
+	// that aren't being perserved. Or if we are not in a transition,
+	// unload all entities.
+	for ( auto itr = _entities.begin(); itr != _entities.end(); )
+	{
+		entitydef_t &def = *itr;
+		if ( ( is_transition && !def.preserved ) || !is_transition )
+		{
+			PyObject *py_ent = def.py_entity;
+			if ( py_ent )
+			{
+				PyObject_CallMethod( py_ent, "unload", NULL );
+				Py_DECREF( py_ent );
+				def.py_entity = nullptr;
+			}
+			itr = _entities.erase( itr );
+			continue;
+		}
+		else if ( def.c_entity )
+		{
+			// This entity is being preserved.
+			// The entnum is now invalid since the BSP file is changing.
+			// This avoids conflicts with future entities from the new BSP file.
+			def.c_entity->_bsp_entnum = -1;
+		}
+		itr++;
+	}
 
-        _cent_to_pyent.clear();
-
-#ifdef HAVE_PYTHON
-        for ( size_t i = 0; i < _py_entities.size(); i++ )
-        {
-                PyObject_CallMethod( _py_entities[i], "unload", NULL );
-                Py_DECREF( _py_entities[i] );
-        }
-        _py_entities.clear();
-#endif
-        _class_entities.clear();
+	if ( !is_transition )
+	{
+		_entities.clear();
+	}
+	else if ( !_transition_source_landmark.is_empty() )
+	{
+		// We are in a transition to another level.
+		// Store all entity transforms relative to the source landmark.
+		for ( size_t i = 0; i < _entities.size(); i++ )
+		{
+			entitydef_t &ent = _entities[i];
+			if ( ent.py_entity && DtoolInstance_Check( ent.py_entity ) )
+			{
+				NodePath *pyent_np = (NodePath *)
+					DtoolInstance_VOID_PTR( ent.py_entity );
+				if ( pyent_np )
+				{
+					ent.landmark_relative_transform =
+						pyent_np->get_mat( _transition_source_landmark );
+				}
+			}
+		}
+	}
 
         _lightmap_dir.face_index.clear();
         _lightmap_dir.face_entries.clear();
@@ -2253,46 +2388,6 @@ void BSPLoader::link_entity_to_class( const string &entname, PyTypeObject *type 
         _entity_to_class[entname] = type;
 }
 
-string BSPLoader::get_entity_value( int entnum, const char *key ) const
-{
-        entity_t *ent = &_bspdata->entities[entnum];
-        return ValueForKey( ent, key );
-}
-
-int BSPLoader::get_entity_value_int( int entnum, const char *key ) const
-{
-        entity_t *ent = &_bspdata->entities[entnum];
-        return IntForKey( ent, key );
-}
-
-float BSPLoader::get_entity_value_float( int entnum, const char *key ) const
-{
-        entity_t *ent = &_bspdata->entities[entnum];
-        return FloatForKey( ent, key );
-}
-
-LVector3 BSPLoader::get_entity_value_vector( int entnum, const char *key ) const
-{
-        entity_t *ent = &_bspdata->entities[entnum];
-
-        vec3_t vec;
-        GetVectorForKey( ent, key, vec );
-
-        return LVector3( vec[0], vec[1], vec[2] );
-}
-
-LColor BSPLoader::get_entity_value_color( int entnum, const char *key, bool scale ) const
-{
-        entity_t *ent = &_bspdata->entities[entnum];
-
-        return color_from_value( ValueForKey( ent, key ), scale, true );
-}
-
-NodePath BSPLoader::get_entity( int entnum ) const
-{
-        return _nodepath_entities[entnum];
-}
-
 NodePath BSPLoader::get_model( int modelnum ) const
 {
         std::ostringstream search;
@@ -2304,18 +2399,34 @@ NodePath BSPLoader::get_model( int modelnum ) const
 
 void BSPLoader::link_cent_to_pyent( int entnum, PyObject *pyent )
 {
-        Py_INCREF( pyent );
-        _cent_to_pyent[get_c_entity( entnum )] = pyent;
+	entitydef_t *pdef = nullptr;
+	for ( size_t i = 0; i < _entities.size(); i++ )
+	{
+		entitydef_t &def = _entities[i];
+		if ( !def.c_entity )
+			continue;
+		if ( def.c_entity->get_bsp_entnum() == entnum )
+		{
+			pdef = &def;
+			break;
+		}
+	}
+
+	nassertv( pdef != nullptr );
+	Py_INCREF( pyent );
+	pdef->py_entity = pyent;
 }
 
 PyObject *BSPLoader::get_py_entity_by_target_name( const string &targetname ) const
 {
-        for ( CEntToPyEnt::const_iterator itr = _cent_to_pyent.begin(); itr != _cent_to_pyent.end(); ++itr )
+        for ( size_t i = 0; i < _entities.size(); i++ )
         {
-                CBaseEntity *cent = itr->first;
-                PyObject *pyent = itr->second;
-                string tname = ValueForKey( &_bspdata->entities[cent->get_entnum()], "targetname" );
-                if (  tname == targetname )
+		const entitydef_t &def = _entities[i];
+		if ( !def.c_entity )
+			continue;
+		PyObject *pyent = def.py_entity;
+		string tname = def.c_entity->get_entity_value( "targetname" );
+                if ( tname == targetname )
                 {
                         Py_INCREF( pyent );
                         return pyent;
@@ -2341,12 +2452,15 @@ PyObject *BSPLoader::find_all_entities( const string &classname )
 {
         PyObject *list = PyList_New( 0 );
 
-        for ( auto itr = _cent_to_pyent.begin(); itr != _cent_to_pyent.end(); ++itr )
+        for ( size_t i = 0; i < _entities.size(); i++ )
         {
-                string cls = ValueForKey( _bspdata->entities + itr->first->get_entnum(), "classname" );
+		const entitydef_t &def = _entities[i];
+		if ( !def.c_entity )
+			continue;
+		std::string cls = def.c_entity->get_entity_value( "classname" );
                 if ( classname == cls )
                 {
-                        PyList_Append( list, itr->second );
+                        PyList_Append( list, def.py_entity );
                 }
         }
 
@@ -2360,12 +2474,15 @@ PyObject *BSPLoader::find_all_entities( const string &classname )
  */
 void BSPLoader::remove_py_entity( PyObject *obj )
 {
-        auto itr = std::find( _py_entities.begin(), _py_entities.end(), obj );
-        if ( itr != _py_entities.end() )
-        {
-                _py_entities.erase( itr );
-                Py_DECREF( obj );
-        }
+	for ( size_t i = 0; i < _entities.size(); i++ )
+	{
+		entitydef_t &ent = _entities[i];
+		if ( ent.py_entity == obj )
+		{
+			Py_DECREF( ent.py_entity );
+			ent.py_entity = nullptr;
+		}
+	}
 }
 
 #endif
@@ -2465,11 +2582,15 @@ LPoint3 BSPLoader::clip_line( const LPoint3 &start, const LPoint3 &end )
 
 CBaseEntity *BSPLoader::get_c_entity( const int entnum ) const
 {
-        for ( size_t i = 0; i < _class_entities.size(); i++ )
+        for ( size_t i = 0; i < _entities.size(); i++ )
         {
-                if ( _class_entities[i]->get_entnum() == entnum )
+		const entitydef_t &def = _entities[i];
+		if ( !def.c_entity )
+			continue;
+                if ( def.c_entity && 
+		     def.c_entity->get_bsp_entnum() == entnum )
                 {
-                        return _class_entities[i];
+			return def.c_entity;
                 }
         }
 
