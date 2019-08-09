@@ -3,4 +3,6 @@
 
 The library is written fully in C++ and most of the classes are published to Python via Panda3D's `interrogate` tool.
 
+Since I have just published it, the repository is currently not buildable/useable by itself yet.
+
 WIP readme
