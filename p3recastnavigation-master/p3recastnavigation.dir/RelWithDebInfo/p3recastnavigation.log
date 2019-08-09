@@ -1,6 +1,0 @@
-﻿  interrogate_wrapper.cpp
-  recastnavigation_composite4.cxx
-  rnCrowdAgent.cxx
-c:\users\brian\desktop\p3recastnavigation-master\source\interrogate_wrapper.cpp(13869): error C2065: 'Dtool_AddToDictionary': undeclared identifier
-c:\users\brian\desktop\p3recastnavigation-master\source\rncrowdagent.cxx(307): error C2451: conditional expression of type 'WeakPointerTo<RNNavMesh>' is illegal
-  c:\users\brian\desktop\p3recastnavigation-master\source\rncrowdagent.cxx(307): note: No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
