@@ -1,3 +1,14 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * 
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
+ *
+ * @file ciolib.h
+ * @author Brian Lach
+ * @date July 12, 2019
+ */
+
 #ifdef CIO
 
 #ifndef CIOLIB_H
