@@ -16,7 +16,7 @@ Since I have just published it, the repository is currently not buildable/useabl
   * Can be applied to any node or `RenderState`
 * Post Processing system
   * Bloom and HDR tonemapping filters provided
-* Custom BSP level format
+* Custom BSP level system
   * Derived from Half-Life BSP format
   * New features based on Source Engine BSP format
   * Construct level with brush geometry
@@ -34,6 +34,7 @@ Since I have just published it, the repository is currently not buildable/useabl
   * Transitioning entities between levels
   * Client and server side views of levels
   * Collision meshes for Bullet or built-in Panda collision
+  * Decal tracing and clipping onto brush surfaces
 * Abstraction layer to Intel's Embree ray tracing library
 
 WIP readme
