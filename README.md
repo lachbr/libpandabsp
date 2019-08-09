@@ -35,6 +35,7 @@ Since I have just published it, the repository is currently not buildable/useabl
   * Client and server side views of levels
   * Collision meshes for Bullet or built-in Panda collision
   * Decal tracing and clipping onto brush surfaces
+  * Dynamic models lit with four closest light entities, closest ambient probe, closest reflection probe
 * Abstraction layer to Intel's Embree ray tracing library
 * Panda3D's `Audio3DManager` rewritten in C++
 * Glow effect with an occlusion query
