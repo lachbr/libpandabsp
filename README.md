@@ -5,4 +5,35 @@ The library is written fully in C++ and most of the classes are published to Pyt
 
 Since I have just published it, the repository is currently not buildable/useable by itself yet.
 
+# Features
+
+* Shader system
+  * Each shader implements a class that configures a variation of itself for each `RenderState` that uses the shader
+  * `RenderStates` and material file parameters influence/configure shader variations
+  * Various provided shaders (Model PBR, Lightmapped PBR, etc)
+* Material system
+  * Material files configure a shader's parameters
+  * Can be applied to any node or `RenderState`
+* Post Processing system
+  * Bloom and HDR tonemapping filters provided
+* Custom BSP level format
+  * Derived from Half-Life BSP format
+  * New features based on Source Engine BSP format
+  * Construct level with brush geometry
+  * BSP tree computed from brushes
+  * Ray tracing against and querying the BSP tree
+  * Precomputed visibility structure for optimized rendering
+  * Entities (point and brush)
+  * Precomputed HDR radiosity lightmaps on brush surfaces
+  * Lightmaps packed into single texture when loaded
+  * Radiosity normal mapping on normal-mapped brush surfaces
+  * Precomputed directional ambient lighting probes for dynamic models
+  * Static prop models with precomputed vertex lighting
+  * Dynamic lighting and cascaded shadow mapping for the sun on models and brushes
+  * Pre-rendered HDR cubemap reflection probes
+  * Transitioning entities between levels
+  * Client and server side views of levels
+  * Collision meshes for Bullet or built-in Panda collision
+* Abstraction layer to Intel's Embree ray tracing library
+
 WIP readme
