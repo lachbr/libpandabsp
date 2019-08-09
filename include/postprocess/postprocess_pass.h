@@ -1,3 +1,14 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * 
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
+ *
+ * @file postprocess_pass.h
+ * @author Brian Lach
+ * @date July 24, 2019
+ */
+
 #ifndef POSTPROCESS_PASS_H
 #define POSTPROCESS_PASS_H
 

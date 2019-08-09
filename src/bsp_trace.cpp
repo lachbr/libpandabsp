@@ -1,13 +1,15 @@
 /**
-* PANDA3D BSP LIBRARY
-* Copyright (c) CIO Team. All rights reserved.
-*
-* @file bsp_trace.cpp
-* @author Brian Lach
-* @date August 23, 2018
-*
-* @desc This code is heavily derived from Source Engines's cmodel.cpp
-*/
+ * PANDA3D BSP LIBRARY
+ * 
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
+ *
+ * @file bsp_trace.cpp
+ * @author Brian Lach
+ * @date August 23, 2018
+ *
+ * @desc This code is heavily derived from Source Engines's cmodel.cpp
+ */
 
 #include "bsp_trace.h"
 #include "bsploader.h"

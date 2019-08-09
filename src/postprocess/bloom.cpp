@@ -1,3 +1,14 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * 
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
+ *
+ * @file bloom.cpp
+ * @author Brian Lach
+ * @date July 23, 2019
+ */
+
 #include "postprocess/bloom.h"
 #include "postprocess/postprocess.h"
 #include "postprocess/postprocess_pass.h"

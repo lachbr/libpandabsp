@@ -1,3 +1,14 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * 
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
+ *
+ * @file postprocess_effect.cpp
+ * @author Brian Lach
+ * @date July 24, 2019
+ */
+
 #include "postprocess/postprocess_effect.h"
 #include "postprocess/postprocess_pass.h"
 

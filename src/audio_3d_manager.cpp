@@ -1,3 +1,14 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * 
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
+ *
+ * @file audio_3d_manager.cpp
+ * @author Brian Lach
+ * @date July 05, 2019
+ */
+
 #include "audio_3d_manager.h"
 
 #include <asyncTaskManager.h>

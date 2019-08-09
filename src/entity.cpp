@@ -1,6 +1,8 @@
 /**
  * PANDA3D BSP LIBRARY
- * Copyright (c) CIO Team. All rights reserved.
+ * 
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
  *
  * @file entity.cpp
  * @author Brian Lach

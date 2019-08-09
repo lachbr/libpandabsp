@@ -1,3 +1,14 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * 
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
+ *
+ * @file hdr.h
+ * @author Brian Lach
+ * @date July 22, 2019
+ */
+
 #include "postprocess/postprocess_pass.h"
 #include "postprocess/postprocess_effect.h"
 

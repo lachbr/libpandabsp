@@ -1,3 +1,14 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * 
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
+ *
+ * @file glow_node.cpp
+ * @author Brian Lach
+ * @date July 20, 2019
+ */
+
 #include "glow_node.h"
 
 #include <mathlib.h>

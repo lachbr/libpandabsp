@@ -1,3 +1,14 @@
+/**
+ * PANDA3D BSP LIBRARY
+ * 
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
+ *
+ * @file postprocess.h
+ * @author Brian Lach
+ * @date July 22, 2019
+ */
+
 #ifndef POSTPROCESS_H
 #define POSTPROCESS_H
 
