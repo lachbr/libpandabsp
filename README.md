@@ -36,5 +36,7 @@ Since I have just published it, the repository is currently not buildable/useabl
   * Collision meshes for Bullet or built-in Panda collision
   * Decal tracing and clipping onto brush surfaces
 * Abstraction layer to Intel's Embree ray tracing library
+* Panda3D's `Audio3DManager` rewritten in C++
+* Glow effect with an occlusion query
 
 WIP readme
