@@ -3,6 +3,8 @@
 
 The library is written fully in C++ and most of the classes are published to Python via Panda3D's `interrogate` tool.
 
+The project is only supported on Windows currently, but cross-platform support is possible.
+
 # Dependencies
 * [Panda3D SDK](https://panda3d.org)
 * [Intel Embree SDK](http://embree.org)
