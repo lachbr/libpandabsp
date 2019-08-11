@@ -5,6 +5,12 @@ The library is written fully in C++ and most of the classes are published to Pyt
 
 Since I have just published it, the repository is currently not buildable/useable by itself yet.
 
+# Dependencies
+* [Panda3D SDK](https://panda3d.org)
+* [Intel Embree SDK](http://embree.org)
+* [keyvalue-parser](https://github.com/lachbr/keyvalue-parser)
+* [libpandabsp-compilers](https://github.com/lachbr/libpandabsp-compilers) `common` library
+
 # Features
 
 * Shader system
