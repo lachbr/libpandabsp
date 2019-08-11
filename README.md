@@ -3,7 +3,7 @@
 
 The library is written fully in C++ and most of the classes are published to Python via Panda3D's `interrogate` tool.
 
-The project is only supported on Windows currently, but cross-platform support is possible.
+The project is currently only supported on Windows. Cross-platform support has not yet been tested, but it is possible.
 
 # Dependencies
 * [Panda3D SDK](https://panda3d.org)
