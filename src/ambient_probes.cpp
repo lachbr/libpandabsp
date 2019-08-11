@@ -179,7 +179,7 @@ void AmbientProbeManager::process_ambient_probes()
                         light->id = (int)_all_lights.size();
 
                         vec3_t pos;
-                        GetVectorForKey( ent, "origin", pos );
+                        GetVectorDForKey( ent, "origin", pos );
                         VectorCopy( pos, light->pos );
                         VectorScale( light->pos, 1 / 16.0, light->pos );
 
@@ -193,7 +193,7 @@ void AmbientProbeManager::process_ambient_probes()
                              light->type == LIGHTTYPE_SPOT)
                         {
                                 vec3_t angles;
-                                GetVectorForKey( ent, "angles", angles );
+                                GetVectorDForKey( ent, "angles", angles );
                                 float pitch = FloatForKey( ent, "pitch" );
                                 float temp = angles[1];
                                 if ( !pitch )

@@ -532,7 +532,8 @@ void CM_RecursiveHullCheckImpl( Trace *trace, int num, const float p1f, const fl
                 return;
         }
 
-        float t1 = 0, t2 = 0, offset = 0;
+	float t1 = 0, t2 = 0;
+	double offset = 0;
         float frac, frac2;
         float idist;
         LVector3 mid;
@@ -566,7 +567,7 @@ void CM_RecursiveHullCheckImpl( Trace *trace, int num, const float p1f, const fl
                         }
                         else
                         {
-                                offset = DotProductAbs( trace->extents, plane->normal );
+                                offset = DotProductAbsD( trace->extents, plane->normal );
                         }
                 }
 

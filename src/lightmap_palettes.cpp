@@ -15,7 +15,6 @@
 #include "TexturePacker.h"
 
 #include <bitset>
-#include <pnmFileTypeJPG.h>
 #include <cstdio>
 
 NotifyCategoryDef( lightmapPalettizer, "" );

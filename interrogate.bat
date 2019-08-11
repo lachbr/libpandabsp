@@ -1,5 +1,7 @@
 
-set PANDA_DIR=..\..\..\cio\cio-panda3d\built_x64
+REM Make sure this is set to the correct directory on your machine!
+set PANDA_DIR=..\cio-panda3d\built_x64
+
 set INTERROGATE=%PANDA_DIR%\bin\interrogate
 set INTERROGATE_MODULE=%PANDA_DIR%\bin\interrogate_module
 set PANDA_INCLUDE=%PANDA_DIR%/include

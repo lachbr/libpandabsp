@@ -1,3 +1,5 @@
+project(libpandabsp)
+
 file (GLOB SRCS "src/*.cpp")
 file (GLOB HEADERS "include/*.h")
 file (GLOB KD_SRCS "kdtree/*.cpp")
@@ -7,19 +9,10 @@ file (GLOB DX11_HDRS "dxgsg11/*.h")
 file (GLOB PP_HDRS "include/postprocess/*.h")
 file (GLOB PP_SRCS "src/postprocess/*.cpp")
 
-file (GLOB CM_SRCS "../../panda_hl_bsp_tools/common/*.cpp")
-file (GLOB CM_INC "../../panda_hl_bsp_tools/common/*.h")
-file (GLOB SSE_SRCS "../../panda_hl_bsp_tools/common/mathlib/*.cpp")
-file (GLOB SSE_INC "../../panda_hl_bsp_tools/common/mathlib/*.h")
-
 source_group("Header Files" FILES ${HEADERS})
 source_group("Source Files" FILES ${SRCS})
 source_group("Source Files\\kdtree" FILES ${KD_SRCS})
 source_group("Header Files\\kdtree" FILES ${KD_HDRS})
-source_group("Header Files\\common" FILES ${CM_INC})
-source_group("Source Files\\common" FILES ${CM_SRCS})
-source_group("Source Files\\common\\mathlib" FILES ${SSE_SRCS})
-source_group("Header Files\\common\\mathlib" FILES ${SSE_INC})
 source_group("Header Files\\dxgsg11" FILES ${DX11_HDRS})
 source_group("Source Files\\dxgsg11" FILES ${DX11_SRCS})
 source_group("Source Files\\postprocess" FILES ${PP_SRCS})
@@ -36,18 +29,27 @@ else()
     set(P3BUILT built_x64)
 endif ()
 
-set(P3BSP_PANDA3D_DIR ../../../cio/cio-panda3d/${P3BUILT})
-set(EMBREE_DIR ../embree-3.5.0.x64.vc14.windows)
+set(EMBREE_DIR ../embree-3.5.0.x64.vc14.windows CACHE PATH "Embree install directory")
+set(PANDA3D_DIR ..\\..\\..\\cio\\cio-panda3d\\${P3BUILT} CACHE PATH "Panda3D directory")
+set(BSP_COMMON_INCLUDE ..\\common CACHE PATH "BSP Common directory")
+set(BSP_COMMON_LIB ..\\common\\Release\\bsp_common.lib CACHE FILEPATH "BSP Common lib file")
+set(VIF_INCLUDE keyvalue-parser\\include CACHE PATH "keyvalue-parser include directory")
+set(VIF_LIB keyvalue-parser\\Release\\libvif.lib CACHE FILEPATH "keyvalue-parser lib file")
 
-include_directories(./include ${P3BSP_PANDA3D_DIR}/include ${P3BSP_PANDA3D_DIR}/python/include ../../../cio/cio-panda3d/thirdparty/win-libs-vc14-x64/png/include ../../../cio/cio-panda3d/thirdparty/win-libs-vc14-x64/jpeg/include ../../panda_hl_bsp_tools/common ../../panda_hl_bsp_tools/template ../vifparser/include)
-link_directories(${P3BSP_PANDA3D_DIR}/lib ${P3BSP_PANDA3D_DIR}/python/libs)
-if (NOT DEFINED LINK_ALL_STATIC)
-    link_directories(../vifparser/Release)
-endif()
+include_directories(./include ${PANDA3D_DIR}/include ${PANDA3D_DIR}/python/include ${BSP_COMMON_INCLUDE} ${VIF_INCLUDE})
+link_directories(${PANDA3D_DIR}/lib ${PANDA3D_DIR}/python/libs)
 link_directories(${EMBREE_DIR}/lib)
 include_directories(${EMBREE_DIR}/include)
 
-add_definitions(-DNOMINMAX -DBUILDING_LIBPANDABSP -DWITHIN_PANDA -DCOMPILER_MSVC64 -DVERSION_64BIT -DDOUBLEVEC_T -DSYSTEM_WIN32 -DSTDC_HEADERS -DCIO)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    # 64 bits
+    add_definitions(-DVERSION_64BIT)
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    # 32 bits
+    add_definitions(-DVERSION_32BIT)
+endif()
+
+add_definitions(-DNOMINMAX -DBUILDING_LIBPANDABSP -DWITHIN_PANDA -DSTDC_HEADERS -DCIO)
 if (DEFINED LINK_ALL_STATIC)
     set(LIB_TYPE STATIC)
     set(OUT_EXT .lib)
@@ -57,7 +59,7 @@ else ()
     set(OUT_EXT .pyd)
 endif ()
 
-add_library(libpandabsp ${LIB_TYPE} ${SRCS} ${HEADERS} ${CM_INC} ${CM_SRCS} ${SSE_INC} ${SSE_SRCS} ${KD_SRCS} ${KD_HDRS} ${PP_SRCS} ${PP_HDRS} interrogate.bat)
+add_library(libpandabsp ${LIB_TYPE} ${SRCS} ${HEADERS} ${KD_SRCS} ${KD_HDRS} ${PP_SRCS} ${PP_HDRS} interrogate.bat)
 
 set(bsp_suff ${OUT_EXT})
 set(bsp_out bsp)
@@ -65,17 +67,17 @@ set(bsp_out bsp)
 set_target_properties(libpandabsp PROPERTIES SUFFIX ${bsp_suff})
 set_target_properties(libpandabsp PROPERTIES OUTPUT_NAME ${bsp_out})
 
-string(REGEX REPLACE "/" "\\\\" P3BSP_PANDA3D_DIR ${P3BSP_PANDA3D_DIR})
+string(REGEX REPLACE "/" "\\\\" WIN_PANDA3D_DIR ${PANDA3D_DIR})
 
 add_custom_command(TARGET libpandabsp PRE_BUILD COMMAND interrogate.bat)
 
 if (DEFINED LINK_ALL_STATIC)
-    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${P3BSP_PANDA3D_DIR}\\lib\\${bsp_out}${bsp_suff})
+    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${WIN_PANDA3D_DIR}\\lib\\${bsp_out}${bsp_suff})
 else()
-    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${P3BSP_PANDA3D_DIR}\\panda3d\\${bsp_out}${bsp_suff})
-    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${P3BSP_PANDA3D_DIR}\\bin\\${bsp_out}${bsp_suff})
-    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}.pdb ${P3BSP_PANDA3D_DIR}\\panda3d\\${bsp_out}.pdb)
-    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}.pdb ${P3BSP_PANDA3D_DIR}\\bin\\${bsp_out}.pdb)
+    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${WIN_PANDA3D_DIR}\\panda3d\\${bsp_out}${bsp_suff})
+    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${WIN_PANDA3D_DIR}\\bin\\${bsp_out}${bsp_suff})
+    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}.pdb ${WIN_PANDA3D_DIR}\\panda3d\\${bsp_out}.pdb)
+    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}.pdb ${WIN_PANDA3D_DIR}\\bin\\${bsp_out}.pdb)
 endif()
 
 target_link_libraries(libpandabsp libpanda.lib
@@ -89,11 +91,12 @@ target_link_libraries(libpandabsp libpanda.lib
 							interrogatedb.lib
 							libp3pystub.lib
 							core.lib
-							libvif.lib
 							python27.lib
                             embree3.lib
                             tbb.lib
                             tbbmalloc.lib
-							libpandagl.lib)
+							libpandagl.lib
+                            ${BSP_COMMON_LIB}
+                            ${VIF_LIB})
                             
 add_dependencies(libpandabsp vifparser)

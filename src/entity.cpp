@@ -76,11 +76,11 @@ void CPointEntity::set_data( int entnum, entity_t *ent, BSPLoader *loader )
 	CBaseEntity::set_data( entnum, ent, loader );
 
 	vec3_t pos;
-	GetVectorForKey( ent, "origin", pos );
+	GetVectorDForKey( ent, "origin", pos );
 	_origin = LPoint3( pos[0] / 16.0, pos[1] / 16.0, pos[2] / 16.0 );
 
 	vec3_t angles;
-	GetVectorForKey( ent, "angles", angles );
+	GetVectorDForKey( ent, "angles", angles );
 	_angles = LVector3( angles[1] - 90, angles[0], angles[2] );
 }
 

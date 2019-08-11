@@ -35,7 +35,6 @@
 #include <load_egg_file.h>
 #include <loader.h>
 #include <nodePathCollection.h>
-#include <pnmFileTypeJPG.h>
 #include <pointLight.h>
 #include <randomizer.h>
 #include <rigidBodyCombiner.h>
@@ -68,7 +67,6 @@
 #include <materialAttrib.h>
 #include <materialPool.h>
 #include <pnmFileTypeTGA.h>
-#include <pnmFileTypePfm.h>
 
 static LVector3 default_shadow_dir( 0.5, 0, -0.9 );
 static LVector4 default_shadow_color( 0.5, 0.5, 0.5, 1.0 );
@@ -1252,10 +1250,10 @@ void BSPLoader::load_entities()
                 string id = ValueForKey( ent, "id" );
 
                 vec_t origin[3];
-                GetVectorForKey( ent, "origin", origin );
+                GetVectorDForKey( ent, "origin", origin );
 
                 vec_t angles[3];
-                GetVectorForKey( ent, "angles", angles );
+                GetVectorDForKey( ent, "angles", angles );
 
                 string targetname = ValueForKey( ent, "targetname" );
 
