@@ -548,18 +548,18 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_Namable (imports[2].type)
   {"TypedObject", nullptr},
 #define Dtool_Ptr_TypedObject (imports[3].type)
-  {"TypedReferenceCount", nullptr},
-#define Dtool_Ptr_TypedReferenceCount (imports[4].type)
   {"ReferenceCount", nullptr},
-#define Dtool_Ptr_ReferenceCount (imports[5].type)
+#define Dtool_Ptr_ReferenceCount (imports[4].type)
+  {"TypedReferenceCount", nullptr},
+#define Dtool_Ptr_TypedReferenceCount (imports[5].type)
   {"TypedWritable", nullptr},
 #define Dtool_Ptr_TypedWritable (imports[6].type)
   {"TypedWritableReferenceCount", nullptr},
 #define Dtool_Ptr_TypedWritableReferenceCount (imports[7].type)
-  {"LPoint3f", nullptr},
-#define Dtool_Ptr_LPoint3f (imports[8].type)
   {"LPoint2f", nullptr},
-#define Dtool_Ptr_LPoint2f (imports[9].type)
+#define Dtool_Ptr_LPoint2f (imports[8].type)
+  {"LPoint3f", nullptr},
+#define Dtool_Ptr_LPoint3f (imports[9].type)
   {"LVecBase4f", nullptr},
 #define Dtool_Ptr_LVecBase4f (imports[10].type)
   {"LVector3f", nullptr},
@@ -570,10 +570,10 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_LVector2f (imports[13].type)
   {"BitMask< uint32_t, 32 >", nullptr},
 #define Dtool_Ptr_BitMask_uint32_t_32 (imports[14].type)
-  {"BoundingVolume", nullptr},
-#define Dtool_Ptr_BoundingVolume (imports[15].type)
   {"FiniteBoundingVolume", nullptr},
-#define Dtool_Ptr_FiniteBoundingVolume (imports[16].type)
+#define Dtool_Ptr_FiniteBoundingVolume (imports[15].type)
+  {"BoundingVolume", nullptr},
+#define Dtool_Ptr_BoundingVolume (imports[16].type)
   {"GeometricBoundingVolume", nullptr},
 #define Dtool_Ptr_GeometricBoundingVolume (imports[17].type)
   {"LPlanef", nullptr},
@@ -602,18 +602,18 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_RenderEffect (imports[29].type)
   {"PandaNode", nullptr},
 #define Dtool_Ptr_PandaNode (imports[30].type)
-  {"NodePath", nullptr},
-#define Dtool_Ptr_NodePath (imports[31].type)
   {"FrameBufferProperties", nullptr},
-#define Dtool_Ptr_FrameBufferProperties (imports[32].type)
+#define Dtool_Ptr_FrameBufferProperties (imports[31].type)
+  {"NodePath", nullptr},
+#define Dtool_Ptr_NodePath (imports[32].type)
   {"GeomNode", nullptr},
 #define Dtool_Ptr_GeomNode (imports[33].type)
   {"DrawableRegion", nullptr},
 #define Dtool_Ptr_DrawableRegion (imports[34].type)
-  {"CullTraverser", nullptr},
-#define Dtool_Ptr_CullTraverser (imports[35].type)
   {"Fog", nullptr},
-#define Dtool_Ptr_Fog (imports[36].type)
+#define Dtool_Ptr_Fog (imports[35].type)
+  {"CullTraverser", nullptr},
+#define Dtool_Ptr_CullTraverser (imports[36].type)
   {"DisplayRegion", nullptr},
 #define Dtool_Ptr_DisplayRegion (imports[37].type)
   {"ShaderGenerator", nullptr},
@@ -628,10 +628,10 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_ModelNode (imports[42].type)
   {"ModelRoot", nullptr},
 #define Dtool_Ptr_ModelRoot (imports[43].type)
-  {"AudioSound", nullptr},
-#define Dtool_Ptr_AudioSound (imports[44].type)
   {"AudioManager", nullptr},
-#define Dtool_Ptr_AudioManager (imports[45].type)
+#define Dtool_Ptr_AudioManager (imports[44].type)
+  {"AudioSound", nullptr},
+#define Dtool_Ptr_AudioSound (imports[45].type)
   {nullptr, nullptr},
 };
 #endif
@@ -672,17 +672,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
 extern struct Dtool_PyTypedObject Dtool_TypedObject;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedObject = &Dtool_TypedObject;
 #endif
-// TypedReferenceCount
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
-#endif
 // ReferenceCount
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
+#endif
+// TypedReferenceCount
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
 #endif
 // TypedWritable
 #ifndef LINK_ALL_STATIC
@@ -696,18 +696,6 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedW
 extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
 #endif
-// LPoint3f
-#ifndef LINK_ALL_STATIC
-inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
-  nassertr(Dtool_Ptr_LPoint3f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LPoint3f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LPoint3f *(*)(PyObject *, LPoint3f &))Dtool_Ptr_LPoint3f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LPoint3f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
-extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
-#endif
 // LPoint2f
 #ifndef LINK_ALL_STATIC
 inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced) {
@@ -719,6 +707,18 @@ inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced)
 extern struct Dtool_PyTypedObject Dtool_LPoint2f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint2f = &Dtool_LPoint2f;
 extern LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced);
+#endif
+// LPoint3f
+#ifndef LINK_ALL_STATIC
+inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
+  nassertr(Dtool_Ptr_LPoint3f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LPoint3f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LPoint3f *(*)(PyObject *, LPoint3f &))Dtool_Ptr_LPoint3f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LPoint3f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
+extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
 #endif
 // LVecBase4f
 #ifndef LINK_ALL_STATIC
@@ -780,17 +780,17 @@ extern struct Dtool_PyTypedObject Dtool_BitMask_uint32_t_32;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_BitMask_uint32_t_32 = &Dtool_BitMask_uint32_t_32;
 extern BitMask< uint32_t, 32 > *Dtool_Coerce_BitMask_uint32_t_32(PyObject *args, BitMask< uint32_t, 32 > &coerced);
 #endif
-// BoundingVolume
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_BoundingVolume;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_BoundingVolume = &Dtool_BoundingVolume;
-#endif
 // FiniteBoundingVolume
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_FiniteBoundingVolume;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_FiniteBoundingVolume = &Dtool_FiniteBoundingVolume;
+#endif
+// BoundingVolume
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_BoundingVolume;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_BoundingVolume = &Dtool_BoundingVolume;
 #endif
 // GeometricBoundingVolume
 #ifndef LINK_ALL_STATIC
@@ -912,17 +912,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderEffect = &Dtool_RenderE
 extern struct Dtool_PyTypedObject Dtool_PandaNode;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_PandaNode = &Dtool_PandaNode;
 #endif
-// NodePath
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_NodePath;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_NodePath = &Dtool_NodePath;
-#endif
 // FrameBufferProperties
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_FrameBufferProperties;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_FrameBufferProperties = &Dtool_FrameBufferProperties;
+#endif
+// NodePath
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_NodePath;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_NodePath = &Dtool_NodePath;
 #endif
 // GeomNode
 #ifndef LINK_ALL_STATIC
@@ -936,17 +936,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_GeomNode = &Dtool_GeomNode;
 extern struct Dtool_PyTypedObject Dtool_DrawableRegion;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_DrawableRegion = &Dtool_DrawableRegion;
 #endif
-// CullTraverser
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_CullTraverser;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_CullTraverser = &Dtool_CullTraverser;
-#endif
 // Fog
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_Fog;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Fog = &Dtool_Fog;
+#endif
+// CullTraverser
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_CullTraverser;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_CullTraverser = &Dtool_CullTraverser;
 #endif
 // DisplayRegion
 #ifndef LINK_ALL_STATIC
@@ -1002,17 +1002,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelNode = &Dtool_ModelNode;
 extern struct Dtool_PyTypedObject Dtool_ModelRoot;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelRoot = &Dtool_ModelRoot;
 #endif
-// AudioSound
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_AudioSound;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioSound = &Dtool_AudioSound;
-#endif
 // AudioManager
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_AudioManager;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioManager = &Dtool_AudioManager;
+#endif
+// AudioSound
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_AudioSound;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioSound = &Dtool_AudioSound;
 #endif
 
 /**
@@ -25051,7 +25051,7 @@ extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, nullp
 extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, imports};
 #endif
 static InterrogateModuleDef _in_module_def = {
-  1565540063,  /* file_identifier */
+  1565672371,  /* file_identifier */
   "bsp",  /* library_name */
   "t5GT",  /* library_hash_name */
   "bsp",  /* module_name */

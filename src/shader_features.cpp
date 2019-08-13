@@ -145,15 +145,6 @@ SHADERFEATURE_SETUP_FUNC( BaseTextureFeature )
         if ( has_feature && base_texture )
         {
                 perms.add_permutation( "BASETEXTURE" );
-		switch ( base_texture->get_format() )
-		{
-		case Texture::F_luminance:
-		case Texture::F_luminance_alpha:
-		case Texture::F_luminance_alphamask:
-			// sigh
-			perms.add_permutation( "BASETEXTURE_IS_LUMINANCE" );
-			break;
-		}
                 perms.add_input( ShaderInput( "baseTextureSampler", base_texture ) );
         }
 }
@@ -338,14 +329,6 @@ SHADERFEATURE_SETUP_FUNC( LightwarpFeature )
         if ( has_feature && lightwarp_tex )
         {
                 perms.add_permutation( "LIGHTWARP" );
-		switch ( lightwarp_tex->get_format() )
-		{
-		case Texture::F_luminance:
-		case Texture::F_luminance_alpha:
-		case Texture::F_luminance_alphamask:
-			perms.add_permutation( "LIGHTWARP_IS_LUMINANCE" );
-			break;
-		}
                 perms.add_input( ShaderInput( "lightwarpSampler", lightwarp_tex ) );
         }
 }

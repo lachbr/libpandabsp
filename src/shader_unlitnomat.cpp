@@ -44,15 +44,6 @@ void UnlitNoMatSpec::setup_permutations( ShaderPermutations &result,
 		{
 			// Convert from gamma to linear in shader
 			enable_srgb_read( tex, true );
-			switch ( tex->get_format() )
-			{
-			case Texture::F_luminance:
-			case Texture::F_luminance_alpha:
-			case Texture::F_luminance_alphamask:
-				// sigh
-				result.add_permutation( "BASETEXTURE_IS_LUMINANCE" );
-				break;
-			}
 			result.add_permutation( "HAS_TEXTURE" );
 		}
 	}
