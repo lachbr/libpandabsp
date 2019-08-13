@@ -10,9 +10,9 @@ void CSMRenderConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
 
 CSMRenderSpec::CSMRenderSpec() :
         ShaderSpec( "CSMRender",
-                    Filename( "phase_14/models/shaders/pssm_camera.vert.glsl" ),
-                    Filename( "phase_14/models/shaders/pssm_camera.frag.glsl" ),
-                    Filename( "phase_14/models/shaders/pssm_camera.geom.glsl" ) )
+                    Filename( "shaders/stdshaders/pssm_camera.vert.glsl" ),
+                    Filename( "shaders/stdshaders/pssm_camera.frag.glsl" ),
+                    Filename( "shaders/stdshaders/pssm_camera.geom.glsl" ) )
 {
 }
 

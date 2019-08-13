@@ -37,8 +37,8 @@ public:
 	virtual void setup()
 	{
 		PostProcessPass::setup();
-		get_quad().set_shader( Shader::load( Shader::SL_GLSL, "phase_14/models/shaders/postprocess/downsample.vert.glsl",
-						     "phase_14/models/shaders/postprocess/downsample.frag.glsl" ) );
+		get_quad().set_shader( Shader::load( Shader::SL_GLSL, "shaders/postprocess/downsample.vert.glsl",
+						     "shaders/postprocess/downsample.frag.glsl" ) );
 
 		// Vertex shader
 		get_quad().set_shader_input( "tapOffsets", _tap_offsets );
@@ -92,8 +92,8 @@ public:
 	virtual void setup()
 	{
 		PostProcessPass::setup();
-		get_quad().set_shader( Shader::load( Shader::SL_GLSL, "phase_14/models/shaders/postprocess/blur.vert.glsl",
-						     "phase_14/models/shaders/postprocess/blur.frag.glsl" ) );
+		get_quad().set_shader( Shader::load( Shader::SL_GLSL, "shaders/postprocess/blur.vert.glsl",
+						     "shaders/postprocess/blur.frag.glsl" ) );
 		get_quad().set_shader_input( "texSampler",
 					     _dsl->get_color_texture() );
 		get_quad().set_shader_input( "psTapOffsets", _ps_tap_offsets );
@@ -152,8 +152,8 @@ public:
 	virtual void setup()
 	{
 		PostProcessPass::setup();
-		get_quad().set_shader( Shader::load( Shader::SL_GLSL, "phase_14/models/shaders/postprocess/blur.vert.glsl",
-						     "phase_14/models/shaders/postprocess/blur.frag.glsl" ) );
+		get_quad().set_shader( Shader::load( Shader::SL_GLSL, "shaders/postprocess/blur.vert.glsl",
+						     "shaders/postprocess/blur.frag.glsl" ) );
 		get_quad().set_shader_input( "texSampler",
 					     _blur_x->get_color_texture() );
 		get_quad().set_shader_input( "psTapOffsets", _ps_tap_offsets );

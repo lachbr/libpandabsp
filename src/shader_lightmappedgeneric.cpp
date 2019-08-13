@@ -31,8 +31,8 @@ void LMGConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
 
 LightmappedGenericSpec::LightmappedGenericSpec() :
         ShaderSpec( "LightmappedGeneric",
-                    Filename( "phase_14/models/shaders/stdshaders/lightmappedGeneric_PBR.vert.glsl" ),
-                    Filename( "phase_14/models/shaders/stdshaders/lightmappedGeneric_PBR.frag.glsl" ) )
+                    Filename( "shaders/stdshaders/lightmappedGeneric_PBR.vert.glsl" ),
+                    Filename( "shaders/stdshaders/lightmappedGeneric_PBR.frag.glsl" ) )
 {
 }
 

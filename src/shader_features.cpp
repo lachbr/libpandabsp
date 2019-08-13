@@ -21,11 +21,10 @@ static Texture *get_brdf_lut()
 {
         if ( !brdf_lut )
         {
-                brdf_lut = TexturePool::load_texture( "phase_14/maps/brdf_lut.png" );
+                brdf_lut = TexturePool::load_texture( "materials/engine/brdf_lut.png" );
                 brdf_lut->set_wrap_u( SamplerState::WM_clamp );
                 brdf_lut->set_wrap_v( SamplerState::WM_clamp );
         }
-                
 
         return brdf_lut;
 }

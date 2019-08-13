@@ -19,8 +19,8 @@ void ULGConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
 
 UnlitGenericSpec::UnlitGenericSpec() :
         ShaderSpec( "UnlitGeneric",
-                    Filename( "phase_14/models/shaders/stdshaders/unlitGeneric.vert.glsl" ),
-                    Filename( "phase_14/models/shaders/stdshaders/unlitGeneric.frag.glsl" ) )
+                    Filename( "shaders/stdshaders/unlitGeneric.vert.glsl" ),
+                    Filename( "shaders/stdshaders/unlitGeneric.frag.glsl" ) )
 {
 }
 

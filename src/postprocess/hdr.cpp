@@ -230,8 +230,8 @@ void HDRPass::setup_quad()
 	_hdr_quad_geom = gn->get_geom( 0 );
 
 	PT( Shader ) shader = Shader::load( Shader::SL_GLSL,
-					    "phase_14/models/shaders/postprocess/luminance_compare.vert.glsl",
-					    "phase_14/models/shaders/postprocess/luminance_compare.frag.glsl" );
+					    "shaders/postprocess/luminance_compare.vert.glsl",
+					    "shaders/postprocess/luminance_compare.frag.glsl" );
 	CPT( RenderAttrib ) shattr = ShaderAttrib::make( shader );
 	shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( "sceneColorSampler", _pp->get_scene_color_texture() );
 	shattr = DCAST( ShaderAttrib, shattr )->set_shader_input( "luminanceMinMax", _luminance_min_max );

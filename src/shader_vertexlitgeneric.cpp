@@ -47,8 +47,8 @@ void VLGShaderConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
 
 VertexLitGenericSpec::VertexLitGenericSpec() :
         ShaderSpec( "VertexLitGeneric",
-                    Filename( "phase_14/models/shaders/stdshaders/vertexLitGeneric_PBR.vert.glsl" ),
-                    Filename( "phase_14/models/shaders/stdshaders/vertexLitGeneric_PBR.frag.glsl" ) )
+                    Filename( "shaders/stdshaders/vertexLitGeneric_PBR.vert.glsl" ),
+                    Filename( "shaders/stdshaders/vertexLitGeneric_PBR.frag.glsl" ) )
 {
 }
 

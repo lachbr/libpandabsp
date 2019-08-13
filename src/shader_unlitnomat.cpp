@@ -21,8 +21,8 @@ void UNMConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
 
 UnlitNoMatSpec::UnlitNoMatSpec() :
         ShaderSpec( "UnlitNoMat",
-                    Filename( "phase_14/models/shaders/stdshaders/unlitNoMat.vert.glsl" ),
-                    Filename( "phase_14/models/shaders/stdshaders/unlitNoMat.frag.glsl" ) )
+                    Filename( "shaders/stdshaders/unlitNoMat.vert.glsl" ),
+                    Filename( "shaders/stdshaders/unlitNoMat.frag.glsl" ) )
 {
 }
 

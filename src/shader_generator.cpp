@@ -168,7 +168,7 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePa
                 shattr = DCAST( ShaderAttrib, shattr )->set_shader_auto();
                 state = state->set_attrib( shattr );
                 state = state->set_attrib( BSPMaterialAttrib::make_override_shader( BSPMaterial::get_from_file(
-                        "phase_14/materials/csm_shadow.mat"
+                        "materials/engine/csm_shadow.mat"
                 ) ) );
 
                 Camera *maincam = DCAST( Camera, _pssm_rig->get_camera( 0 ).node() );
@@ -459,7 +459,7 @@ Texture *BSPShaderGenerator::get_identity_cubemap()
 {
         if ( !_identity_cubemap )
         {
-                _identity_cubemap = TexturePool::load_cube_map( "phase_14/maps/defaultcubemap/defaultcubemap_#.jpg" );
+                _identity_cubemap = TexturePool::load_cube_map( "materials/engine/defaultcubemap/defaultcubemap_#.jpg" );
 		enable_srgb_read( _identity_cubemap, true );
         }
 

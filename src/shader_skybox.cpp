@@ -6,8 +6,8 @@ void SkyBoxConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
 }
 
 SkyBoxSpec::SkyBoxSpec() :
-        ShaderSpec( "SkyBox", Filename( "phase_14/models/shaders/stdshaders/skybox.vert.glsl" ),
-                Filename( "phase_14/models/shaders/stdshaders/skybox.frag.glsl" ) )
+        ShaderSpec( "SkyBox", Filename( "shaders/stdshaders/skybox.vert.glsl" ),
+                Filename( "shaders/stdshaders/skybox.frag.glsl" ) )
 {
 }
 
