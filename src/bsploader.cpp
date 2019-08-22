@@ -21,6 +21,7 @@
 #include "shader_generator.h"
 #include "bsptools.h"
 #include "postprocess/hdr.h"
+#include "static_props.h"
 
 #include <array>
 #include <bitset>
@@ -70,6 +71,8 @@
 
 static LVector3 default_shadow_dir( 0.5, 0, -0.9 );
 static LVector4 default_shadow_color( 0.5, 0.5, 0.5, 1.0 );
+
+static PT( InternalName ) static_vertex_lighting_name = InternalName::make( "static_vertex_lighting" );
 
 static ConfigVariableBool dumpcubemaps( "dumpcubemaps", false );
 
@@ -963,10 +966,13 @@ void BSPLoader::load_static_props()
                         lightsrc_col = color_from_value( ValueForKey( lightsrc, "_light" ), true, true );
                 }
 
+		bool static_lighting = false;
+
                 if ( prop->first_vertex_data != -1 &&
                      ( prop->flags & STATICPROPFLAGS_STATICLIGHTING ) != 0 &&
                      ( prop->flags & STATICPROPFLAGS_DYNAMICLIGHTING ) == 0 )
                 {
+			static_lighting = true;
                         bool use_cubemap = false;
 
                         // prop has pre computed per vertex lighting
@@ -1013,15 +1019,15 @@ void BSPLoader::load_static_props()
                                 VDataDef *def = &vdatadefs[i];
 
                                 PT( GeomVertexData ) mod_vdata = new GeomVertexData( *def->vdata );
-                                if ( !mod_vdata->has_column( InternalName::get_color() ) )
+                                if ( !mod_vdata->has_column( static_vertex_lighting_name ) )
                                 {
                                         PT( GeomVertexFormat ) format = new GeomVertexFormat( *mod_vdata->get_format() );
                                         PT( GeomVertexArrayFormat ) array = format->modify_array( 0 );
-                                        array->add_column( InternalName::get_color(), 4, GeomEnums::NT_uint8, GeomEnums::C_color );
+                                        array->add_column( static_vertex_lighting_name, 4, GeomEnums::NT_uint16, GeomEnums::C_color );
                                         format->set_array( 0, array );
                                         mod_vdata->set_format( GeomVertexFormat::register_format( format ) );
                                 }
-                                GeomVertexRewriter color_mod( mod_vdata, InternalName::get_color() );
+                                GeomVertexWriter color_mod( mod_vdata, static_vertex_lighting_name );
 
                                 if ( dvdata->num_lighting_samples != mod_vdata->get_num_rows() )
                                 {
@@ -1036,16 +1042,13 @@ void BSPLoader::load_static_props()
                                 for ( int j = 0; j < dvdata->num_lighting_samples; j++ )
                                 {
                                         colorrgbexp32_t *sample = &_bspdata->staticproplighting[dvdata->first_lighting_sample + j];
-                                        LRGBColor vtx_rgb = color_shift_pixel( sample, _gamma );
+					LVector3 vtx_rgb;
+					ColorRGBExp32ToVector( *sample, vtx_rgb );
+					vtx_rgb /= 255.0f;
                                         LColorf vtx_color( vtx_rgb[0], vtx_rgb[1], vtx_rgb[2], 1.0 );
-
-                                        // get the current vertex color and multiply it by our lighting sample
-                                        color_mod.set_row( j );
-                                        LColorf curr_color( color_mod.get_data4f() );
-                                        color_mod.set_row( j );
-                                        curr_color.componentwise_mult( vtx_color );
+					std::cout << vtx_color << std::endl;
                                         // now apply it to the modified vertex data
-                                        color_mod.set_data4f( curr_color );
+                                        color_mod.set_data4f( vtx_color );
                                 }
 
                                 // apply the modified vertex data to each geom that shares this vertex data
@@ -1128,9 +1131,7 @@ void BSPLoader::load_static_props()
 
                         // since this prop has static lighting applied to the vertices
                         // ignore any dynamic lights.
-                        // also make sure the vertex colors are rendered.
                         propnp.set_light_off( 1 );
-                        propnp.set_attrib( ColorAttrib::make_vertex(), 2 );
                 }
                 else if ( prop->flags & STATICPROPFLAGS_NOLIGHTING )
                 {
@@ -1176,6 +1177,9 @@ void BSPLoader::load_static_props()
                         }
                 }
 #endif
+
+		// Indicate that any Geoms underneath this prop node are static prop geometry.
+		propnp.set_attrib( StaticPropAttrib::make( static_lighting ) );
 
                 if ( prop->flags & STATICPROPFLAGS_DOUBLESIDE )
                 {

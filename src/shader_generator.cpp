@@ -349,12 +349,12 @@ CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs
 		else
 		{
 			// Another hack. Switch to UnlitGeneric if setLightOff() was set on a VertexLitGeneric material.
-			const LightAttrib *la;
-			rs->get_attrib_def( la );
-			if ( la->has_all_off() && shader_name == "VertexLitGeneric" )
-			{
-				shader_name = "UnlitGeneric";
-			}
+			//const LightAttrib *la;
+			//rs->get_attrib_def( la );
+			//if ( la->has_all_off() && shader_name == "VertexLitGeneric" )
+			//{
+			//	shader_name = "UnlitGeneric";
+			//}
 		}
         }
 

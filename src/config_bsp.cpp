@@ -24,6 +24,7 @@
 #include "postprocess/postprocess.h"
 #include "postprocess/hdr.h"
 #include "postprocess/bloom.h"
+#include "static_props.h"
 
 #include <texturePool.h>
 #include "texture_filter.h"
@@ -62,6 +63,7 @@ void init_libpandabsp()
         BSPMaterialAttrib::register_with_read_factory();
 
         AuxDataAttrib::init_type();
+	StaticPropAttrib::init_type();
 
         ShaderSpec::init_type();
 

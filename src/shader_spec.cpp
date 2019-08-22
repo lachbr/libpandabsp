@@ -13,6 +13,7 @@
 #include "shader_generator.h"
 #include "bsp_material.h"
 #include "bsploader.h"
+#include "static_props.h"
 
 #include <virtualFileSystem.h>
 #include <colorBlendAttrib.h>
@@ -118,6 +119,13 @@ void ShaderSpec::setup_permutations( ShaderPermutations &result,
 		{
 			result.add_permutation( "BLEND_MODULATE" );
 		}
+	}
+
+	const StaticPropAttrib *spa;
+	state->get_attrib_def( spa );
+	if ( spa->has_static_lighting() )
+	{
+		result.add_permutation( "STATIC_PROP_LIGHTING" );
 	}
 }
 

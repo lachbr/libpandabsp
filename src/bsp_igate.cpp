@@ -540,102 +540,180 @@ static const Dtool_TypeDef exports[] = {
  */
 #ifndef LINK_ALL_STATIC
 static Dtool_TypeDef imports[] = {
-  {"TypeHandle", nullptr},
-#define Dtool_Ptr_TypeHandle (imports[0].type)
-  {"Filename", nullptr},
-#define Dtool_Ptr_Filename (imports[1].type)
-  {"TypedObject", nullptr},
-#define Dtool_Ptr_TypedObject (imports[2].type)
-  {"Namable", nullptr},
-#define Dtool_Ptr_Namable (imports[3].type)
-  {"ReferenceCount", nullptr},
-#define Dtool_Ptr_ReferenceCount (imports[4].type)
-  {"TypedReferenceCount", nullptr},
-#define Dtool_Ptr_TypedReferenceCount (imports[5].type)
-  {"TypedWritableReferenceCount", nullptr},
-#define Dtool_Ptr_TypedWritableReferenceCount (imports[6].type)
-  {"TypedWritable", nullptr},
-#define Dtool_Ptr_TypedWritable (imports[7].type)
-  {"LVector2f", nullptr},
-#define Dtool_Ptr_LVector2f (imports[8].type)
-  {"LPoint2f", nullptr},
-#define Dtool_Ptr_LPoint2f (imports[9].type)
-  {"LVector3f", nullptr},
-#define Dtool_Ptr_LVector3f (imports[10].type)
-  {"LPoint3f", nullptr},
-#define Dtool_Ptr_LPoint3f (imports[11].type)
-  {"LVecBase4f", nullptr},
-#define Dtool_Ptr_LVecBase4f (imports[12].type)
-  {"LVector2i", nullptr},
-#define Dtool_Ptr_LVector2i (imports[13].type)
-  {"BitMask< uint32_t, 32 >", nullptr},
-#define Dtool_Ptr_BitMask_uint32_t_32 (imports[14].type)
-  {"GeometricBoundingVolume", nullptr},
-#define Dtool_Ptr_GeometricBoundingVolume (imports[15].type)
-  {"BoundingVolume", nullptr},
-#define Dtool_Ptr_BoundingVolume (imports[16].type)
-  {"FiniteBoundingVolume", nullptr},
-#define Dtool_Ptr_FiniteBoundingVolume (imports[17].type)
-  {"LPlanef", nullptr},
-#define Dtool_Ptr_LPlanef (imports[18].type)
-  {"Texture", nullptr},
-#define Dtool_Ptr_Texture (imports[19].type)
-  {"PointerToArray< float >", nullptr},
-#define Dtool_Ptr_PointerToArray_float (imports[20].type)
-  {"PointerToArray< UnalignedLVecBase4f >", nullptr},
-#define Dtool_Ptr_PointerToArray_UnalignedLVecBase4f (imports[21].type)
-  {"RenderAttrib", nullptr},
-#define Dtool_Ptr_RenderAttrib (imports[22].type)
-  {"Shader", nullptr},
-#define Dtool_Ptr_Shader (imports[23].type)
-  {"ShaderInput", nullptr},
-#define Dtool_Ptr_ShaderInput (imports[24].type)
-  {"TextureStage", nullptr},
-#define Dtool_Ptr_TextureStage (imports[25].type)
-  {"Geom", nullptr},
-#define Dtool_Ptr_Geom (imports[26].type)
-  {"TransformState", nullptr},
-#define Dtool_Ptr_TransformState (imports[27].type)
-  {"RenderState", nullptr},
-#define Dtool_Ptr_RenderState (imports[28].type)
-  {"RenderEffect", nullptr},
-#define Dtool_Ptr_RenderEffect (imports[29].type)
-  {"PandaNode", nullptr},
-#define Dtool_Ptr_PandaNode (imports[30].type)
-  {"NodePath", nullptr},
-#define Dtool_Ptr_NodePath (imports[31].type)
-  {"FrameBufferProperties", nullptr},
-#define Dtool_Ptr_FrameBufferProperties (imports[32].type)
-  {"GeomNode", nullptr},
-#define Dtool_Ptr_GeomNode (imports[33].type)
-  {"DrawableRegion", nullptr},
-#define Dtool_Ptr_DrawableRegion (imports[34].type)
-  {"Fog", nullptr},
-#define Dtool_Ptr_Fog (imports[35].type)
   {"CullTraverser", nullptr},
-#define Dtool_Ptr_CullTraverser (imports[36].type)
+#define Dtool_Ptr_CullTraverser (imports[0].type)
+  {"Fog", nullptr},
+#define Dtool_Ptr_Fog (imports[1].type)
   {"DisplayRegion", nullptr},
-#define Dtool_Ptr_DisplayRegion (imports[37].type)
-  {"GraphicsStateGuardian", nullptr},
-#define Dtool_Ptr_GraphicsStateGuardian (imports[38].type)
+#define Dtool_Ptr_DisplayRegion (imports[2].type)
   {"ShaderGenerator", nullptr},
-#define Dtool_Ptr_ShaderGenerator (imports[39].type)
+#define Dtool_Ptr_ShaderGenerator (imports[3].type)
+  {"GraphicsStateGuardian", nullptr},
+#define Dtool_Ptr_GraphicsStateGuardian (imports[4].type)
   {"GraphicsOutput", nullptr},
-#define Dtool_Ptr_GraphicsOutput (imports[40].type)
+#define Dtool_Ptr_GraphicsOutput (imports[5].type)
   {"GraphicsWindow", nullptr},
-#define Dtool_Ptr_GraphicsWindow (imports[41].type)
-  {"ModelRoot", nullptr},
-#define Dtool_Ptr_ModelRoot (imports[42].type)
+#define Dtool_Ptr_GraphicsWindow (imports[6].type)
   {"ModelNode", nullptr},
-#define Dtool_Ptr_ModelNode (imports[43].type)
+#define Dtool_Ptr_ModelNode (imports[7].type)
+  {"ModelRoot", nullptr},
+#define Dtool_Ptr_ModelRoot (imports[8].type)
   {"AudioSound", nullptr},
-#define Dtool_Ptr_AudioSound (imports[44].type)
+#define Dtool_Ptr_AudioSound (imports[9].type)
   {"AudioManager", nullptr},
-#define Dtool_Ptr_AudioManager (imports[45].type)
+#define Dtool_Ptr_AudioManager (imports[10].type)
+  {"TypeHandle", nullptr},
+#define Dtool_Ptr_TypeHandle (imports[11].type)
+  {"Filename", nullptr},
+#define Dtool_Ptr_Filename (imports[12].type)
+  {"Namable", nullptr},
+#define Dtool_Ptr_Namable (imports[13].type)
+  {"TypedObject", nullptr},
+#define Dtool_Ptr_TypedObject (imports[14].type)
+  {"TypedReferenceCount", nullptr},
+#define Dtool_Ptr_TypedReferenceCount (imports[15].type)
+  {"ReferenceCount", nullptr},
+#define Dtool_Ptr_ReferenceCount (imports[16].type)
+  {"TypedWritable", nullptr},
+#define Dtool_Ptr_TypedWritable (imports[17].type)
+  {"TypedWritableReferenceCount", nullptr},
+#define Dtool_Ptr_TypedWritableReferenceCount (imports[18].type)
+  {"BitMask< uint32_t, 32 >", nullptr},
+#define Dtool_Ptr_BitMask_uint32_t_32 (imports[19].type)
+  {"RenderAttrib", nullptr},
+#define Dtool_Ptr_RenderAttrib (imports[20].type)
+  {"LPoint2f", nullptr},
+#define Dtool_Ptr_LPoint2f (imports[21].type)
+  {"LVector2f", nullptr},
+#define Dtool_Ptr_LVector2f (imports[22].type)
+  {"LVector2i", nullptr},
+#define Dtool_Ptr_LVector2i (imports[23].type)
+  {"LVector3f", nullptr},
+#define Dtool_Ptr_LVector3f (imports[24].type)
+  {"LVecBase4f", nullptr},
+#define Dtool_Ptr_LVecBase4f (imports[25].type)
+  {"LPoint3f", nullptr},
+#define Dtool_Ptr_LPoint3f (imports[26].type)
+  {"BoundingVolume", nullptr},
+#define Dtool_Ptr_BoundingVolume (imports[27].type)
+  {"GeometricBoundingVolume", nullptr},
+#define Dtool_Ptr_GeometricBoundingVolume (imports[28].type)
+  {"LPlanef", nullptr},
+#define Dtool_Ptr_LPlanef (imports[29].type)
+  {"FiniteBoundingVolume", nullptr},
+#define Dtool_Ptr_FiniteBoundingVolume (imports[30].type)
+  {"Texture", nullptr},
+#define Dtool_Ptr_Texture (imports[31].type)
+  {"PointerToArray< float >", nullptr},
+#define Dtool_Ptr_PointerToArray_float (imports[32].type)
+  {"PointerToArray< UnalignedLVecBase4f >", nullptr},
+#define Dtool_Ptr_PointerToArray_UnalignedLVecBase4f (imports[33].type)
+  {"Shader", nullptr},
+#define Dtool_Ptr_Shader (imports[34].type)
+  {"ShaderInput", nullptr},
+#define Dtool_Ptr_ShaderInput (imports[35].type)
+  {"TextureStage", nullptr},
+#define Dtool_Ptr_TextureStage (imports[36].type)
+  {"Geom", nullptr},
+#define Dtool_Ptr_Geom (imports[37].type)
+  {"TransformState", nullptr},
+#define Dtool_Ptr_TransformState (imports[38].type)
+  {"RenderState", nullptr},
+#define Dtool_Ptr_RenderState (imports[39].type)
+  {"RenderEffect", nullptr},
+#define Dtool_Ptr_RenderEffect (imports[40].type)
+  {"PandaNode", nullptr},
+#define Dtool_Ptr_PandaNode (imports[41].type)
+  {"NodePath", nullptr},
+#define Dtool_Ptr_NodePath (imports[42].type)
+  {"FrameBufferProperties", nullptr},
+#define Dtool_Ptr_FrameBufferProperties (imports[43].type)
+  {"DrawableRegion", nullptr},
+#define Dtool_Ptr_DrawableRegion (imports[44].type)
+  {"GeomNode", nullptr},
+#define Dtool_Ptr_GeomNode (imports[45].type)
   {nullptr, nullptr},
 };
 #endif
 
+// CullTraverser
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_CullTraverser;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_CullTraverser = &Dtool_CullTraverser;
+#endif
+// Fog
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_Fog;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_Fog = &Dtool_Fog;
+#endif
+// DisplayRegion
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_DisplayRegion;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_DisplayRegion = &Dtool_DisplayRegion;
+#endif
+// ShaderGenerator
+#ifndef LINK_ALL_STATIC
+inline static bool Dtool_ConstCoerce_ShaderGenerator(PyObject *args, CPT(ShaderGenerator) &coerced) {
+  nassertr(Dtool_Ptr_ShaderGenerator != nullptr, false);
+  nassertr(Dtool_Ptr_ShaderGenerator->_Dtool_ConstCoerce != nullptr, false);
+  return ((bool (*)(PyObject *, CPT(ShaderGenerator) &))Dtool_Ptr_ShaderGenerator->_Dtool_ConstCoerce)(args, coerced);
+}
+inline static bool Dtool_Coerce_ShaderGenerator(PyObject *args, PT(ShaderGenerator) &coerced) {
+  nassertr(Dtool_Ptr_ShaderGenerator != nullptr, false);
+  nassertr(Dtool_Ptr_ShaderGenerator->_Dtool_Coerce != nullptr, false);
+  return ((bool (*)(PyObject *, PT(ShaderGenerator) &))Dtool_Ptr_ShaderGenerator->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_ShaderGenerator;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderGenerator = &Dtool_ShaderGenerator;
+extern bool Dtool_ConstCoerce_ShaderGenerator(PyObject *args, CPT(ShaderGenerator) &coerced);
+extern bool Dtool_Coerce_ShaderGenerator(PyObject *args, PT(ShaderGenerator) &coerced);
+#endif
+// GraphicsStateGuardian
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_GraphicsStateGuardian;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsStateGuardian = &Dtool_GraphicsStateGuardian;
+#endif
+// GraphicsOutput
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_GraphicsOutput;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsOutput = &Dtool_GraphicsOutput;
+#endif
+// GraphicsWindow
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_GraphicsWindow;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsWindow = &Dtool_GraphicsWindow;
+#endif
+// ModelNode
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_ModelNode;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelNode = &Dtool_ModelNode;
+#endif
+// ModelRoot
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_ModelRoot;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelRoot = &Dtool_ModelRoot;
+#endif
+// AudioSound
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_AudioSound;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioSound = &Dtool_AudioSound;
+#endif
+// AudioManager
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_AudioManager;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioManager = &Dtool_AudioManager;
+#endif
 // TypeHandle
 #ifndef LINK_ALL_STATIC
 inline static TypeHandle *Dtool_Coerce_TypeHandle(PyObject *args, TypeHandle &coerced) {
@@ -660,23 +738,17 @@ extern struct Dtool_PyTypedObject Dtool_Filename;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Filename = &Dtool_Filename;
 extern Filename *Dtool_Coerce_Filename(PyObject *args, Filename &coerced);
 #endif
-// TypedObject
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedObject;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedObject = &Dtool_TypedObject;
-#endif
 // Namable
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_Namable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
 #endif
-// ReferenceCount
+// TypedObject
 #ifndef LINK_ALL_STATIC
 #else
-extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
+extern struct Dtool_PyTypedObject Dtool_TypedObject;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedObject = &Dtool_TypedObject;
 #endif
 // TypedReferenceCount
 #ifndef LINK_ALL_STATIC
@@ -684,11 +756,11 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_Refer
 extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
 #endif
-// TypedWritableReferenceCount
+// ReferenceCount
 #ifndef LINK_ALL_STATIC
 #else
-extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
+extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
 #endif
 // TypedWritable
 #ifndef LINK_ALL_STATIC
@@ -696,77 +768,11 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount =
 extern struct Dtool_PyTypedObject Dtool_TypedWritable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedWritable;
 #endif
-// LVector2f
+// TypedWritableReferenceCount
 #ifndef LINK_ALL_STATIC
-inline static LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced) {
-  nassertr(Dtool_Ptr_LVector2f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVector2f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVector2f *(*)(PyObject *, LVector2f &))Dtool_Ptr_LVector2f->_Dtool_Coerce)(args, coerced);
-}
 #else
-extern struct Dtool_PyTypedObject Dtool_LVector2f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2f = &Dtool_LVector2f;
-extern LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced);
-#endif
-// LPoint2f
-#ifndef LINK_ALL_STATIC
-inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced) {
-  nassertr(Dtool_Ptr_LPoint2f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LPoint2f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LPoint2f *(*)(PyObject *, LPoint2f &))Dtool_Ptr_LPoint2f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LPoint2f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint2f = &Dtool_LPoint2f;
-extern LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced);
-#endif
-// LVector3f
-#ifndef LINK_ALL_STATIC
-inline static LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced) {
-  nassertr(Dtool_Ptr_LVector3f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVector3f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVector3f *(*)(PyObject *, LVector3f &))Dtool_Ptr_LVector3f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVector3f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
-extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
-#endif
-// LPoint3f
-#ifndef LINK_ALL_STATIC
-inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
-  nassertr(Dtool_Ptr_LPoint3f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LPoint3f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LPoint3f *(*)(PyObject *, LPoint3f &))Dtool_Ptr_LPoint3f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LPoint3f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
-extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
-#endif
-// LVecBase4f
-#ifndef LINK_ALL_STATIC
-inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
-  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
-extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
-#endif
-// LVector2i
-#ifndef LINK_ALL_STATIC
-inline static LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced) {
-  nassertr(Dtool_Ptr_LVector2i != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVector2i->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVector2i *(*)(PyObject *, LVector2i &))Dtool_Ptr_LVector2i->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVector2i;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2i = &Dtool_LVector2i;
-extern LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced);
+extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
 #endif
 // BitMask< uint32_t, 32 >
 #ifndef LINK_ALL_STATIC
@@ -780,11 +786,83 @@ extern struct Dtool_PyTypedObject Dtool_BitMask_uint32_t_32;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_BitMask_uint32_t_32 = &Dtool_BitMask_uint32_t_32;
 extern BitMask< uint32_t, 32 > *Dtool_Coerce_BitMask_uint32_t_32(PyObject *args, BitMask< uint32_t, 32 > &coerced);
 #endif
-// GeometricBoundingVolume
+// RenderAttrib
 #ifndef LINK_ALL_STATIC
 #else
-extern struct Dtool_PyTypedObject Dtool_GeometricBoundingVolume;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dtool_GeometricBoundingVolume;
+extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
+#endif
+// LPoint2f
+#ifndef LINK_ALL_STATIC
+inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced) {
+  nassertr(Dtool_Ptr_LPoint2f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LPoint2f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LPoint2f *(*)(PyObject *, LPoint2f &))Dtool_Ptr_LPoint2f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LPoint2f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint2f = &Dtool_LPoint2f;
+extern LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced);
+#endif
+// LVector2f
+#ifndef LINK_ALL_STATIC
+inline static LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced) {
+  nassertr(Dtool_Ptr_LVector2f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVector2f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVector2f *(*)(PyObject *, LVector2f &))Dtool_Ptr_LVector2f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVector2f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2f = &Dtool_LVector2f;
+extern LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced);
+#endif
+// LVector2i
+#ifndef LINK_ALL_STATIC
+inline static LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced) {
+  nassertr(Dtool_Ptr_LVector2i != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVector2i->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVector2i *(*)(PyObject *, LVector2i &))Dtool_Ptr_LVector2i->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVector2i;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2i = &Dtool_LVector2i;
+extern LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced);
+#endif
+// LVector3f
+#ifndef LINK_ALL_STATIC
+inline static LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced) {
+  nassertr(Dtool_Ptr_LVector3f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVector3f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVector3f *(*)(PyObject *, LVector3f &))Dtool_Ptr_LVector3f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVector3f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
+extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
+#endif
+// LVecBase4f
+#ifndef LINK_ALL_STATIC
+inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
+  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
+extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
+#endif
+// LPoint3f
+#ifndef LINK_ALL_STATIC
+inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
+  nassertr(Dtool_Ptr_LPoint3f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LPoint3f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LPoint3f *(*)(PyObject *, LPoint3f &))Dtool_Ptr_LPoint3f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LPoint3f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
+extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
 #endif
 // BoundingVolume
 #ifndef LINK_ALL_STATIC
@@ -792,11 +870,11 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dt
 extern struct Dtool_PyTypedObject Dtool_BoundingVolume;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_BoundingVolume = &Dtool_BoundingVolume;
 #endif
-// FiniteBoundingVolume
+// GeometricBoundingVolume
 #ifndef LINK_ALL_STATIC
 #else
-extern struct Dtool_PyTypedObject Dtool_FiniteBoundingVolume;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_FiniteBoundingVolume = &Dtool_FiniteBoundingVolume;
+extern struct Dtool_PyTypedObject Dtool_GeometricBoundingVolume;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dtool_GeometricBoundingVolume;
 #endif
 // LPlanef
 #ifndef LINK_ALL_STATIC
@@ -809,6 +887,12 @@ inline static LPlanef *Dtool_Coerce_LPlanef(PyObject *args, LPlanef &coerced) {
 extern struct Dtool_PyTypedObject Dtool_LPlanef;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LPlanef = &Dtool_LPlanef;
 extern LPlanef *Dtool_Coerce_LPlanef(PyObject *args, LPlanef &coerced);
+#endif
+// FiniteBoundingVolume
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_FiniteBoundingVolume;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_FiniteBoundingVolume = &Dtool_FiniteBoundingVolume;
 #endif
 // Texture
 #ifndef LINK_ALL_STATIC
@@ -839,12 +923,6 @@ inline static PointerToArray< UnalignedLVecBase4f > *Dtool_Coerce_PointerToArray
 extern struct Dtool_PyTypedObject Dtool_PointerToArray_UnalignedLVecBase4f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_PointerToArray_UnalignedLVecBase4f = &Dtool_PointerToArray_UnalignedLVecBase4f;
 extern PointerToArray< UnalignedLVecBase4f > *Dtool_Coerce_PointerToArray_UnalignedLVecBase4f(PyObject *args, PointerToArray< UnalignedLVecBase4f > &coerced);
-#endif
-// RenderAttrib
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
 #endif
 // Shader
 #ifndef LINK_ALL_STATIC
@@ -924,95 +1002,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_NodePath = &Dtool_NodePath;
 extern struct Dtool_PyTypedObject Dtool_FrameBufferProperties;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_FrameBufferProperties = &Dtool_FrameBufferProperties;
 #endif
-// GeomNode
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_GeomNode;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GeomNode = &Dtool_GeomNode;
-#endif
 // DrawableRegion
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_DrawableRegion;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_DrawableRegion = &Dtool_DrawableRegion;
 #endif
-// Fog
+// GeomNode
 #ifndef LINK_ALL_STATIC
 #else
-extern struct Dtool_PyTypedObject Dtool_Fog;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_Fog = &Dtool_Fog;
-#endif
-// CullTraverser
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_CullTraverser;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_CullTraverser = &Dtool_CullTraverser;
-#endif
-// DisplayRegion
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_DisplayRegion;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_DisplayRegion = &Dtool_DisplayRegion;
-#endif
-// GraphicsStateGuardian
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_GraphicsStateGuardian;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsStateGuardian = &Dtool_GraphicsStateGuardian;
-#endif
-// ShaderGenerator
-#ifndef LINK_ALL_STATIC
-inline static bool Dtool_ConstCoerce_ShaderGenerator(PyObject *args, CPT(ShaderGenerator) &coerced) {
-  nassertr(Dtool_Ptr_ShaderGenerator != nullptr, false);
-  nassertr(Dtool_Ptr_ShaderGenerator->_Dtool_ConstCoerce != nullptr, false);
-  return ((bool (*)(PyObject *, CPT(ShaderGenerator) &))Dtool_Ptr_ShaderGenerator->_Dtool_ConstCoerce)(args, coerced);
-}
-inline static bool Dtool_Coerce_ShaderGenerator(PyObject *args, PT(ShaderGenerator) &coerced) {
-  nassertr(Dtool_Ptr_ShaderGenerator != nullptr, false);
-  nassertr(Dtool_Ptr_ShaderGenerator->_Dtool_Coerce != nullptr, false);
-  return ((bool (*)(PyObject *, PT(ShaderGenerator) &))Dtool_Ptr_ShaderGenerator->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_ShaderGenerator;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderGenerator = &Dtool_ShaderGenerator;
-extern bool Dtool_ConstCoerce_ShaderGenerator(PyObject *args, CPT(ShaderGenerator) &coerced);
-extern bool Dtool_Coerce_ShaderGenerator(PyObject *args, PT(ShaderGenerator) &coerced);
-#endif
-// GraphicsOutput
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_GraphicsOutput;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsOutput = &Dtool_GraphicsOutput;
-#endif
-// GraphicsWindow
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_GraphicsWindow;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsWindow = &Dtool_GraphicsWindow;
-#endif
-// ModelRoot
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_ModelRoot;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelRoot = &Dtool_ModelRoot;
-#endif
-// ModelNode
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_ModelNode;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelNode = &Dtool_ModelNode;
-#endif
-// AudioSound
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_AudioSound;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioSound = &Dtool_AudioSound;
-#endif
-// AudioManager
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_AudioManager;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioManager = &Dtool_AudioManager;
+extern struct Dtool_PyTypedObject Dtool_GeomNode;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GeomNode = &Dtool_GeomNode;
 #endif
 
 /**
@@ -16052,7 +16052,11 @@ struct Dtool_PyTypedObject Dtool_TextureStages = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_TextureStages,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -16120,6 +16124,9 @@ struct Dtool_PyTypedObject Dtool_TextureStages = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -16299,7 +16306,11 @@ struct Dtool_PyTypedObject Dtool_BSPMaterial = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPMaterial,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -16351,6 +16362,9 @@ struct Dtool_PyTypedObject Dtool_BSPMaterial = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -16507,7 +16521,11 @@ struct Dtool_PyTypedObject Dtool_BSPMaterialAttrib = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPMaterialAttrib,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -16559,6 +16577,9 @@ struct Dtool_PyTypedObject Dtool_BSPMaterialAttrib = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -16712,7 +16733,11 @@ struct Dtool_PyTypedObject Dtool_BoundingKDOP = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BoundingKDOP,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -16772,6 +16797,9 @@ struct Dtool_PyTypedObject Dtool_BoundingKDOP = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -16931,7 +16959,11 @@ struct Dtool_PyTypedObject Dtool_CBaseEntity = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_CBaseEntity,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -16983,6 +17015,9 @@ struct Dtool_PyTypedObject Dtool_CBaseEntity = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -17132,7 +17167,11 @@ struct Dtool_PyTypedObject Dtool_CPointEntity = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_CPointEntity,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -17184,6 +17223,9 @@ struct Dtool_PyTypedObject Dtool_CPointEntity = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -17333,7 +17375,11 @@ struct Dtool_PyTypedObject Dtool_CBoundsEntity = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_CBoundsEntity,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -17392,6 +17438,9 @@ struct Dtool_PyTypedObject Dtool_CBoundsEntity = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -17539,7 +17588,11 @@ struct Dtool_PyTypedObject Dtool_CBrushEntity = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_CBrushEntity,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -17591,6 +17644,9 @@ struct Dtool_PyTypedObject Dtool_CBrushEntity = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -17698,7 +17754,11 @@ struct Dtool_PyTypedObject Dtool_PackResult = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_PackResult,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -17750,6 +17810,9 @@ struct Dtool_PyTypedObject Dtool_PackResult = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -17860,7 +17923,11 @@ struct Dtool_PyTypedObject Dtool_TextureLocation = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_TextureLocation,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -17912,6 +17979,9 @@ struct Dtool_PyTypedObject Dtool_TextureLocation = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -18019,7 +18089,11 @@ struct Dtool_PyTypedObject Dtool_TexturePacker = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_TexturePacker,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -18071,6 +18145,9 @@ struct Dtool_PyTypedObject Dtool_TexturePacker = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -18173,7 +18250,11 @@ struct Dtool_PyTypedObject Dtool_RayTrace = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_RayTrace,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -18225,6 +18306,9 @@ struct Dtool_PyTypedObject Dtool_RayTrace = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -18337,7 +18421,11 @@ struct Dtool_PyTypedObject Dtool_RayTraceHitResult = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_RayTraceHitResult,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -18389,6 +18477,9 @@ struct Dtool_PyTypedObject Dtool_RayTraceHitResult = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -18544,7 +18635,11 @@ struct Dtool_PyTypedObject Dtool_RayTraceScene = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_RayTraceScene,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -18596,6 +18691,9 @@ struct Dtool_PyTypedObject Dtool_RayTraceScene = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -18752,7 +18850,11 @@ struct Dtool_PyTypedObject Dtool_RayTraceGeometry = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_RayTraceGeometry,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -18804,6 +18906,9 @@ struct Dtool_PyTypedObject Dtool_RayTraceGeometry = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -18951,7 +19056,11 @@ struct Dtool_PyTypedObject Dtool_RayTraceTriangleMesh = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_RayTraceTriangleMesh,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -19003,6 +19112,9 @@ struct Dtool_PyTypedObject Dtool_RayTraceTriangleMesh = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -19157,7 +19269,11 @@ struct Dtool_PyTypedObject Dtool_BSPFaceAttrib = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPFaceAttrib,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -19217,6 +19333,9 @@ struct Dtool_PyTypedObject Dtool_BSPFaceAttrib = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -19440,7 +19559,11 @@ struct Dtool_PyTypedObject Dtool_BSPLoader = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPLoader,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -19498,6 +19621,9 @@ struct Dtool_PyTypedObject Dtool_BSPLoader = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -19669,7 +19795,11 @@ struct Dtool_PyTypedObject Dtool_ShaderPermutations = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_ShaderPermutations,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -19731,6 +19861,9 @@ struct Dtool_PyTypedObject Dtool_ShaderPermutations = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -19880,7 +20013,11 @@ struct Dtool_PyTypedObject Dtool_ShaderSpec = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_ShaderSpec,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -19939,6 +20076,9 @@ struct Dtool_PyTypedObject Dtool_ShaderSpec = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -20121,7 +20261,11 @@ struct Dtool_PyTypedObject Dtool_BSPShaderGenerator = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPShaderGenerator,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -20173,6 +20317,9 @@ struct Dtool_PyTypedObject Dtool_BSPShaderGenerator = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -20318,7 +20465,11 @@ struct Dtool_PyTypedObject Dtool_BSPCullTraverser = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPCullTraverser,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -20370,6 +20521,9 @@ struct Dtool_PyTypedObject Dtool_BSPCullTraverser = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -20515,7 +20669,11 @@ struct Dtool_PyTypedObject Dtool_BSPRender = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPRender,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -20574,6 +20732,9 @@ struct Dtool_PyTypedObject Dtool_BSPRender = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -20719,7 +20880,11 @@ struct Dtool_PyTypedObject Dtool_BSPRoot = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPRoot,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -20771,6 +20936,9 @@ struct Dtool_PyTypedObject Dtool_BSPRoot = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -20916,7 +21084,11 @@ struct Dtool_PyTypedObject Dtool_BSPProp = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPProp,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -20968,6 +21140,9 @@ struct Dtool_PyTypedObject Dtool_BSPProp = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -21113,7 +21288,11 @@ struct Dtool_PyTypedObject Dtool_BSPModel = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPModel,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -21165,6 +21344,9 @@ struct Dtool_PyTypedObject Dtool_BSPModel = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -21306,7 +21488,11 @@ struct Dtool_PyTypedObject Dtool_VertexLitGenericSpec = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_VertexLitGenericSpec,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -21358,6 +21544,9 @@ struct Dtool_PyTypedObject Dtool_VertexLitGenericSpec = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -21497,7 +21686,11 @@ struct Dtool_PyTypedObject Dtool_LightmappedGenericSpec = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_LightmappedGenericSpec,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -21549,6 +21742,9 @@ struct Dtool_PyTypedObject Dtool_LightmappedGenericSpec = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -21688,7 +21884,11 @@ struct Dtool_PyTypedObject Dtool_UnlitGenericSpec = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_UnlitGenericSpec,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -21747,6 +21947,9 @@ struct Dtool_PyTypedObject Dtool_UnlitGenericSpec = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -21886,7 +22089,11 @@ struct Dtool_PyTypedObject Dtool_UnlitNoMatSpec = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_UnlitNoMatSpec,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -21938,6 +22145,9 @@ struct Dtool_PyTypedObject Dtool_UnlitNoMatSpec = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -22077,7 +22287,11 @@ struct Dtool_PyTypedObject Dtool_CSMRenderSpec = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_CSMRenderSpec,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -22129,6 +22343,9 @@ struct Dtool_PyTypedObject Dtool_CSMRenderSpec = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -22268,7 +22485,11 @@ struct Dtool_PyTypedObject Dtool_SkyBoxSpec = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_SkyBoxSpec,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -22320,6 +22541,9 @@ struct Dtool_PyTypedObject Dtool_SkyBoxSpec = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -22462,7 +22686,11 @@ struct Dtool_PyTypedObject Dtool_AmbientBoostEffect = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_AmbientBoostEffect,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -22514,6 +22742,9 @@ struct Dtool_PyTypedObject Dtool_AmbientBoostEffect = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -22650,7 +22881,11 @@ struct Dtool_PyTypedObject Dtool_Audio3DManager = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_Audio3DManager,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -22702,6 +22937,9 @@ struct Dtool_PyTypedObject Dtool_Audio3DManager = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -22806,7 +23044,11 @@ struct Dtool_PyTypedObject Dtool_CIOLib = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_CIOLib,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -22858,6 +23100,9 @@ struct Dtool_PyTypedObject Dtool_CIOLib = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -22996,7 +23241,11 @@ struct Dtool_PyTypedObject Dtool_DecalModulateSpec = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_DecalModulateSpec,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -23054,6 +23303,9 @@ struct Dtool_PyTypedObject Dtool_DecalModulateSpec = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -23197,7 +23449,11 @@ struct Dtool_PyTypedObject Dtool_GlowNode = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_GlowNode,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -23258,6 +23514,9 @@ struct Dtool_PyTypedObject Dtool_GlowNode = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -23418,7 +23677,11 @@ struct Dtool_PyTypedObject Dtool_PostProcessEffect = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_PostProcessEffect,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -23470,6 +23733,9 @@ struct Dtool_PyTypedObject Dtool_PostProcessEffect = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -23663,7 +23929,11 @@ struct Dtool_PyTypedObject Dtool_PostProcessPass = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_PostProcessPass,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -23715,6 +23985,9 @@ struct Dtool_PyTypedObject Dtool_PostProcessPass = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -23865,7 +24138,11 @@ struct Dtool_PyTypedObject Dtool_PostProcessScenePass = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_PostProcessScenePass,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -23917,6 +24194,9 @@ struct Dtool_PyTypedObject Dtool_PostProcessScenePass = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -24053,7 +24333,11 @@ struct Dtool_PyTypedObject Dtool_PostProcess = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_PostProcess,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -24105,6 +24389,9 @@ struct Dtool_PyTypedObject Dtool_PostProcess = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -24251,7 +24538,11 @@ struct Dtool_PyTypedObject Dtool_HDRPass = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_HDRPass,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -24303,6 +24594,9 @@ struct Dtool_PyTypedObject Dtool_HDRPass = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -24444,7 +24738,11 @@ struct Dtool_PyTypedObject Dtool_HDREffect = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_HDREffect,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -24496,6 +24794,9 @@ struct Dtool_PyTypedObject Dtool_HDREffect = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -24637,7 +24938,11 @@ struct Dtool_PyTypedObject Dtool_BloomEffect = {
     sizeof(Dtool_PyInstDef),
     0, // tp_itemsize
     &Dtool_FreeInstance_BloomEffect,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
     nullptr,
+#endif
     nullptr,
     nullptr,
 #if PY_VERSION_HEX >= 0x03050000
@@ -24689,6 +24994,9 @@ struct Dtool_PyTypedObject Dtool_BloomEffect = {
 #endif
 #if PY_VERSION_HEX >= 0x03040000
     nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
 #endif
   },
   TypeHandle::none(),
@@ -25051,7 +25359,7 @@ extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, nullp
 extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, imports};
 #endif
 static InterrogateModuleDef _in_module_def = {
-  1565674191,  /* file_identifier */
+  1566438765,  /* file_identifier */
   "bsp",  /* library_name */
   "t5GT",  /* library_hash_name */
   "bsp",  /* module_name */
