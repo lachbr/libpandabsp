@@ -55,27 +55,32 @@ bool BSPCullTraverser::is_in_view( CullTraverserData &data )
                 return false;
         }
 
-        CPT( BSPFaceAttrib ) bfa;
-        data._state->get_attrib_def( bfa );
-        if ( bfa->get_ignore_pvs() )
-        {
-                // Don't test this node against PVS.
-                return true;
-        }
+	if ( _loader->has_active_level() )
+	{
+		CPT( BSPFaceAttrib ) bfa;
+		data._state->get_attrib_def( bfa );
+		if ( bfa->get_ignore_pvs() )
+		{
+			// Don't test this node against PVS.
+			return true;
+		}
 
-        // View frustum test passed.
-        // Now test against PVS (AABBs of all potentially visible leafs).
+		// View frustum test passed.
+		// Now test against PVS (AABBs of all potentially visible leafs).
 
-        pvs_node_xform_collector.start();
-        CPT( GeometricBoundingVolume ) bbox = loader->make_net_bounds(
-                data.get_net_transform( this ),
-                data.node()->get_bounds()->as_geometric_bounding_volume() );
-        pvs_node_xform_collector.stop();
+		pvs_node_xform_collector.start();
+		CPT( GeometricBoundingVolume ) bbox = loader->make_net_bounds(
+			data.get_net_transform( this ),
+			data.node()->get_bounds()->as_geometric_bounding_volume() );
+		pvs_node_xform_collector.stop();
 
-        pvs_test_node_collector.start();
-        bool ret = loader->pvs_bounds_test( bbox, get_required_leaf_flags() );
-        pvs_test_node_collector.stop();
-        return ret;
+		pvs_test_node_collector.start();
+		bool ret = loader->pvs_bounds_test( bbox, get_required_leaf_flags() );
+		pvs_test_node_collector.stop();
+		return ret;
+	}
+        
+	return true;
 }
 
 INLINE bool geom_cull_test( CPT( Geom ) geom, CPT( RenderState ) state, CullTraverserData &data,
@@ -160,26 +165,29 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                                 continue;
                         }
 
-                        CPT( BSPFaceAttrib ) bfa;
-                        data._state->get_attrib_def( bfa );
-                        if ( !bfa->get_ignore_pvs() )
-                        {
-                                pvs_xform_collector.start();
-                                CPT( GeometricBoundingVolume ) net_geom_volume =
-                                        loader->make_net_bounds( net_transform, geom_gbv );
-                                pvs_xform_collector.stop();
+			if ( _loader->has_active_level() )
+			{
+				CPT( BSPFaceAttrib ) bfa;
+				data._state->get_attrib_def( bfa );
+				if ( !bfa->get_ignore_pvs() )
+				{
+					pvs_xform_collector.start();
+					CPT( GeometricBoundingVolume ) net_geom_volume =
+						loader->make_net_bounds( net_transform, geom_gbv );
+					pvs_xform_collector.stop();
 
-                                pvs_test_geom_collector.start();
-                                // Test geom bounds against visible leaf bounding boxes.
-				// Always test against PVS even if camera's bit isn't set in CAMERA_MASK_CULLING.
-                                if ( !loader->pvs_bounds_test( net_geom_volume, get_required_leaf_flags() ) )
-                                {
-                                        // Didn't intersect any, cull.
-                                        pvs_test_geom_collector.stop();
-                                        continue;
-                                }
-                                pvs_test_geom_collector.stop();
-                        }                        
+					pvs_test_geom_collector.start();
+					// Test geom bounds against visible leaf bounding boxes.
+					// Always test against PVS even if camera's bit isn't set in CAMERA_MASK_CULLING.
+					if ( !loader->pvs_bounds_test( net_geom_volume, get_required_leaf_flags() ) )
+					{
+						// Didn't intersect any, cull.
+						pvs_test_geom_collector.stop();
+						continue;
+					}
+					pvs_test_geom_collector.stop();
+				}
+			}     
                 }
 
 		if ( _loader->get_wireframe() && has_camera_bits( CAMERA_MAIN | CAMERA_VIEWMODEL ) )
@@ -233,8 +241,9 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                         data._state = data._state->compose( get_depth_offset_state() );
                 }
 
-		if ( node->is_of_type( BSPModel::get_class_type() ) &&
-			node->get_name() == "model-0" ) // UNDONE: think of a better way to identify world geometry?
+		if ( _loader->has_active_level() &&
+		     node->is_of_type( BSPModel::get_class_type() ) &&
+		     node->get_name() == "model-0" ) // UNDONE: think of a better way to identify world geometry?
 		{
 			wsp_trav_collector.start();
 
@@ -309,8 +318,9 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
 
 			wsp_trav_collector.stop();
 		}
-		else if ( has_camera_bits( CAMERA_MAIN | CAMERA_VIEWMODEL ) &&
-			node->is_of_type( ModelRoot::get_class_type() ) )
+		else if ( _loader->has_active_level() &&
+			  has_camera_bits( CAMERA_MAIN | CAMERA_VIEWMODEL ) &&
+			  node->is_of_type( ModelRoot::get_class_type() ) )
                 {
                         // Only run this logic on the main Camera and viewmodel.
 
@@ -411,8 +421,8 @@ BSPRender::BSPRender( const std::string &name, BSPLoader *loader ) :
 bool BSPRender::cull_callback( CullTraverser *trav, CullTraverserData &data )
 {
         BSPLoader *loader = _loader;
-        if ( loader->has_visibility() )
-        {
+        //if ( loader->has_visibility() )
+        //{
                 ambientprobe_nodes_collector.flush_level();
                 ambientprobe_nodes_collector.set_level( 0 );
 
@@ -433,10 +443,10 @@ bool BSPRender::cull_callback( CullTraverser *trav, CullTraverserData &data )
                 // No need for CullTraverser to go further down this node,
                 // the BSPCullTraverser has already handled it.
                 return false;
-        }
+        //}
 
         // If no BSP level, do regular culling.
-        return true;
+        //return true;
 }
 
 TypeDef( BSPRoot );

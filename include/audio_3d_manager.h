@@ -106,7 +106,7 @@ private:
 	
 
 private:
-	AudioManager *_mgr;
+	PT( AudioManager ) _mgr;
 	NodePath _listener_target;
 	LPoint3 _listener_last_pos;
 	NodePath _root;

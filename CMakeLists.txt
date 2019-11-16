@@ -89,7 +89,6 @@ target_link_libraries(libpandabsp libpanda.lib
                             libpandaegg.lib
 							libp3interrogatedb.lib
 							interrogatedb.lib
-							libp3pystub.lib
 							core.lib
 							python27.lib
                             embree3.lib

@@ -16,6 +16,7 @@
 #include "bsptools.h"
 #include "winding.h"
 #include "ambient_boost_effect.h"
+#include "lighting_origin_effect.h"
 
 #include <shader.h>
 #include <loader.h>
@@ -478,7 +479,7 @@ INLINE void apply_lightdatas( int n, const light_t *light, nodeshaderinput_t *in
 }
 
 const RenderState *AmbientProbeManager::update_node( PandaNode *node,
-                                                     const TransformState *curr_trans )
+						     CPT( TransformState ) curr_trans )
 {
         PStatTimer timer( updatenode_collector );
 
@@ -488,6 +489,18 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
         {
                 return nullptr;
         }
+
+	// By default, the lighting position is the position of the node.
+	// An effect can be applied to offset the lighting position.
+	if ( node->has_effect( LightingOriginEffect::get_class_type() ) )
+	{
+		const LightingOriginEffect *effect =
+			DCAST( LightingOriginEffect,
+			       node->get_effect( LightingOriginEffect::get_class_type() ) );
+		LQuaternion quat = curr_trans->get_norm_quat();
+		LVector3 world_offset = quat.xform( effect->get_lighting_origin() );
+		curr_trans = curr_trans->set_pos( curr_trans->get_pos() + world_offset );
+	}
 
         finddata_collector.start();
         bool new_instance = false;

@@ -190,7 +190,7 @@ public:
 
         void process_ambient_probes();
 
-        const RenderState *update_node( PandaNode *node, const TransformState *net_ts );
+	const RenderState *update_node( PandaNode *node, CPT( TransformState ) net_ts );
 
         void load_cubemaps();
 
