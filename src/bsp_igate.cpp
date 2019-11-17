@@ -9,7 +9,6 @@
 #include "dconfig.h"
 #include "pnotify.h"
 #include <sstream>
-#define PANDA_LIBRARY_NAME_bsp
 #include "py_panda.h"
 #include "extension.h"
 #include "dcast.h"
@@ -551,282 +550,102 @@ static const Dtool_TypeDef exports[] = {
  */
 #ifndef LINK_ALL_STATIC
 static Dtool_TypeDef imports[] = {
-  {"TypedObject", nullptr},
-#define Dtool_Ptr_TypedObject (imports[0].type)
-  {"Namable", nullptr},
-#define Dtool_Ptr_Namable (imports[1].type)
-  {"TypeHandle", nullptr},
-#define Dtool_Ptr_TypeHandle (imports[2].type)
-  {"Filename", nullptr},
-#define Dtool_Ptr_Filename (imports[3].type)
-  {"TypedReferenceCount", nullptr},
-#define Dtool_Ptr_TypedReferenceCount (imports[4].type)
-  {"ReferenceCount", nullptr},
-#define Dtool_Ptr_ReferenceCount (imports[5].type)
-  {"TypedWritableReferenceCount", nullptr},
-#define Dtool_Ptr_TypedWritableReferenceCount (imports[6].type)
-  {"TypedWritable", nullptr},
-#define Dtool_Ptr_TypedWritable (imports[7].type)
-  {"BitMask< uint32_t, 32 >", nullptr},
-#define Dtool_Ptr_BitMask_uint32_t_32 (imports[8].type)
-  {"RenderAttrib", nullptr},
-#define Dtool_Ptr_RenderAttrib (imports[9].type)
-  {"LVector2i", nullptr},
-#define Dtool_Ptr_LVector2i (imports[10].type)
-  {"LPoint2f", nullptr},
-#define Dtool_Ptr_LPoint2f (imports[11].type)
-  {"LVector3f", nullptr},
-#define Dtool_Ptr_LVector3f (imports[12].type)
-  {"LVector2f", nullptr},
-#define Dtool_Ptr_LVector2f (imports[13].type)
-  {"LVecBase4f", nullptr},
-#define Dtool_Ptr_LVecBase4f (imports[14].type)
-  {"LPoint3f", nullptr},
-#define Dtool_Ptr_LPoint3f (imports[15].type)
-  {"GeometricBoundingVolume", nullptr},
-#define Dtool_Ptr_GeometricBoundingVolume (imports[16].type)
-  {"BoundingVolume", nullptr},
-#define Dtool_Ptr_BoundingVolume (imports[17].type)
-  {"FiniteBoundingVolume", nullptr},
-#define Dtool_Ptr_FiniteBoundingVolume (imports[18].type)
-  {"LPlanef", nullptr},
-#define Dtool_Ptr_LPlanef (imports[19].type)
   {"Texture", nullptr},
-#define Dtool_Ptr_Texture (imports[20].type)
+#define Dtool_Ptr_Texture (imports[0].type)
   {"PointerToArray< float >", nullptr},
-#define Dtool_Ptr_PointerToArray_float (imports[21].type)
+#define Dtool_Ptr_PointerToArray_float (imports[1].type)
   {"PointerToArray< UnalignedLVecBase4f >", nullptr},
-#define Dtool_Ptr_PointerToArray_UnalignedLVecBase4f (imports[22].type)
-  {"Shader", nullptr},
-#define Dtool_Ptr_Shader (imports[23].type)
-  {"TextureStage", nullptr},
-#define Dtool_Ptr_TextureStage (imports[24].type)
+#define Dtool_Ptr_PointerToArray_UnalignedLVecBase4f (imports[2].type)
   {"ShaderInput", nullptr},
-#define Dtool_Ptr_ShaderInput (imports[25].type)
+#define Dtool_Ptr_ShaderInput (imports[3].type)
+  {"TextureStage", nullptr},
+#define Dtool_Ptr_TextureStage (imports[4].type)
+  {"Shader", nullptr},
+#define Dtool_Ptr_Shader (imports[5].type)
   {"Geom", nullptr},
-#define Dtool_Ptr_Geom (imports[26].type)
+#define Dtool_Ptr_Geom (imports[6].type)
   {"TransformState", nullptr},
-#define Dtool_Ptr_TransformState (imports[27].type)
+#define Dtool_Ptr_TransformState (imports[7].type)
   {"RenderState", nullptr},
-#define Dtool_Ptr_RenderState (imports[28].type)
+#define Dtool_Ptr_RenderState (imports[8].type)
   {"RenderEffect", nullptr},
-#define Dtool_Ptr_RenderEffect (imports[29].type)
+#define Dtool_Ptr_RenderEffect (imports[9].type)
   {"PandaNode", nullptr},
-#define Dtool_Ptr_PandaNode (imports[30].type)
-  {"DrawableRegion", nullptr},
-#define Dtool_Ptr_DrawableRegion (imports[31].type)
-  {"GeomNode", nullptr},
-#define Dtool_Ptr_GeomNode (imports[32].type)
+#define Dtool_Ptr_PandaNode (imports[10].type)
   {"NodePath", nullptr},
-#define Dtool_Ptr_NodePath (imports[33].type)
+#define Dtool_Ptr_NodePath (imports[11].type)
   {"FrameBufferProperties", nullptr},
-#define Dtool_Ptr_FrameBufferProperties (imports[34].type)
+#define Dtool_Ptr_FrameBufferProperties (imports[12].type)
+  {"DrawableRegion", nullptr},
+#define Dtool_Ptr_DrawableRegion (imports[13].type)
+  {"GeomNode", nullptr},
+#define Dtool_Ptr_GeomNode (imports[14].type)
   {"Fog", nullptr},
-#define Dtool_Ptr_Fog (imports[35].type)
+#define Dtool_Ptr_Fog (imports[15].type)
   {"CullTraverser", nullptr},
-#define Dtool_Ptr_CullTraverser (imports[36].type)
+#define Dtool_Ptr_CullTraverser (imports[16].type)
   {"DisplayRegion", nullptr},
-#define Dtool_Ptr_DisplayRegion (imports[37].type)
+#define Dtool_Ptr_DisplayRegion (imports[17].type)
   {"ShaderGenerator", nullptr},
-#define Dtool_Ptr_ShaderGenerator (imports[38].type)
+#define Dtool_Ptr_ShaderGenerator (imports[18].type)
   {"GraphicsStateGuardian", nullptr},
-#define Dtool_Ptr_GraphicsStateGuardian (imports[39].type)
-  {"GraphicsOutput", nullptr},
-#define Dtool_Ptr_GraphicsOutput (imports[40].type)
+#define Dtool_Ptr_GraphicsStateGuardian (imports[19].type)
   {"GraphicsWindow", nullptr},
-#define Dtool_Ptr_GraphicsWindow (imports[41].type)
+#define Dtool_Ptr_GraphicsWindow (imports[20].type)
+  {"GraphicsOutput", nullptr},
+#define Dtool_Ptr_GraphicsOutput (imports[21].type)
   {"ModelRoot", nullptr},
-#define Dtool_Ptr_ModelRoot (imports[42].type)
+#define Dtool_Ptr_ModelRoot (imports[22].type)
   {"ModelNode", nullptr},
-#define Dtool_Ptr_ModelNode (imports[43].type)
+#define Dtool_Ptr_ModelNode (imports[23].type)
   {"AudioSound", nullptr},
-#define Dtool_Ptr_AudioSound (imports[44].type)
+#define Dtool_Ptr_AudioSound (imports[24].type)
   {"AudioManager", nullptr},
-#define Dtool_Ptr_AudioManager (imports[45].type)
+#define Dtool_Ptr_AudioManager (imports[25].type)
+  {"TypeHandle", nullptr},
+#define Dtool_Ptr_TypeHandle (imports[26].type)
+  {"Filename", nullptr},
+#define Dtool_Ptr_Filename (imports[27].type)
+  {"TypedObject", nullptr},
+#define Dtool_Ptr_TypedObject (imports[28].type)
+  {"Namable", nullptr},
+#define Dtool_Ptr_Namable (imports[29].type)
+  {"ReferenceCount", nullptr},
+#define Dtool_Ptr_ReferenceCount (imports[30].type)
+  {"TypedReferenceCount", nullptr},
+#define Dtool_Ptr_TypedReferenceCount (imports[31].type)
+  {"TypedWritable", nullptr},
+#define Dtool_Ptr_TypedWritable (imports[32].type)
+  {"TypedWritableReferenceCount", nullptr},
+#define Dtool_Ptr_TypedWritableReferenceCount (imports[33].type)
+  {"BitMask< uint32_t, 32 >", nullptr},
+#define Dtool_Ptr_BitMask_uint32_t_32 (imports[34].type)
+  {"RenderAttrib", nullptr},
+#define Dtool_Ptr_RenderAttrib (imports[35].type)
+  {"LVector2i", nullptr},
+#define Dtool_Ptr_LVector2i (imports[36].type)
+  {"LPoint2f", nullptr},
+#define Dtool_Ptr_LPoint2f (imports[37].type)
+  {"LVector2f", nullptr},
+#define Dtool_Ptr_LVector2f (imports[38].type)
+  {"LVector3f", nullptr},
+#define Dtool_Ptr_LVector3f (imports[39].type)
+  {"LPoint3f", nullptr},
+#define Dtool_Ptr_LPoint3f (imports[40].type)
+  {"LVecBase4f", nullptr},
+#define Dtool_Ptr_LVecBase4f (imports[41].type)
+  {"BoundingVolume", nullptr},
+#define Dtool_Ptr_BoundingVolume (imports[42].type)
+  {"GeometricBoundingVolume", nullptr},
+#define Dtool_Ptr_GeometricBoundingVolume (imports[43].type)
+  {"FiniteBoundingVolume", nullptr},
+#define Dtool_Ptr_FiniteBoundingVolume (imports[44].type)
+  {"LPlanef", nullptr},
+#define Dtool_Ptr_LPlanef (imports[45].type)
   {nullptr, nullptr},
 };
 #endif
 
-// TypedObject
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedObject;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedObject = &Dtool_TypedObject;
-#endif
-// Namable
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_Namable;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
-#endif
-// TypeHandle
-#ifndef LINK_ALL_STATIC
-inline static TypeHandle *Dtool_Coerce_TypeHandle(PyObject *args, TypeHandle &coerced) {
-  nassertr(Dtool_Ptr_TypeHandle != nullptr, nullptr);
-  nassertr(Dtool_Ptr_TypeHandle->_Dtool_Coerce != nullptr, nullptr);
-  return ((TypeHandle *(*)(PyObject *, TypeHandle &))Dtool_Ptr_TypeHandle->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_TypeHandle;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypeHandle = &Dtool_TypeHandle;
-extern TypeHandle *Dtool_Coerce_TypeHandle(PyObject *args, TypeHandle &coerced);
-#endif
-// Filename
-#ifndef LINK_ALL_STATIC
-inline static Filename *Dtool_Coerce_Filename(PyObject *args, Filename &coerced) {
-  nassertr(Dtool_Ptr_Filename != nullptr, nullptr);
-  nassertr(Dtool_Ptr_Filename->_Dtool_Coerce != nullptr, nullptr);
-  return ((Filename *(*)(PyObject *, Filename &))Dtool_Ptr_Filename->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_Filename;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_Filename = &Dtool_Filename;
-extern Filename *Dtool_Coerce_Filename(PyObject *args, Filename &coerced);
-#endif
-// TypedReferenceCount
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
-#endif
-// ReferenceCount
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
-#endif
-// TypedWritableReferenceCount
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
-#endif
-// TypedWritable
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TypedWritable;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedWritable;
-#endif
-// BitMask< uint32_t, 32 >
-#ifndef LINK_ALL_STATIC
-inline static BitMask< uint32_t, 32 > *Dtool_Coerce_BitMask_uint32_t_32(PyObject *args, BitMask< uint32_t, 32 > &coerced) {
-  nassertr(Dtool_Ptr_BitMask_uint32_t_32 != nullptr, nullptr);
-  nassertr(Dtool_Ptr_BitMask_uint32_t_32->_Dtool_Coerce != nullptr, nullptr);
-  return ((BitMask< uint32_t, 32 > *(*)(PyObject *, BitMask< uint32_t, 32 > &))Dtool_Ptr_BitMask_uint32_t_32->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_BitMask_uint32_t_32;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_BitMask_uint32_t_32 = &Dtool_BitMask_uint32_t_32;
-extern BitMask< uint32_t, 32 > *Dtool_Coerce_BitMask_uint32_t_32(PyObject *args, BitMask< uint32_t, 32 > &coerced);
-#endif
-// RenderAttrib
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
-#endif
-// LVector2i
-#ifndef LINK_ALL_STATIC
-inline static LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced) {
-  nassertr(Dtool_Ptr_LVector2i != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVector2i->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVector2i *(*)(PyObject *, LVector2i &))Dtool_Ptr_LVector2i->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVector2i;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2i = &Dtool_LVector2i;
-extern LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced);
-#endif
-// LPoint2f
-#ifndef LINK_ALL_STATIC
-inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced) {
-  nassertr(Dtool_Ptr_LPoint2f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LPoint2f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LPoint2f *(*)(PyObject *, LPoint2f &))Dtool_Ptr_LPoint2f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LPoint2f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint2f = &Dtool_LPoint2f;
-extern LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced);
-#endif
-// LVector3f
-#ifndef LINK_ALL_STATIC
-inline static LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced) {
-  nassertr(Dtool_Ptr_LVector3f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVector3f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVector3f *(*)(PyObject *, LVector3f &))Dtool_Ptr_LVector3f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVector3f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
-extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
-#endif
-// LVector2f
-#ifndef LINK_ALL_STATIC
-inline static LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced) {
-  nassertr(Dtool_Ptr_LVector2f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVector2f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVector2f *(*)(PyObject *, LVector2f &))Dtool_Ptr_LVector2f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVector2f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2f = &Dtool_LVector2f;
-extern LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced);
-#endif
-// LVecBase4f
-#ifndef LINK_ALL_STATIC
-inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
-  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
-extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
-#endif
-// LPoint3f
-#ifndef LINK_ALL_STATIC
-inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
-  nassertr(Dtool_Ptr_LPoint3f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LPoint3f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LPoint3f *(*)(PyObject *, LPoint3f &))Dtool_Ptr_LPoint3f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LPoint3f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
-extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
-#endif
-// GeometricBoundingVolume
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_GeometricBoundingVolume;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dtool_GeometricBoundingVolume;
-#endif
-// BoundingVolume
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_BoundingVolume;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_BoundingVolume = &Dtool_BoundingVolume;
-#endif
-// FiniteBoundingVolume
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_FiniteBoundingVolume;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_FiniteBoundingVolume = &Dtool_FiniteBoundingVolume;
-#endif
-// LPlanef
-#ifndef LINK_ALL_STATIC
-inline static LPlanef *Dtool_Coerce_LPlanef(PyObject *args, LPlanef &coerced) {
-  nassertr(Dtool_Ptr_LPlanef != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LPlanef->_Dtool_Coerce != nullptr, nullptr);
-  return ((LPlanef *(*)(PyObject *, LPlanef &))Dtool_Ptr_LPlanef->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LPlanef;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LPlanef = &Dtool_LPlanef;
-extern LPlanef *Dtool_Coerce_LPlanef(PyObject *args, LPlanef &coerced);
-#endif
 // Texture
 #ifndef LINK_ALL_STATIC
 #else
@@ -857,6 +676,18 @@ extern struct Dtool_PyTypedObject Dtool_PointerToArray_UnalignedLVecBase4f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_PointerToArray_UnalignedLVecBase4f = &Dtool_PointerToArray_UnalignedLVecBase4f;
 extern PointerToArray< UnalignedLVecBase4f > *Dtool_Coerce_PointerToArray_UnalignedLVecBase4f(PyObject *args, PointerToArray< UnalignedLVecBase4f > &coerced);
 #endif
+// ShaderInput
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_ShaderInput;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderInput = &Dtool_ShaderInput;
+#endif
+// TextureStage
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TextureStage;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TextureStage = &Dtool_TextureStage;
+#endif
 // Shader
 #ifndef LINK_ALL_STATIC
 inline static bool Dtool_ConstCoerce_Shader(PyObject *args, CPT(Shader) &coerced) {
@@ -874,18 +705,6 @@ extern struct Dtool_PyTypedObject Dtool_Shader;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Shader = &Dtool_Shader;
 extern bool Dtool_ConstCoerce_Shader(PyObject *args, CPT(Shader) &coerced);
 extern bool Dtool_Coerce_Shader(PyObject *args, PT(Shader) &coerced);
-#endif
-// TextureStage
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TextureStage;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TextureStage = &Dtool_TextureStage;
-#endif
-// ShaderInput
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_ShaderInput;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderInput = &Dtool_ShaderInput;
 #endif
 // Geom
 #ifndef LINK_ALL_STATIC
@@ -923,18 +742,6 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderEffect = &Dtool_RenderE
 extern struct Dtool_PyTypedObject Dtool_PandaNode;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_PandaNode = &Dtool_PandaNode;
 #endif
-// DrawableRegion
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_DrawableRegion;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_DrawableRegion = &Dtool_DrawableRegion;
-#endif
-// GeomNode
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_GeomNode;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GeomNode = &Dtool_GeomNode;
-#endif
 // NodePath
 #ifndef LINK_ALL_STATIC
 #else
@@ -946,6 +753,18 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_NodePath = &Dtool_NodePath;
 #else
 extern struct Dtool_PyTypedObject Dtool_FrameBufferProperties;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_FrameBufferProperties = &Dtool_FrameBufferProperties;
+#endif
+// DrawableRegion
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_DrawableRegion;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_DrawableRegion = &Dtool_DrawableRegion;
+#endif
+// GeomNode
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_GeomNode;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GeomNode = &Dtool_GeomNode;
 #endif
 // Fog
 #ifndef LINK_ALL_STATIC
@@ -989,17 +808,17 @@ extern bool Dtool_Coerce_ShaderGenerator(PyObject *args, PT(ShaderGenerator) &co
 extern struct Dtool_PyTypedObject Dtool_GraphicsStateGuardian;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsStateGuardian = &Dtool_GraphicsStateGuardian;
 #endif
-// GraphicsOutput
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_GraphicsOutput;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsOutput = &Dtool_GraphicsOutput;
-#endif
 // GraphicsWindow
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_GraphicsWindow;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsWindow = &Dtool_GraphicsWindow;
+#endif
+// GraphicsOutput
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_GraphicsOutput;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsOutput = &Dtool_GraphicsOutput;
 #endif
 // ModelRoot
 #ifndef LINK_ALL_STATIC
@@ -1024,6 +843,186 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioSound = &Dtool_AudioSoun
 #else
 extern struct Dtool_PyTypedObject Dtool_AudioManager;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioManager = &Dtool_AudioManager;
+#endif
+// TypeHandle
+#ifndef LINK_ALL_STATIC
+inline static TypeHandle *Dtool_Coerce_TypeHandle(PyObject *args, TypeHandle &coerced) {
+  nassertr(Dtool_Ptr_TypeHandle != nullptr, nullptr);
+  nassertr(Dtool_Ptr_TypeHandle->_Dtool_Coerce != nullptr, nullptr);
+  return ((TypeHandle *(*)(PyObject *, TypeHandle &))Dtool_Ptr_TypeHandle->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_TypeHandle;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypeHandle = &Dtool_TypeHandle;
+extern TypeHandle *Dtool_Coerce_TypeHandle(PyObject *args, TypeHandle &coerced);
+#endif
+// Filename
+#ifndef LINK_ALL_STATIC
+inline static Filename *Dtool_Coerce_Filename(PyObject *args, Filename &coerced) {
+  nassertr(Dtool_Ptr_Filename != nullptr, nullptr);
+  nassertr(Dtool_Ptr_Filename->_Dtool_Coerce != nullptr, nullptr);
+  return ((Filename *(*)(PyObject *, Filename &))Dtool_Ptr_Filename->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_Filename;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_Filename = &Dtool_Filename;
+extern Filename *Dtool_Coerce_Filename(PyObject *args, Filename &coerced);
+#endif
+// TypedObject
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedObject;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedObject = &Dtool_TypedObject;
+#endif
+// Namable
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_Namable;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
+#endif
+// ReferenceCount
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
+#endif
+// TypedReferenceCount
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
+#endif
+// TypedWritable
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedWritable;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedWritable;
+#endif
+// TypedWritableReferenceCount
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
+#endif
+// BitMask< uint32_t, 32 >
+#ifndef LINK_ALL_STATIC
+inline static BitMask< uint32_t, 32 > *Dtool_Coerce_BitMask_uint32_t_32(PyObject *args, BitMask< uint32_t, 32 > &coerced) {
+  nassertr(Dtool_Ptr_BitMask_uint32_t_32 != nullptr, nullptr);
+  nassertr(Dtool_Ptr_BitMask_uint32_t_32->_Dtool_Coerce != nullptr, nullptr);
+  return ((BitMask< uint32_t, 32 > *(*)(PyObject *, BitMask< uint32_t, 32 > &))Dtool_Ptr_BitMask_uint32_t_32->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_BitMask_uint32_t_32;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_BitMask_uint32_t_32 = &Dtool_BitMask_uint32_t_32;
+extern BitMask< uint32_t, 32 > *Dtool_Coerce_BitMask_uint32_t_32(PyObject *args, BitMask< uint32_t, 32 > &coerced);
+#endif
+// RenderAttrib
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
+#endif
+// LVector2i
+#ifndef LINK_ALL_STATIC
+inline static LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced) {
+  nassertr(Dtool_Ptr_LVector2i != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVector2i->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVector2i *(*)(PyObject *, LVector2i &))Dtool_Ptr_LVector2i->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVector2i;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2i = &Dtool_LVector2i;
+extern LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced);
+#endif
+// LPoint2f
+#ifndef LINK_ALL_STATIC
+inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced) {
+  nassertr(Dtool_Ptr_LPoint2f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LPoint2f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LPoint2f *(*)(PyObject *, LPoint2f &))Dtool_Ptr_LPoint2f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LPoint2f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint2f = &Dtool_LPoint2f;
+extern LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced);
+#endif
+// LVector2f
+#ifndef LINK_ALL_STATIC
+inline static LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced) {
+  nassertr(Dtool_Ptr_LVector2f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVector2f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVector2f *(*)(PyObject *, LVector2f &))Dtool_Ptr_LVector2f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVector2f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2f = &Dtool_LVector2f;
+extern LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced);
+#endif
+// LVector3f
+#ifndef LINK_ALL_STATIC
+inline static LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced) {
+  nassertr(Dtool_Ptr_LVector3f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVector3f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVector3f *(*)(PyObject *, LVector3f &))Dtool_Ptr_LVector3f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVector3f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
+extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
+#endif
+// LPoint3f
+#ifndef LINK_ALL_STATIC
+inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
+  nassertr(Dtool_Ptr_LPoint3f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LPoint3f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LPoint3f *(*)(PyObject *, LPoint3f &))Dtool_Ptr_LPoint3f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LPoint3f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
+extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
+#endif
+// LVecBase4f
+#ifndef LINK_ALL_STATIC
+inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
+  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
+extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
+#endif
+// BoundingVolume
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_BoundingVolume;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_BoundingVolume = &Dtool_BoundingVolume;
+#endif
+// GeometricBoundingVolume
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_GeometricBoundingVolume;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dtool_GeometricBoundingVolume;
+#endif
+// FiniteBoundingVolume
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_FiniteBoundingVolume;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_FiniteBoundingVolume = &Dtool_FiniteBoundingVolume;
+#endif
+// LPlanef
+#ifndef LINK_ALL_STATIC
+inline static LPlanef *Dtool_Coerce_LPlanef(PyObject *args, LPlanef &coerced) {
+  nassertr(Dtool_Ptr_LPlanef != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LPlanef->_Dtool_Coerce != nullptr, nullptr);
+  return ((LPlanef *(*)(PyObject *, LPlanef &))Dtool_Ptr_LPlanef->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LPlanef;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LPlanef = &Dtool_LPlanef;
+extern LPlanef *Dtool_Coerce_LPlanef(PyObject *args, LPlanef &coerced);
 #endif
 
 /**
@@ -1058,7 +1057,7 @@ static PyObject *Dtool_TextureStages_get_2(PyObject *, PyObject *args, PyObject 
         }
 #endif
         if (param0_str != nullptr) {
-          TextureStage *return_value = TextureStages::get(std::string(param0_str, param0_len));
+          TextureStage *return_value = (TextureStages::get)(std::string(param0_str, param0_len));
           if (return_value != nullptr) {
             return_value->ref();
           }
@@ -1087,7 +1086,7 @@ static PyObject *Dtool_TextureStages_get_2(PyObject *, PyObject *args, PyObject 
       Py_ssize_t param1_len;
       static const char *keyword_list[] = {"name", "uv_name", nullptr};
       if (PyArg_ParseTupleAndKeywords(args, kwds, "s#s#:get", (char **)keyword_list, &param0_str, &param0_len, &param1_str, &param1_len)) {
-        TextureStage *return_value = TextureStages::get(std::string(param0_str, param0_len), std::string(param1_str, param1_len));
+        TextureStage *return_value = (TextureStages::get)(std::string(param0_str, param0_len), std::string(param1_str, param1_len));
         if (return_value != nullptr) {
           return_value->ref();
         }
@@ -1136,7 +1135,7 @@ static const char *Dtool_TextureStages_get_2_comment = nullptr;
  */
 static PyObject *Dtool_TextureStages_get_basetexture_3(PyObject *, PyObject *) {
   // 1-static TextureStage *TextureStages::get_basetexture(void)
-  TextureStage *return_value = TextureStages::get_basetexture();
+  TextureStage *return_value = (TextureStages::get_basetexture)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -1168,7 +1167,7 @@ static const char *Dtool_TextureStages_get_basetexture_3_comment = nullptr;
  */
 static PyObject *Dtool_TextureStages_get_lightmap_4(PyObject *, PyObject *) {
   // 1-static TextureStage *TextureStages::get_lightmap(void)
-  TextureStage *return_value = TextureStages::get_lightmap();
+  TextureStage *return_value = (TextureStages::get_lightmap)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -1200,7 +1199,7 @@ static const char *Dtool_TextureStages_get_lightmap_4_comment = nullptr;
  */
 static PyObject *Dtool_TextureStages_get_bumped_lightmap_5(PyObject *, PyObject *) {
   // 1-static TextureStage *TextureStages::get_bumped_lightmap(void)
-  TextureStage *return_value = TextureStages::get_bumped_lightmap();
+  TextureStage *return_value = (TextureStages::get_bumped_lightmap)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -1232,7 +1231,7 @@ static const char *Dtool_TextureStages_get_bumped_lightmap_5_comment = nullptr;
  */
 static PyObject *Dtool_TextureStages_get_spheremap_6(PyObject *, PyObject *) {
   // 1-static TextureStage *TextureStages::get_spheremap(void)
-  TextureStage *return_value = TextureStages::get_spheremap();
+  TextureStage *return_value = (TextureStages::get_spheremap)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -1264,7 +1263,7 @@ static const char *Dtool_TextureStages_get_spheremap_6_comment = nullptr;
  */
 static PyObject *Dtool_TextureStages_get_cubemap_7(PyObject *, PyObject *) {
   // 1-static TextureStage *TextureStages::get_cubemap(void)
-  TextureStage *return_value = TextureStages::get_cubemap();
+  TextureStage *return_value = (TextureStages::get_cubemap)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -1296,7 +1295,7 @@ static const char *Dtool_TextureStages_get_cubemap_7_comment = nullptr;
  */
 static PyObject *Dtool_TextureStages_get_normalmap_8(PyObject *, PyObject *) {
   // 1-static TextureStage *TextureStages::get_normalmap(void)
-  TextureStage *return_value = TextureStages::get_normalmap();
+  TextureStage *return_value = (TextureStages::get_normalmap)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -1328,7 +1327,7 @@ static const char *Dtool_TextureStages_get_normalmap_8_comment = nullptr;
  */
 static PyObject *Dtool_TextureStages_get_heightmap_9(PyObject *, PyObject *) {
   // 1-static TextureStage *TextureStages::get_heightmap(void)
-  TextureStage *return_value = TextureStages::get_heightmap();
+  TextureStage *return_value = (TextureStages::get_heightmap)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -1360,7 +1359,7 @@ static const char *Dtool_TextureStages_get_heightmap_9_comment = nullptr;
  */
 static PyObject *Dtool_TextureStages_get_glossmap_10(PyObject *, PyObject *) {
   // 1-static TextureStage *TextureStages::get_glossmap(void)
-  TextureStage *return_value = TextureStages::get_glossmap();
+  TextureStage *return_value = (TextureStages::get_glossmap)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -1392,7 +1391,7 @@ static const char *Dtool_TextureStages_get_glossmap_10_comment = nullptr;
  */
 static PyObject *Dtool_TextureStages_get_glowmap_11(PyObject *, PyObject *) {
   // 1-static TextureStage *TextureStages::get_glowmap(void)
-  TextureStage *return_value = TextureStages::get_glowmap();
+  TextureStage *return_value = (TextureStages::get_glowmap)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -1524,7 +1523,7 @@ static PyObject *Dtool_BSPMaterial_operator_17(PyObject *self, PyObject *arg) {
   // 1-inline void BSPMaterial::operator =(BSPMaterial const &copy)
   BSPMaterial const *arg_this = (BSPMaterial *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_BSPMaterial, 1, "BSPMaterial.assign", true, true);
   if (arg_this != nullptr) {
-    (*local_this).operator =(*arg_this);
+    ((*local_this).operator =)(*arg_this);
     BSPMaterial *return_value = local_this;
     if (return_value != nullptr) {
       return_value->ref();
@@ -1573,7 +1572,7 @@ static PyObject *Dtool_BSPMaterial_set_keyvalue_18(PyObject *self, PyObject *arg
   Py_ssize_t param2_len;
   static const char *keyword_list[] = {"key", "value", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "s#s#:set_keyvalue", (char **)keyword_list, &param1_str, &param1_len, &param2_str, &param2_len)) {
-    (*local_this).set_keyvalue(std::string(param1_str, param1_len), std::string(param2_str, param2_len));
+    ((*local_this).set_keyvalue)(std::string(param1_str, param1_len), std::string(param2_str, param2_len));
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -1611,7 +1610,7 @@ static PyObject *Dtool_BSPMaterial_get_keyvalue_19(PyObject *self, PyObject *arg
   }
 #endif
   if (param1_str != nullptr) {
-    std::string return_value = (*(const BSPMaterial*)local_this).get_keyvalue(std::string(param1_str, param1_len));
+    std::string return_value = ((*(const BSPMaterial*)local_this).get_keyvalue)(std::string(param1_str, param1_len));
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -1642,7 +1641,7 @@ static PyObject *Dtool_BSPMaterial_get_num_keyvalues_20(PyObject *self, PyObject
     return nullptr;
   }
   // 1-inline std::size_t BSPMaterial::get_num_keyvalues(void) const
-  std::size_t return_value = (*(const BSPMaterial*)local_this).get_num_keyvalues();
+  std::size_t return_value = ((*(const BSPMaterial*)local_this).get_num_keyvalues)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -1674,7 +1673,7 @@ static PyObject *Dtool_BSPMaterial_get_key_21(PyObject *self, PyObject *arg) {
       return nullptr;
     }
 #endif
-    std::string const &return_value = (*(const BSPMaterial*)local_this).get_key(arg_val);
+    std::string const &return_value = ((*(const BSPMaterial*)local_this).get_key)(arg_val);
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -1712,7 +1711,7 @@ static PyObject *Dtool_BSPMaterial_get_value_22(PyObject *self, PyObject *arg) {
       return nullptr;
     }
 #endif
-    std::string const &return_value = (*(const BSPMaterial*)local_this).get_value(arg_val);
+    std::string const &return_value = ((*(const BSPMaterial*)local_this).get_value)(arg_val);
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -1753,7 +1752,7 @@ static PyObject *Dtool_BSPMaterial_get_keyvalue_int_23(PyObject *self, PyObject 
   }
 #endif
   if (param1_str != nullptr) {
-    int return_value = (*(const BSPMaterial*)local_this).get_keyvalue_int(std::string(param1_str, param1_len));
+    int return_value = ((*(const BSPMaterial*)local_this).get_keyvalue_int)(std::string(param1_str, param1_len));
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -1794,7 +1793,7 @@ static PyObject *Dtool_BSPMaterial_get_keyvalue_float_24(PyObject *self, PyObjec
   }
 #endif
   if (param1_str != nullptr) {
-    float return_value = (*(const BSPMaterial*)local_this).get_keyvalue_float(std::string(param1_str, param1_len));
+    float return_value = ((*(const BSPMaterial*)local_this).get_keyvalue_float)(std::string(param1_str, param1_len));
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -1835,7 +1834,7 @@ static PyObject *Dtool_BSPMaterial_set_shader_25(PyObject *self, PyObject *arg) 
   }
 #endif
   if (param1_str != nullptr) {
-    (*local_this).set_shader(std::string(param1_str, param1_len));
+    ((*local_this).set_shader)(std::string(param1_str, param1_len));
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -1863,7 +1862,7 @@ static PyObject *Dtool_BSPMaterial_get_shader_26(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline std::string BSPMaterial::get_shader(void) const
-  std::string return_value = (*(const BSPMaterial*)local_this).get_shader();
+  std::string return_value = ((*(const BSPMaterial*)local_this).get_shader)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -1888,7 +1887,7 @@ static PyObject *Dtool_BSPMaterial_get_file_27(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline Filename BSPMaterial::get_file(void) const
-  Filename *return_value = new Filename((*(const BSPMaterial*)local_this).get_file());
+  Filename *return_value = new Filename(((*(const BSPMaterial*)local_this).get_file)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -1927,7 +1926,7 @@ static PyObject *Dtool_BSPMaterial_has_keyvalue_28(PyObject *self, PyObject *arg
   }
 #endif
   if (param1_str != nullptr) {
-    bool return_value = (*(const BSPMaterial*)local_this).has_keyvalue(std::string(param1_str, param1_len));
+    bool return_value = ((*(const BSPMaterial*)local_this).has_keyvalue)(std::string(param1_str, param1_len));
     return Dtool_Return_Bool(return_value);
   }
   if (!_PyErr_OCCURRED()) {
@@ -1955,7 +1954,7 @@ static PyObject *Dtool_BSPMaterial_has_env_cubemap_29(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline bool BSPMaterial::has_env_cubemap(void) const
-  bool return_value = (*(const BSPMaterial*)local_this).has_env_cubemap();
+  bool return_value = ((*(const BSPMaterial*)local_this).has_env_cubemap)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -1977,7 +1976,7 @@ static PyObject *Dtool_BSPMaterial_has_transparency_30(PyObject *self, PyObject 
     return nullptr;
   }
   // 1-inline bool BSPMaterial::has_transparency(void) const
-  bool return_value = (*(const BSPMaterial*)local_this).has_transparency();
+  bool return_value = ((*(const BSPMaterial*)local_this).has_transparency)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -1999,7 +1998,7 @@ static PyObject *Dtool_BSPMaterial_get_surface_prop_31(PyObject *self, PyObject 
     return nullptr;
   }
   // 1-inline std::string BSPMaterial::get_surface_prop(void) const
-  std::string return_value = (*(const BSPMaterial*)local_this).get_surface_prop();
+  std::string return_value = ((*(const BSPMaterial*)local_this).get_surface_prop)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -2024,7 +2023,7 @@ static PyObject *Dtool_BSPMaterial_get_contents_32(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline std::string BSPMaterial::get_contents(void) const
-  std::string return_value = (*(const BSPMaterial*)local_this).get_contents();
+  std::string return_value = ((*(const BSPMaterial*)local_this).get_contents)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -2049,7 +2048,7 @@ static PyObject *Dtool_BSPMaterial_is_lightmapped_33(PyObject *self, PyObject *)
     return nullptr;
   }
   // 1-inline bool BSPMaterial::is_lightmapped(void) const
-  bool return_value = (*(const BSPMaterial*)local_this).is_lightmapped();
+  bool return_value = ((*(const BSPMaterial*)local_this).is_lightmapped)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -2071,7 +2070,7 @@ static PyObject *Dtool_BSPMaterial_has_bumpmap_34(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline bool BSPMaterial::has_bumpmap(void) const
-  bool return_value = (*(const BSPMaterial*)local_this).has_bumpmap();
+  bool return_value = ((*(const BSPMaterial*)local_this).has_bumpmap)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -2094,7 +2093,7 @@ static PyObject *Dtool_BSPMaterial_get_from_file_35(PyObject *, PyObject *arg) {
   if (!(arg_this != nullptr)) {
     return Dtool_Raise_ArgTypeError(arg, 0, "BSPMaterial.get_from_file", "Filename");
   }
-  BSPMaterial const *return_value = BSPMaterial::get_from_file(*arg_this);
+  BSPMaterial const *return_value = (BSPMaterial::get_from_file)(*arg_this);
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -2131,7 +2130,7 @@ static const char *Dtool_BSPMaterial_get_from_file_35_comment = nullptr;
  */
 static PyObject *Dtool_BSPMaterial_get_class_type_36(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPMaterial::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BSPMaterial::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BSPMaterial::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -2299,7 +2298,7 @@ static PyObject *Dtool_BSPMaterialAttrib_make_40(PyObject *, PyObject *arg) {
   // 1-static ConstPointerTo< RenderAttrib > BSPMaterialAttrib::make(BSPMaterial const *mat)
   BSPMaterial const *arg_this = (BSPMaterial *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_BSPMaterial, 0, "BSPMaterialAttrib.make", true, true);
   if (arg_this != nullptr) {
-    ConstPointerTo< RenderAttrib > return_value = BSPMaterialAttrib::make(arg_this);
+    ConstPointerTo< RenderAttrib > return_value = (BSPMaterialAttrib::make)(arg_this);
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -2336,7 +2335,7 @@ static PyObject *Dtool_BSPMaterialAttrib_make_override_shader_41(PyObject *, PyO
   // 1-static ConstPointerTo< RenderAttrib > BSPMaterialAttrib::make_override_shader(BSPMaterial const *mat)
   BSPMaterial const *arg_this = (BSPMaterial *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_BSPMaterial, 0, "BSPMaterialAttrib.make_override_shader", true, true);
   if (arg_this != nullptr) {
-    ConstPointerTo< RenderAttrib > return_value = BSPMaterialAttrib::make_override_shader(arg_this);
+    ConstPointerTo< RenderAttrib > return_value = (BSPMaterialAttrib::make_override_shader)(arg_this);
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -2371,7 +2370,7 @@ static const char *Dtool_BSPMaterialAttrib_make_override_shader_41_comment = nul
  */
 static PyObject *Dtool_BSPMaterialAttrib_make_default_42(PyObject *, PyObject *) {
   // 1-static ConstPointerTo< RenderAttrib > BSPMaterialAttrib::make_default(void)
-  ConstPointerTo< RenderAttrib > return_value = BSPMaterialAttrib::make_default();
+  ConstPointerTo< RenderAttrib > return_value = (BSPMaterialAttrib::make_default)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -2404,7 +2403,7 @@ static PyObject *Dtool_BSPMaterialAttrib_get_override_shader_43(PyObject *self, 
     return nullptr;
   }
   // 1-inline std::string BSPMaterialAttrib::get_override_shader(void) const
-  std::string return_value = (*(const BSPMaterialAttrib*)local_this).get_override_shader();
+  std::string return_value = ((*(const BSPMaterialAttrib*)local_this).get_override_shader)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -2429,7 +2428,7 @@ static PyObject *Dtool_BSPMaterialAttrib_has_override_shader_44(PyObject *self, 
     return nullptr;
   }
   // 1-inline bool BSPMaterialAttrib::has_override_shader(void) const
-  bool return_value = (*(const BSPMaterialAttrib*)local_this).has_override_shader();
+  bool return_value = ((*(const BSPMaterialAttrib*)local_this).has_override_shader)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -2451,7 +2450,7 @@ static PyObject *Dtool_BSPMaterialAttrib_get_material_45(PyObject *self, PyObjec
     return nullptr;
   }
   // 1-inline BSPMaterial const *BSPMaterialAttrib::get_material(void) const
-  BSPMaterial const *return_value = (*(const BSPMaterialAttrib*)local_this).get_material();
+  BSPMaterial const *return_value = ((*(const BSPMaterialAttrib*)local_this).get_material)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -2483,7 +2482,7 @@ static const char *Dtool_BSPMaterialAttrib_get_material_45_comment = nullptr;
  */
 static PyObject *Dtool_BSPMaterialAttrib_get_class_slot_46(PyObject *, PyObject *) {
   // 1-static int BSPMaterialAttrib::get_class_slot(void)
-  int return_value = BSPMaterialAttrib::get_class_slot();
+  int return_value = (BSPMaterialAttrib::get_class_slot)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -2504,7 +2503,7 @@ static const char *Dtool_BSPMaterialAttrib_get_class_slot_46_comment = nullptr;
  */
 static PyObject *Dtool_BSPMaterialAttrib_get_class_type_49(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPMaterialAttrib::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BSPMaterialAttrib::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BSPMaterialAttrib::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -2525,7 +2524,7 @@ static const char *Dtool_BSPMaterialAttrib_get_class_type_49_comment = nullptr;
 
 static PyObject *Dtool_BSPMaterialAttrib_class_slot_Getter(PyObject *self, void *) {
   // 1-static int BSPMaterialAttrib::get_class_slot(void)
-  int return_value = BSPMaterialAttrib::get_class_slot();
+  int return_value = (BSPMaterialAttrib::get_class_slot)();
 #ifndef NDEBUG
   Notify *notify = Notify::ptr();
   if (UNLIKELY(notify->has_assert_failed())) {
@@ -2553,7 +2552,7 @@ bool Dtool_ConstCoerce_BSPMaterialAttrib(PyObject *args, CPT(BSPMaterialAttrib) 
     BSPMaterial const *arg_this = nullptr;
     DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_BSPMaterial);
     if (arg_this != nullptr) {
-      ConstPointerTo< RenderAttrib > return_value = BSPMaterialAttrib::make(arg_this);
+      ConstPointerTo< RenderAttrib > return_value = (BSPMaterialAttrib::make)(arg_this);
       if (_PyErr_OCCURRED()) {
         return false;
       } else {
@@ -2637,7 +2636,7 @@ static PyObject *Dtool_BoundingKDOP_get_num_points_53(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline std::size_t BoundingKDOP::get_num_points(void) const
-  std::size_t return_value = (*(const BoundingKDOP*)local_this).get_num_points();
+  std::size_t return_value = ((*(const BoundingKDOP*)local_this).get_num_points)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -2671,7 +2670,7 @@ static PyObject *Dtool_BoundingKDOP_get_point_54(PyObject *self, PyObject *arg) 
                           arg_val);
     }
 #endif
-    LPoint3 *return_value = new LPoint3((*(const BoundingKDOP*)local_this).get_point((int)arg_val));
+    LPoint3 *return_value = new LPoint3(((*(const BoundingKDOP*)local_this).get_point)((int)arg_val));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -2706,7 +2705,7 @@ static PyObject *Dtool_BoundingKDOP_get_num_planes_55(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline std::size_t BoundingKDOP::get_num_planes(void) const
-  std::size_t return_value = (*(const BoundingKDOP*)local_this).get_num_planes();
+  std::size_t return_value = ((*(const BoundingKDOP*)local_this).get_num_planes)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -2740,7 +2739,7 @@ static PyObject *Dtool_BoundingKDOP_get_plane_56(PyObject *self, PyObject *arg) 
                           arg_val);
     }
 #endif
-    LPlane *return_value = new LPlane((*(const BoundingKDOP*)local_this).get_plane((int)arg_val));
+    LPlane *return_value = new LPlane(((*(const BoundingKDOP*)local_this).get_plane)((int)arg_val));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -2771,7 +2770,7 @@ static const char *Dtool_BoundingKDOP_get_plane_56_comment = nullptr;
  */
 static PyObject *Dtool_BoundingKDOP_get_class_type_57(PyObject *, PyObject *) {
   // 1-static TypeHandle BoundingKDOP::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BoundingKDOP::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BoundingKDOP::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -2870,7 +2869,7 @@ static void *Dtool_DowncastInterface_BoundingKDOP(void *from_this, Dtool_PyTyped
  */
 static PyObject *Dtool_CBaseEntity_get_class_type_60(PyObject *, PyObject *) {
   // 1-static TypeHandle CBaseEntity::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(CBaseEntity::get_class_type());
+  TypeHandle *return_value = new TypeHandle((CBaseEntity::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -2899,7 +2898,7 @@ static PyObject *Dtool_CBaseEntity_get_loader_62(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-BSPLoader *CBaseEntity::get_loader(void) const
-  BSPLoader *return_value = (*(const CBaseEntity*)local_this).get_loader();
+  BSPLoader *return_value = ((*(const CBaseEntity*)local_this).get_loader)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -2934,7 +2933,7 @@ static PyObject *Dtool_CBaseEntity_get_entity_value_63(PyObject *self, PyObject 
   }
 #endif
   if (param1_str != nullptr) {
-    std::string return_value = (*(const CBaseEntity*)local_this).get_entity_value(std::string(param1_str, param1_len));
+    std::string return_value = ((*(const CBaseEntity*)local_this).get_entity_value)(std::string(param1_str, param1_len));
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -2975,7 +2974,7 @@ static PyObject *Dtool_CBaseEntity_get_entity_value_vector_64(PyObject *self, Py
   }
 #endif
   if (param1_str != nullptr) {
-    LVector3 *return_value = new LVector3((*(const CBaseEntity*)local_this).get_entity_value_vector(std::string(param1_str, param1_len)));
+    LVector3 *return_value = new LVector3(((*(const CBaseEntity*)local_this).get_entity_value_vector)(std::string(param1_str, param1_len)));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -3015,7 +3014,7 @@ static PyObject *Dtool_CBaseEntity_get_entity_value_color_65(PyObject *self, PyO
   PyObject *param2 = Py_True;
   static const char *keyword_list[] = {"key", "scale", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "s#|O:get_entity_value_color", (char **)keyword_list, &param1_str, &param1_len, &param2)) {
-    LColor *return_value = new LColor((*(const CBaseEntity*)local_this).get_entity_value_color(std::string(param1_str, param1_len), (PyObject_IsTrue(param2) != 0)));
+    LColor *return_value = new LColor(((*(const CBaseEntity*)local_this).get_entity_value_color)(std::string(param1_str, param1_len), (PyObject_IsTrue(param2) != 0)));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -3050,7 +3049,7 @@ static PyObject *Dtool_CBaseEntity_get_classname_66(PyObject *self, PyObject *) 
     return nullptr;
   }
   // 1-inline std::string CBaseEntity::get_classname(void) const
-  std::string return_value = (*(const CBaseEntity*)local_this).get_classname();
+  std::string return_value = ((*(const CBaseEntity*)local_this).get_classname)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -3075,7 +3074,7 @@ static PyObject *Dtool_CBaseEntity_get_targetname_67(PyObject *self, PyObject *)
     return nullptr;
   }
   // 1-inline std::string CBaseEntity::get_targetname(void) const
-  std::string return_value = (*(const CBaseEntity*)local_this).get_targetname();
+  std::string return_value = ((*(const CBaseEntity*)local_this).get_targetname)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -3100,7 +3099,7 @@ static PyObject *Dtool_CBaseEntity_get_bsp_entnum_68(PyObject *self, PyObject *)
     return nullptr;
   }
   // 1-inline int CBaseEntity::get_bsp_entnum(void) const
-  int return_value = (*(const CBaseEntity*)local_this).get_bsp_entnum();
+  int return_value = ((*(const CBaseEntity*)local_this).get_bsp_entnum)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -3238,7 +3237,7 @@ static void *Dtool_DowncastInterface_CBaseEntity(void *from_this, Dtool_PyTypedO
  */
 static PyObject *Dtool_CPointEntity_get_class_type_71(PyObject *, PyObject *) {
   // 1-static TypeHandle CPointEntity::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(CPointEntity::get_class_type());
+  TypeHandle *return_value = new TypeHandle((CPointEntity::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -3267,7 +3266,7 @@ static PyObject *Dtool_CPointEntity_get_origin_73(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-LPoint3 CPointEntity::get_origin(void) const
-  LPoint3 *return_value = new LPoint3((*(const CPointEntity*)local_this).get_origin());
+  LPoint3 *return_value = new LPoint3(((*(const CPointEntity*)local_this).get_origin)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -3296,7 +3295,7 @@ static PyObject *Dtool_CPointEntity_get_angles_74(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-LVector3 CPointEntity::get_angles(void) const
-  LVector3 *return_value = new LVector3((*(const CPointEntity*)local_this).get_angles());
+  LVector3 *return_value = new LVector3(((*(const CPointEntity*)local_this).get_angles)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -3445,7 +3444,7 @@ static void *Dtool_DowncastInterface_CPointEntity(void *from_this, Dtool_PyTyped
  */
 static PyObject *Dtool_CBoundsEntity_get_class_type_77(PyObject *, PyObject *) {
   // 1-static TypeHandle CBoundsEntity::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(CBoundsEntity::get_class_type());
+  TypeHandle *return_value = new TypeHandle((CBoundsEntity::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -3474,7 +3473,7 @@ static PyObject *Dtool_CBoundsEntity_get_bounds_79(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-BoundingKDOP *CBoundsEntity::get_bounds(void) const
-  BoundingKDOP *return_value = (*(const CBoundsEntity*)local_this).get_bounds();
+  BoundingKDOP *return_value = ((*(const CBoundsEntity*)local_this).get_bounds)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -3515,7 +3514,7 @@ static PyObject *Dtool_CBoundsEntity_is_inside_80(PyObject *self, PyObject *arg)
   if (!(arg_this != nullptr)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "CBoundsEntity.is_inside", "LPoint3f");
   }
-  bool return_value = (*(const CBoundsEntity*)local_this).is_inside(*arg_this);
+  bool return_value = ((*(const CBoundsEntity*)local_this).is_inside)(*arg_this);
   return Dtool_Return_Bool(return_value);
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -3556,7 +3555,7 @@ static PyObject *Dtool_CBoundsEntity_fillin_bounds_81(PyObject *self, PyObject *
     if (!(param2_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param2, 2, "CBoundsEntity.fillin_bounds", "LPoint3f");
     }
-    (*local_this).fillin_bounds(*param1_this, *param2_this);
+    ((*local_this).fillin_bounds)(*param1_this, *param2_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -3704,7 +3703,7 @@ static void *Dtool_DowncastInterface_CBoundsEntity(void *from_this, Dtool_PyType
  */
 static PyObject *Dtool_CBrushEntity_get_class_type_84(PyObject *, PyObject *) {
   // 1-static TypeHandle CBrushEntity::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(CBrushEntity::get_class_type());
+  TypeHandle *return_value = new TypeHandle((CBrushEntity::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -3733,7 +3732,7 @@ static PyObject *Dtool_CBrushEntity_get_model_np_86(PyObject *self, PyObject *) 
     return nullptr;
   }
   // 1-NodePath CBrushEntity::get_model_np(void) const
-  NodePath *return_value = new NodePath((*(const CBrushEntity*)local_this).get_model_np());
+  NodePath *return_value = new NodePath(((*(const CBrushEntity*)local_this).get_model_np)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -3776,7 +3775,7 @@ static PyObject *Dtool_CBrushEntity_get_model_bounds_87(PyObject *self, PyObject
     if (!(param2_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param2, 2, "CBrushEntity.get_model_bounds", "LPoint3f");
     }
-    (*local_this).get_model_bounds(*param1_this, *param2_this);
+    ((*local_this).get_model_bounds)(*param1_this, *param2_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -3928,7 +3927,7 @@ static PyObject *Dtool_PackResult_get_width_90(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline int PackResult::get_width(void) const
-  int return_value = (*(const PackResult*)local_this).get_width();
+  int return_value = ((*(const PackResult*)local_this).get_width)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -3953,7 +3952,7 @@ static PyObject *Dtool_PackResult_get_height_91(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline int PackResult::get_height(void) const
-  int return_value = (*(const PackResult*)local_this).get_height();
+  int return_value = ((*(const PackResult*)local_this).get_height)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -3978,7 +3977,7 @@ static PyObject *Dtool_PackResult_get_unused_area_92(PyObject *self, PyObject *)
     return nullptr;
   }
   // 1-inline int PackResult::get_unused_area(void) const
-  int return_value = (*(const PackResult*)local_this).get_unused_area();
+  int return_value = ((*(const PackResult*)local_this).get_unused_area)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -4069,7 +4068,7 @@ static PyObject *Dtool_TextureLocation_get_x_96(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline int TextureLocation::get_x(void) const
-  int return_value = (*(const TextureLocation*)local_this).get_x();
+  int return_value = ((*(const TextureLocation*)local_this).get_x)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -4094,7 +4093,7 @@ static PyObject *Dtool_TextureLocation_get_y_97(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline int TextureLocation::get_y(void) const
-  int return_value = (*(const TextureLocation*)local_this).get_y();
+  int return_value = ((*(const TextureLocation*)local_this).get_y)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -4119,7 +4118,7 @@ static PyObject *Dtool_TextureLocation_get_width_98(PyObject *self, PyObject *) 
     return nullptr;
   }
   // 1-inline int TextureLocation::get_width(void) const
-  int return_value = (*(const TextureLocation*)local_this).get_width();
+  int return_value = ((*(const TextureLocation*)local_this).get_width)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -4144,7 +4143,7 @@ static PyObject *Dtool_TextureLocation_get_height_99(PyObject *self, PyObject *)
     return nullptr;
   }
   // 1-inline int TextureLocation::get_height(void) const
-  int return_value = (*(const TextureLocation*)local_this).get_height();
+  int return_value = ((*(const TextureLocation*)local_this).get_height)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -4169,7 +4168,7 @@ static PyObject *Dtool_TextureLocation_get_rotated_100(PyObject *self, PyObject 
     return nullptr;
   }
   // 1-inline bool TextureLocation::get_rotated(void) const
-  bool return_value = (*(const TextureLocation*)local_this).get_rotated();
+  bool return_value = ((*(const TextureLocation*)local_this).get_rotated)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -4257,7 +4256,7 @@ static PyObject *Dtool_TexturePacker_getTextureCount_104(PyObject *self, PyObjec
     return nullptr;
   }
   // 1-virtual int TexturePacker::getTextureCount(void) = 0
-  int return_value = (*local_this).getTextureCount();
+  int return_value = ((*local_this).getTextureCount)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -4291,7 +4290,7 @@ static PyObject *Dtool_TexturePacker_setTextureCount_105(PyObject *self, PyObjec
                           arg_val);
     }
 #endif
-    (*local_this).setTextureCount((int)arg_val);
+    ((*local_this).setTextureCount)((int)arg_val);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -4325,7 +4324,7 @@ static PyObject *Dtool_TexturePacker_addTexture_106(PyObject *self, PyObject *ar
   int param2;
   static const char *keyword_list[] = {"wid", "hit", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "ii:addTexture", (char **)keyword_list, &param1, &param2)) {
-    (*local_this).addTexture((int)param1, (int)param2);
+    ((*local_this).addTexture)((int)param1, (int)param2);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -4363,7 +4362,7 @@ static PyObject *Dtool_TexturePacker_wouldTextureFit_107(PyObject *self, PyObjec
   int param6;
   static const char *keyword_list[] = {"wid", "hit", "forcePowerOfTwo", "onePixelBorder", "max_wid", "max_hit", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "iiOOii:wouldTextureFit", (char **)keyword_list, &param1, &param2, &param3, &param4, &param5, &param6)) {
-    bool return_value = (*local_this).wouldTextureFit((int)param1, (int)param2, (PyObject_IsTrue(param3) != 0), (PyObject_IsTrue(param4) != 0), (int)param5, (int)param6);
+    bool return_value = ((*local_this).wouldTextureFit)((int)param1, (int)param2, (PyObject_IsTrue(param3) != 0), (PyObject_IsTrue(param4) != 0), (int)param5, (int)param6);
     return Dtool_Return_Bool(return_value);
   }
   if (!_PyErr_OCCURRED()) {
@@ -4395,7 +4394,7 @@ static PyObject *Dtool_TexturePacker_addNewTexture_108(PyObject *self, PyObject 
   int param2;
   static const char *keyword_list[] = {"wid", "hit", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "ii:addNewTexture", (char **)keyword_list, &param1, &param2)) {
-    (*local_this).addNewTexture((int)param1, (int)param2);
+    ((*local_this).addNewTexture)((int)param1, (int)param2);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -4427,7 +4426,7 @@ static PyObject *Dtool_TexturePacker_packTextures_109(PyObject *self, PyObject *
   PyObject *param2;
   static const char *keyword_list[] = {"forcePowerOfTwo", "onePixelBorder", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "OO:packTextures", (char **)keyword_list, &param1, &param2)) {
-    PackResult *return_value = new PackResult((*local_this).packTextures((PyObject_IsTrue(param1) != 0), (PyObject_IsTrue(param2) != 0)));
+    PackResult *return_value = new PackResult(((*local_this).packTextures)((PyObject_IsTrue(param1) != 0), (PyObject_IsTrue(param2) != 0)));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -4473,7 +4472,7 @@ static PyObject *Dtool_TexturePacker_getTextureLocation_110(PyObject *self, PyOb
                           arg_val);
     }
 #endif
-    TextureLocation *return_value = new TextureLocation((*local_this).getTextureLocation((int)arg_val));
+    TextureLocation *return_value = new TextureLocation(((*local_this).getTextureLocation)((int)arg_val));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -4506,7 +4505,7 @@ static const char *Dtool_TexturePacker_getTextureLocation_110_comment = nullptr;
  */
 static PyObject *Dtool_TexturePacker_createTexturePacker_111(PyObject *, PyObject *) {
   // 1-static TexturePacker *TexturePacker::createTexturePacker(void)
-  TexturePacker *return_value = TexturePacker::createTexturePacker();
+  TexturePacker *return_value = (TexturePacker::createTexturePacker)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -4529,7 +4528,7 @@ static PyObject *Dtool_TexturePacker_releaseTexturePacker_112(PyObject *, PyObje
   // 1-static void TexturePacker::releaseTexturePacker(TexturePacker *tp)
   TexturePacker *arg_this = (TexturePacker *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_TexturePacker, 0, "TexturePacker.releaseTexturePacker", false, true);
   if (arg_this != nullptr) {
-    TexturePacker::releaseTexturePacker(arg_this);
+    (TexturePacker::releaseTexturePacker)(arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -4585,7 +4584,7 @@ static void *Dtool_DowncastInterface_TexturePacker(void *from_this, Dtool_PyType
  */
 static PyObject *Dtool_RayTrace_initialize_115(PyObject *, PyObject *) {
   // 1-static void RayTrace::initialize(void)
-  RayTrace::initialize();
+  (RayTrace::initialize)();
   return Dtool_Return_None();
 }
 
@@ -4603,7 +4602,7 @@ static const char *Dtool_RayTrace_initialize_115_comment = nullptr;
  */
 static PyObject *Dtool_RayTrace_destruct_116(PyObject *, PyObject *) {
   // 1-static void RayTrace::destruct(void)
-  RayTrace::destruct();
+  (RayTrace::destruct)();
   return Dtool_Return_None();
 }
 
@@ -4719,7 +4718,7 @@ static PyObject *Dtool_RayTraceHitResult_has_hit_121(PyObject *self, PyObject *)
     return nullptr;
   }
   // 1-inline bool RayTraceHitResult::has_hit(void) const
-  bool return_value = (*(const RayTraceHitResult*)local_this).has_hit();
+  bool return_value = ((*(const RayTraceHitResult*)local_this).has_hit)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -4741,7 +4740,7 @@ static PyObject *Dtool_RayTraceHitResult_get_hit_normal_122(PyObject *self, PyOb
     return nullptr;
   }
   // 1-inline LVector3 RayTraceHitResult::get_hit_normal(void) const
-  LVector3 *return_value = new LVector3((*(const RayTraceHitResult*)local_this).get_hit_normal());
+  LVector3 *return_value = new LVector3(((*(const RayTraceHitResult*)local_this).get_hit_normal)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -4770,7 +4769,7 @@ static PyObject *Dtool_RayTraceHitResult_get_uv_123(PyObject *self, PyObject *) 
     return nullptr;
   }
   // 1-inline LVector2 RayTraceHitResult::get_uv(void) const
-  LVector2 *return_value = new LVector2((*(const RayTraceHitResult*)local_this).get_uv());
+  LVector2 *return_value = new LVector2(((*(const RayTraceHitResult*)local_this).get_uv)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -4799,7 +4798,7 @@ static PyObject *Dtool_RayTraceHitResult_get_prim_id_124(PyObject *self, PyObjec
     return nullptr;
   }
   // 1-inline unsigned int RayTraceHitResult::get_prim_id(void) const
-  unsigned int return_value = (*(const RayTraceHitResult*)local_this).get_prim_id();
+  unsigned int return_value = ((*(const RayTraceHitResult*)local_this).get_prim_id)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -4824,7 +4823,7 @@ static PyObject *Dtool_RayTraceHitResult_get_geom_id_125(PyObject *self, PyObjec
     return nullptr;
   }
   // 1-inline unsigned int RayTraceHitResult::get_geom_id(void) const
-  unsigned int return_value = (*(const RayTraceHitResult*)local_this).get_geom_id();
+  unsigned int return_value = ((*(const RayTraceHitResult*)local_this).get_geom_id)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -4849,7 +4848,7 @@ static PyObject *Dtool_RayTraceHitResult_get_hit_fraction_126(PyObject *self, Py
     return nullptr;
   }
   // 1-inline float RayTraceHitResult::get_hit_fraction(void) const
-  float return_value = (*(const RayTraceHitResult*)local_this).get_hit_fraction();
+  float return_value = ((*(const RayTraceHitResult*)local_this).get_hit_fraction)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -4972,7 +4971,7 @@ static PyObject *Dtool_RayTraceScene_add_geometry_131(PyObject *self, PyObject *
   if (!Dtool_Coerce_RayTraceGeometry(arg, arg_this)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "RayTraceScene.add_geometry", "RayTraceGeometry");
   }
-  (*local_this).add_geometry(std::move(arg_this));
+  ((*local_this).add_geometry)(std::move(arg_this));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -5003,7 +5002,7 @@ static PyObject *Dtool_RayTraceScene_remove_geometry_132(PyObject *self, PyObjec
   if (!Dtool_Coerce_RayTraceGeometry(arg, arg_this)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "RayTraceScene.remove_geometry", "RayTraceGeometry");
   }
-  (*local_this).remove_geometry(std::move(arg_this));
+  ((*local_this).remove_geometry)(std::move(arg_this));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -5030,7 +5029,7 @@ static PyObject *Dtool_RayTraceScene_remove_all_133(PyObject *self, PyObject *) 
     return nullptr;
   }
   // 1-void RayTraceScene::remove_all(void)
-  (*local_this).remove_all();
+  ((*local_this).remove_all)();
   return Dtool_Return_None();
 }
 
@@ -5072,7 +5071,7 @@ static PyObject *Dtool_RayTraceScene_trace_line_135(PyObject *self, PyObject *ar
     if (!(param3_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param3, 3, "RayTraceScene.trace_line", "BitMask");
     }
-    RayTraceHitResult *return_value = new RayTraceHitResult((*local_this).trace_line(*param1_this, *param2_this, *param3_this));
+    RayTraceHitResult *return_value = new RayTraceHitResult(((*local_this).trace_line)(*param1_this, *param2_this, *param3_this));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -5128,7 +5127,7 @@ static PyObject *Dtool_RayTraceScene_trace_ray_136(PyObject *self, PyObject *arg
     if (!(param4_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param4, 4, "RayTraceScene.trace_ray", "BitMask");
     }
-    RayTraceHitResult *return_value = new RayTraceHitResult((*local_this).trace_ray(*param1_this, *param2_this, (float)param3, *param4_this));
+    RayTraceHitResult *return_value = new RayTraceHitResult(((*local_this).trace_ray)(*param1_this, *param2_this, (float)param3, *param4_this));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -5172,7 +5171,7 @@ static PyObject *Dtool_RayTraceScene_set_build_quality_137(PyObject *self, PyObj
                           arg_val);
     }
 #endif
-    (*local_this).set_build_quality((int)arg_val);
+    ((*local_this).set_build_quality)((int)arg_val);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -5200,7 +5199,7 @@ static PyObject *Dtool_RayTraceScene_update_138(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-void RayTraceScene::update(void)
-  (*local_this).update();
+  ((*local_this).update)();
   return Dtool_Return_None();
 }
 
@@ -5231,7 +5230,7 @@ static PyObject *Dtool_RayTraceScene_get_geometry_139(PyObject *self, PyObject *
                           param1);
     }
 #endif
-    RayTraceGeometry *return_value = (*local_this).get_geometry((unsigned int)param1);
+    RayTraceGeometry *return_value = ((*local_this).get_geometry)((unsigned int)param1);
     if (return_value != nullptr) {
       return_value->ref();
     }
@@ -5372,7 +5371,7 @@ static void *Dtool_DowncastInterface_RayTraceScene(void *from_this, Dtool_PyType
  */
 static PyObject *Dtool_RayTraceGeometry_get_class_type_142(PyObject *, PyObject *) {
   // 1-static TypeHandle RayTraceGeometry::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(RayTraceGeometry::get_class_type());
+  TypeHandle *return_value = new TypeHandle((RayTraceGeometry::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -5406,7 +5405,7 @@ static PyObject *Dtool_RayTraceGeometry_set_mask_143(PyObject *self, PyObject *a
     BitMask32 const *arg_this = nullptr;
     DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_BitMask_uint32_t_32);
     if (arg_this != nullptr) {
-      (*local_this).set_mask(*arg_this);
+      ((*local_this).set_mask)(*arg_this);
       return Dtool_Return_None();
     }
   }
@@ -5422,7 +5421,7 @@ static PyObject *Dtool_RayTraceGeometry_set_mask_143(PyObject *self, PyObject *a
                             param1);
       }
 #endif
-      (*local_this).set_mask((unsigned int)param1);
+      ((*local_this).set_mask)((unsigned int)param1);
       return Dtool_Return_None();
     }
   }
@@ -5432,7 +5431,7 @@ static PyObject *Dtool_RayTraceGeometry_set_mask_143(PyObject *self, PyObject *a
     BitMask< uint32_t, 32 > arg_local;
     BitMask32 const *arg_this = Dtool_Coerce_BitMask_uint32_t_32(arg, arg_local);
     if ((arg_this != nullptr)) {
-      (*local_this).set_mask(*arg_this);
+      ((*local_this).set_mask)(*arg_this);
       return Dtool_Return_None();
     }
   }
@@ -5465,7 +5464,7 @@ static PyObject *Dtool_RayTraceGeometry_get_mask_144(PyObject *self, PyObject *)
     return nullptr;
   }
   // 1-inline BitMask32 RayTraceGeometry::get_mask(void) const
-  BitMask32 *return_value = new BitMask32((*(const RayTraceGeometry*)local_this).get_mask());
+  BitMask32 *return_value = new BitMask32(((*(const RayTraceGeometry*)local_this).get_mask)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -5494,7 +5493,7 @@ static PyObject *Dtool_RayTraceGeometry_get_geom_id_145(PyObject *self, PyObject
     return nullptr;
   }
   // 1-inline unsigned int RayTraceGeometry::get_geom_id(void) const
-  unsigned int return_value = (*(const RayTraceGeometry*)local_this).get_geom_id();
+  unsigned int return_value = ((*(const RayTraceGeometry*)local_this).get_geom_id)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -5528,7 +5527,7 @@ static PyObject *Dtool_RayTraceGeometry_set_build_quality_146(PyObject *self, Py
                           arg_val);
     }
 #endif
-    (*local_this).set_build_quality((int)arg_val);
+    ((*local_this).set_build_quality)((int)arg_val);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -5556,7 +5555,7 @@ static PyObject *Dtool_RayTraceGeometry_build_147(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-virtual void RayTraceGeometry::build(void) = 0
-  (*local_this).build();
+  ((*local_this).build)();
   return Dtool_Return_None();
 }
 
@@ -5671,7 +5670,7 @@ static void *Dtool_DowncastInterface_RayTraceGeometry(void *from_this, Dtool_PyT
  */
 static PyObject *Dtool_RayTraceTriangleMesh_get_class_type_149(PyObject *, PyObject *) {
   // 1-static TypeHandle RayTraceTriangleMesh::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(RayTraceTriangleMesh::get_class_type());
+  TypeHandle *return_value = new TypeHandle((RayTraceTriangleMesh::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -5720,7 +5719,7 @@ static PyObject *Dtool_RayTraceTriangleMesh_add_triangle_151(PyObject *self, PyO
     if (!(param3_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param3, 3, "RayTraceTriangleMesh.add_triangle", "LPoint3f");
     }
-    (*local_this).add_triangle(*param1_this, *param2_this, *param3_this);
+    ((*local_this).add_triangle)(*param1_this, *param2_this, *param3_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -5758,7 +5757,7 @@ static PyObject *Dtool_RayTraceTriangleMesh_add_triangles_from_geom_152(PyObject
       param2_this = (TransformState *)DTOOL_Call_GetPointerThisClass(param2, Dtool_Ptr_TransformState, 2, "RayTraceTriangleMesh.add_triangles_from_geom", true, true);
     }
     if (param1_this != nullptr && (param2 == nullptr || param2 == Py_None || param2_this != nullptr)) {
-      (*local_this).add_triangles_from_geom(param1_this, param2_this);
+      ((*local_this).add_triangles_from_geom)(param1_this, param2_this);
       return Dtool_Return_None();
     }
   }
@@ -5974,7 +5973,7 @@ static PyObject *Dtool_BSPFaceAttrib_make_156(PyObject *, PyObject *args, PyObje
   int param1;
   static const char *keyword_list[] = {"face_material", "face_type", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "s#i:make", (char **)keyword_list, &param0_str, &param0_len, &param1)) {
-    ConstPointerTo< RenderAttrib > return_value = BSPFaceAttrib::make(std::string(param0_str, param0_len), (int)param1);
+    ConstPointerTo< RenderAttrib > return_value = (BSPFaceAttrib::make)(std::string(param0_str, param0_len), (int)param1);
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -6009,7 +6008,7 @@ static const char *Dtool_BSPFaceAttrib_make_156_comment = nullptr;
  */
 static PyObject *Dtool_BSPFaceAttrib_make_default_157(PyObject *, PyObject *) {
   // 1-static ConstPointerTo< RenderAttrib > BSPFaceAttrib::make_default(void)
-  ConstPointerTo< RenderAttrib > return_value = BSPFaceAttrib::make_default();
+  ConstPointerTo< RenderAttrib > return_value = (BSPFaceAttrib::make_default)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -6038,7 +6037,7 @@ static const char *Dtool_BSPFaceAttrib_make_default_157_comment = nullptr;
  */
 static PyObject *Dtool_BSPFaceAttrib_make_ignore_pvs_158(PyObject *, PyObject *) {
   // 1-static ConstPointerTo< RenderAttrib > BSPFaceAttrib::make_ignore_pvs(void)
-  ConstPointerTo< RenderAttrib > return_value = BSPFaceAttrib::make_ignore_pvs();
+  ConstPointerTo< RenderAttrib > return_value = (BSPFaceAttrib::make_ignore_pvs)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -6071,7 +6070,7 @@ static PyObject *Dtool_BSPFaceAttrib_get_material_159(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline std::string BSPFaceAttrib::get_material(void) const
-  std::string return_value = (*(const BSPFaceAttrib*)local_this).get_material();
+  std::string return_value = ((*(const BSPFaceAttrib*)local_this).get_material)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -6096,7 +6095,7 @@ static PyObject *Dtool_BSPFaceAttrib_get_face_type_160(PyObject *self, PyObject 
     return nullptr;
   }
   // 1-inline int BSPFaceAttrib::get_face_type(void) const
-  int return_value = (*(const BSPFaceAttrib*)local_this).get_face_type();
+  int return_value = ((*(const BSPFaceAttrib*)local_this).get_face_type)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -6121,7 +6120,7 @@ static PyObject *Dtool_BSPFaceAttrib_get_ignore_pvs_161(PyObject *self, PyObject
     return nullptr;
   }
   // 1-inline bool BSPFaceAttrib::get_ignore_pvs(void) const
-  bool return_value = (*(const BSPFaceAttrib*)local_this).get_ignore_pvs();
+  bool return_value = ((*(const BSPFaceAttrib*)local_this).get_ignore_pvs)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -6139,7 +6138,7 @@ static const char *Dtool_BSPFaceAttrib_get_ignore_pvs_161_comment = nullptr;
  */
 static PyObject *Dtool_BSPFaceAttrib_get_class_slot_162(PyObject *, PyObject *) {
   // 1-static int BSPFaceAttrib::get_class_slot(void)
-  int return_value = BSPFaceAttrib::get_class_slot();
+  int return_value = (BSPFaceAttrib::get_class_slot)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -6160,7 +6159,7 @@ static const char *Dtool_BSPFaceAttrib_get_class_slot_162_comment = nullptr;
  */
 static PyObject *Dtool_BSPFaceAttrib_get_class_type_164(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPFaceAttrib::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BSPFaceAttrib::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BSPFaceAttrib::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -6181,7 +6180,7 @@ static const char *Dtool_BSPFaceAttrib_get_class_type_164_comment = nullptr;
 
 static PyObject *Dtool_BSPFaceAttrib_class_slot_Getter(PyObject *self, void *) {
   // 1-static int BSPFaceAttrib::get_class_slot(void)
-  int return_value = BSPFaceAttrib::get_class_slot();
+  int return_value = (BSPFaceAttrib::get_class_slot)();
 #ifndef NDEBUG
   Notify *notify = Notify::ptr();
   if (UNLIKELY(notify->has_assert_failed())) {
@@ -6210,7 +6209,7 @@ bool Dtool_ConstCoerce_BSPFaceAttrib(PyObject *args, CPT(BSPFaceAttrib) &coerced
       Py_ssize_t param0_len;
       int param1;
       if (PyArg_ParseTuple(args, "s#i:make", &param0_str, &param0_len, &param1)) {
-        ConstPointerTo< RenderAttrib > return_value = BSPFaceAttrib::make(std::string(param0_str, param0_len), (int)param1);
+        ConstPointerTo< RenderAttrib > return_value = (BSPFaceAttrib::make)(std::string(param0_str, param0_len), (int)param1);
         if (_PyErr_OCCURRED()) {
           return false;
         } else {
@@ -6297,7 +6296,7 @@ static PyObject *Dtool_BSPLoader_add_dynamic_entity_168(PyObject *self, PyObject
     return nullptr;
   }
   // 1-void BSPLoader::add_dynamic_entity(PyObject *pyent)
-  (*local_this).add_dynamic_entity(arg);
+  ((*local_this).add_dynamic_entity)(arg);
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -6324,7 +6323,7 @@ static PyObject *Dtool_BSPLoader_remove_dynamic_entity_169(PyObject *self, PyObj
     return nullptr;
   }
   // 1-void BSPLoader::remove_dynamic_entity(PyObject *pyent)
-  (*local_this).remove_dynamic_entity(arg);
+  ((*local_this).remove_dynamic_entity)(arg);
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -6355,7 +6354,7 @@ static PyObject *Dtool_BSPLoader_mark_entity_preserved_170(PyObject *self, PyObj
   PyObject *param2 = Py_True;
   static const char *keyword_list[] = {"n", "preserved", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "i|O:mark_entity_preserved", (char **)keyword_list, &param1, &param2)) {
-    (*local_this).mark_entity_preserved((int)param1, (PyObject_IsTrue(param2) != 0));
+    ((*local_this).mark_entity_preserved)((int)param1, (PyObject_IsTrue(param2) != 0));
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -6383,7 +6382,7 @@ static PyObject *Dtool_BSPLoader_get_num_entities_171(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline int BSPLoader::get_num_entities(void) const
-  int return_value = (*(const BSPLoader*)local_this).get_num_entities();
+  int return_value = ((*(const BSPLoader*)local_this).get_num_entities)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -6417,7 +6416,7 @@ static PyObject *Dtool_BSPLoader_get_entity_172(PyObject *self, PyObject *arg) {
                           arg_val);
     }
 #endif
-    PyObject *return_value = (*(const BSPLoader*)local_this).get_entity((int)arg_val);
+    PyObject *return_value = ((*(const BSPLoader*)local_this).get_entity)((int)arg_val);
     return Dtool_Return(return_value);
   }
   if (!_PyErr_OCCURRED()) {
@@ -6461,7 +6460,7 @@ static PyObject *Dtool_BSPLoader_set_transition_landmark_173(PyObject *self, PyO
     if (!(param3_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param3, 3, "BSPLoader.set_transition_landmark", "LVector3f");
     }
-    (*local_this).set_transition_landmark(std::string(param1_str, param1_len), *param2_this, *param3_this);
+    ((*local_this).set_transition_landmark)(std::string(param1_str, param1_len), *param2_this, *param3_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -6489,7 +6488,7 @@ static PyObject *Dtool_BSPLoader_clear_transition_landmark_174(PyObject *self, P
     return nullptr;
   }
   // 1-inline void BSPLoader::clear_transition_landmark(void)
-  (*local_this).clear_transition_landmark();
+  ((*local_this).clear_transition_landmark)();
   return Dtool_Return_None();
 }
 
@@ -6520,7 +6519,7 @@ static PyObject *Dtool_BSPLoader_read_175(PyObject *self, PyObject *args, PyObje
     if (!(param1_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param1, 1, "BSPLoader.read", "Filename");
     }
-    bool return_value = (*local_this).read(*param1_this, (PyObject_IsTrue(param2) != 0));
+    bool return_value = ((*local_this).read)(*param1_this, (PyObject_IsTrue(param2) != 0));
     return Dtool_Return_Bool(return_value);
   }
   if (!_PyErr_OCCURRED()) {
@@ -6548,7 +6547,7 @@ static PyObject *Dtool_BSPLoader_do_optimizations_176(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-void BSPLoader::do_optimizations(void)
-  (*local_this).do_optimizations();
+  ((*local_this).do_optimizations)();
   return Dtool_Return_None();
 }
 
@@ -6574,7 +6573,7 @@ static PyObject *Dtool_BSPLoader_set_gamma_177(PyObject *self, PyObject *args, P
   int param2 = 1;
   static const char *keyword_list[] = {"gamma", "overbright", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "f|i:set_gamma", (char **)keyword_list, &param1, &param2)) {
-    (*local_this).set_gamma((PN_stdfloat)param1, (int)param2);
+    ((*local_this).set_gamma)((PN_stdfloat)param1, (int)param2);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -6602,7 +6601,7 @@ static PyObject *Dtool_BSPLoader_get_gamma_178(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline PN_stdfloat BSPLoader::get_gamma(void) const
-  PN_stdfloat return_value = (*(const BSPLoader*)local_this).get_gamma();
+  PN_stdfloat return_value = ((*(const BSPLoader*)local_this).get_gamma)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -6629,7 +6628,7 @@ static PyObject *Dtool_BSPLoader_set_win_179(PyObject *self, PyObject *arg) {
   // 1-void BSPLoader::set_win(GraphicsWindow *win)
   GraphicsWindow *arg_this = (GraphicsWindow *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_GraphicsWindow, 1, "BSPLoader.set_win", false, true);
   if (arg_this != nullptr) {
-    (*local_this).set_win(arg_this);
+    ((*local_this).set_win)(arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -6659,7 +6658,7 @@ static PyObject *Dtool_BSPLoader_set_camera_180(PyObject *self, PyObject *arg) {
   // 1-void BSPLoader::set_camera(NodePath const &camera)
   NodePath const *arg_this = (NodePath *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_NodePath, 1, "BSPLoader.set_camera", true, true);
   if (arg_this != nullptr) {
-    (*local_this).set_camera(*arg_this);
+    ((*local_this).set_camera)(*arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -6689,7 +6688,7 @@ static PyObject *Dtool_BSPLoader_set_render_181(PyObject *self, PyObject *arg) {
   // 1-void BSPLoader::set_render(NodePath const &render)
   NodePath const *arg_this = (NodePath *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_NodePath, 1, "BSPLoader.set_render", true, true);
   if (arg_this != nullptr) {
-    (*local_this).set_render(*arg_this);
+    ((*local_this).set_render)(*arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -6721,7 +6720,7 @@ static PyObject *Dtool_BSPLoader_set_shader_generator_182(PyObject *self, PyObje
   if (!Dtool_Coerce_BSPShaderGenerator(arg, arg_this)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "BSPLoader.set_shader_generator", "BSPShaderGenerator");
   }
-  (*local_this).set_shader_generator(std::move(arg_this));
+  ((*local_this).set_shader_generator)(std::move(arg_this));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -6748,7 +6747,7 @@ static PyObject *Dtool_BSPLoader_set_want_visibility_183(PyObject *self, PyObjec
     return nullptr;
   }
   // 1-void BSPLoader::set_want_visibility(bool flag)
-  (*local_this).set_want_visibility((PyObject_IsTrue(arg) != 0));
+  ((*local_this).set_want_visibility)((PyObject_IsTrue(arg) != 0));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -6775,7 +6774,7 @@ static PyObject *Dtool_BSPLoader_set_want_lightmaps_184(PyObject *self, PyObject
     return nullptr;
   }
   // 1-void BSPLoader::set_want_lightmaps(bool flag)
-  (*local_this).set_want_lightmaps((PyObject_IsTrue(arg) != 0));
+  ((*local_this).set_want_lightmaps)((PyObject_IsTrue(arg) != 0));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -6811,7 +6810,7 @@ static PyObject *Dtool_BSPLoader_set_physics_type_185(PyObject *self, PyObject *
                           arg_val);
     }
 #endif
-    (*local_this).set_physics_type((int)arg_val);
+    ((*local_this).set_physics_type)((int)arg_val);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -6839,7 +6838,7 @@ static PyObject *Dtool_BSPLoader_set_visualize_leafs_186(PyObject *self, PyObjec
     return nullptr;
   }
   // 1-void BSPLoader::set_visualize_leafs(bool flag)
-  (*local_this).set_visualize_leafs((PyObject_IsTrue(arg) != 0));
+  ((*local_this).set_visualize_leafs)((PyObject_IsTrue(arg) != 0));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -6871,7 +6870,7 @@ static PyObject *Dtool_BSPLoader_set_materials_file_187(PyObject *self, PyObject
   if (!(arg_this != nullptr)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "BSPLoader.set_materials_file", "Filename");
   }
-  (*local_this).set_materials_file(*arg_this);
+  ((*local_this).set_materials_file)(*arg_this);
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -6898,7 +6897,7 @@ static PyObject *Dtool_BSPLoader_set_wireframe_188(PyObject *self, PyObject *arg
     return nullptr;
   }
   // 1-void BSPLoader::set_wireframe(bool flag)
-  (*local_this).set_wireframe((PyObject_IsTrue(arg) != 0));
+  ((*local_this).set_wireframe)((PyObject_IsTrue(arg) != 0));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -6925,7 +6924,7 @@ static PyObject *Dtool_BSPLoader_get_wireframe_189(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline bool BSPLoader::get_wireframe(void) const
-  bool return_value = (*(const BSPLoader*)local_this).get_wireframe();
+  bool return_value = ((*(const BSPLoader*)local_this).get_wireframe)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -6947,7 +6946,7 @@ static PyObject *Dtool_BSPLoader_get_camera_190(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline NodePath BSPLoader::get_camera(void) const
-  NodePath *return_value = new NodePath((*(const BSPLoader*)local_this).get_camera());
+  NodePath *return_value = new NodePath(((*(const BSPLoader*)local_this).get_camera)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -7011,7 +7010,7 @@ static PyObject *Dtool_BSPLoader_trace_decal_191(PyObject *self, PyObject *args,
     if (param6 != nullptr && !(param6_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param6, 6, "BSPLoader.trace_decal", "LVecBase4f");
     }
-    (*local_this).trace_decal(std::string(param1_str, param1_len), *param2_this, (float)param3, *param4_this, *param5_this, *param6_this);
+    ((*local_this).trace_decal)(std::string(param1_str, param1_len), *param2_this, (float)param3, *param4_this, *param5_this, *param6_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -7044,7 +7043,7 @@ static PyObject *Dtool_BSPLoader_get_closest_cubemap_texture_192(PyObject *self,
   if (!(arg_this != nullptr)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "BSPLoader.get_closest_cubemap_texture", "LPoint3f");
   }
-  Texture *return_value = (*local_this).get_closest_cubemap_texture(*arg_this);
+  Texture *return_value = ((*local_this).get_closest_cubemap_texture)(*arg_this);
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -7085,7 +7084,7 @@ static PyObject *Dtool_BSPLoader_build_cubemaps_193(PyObject *self, PyObject *) 
     return nullptr;
   }
   // 1-void BSPLoader::build_cubemaps(void)
-  (*local_this).build_cubemaps();
+  ((*local_this).build_cubemaps)();
   return Dtool_Return_None();
 }
 
@@ -7107,7 +7106,7 @@ static PyObject *Dtool_BSPLoader_set_want_shadows_194(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-void BSPLoader::set_want_shadows(bool flag)
-  (*local_this).set_want_shadows((PyObject_IsTrue(arg) != 0));
+  ((*local_this).set_want_shadows)((PyObject_IsTrue(arg) != 0));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -7139,7 +7138,7 @@ static PyObject *Dtool_BSPLoader_set_shadow_dir_195(PyObject *self, PyObject *ar
   if (!(arg_this != nullptr)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "BSPLoader.set_shadow_dir", "LVector3f");
   }
-  (*local_this).set_shadow_dir(*arg_this);
+  ((*local_this).set_shadow_dir)(*arg_this);
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -7175,7 +7174,7 @@ static PyObject *Dtool_BSPLoader_extract_modelnum_196(PyObject *self, PyObject *
                           arg_val);
     }
 #endif
-    int return_value = (*local_this).extract_modelnum((int)arg_val);
+    int return_value = ((*local_this).extract_modelnum)((int)arg_val);
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -7221,7 +7220,7 @@ static PyObject *Dtool_BSPLoader_get_model_bounds_197(PyObject *self, PyObject *
     if (!(param3_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param3, 3, "BSPLoader.get_model_bounds", "LPoint3f");
     }
-    (*local_this).get_model_bounds((int)param1, *param2_this, *param3_this);
+    ((*local_this).get_model_bounds)((int)param1, *param2_this, *param3_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -7249,7 +7248,7 @@ static PyObject *Dtool_BSPLoader_set_server_entity_dispatcher_198(PyObject *self
     return nullptr;
   }
   // 1-void BSPLoader::set_server_entity_dispatcher(PyObject *dispatcher)
-  (*local_this).set_server_entity_dispatcher(arg);
+  ((*local_this).set_server_entity_dispatcher)(arg);
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -7282,7 +7281,7 @@ static PyObject *Dtool_BSPLoader_link_server_entity_to_class_199(PyObject *self,
   static const char *keyword_list[] = {"name", "type", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "s#O:link_server_entity_to_class", (char **)keyword_list, &param1_str, &param1_len, &param2)) {
     if (PyType_Check(param2)) {
-      (*local_this).link_server_entity_to_class(std::string(param1_str, param1_len), (PyTypeObject *)param2);
+      ((*local_this).link_server_entity_to_class)(std::string(param1_str, param1_len), (PyTypeObject *)param2);
       return Dtool_Return_None();
     }
   }
@@ -7311,7 +7310,7 @@ static PyObject *Dtool_BSPLoader_set_ai_200(PyObject *self, PyObject *arg) {
     return nullptr;
   }
   // 1-void BSPLoader::set_ai(bool ai)
-  (*local_this).set_ai((PyObject_IsTrue(arg) != 0));
+  ((*local_this).set_ai)((PyObject_IsTrue(arg) != 0));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -7338,7 +7337,7 @@ static PyObject *Dtool_BSPLoader_is_ai_201(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline bool BSPLoader::is_ai(void) const
-  bool return_value = (*(const BSPLoader*)local_this).is_ai();
+  bool return_value = ((*(const BSPLoader*)local_this).is_ai)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -7374,7 +7373,7 @@ static PyObject *Dtool_BSPLoader_trace_line_202(PyObject *self, PyObject *args, 
     if (!(param2_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param2, 2, "BSPLoader.trace_line", "LPoint3f");
     }
-    bool return_value = (*local_this).trace_line(*param1_this, *param2_this);
+    bool return_value = ((*local_this).trace_line)(*param1_this, *param2_this);
     return Dtool_Return_Bool(return_value);
   }
   if (!_PyErr_OCCURRED()) {
@@ -7416,7 +7415,7 @@ static PyObject *Dtool_BSPLoader_clip_line_203(PyObject *self, PyObject *args, P
     if (!(param2_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param2, 2, "BSPLoader.clip_line", "LPoint3f");
     }
-    LPoint3 *return_value = new LPoint3((*local_this).clip_line(*param1_this, *param2_this));
+    LPoint3 *return_value = new LPoint3(((*local_this).clip_line)(*param1_this, *param2_this));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -7457,7 +7456,7 @@ static PyObject *Dtool_BSPLoader_link_entity_to_class_204(PyObject *self, PyObje
   static const char *keyword_list[] = {"entname", "type", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "s#O:link_entity_to_class", (char **)keyword_list, &param1_str, &param1_len, &param2)) {
     if (PyType_Check(param2)) {
-      (*local_this).link_entity_to_class(std::string(param1_str, param1_len), (PyTypeObject *)param2);
+      ((*local_this).link_entity_to_class)(std::string(param1_str, param1_len), (PyTypeObject *)param2);
       return Dtool_Return_None();
     }
   }
@@ -7496,7 +7495,7 @@ static PyObject *Dtool_BSPLoader_get_py_entity_by_target_name_205(PyObject *self
   }
 #endif
   if (param1_str != nullptr) {
-    PyObject *return_value = (*(const BSPLoader*)local_this).get_py_entity_by_target_name(std::string(param1_str, param1_len));
+    PyObject *return_value = ((*(const BSPLoader*)local_this).get_py_entity_by_target_name)(std::string(param1_str, param1_len));
     return Dtool_Return(return_value);
   }
   if (!_PyErr_OCCURRED()) {
@@ -7534,7 +7533,7 @@ static PyObject *Dtool_BSPLoader_find_all_entities_206(PyObject *self, PyObject 
   }
 #endif
   if (param1_str != nullptr) {
-    PyObject *return_value = (*local_this).find_all_entities(std::string(param1_str, param1_len));
+    PyObject *return_value = ((*local_this).find_all_entities)(std::string(param1_str, param1_len));
     return Dtool_Return(return_value);
   }
   if (!_PyErr_OCCURRED()) {
@@ -7566,7 +7565,7 @@ static PyObject *Dtool_BSPLoader_get_entity_keyvalues_207(PyObject *self, PyObje
   int param2;
   static const char *keyword_list[] = {"list", "entnum", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "Oi:get_entity_keyvalues", (char **)keyword_list, &param1, &param2)) {
-    (*local_this).get_entity_keyvalues(param1, (int const)param2);
+    ((*local_this).get_entity_keyvalues)(param1, (int const)param2);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -7598,7 +7597,7 @@ static PyObject *Dtool_BSPLoader_link_cent_to_pyent_208(PyObject *self, PyObject
   PyObject *param2;
   static const char *keyword_list[] = {"entum", "pyent", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "iO:link_cent_to_pyent", (char **)keyword_list, &param1, &param2)) {
-    (*local_this).link_cent_to_pyent((int)param1, param2);
+    ((*local_this).link_cent_to_pyent)((int)param1, param2);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -7626,7 +7625,7 @@ static PyObject *Dtool_BSPLoader_remove_py_entity_209(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-void BSPLoader::remove_py_entity(PyObject *ent)
-  (*local_this).remove_py_entity(arg);
+  ((*local_this).remove_py_entity)(arg);
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -7662,7 +7661,7 @@ static PyObject *Dtool_BSPLoader_get_model_210(PyObject *self, PyObject *arg) {
                           arg_val);
     }
 #endif
-    NodePath *return_value = new NodePath((*(const BSPLoader*)local_this).get_model((int)arg_val));
+    NodePath *return_value = new NodePath(((*(const BSPLoader*)local_this).get_model)((int)arg_val));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -7706,7 +7705,7 @@ static PyObject *Dtool_BSPLoader_get_c_entity_211(PyObject *self, PyObject *arg)
                           arg_val);
     }
 #endif
-    CBaseEntity *return_value = (*(const BSPLoader*)local_this).get_c_entity((int const)arg_val);
+    CBaseEntity *return_value = ((*(const BSPLoader*)local_this).get_c_entity)((int const)arg_val);
     if (return_value != nullptr) {
       return_value->ref();
     }
@@ -7757,7 +7756,7 @@ static PyObject *Dtool_BSPLoader_find_leaf_212(PyObject *self, PyObject *args, P
       LPoint3 const *param1_this = nullptr;
       DtoolInstance_GetPointer(param1, param1_this, *Dtool_Ptr_LPoint3f);
       if (param1_this != nullptr) {
-        int return_value = (*local_this).find_leaf(*param1_this, (int)param2);
+        int return_value = ((*local_this).find_leaf)(*param1_this, (int)param2);
         if (Dtool_CheckErrorOccurred()) {
           return nullptr;
         }
@@ -7774,7 +7773,7 @@ static PyObject *Dtool_BSPLoader_find_leaf_212(PyObject *self, PyObject *args, P
       NodePath const *param1_this = nullptr;
       DtoolInstance_GetPointer(param1, param1_this, *Dtool_Ptr_NodePath);
       if (param1_this != nullptr) {
-        int return_value = (*local_this).find_leaf(*param1_this);
+        int return_value = ((*local_this).find_leaf)(*param1_this);
         if (Dtool_CheckErrorOccurred()) {
           return nullptr;
         }
@@ -7792,7 +7791,7 @@ static PyObject *Dtool_BSPLoader_find_leaf_212(PyObject *self, PyObject *args, P
       LPoint3f param1_local;
       LPoint3 const *param1_this = Dtool_Coerce_LPoint3f(param1, param1_local);
       if ((param1_this != nullptr)) {
-        int return_value = (*local_this).find_leaf(*param1_this, (int)param2);
+        int return_value = ((*local_this).find_leaf)(*param1_this, (int)param2);
         if (Dtool_CheckErrorOccurred()) {
           return nullptr;
         }
@@ -7835,7 +7834,7 @@ static PyObject *Dtool_BSPLoader_find_node_213(PyObject *self, PyObject *arg) {
   if (!(arg_this != nullptr)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "BSPLoader.find_node", "LPoint3f");
   }
-  int return_value = (*local_this).find_node(*arg_this);
+  int return_value = ((*local_this).find_node)(*arg_this);
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -7869,7 +7868,7 @@ static PyObject *Dtool_BSPLoader_is_cluster_visible_214(PyObject *self, PyObject
   int param2;
   static const char *keyword_list[] = {"curr_cluster", "cluster", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "ii:is_cluster_visible", (char **)keyword_list, &param1, &param2)) {
-    bool return_value = (*(const BSPLoader*)local_this).is_cluster_visible((int)param1, (int)param2);
+    bool return_value = ((*(const BSPLoader*)local_this).is_cluster_visible)((int)param1, (int)param2);
     return Dtool_Return_Bool(return_value);
   }
   if (!_PyErr_OCCURRED()) {
@@ -7910,7 +7909,7 @@ static PyObject *Dtool_BSPLoader_pvs_bounds_test_215(PyObject *self, PyObject *a
     }
 #endif
     if (param1_this != nullptr) {
-      bool return_value = (*local_this).pvs_bounds_test(param1_this, (unsigned int)param2);
+      bool return_value = ((*local_this).pvs_bounds_test)(param1_this, (unsigned int)param2);
       return Dtool_Return_Bool(return_value);
     }
   }
@@ -7946,7 +7945,7 @@ static PyObject *Dtool_BSPLoader_make_net_bounds_216(PyObject *self, PyObject *a
     TransformState const *param1_this = (TransformState *)DTOOL_Call_GetPointerThisClass(param1, Dtool_Ptr_TransformState, 1, "BSPLoader.make_net_bounds", true, true);
     GeometricBoundingVolume const *param2_this = (GeometricBoundingVolume *)DTOOL_Call_GetPointerThisClass(param2, Dtool_Ptr_GeometricBoundingVolume, 2, "BSPLoader.make_net_bounds", true, true);
     if (param1_this != nullptr && param2_this != nullptr) {
-      ConstPointerTo< GeometricBoundingVolume > return_value = (*local_this).make_net_bounds(param1_this, param2_this);
+      ConstPointerTo< GeometricBoundingVolume > return_value = ((*local_this).make_net_bounds)(param1_this, param2_this);
       if (Dtool_CheckErrorOccurred()) {
         return nullptr;
       }
@@ -7986,7 +7985,7 @@ static PyObject *Dtool_BSPLoader_has_active_level_217(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline bool BSPLoader::has_active_level(void) const
-  bool return_value = (*(const BSPLoader*)local_this).has_active_level();
+  bool return_value = ((*(const BSPLoader*)local_this).has_active_level)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -8008,7 +8007,7 @@ static PyObject *Dtool_BSPLoader_has_visibility_218(PyObject *self, PyObject *) 
     return nullptr;
   }
   // 1-inline bool BSPLoader::has_visibility(void) const
-  bool return_value = (*(const BSPLoader*)local_this).has_visibility();
+  bool return_value = ((*(const BSPLoader*)local_this).has_visibility)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -8032,7 +8031,7 @@ static PyObject *Dtool_BSPLoader_cleanup_219(PyObject *self, PyObject *args, PyO
   // 1-void BSPLoader::cleanup(bool is_transition = false)
   PyObject *param1 = Py_False;
   if (Dtool_ExtractOptionalArg(&param1, args, kwds, "is_transition")) {
-    (*local_this).cleanup((PyObject_IsTrue(param1) != 0));
+    ((*local_this).cleanup)((PyObject_IsTrue(param1) != 0));
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -8060,7 +8059,7 @@ static PyObject *Dtool_BSPLoader_get_result_220(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline NodePath BSPLoader::get_result(void) const
-  NodePath *return_value = new NodePath((*(const BSPLoader*)local_this).get_result());
+  NodePath *return_value = new NodePath(((*(const BSPLoader*)local_this).get_result)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -8098,7 +8097,7 @@ static PyObject *Dtool_BSPLoader_set_current_leaf_221(PyObject *self, PyObject *
                           arg_val);
     }
 #endif
-    (*local_this).set_current_leaf((int)arg_val);
+    ((*local_this).set_current_leaf)((int)arg_val);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -8126,7 +8125,7 @@ static PyObject *Dtool_BSPLoader_get_current_leaf_222(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline int BSPLoader::get_current_leaf(void) const
-  int return_value = (*(const BSPLoader*)local_this).get_current_leaf();
+  int return_value = ((*(const BSPLoader*)local_this).get_current_leaf)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -8151,7 +8150,7 @@ static PyObject *Dtool_BSPLoader_get_num_visleafs_223(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline int BSPLoader::get_num_visleafs(void) const
-  int return_value = (*(const BSPLoader*)local_this).get_num_visleafs();
+  int return_value = ((*(const BSPLoader*)local_this).get_num_visleafs)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -8185,7 +8184,7 @@ static PyObject *Dtool_BSPLoader_get_leaf_center_224(PyObject *self, PyObject *a
                           arg_val);
     }
 #endif
-    LPoint3 *return_value = new LPoint3((*(const BSPLoader*)local_this).get_leaf_center((int)arg_val));
+    LPoint3 *return_value = new LPoint3(((*(const BSPLoader*)local_this).get_leaf_center)((int)arg_val));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -8229,7 +8228,7 @@ static PyObject *Dtool_BSPLoader_get_lightcoords_225(PyObject *self, PyObject *a
     if (!(param2_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param2, 2, "BSPLoader.get_lightcoords", "LVector3f");
     }
-    LTexCoord *return_value = new LTexCoord((*local_this).get_lightcoords((int)param1, *param2_this));
+    LTexCoord *return_value = new LTexCoord(((*local_this).get_lightcoords)((int)param1, *param2_this));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -8264,7 +8263,7 @@ static PyObject *Dtool_BSPLoader_update_226(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-void BSPLoader::update(void)
-  (*local_this).update();
+  ((*local_this).update)();
   return Dtool_Return_None();
 }
 
@@ -8282,7 +8281,7 @@ static const char *Dtool_BSPLoader_update_226_comment = nullptr;
  */
 static PyObject *Dtool_BSPLoader_get_global_ptr_227(PyObject *, PyObject *) {
   // 1-static BSPLoader *BSPLoader::get_global_ptr(void)
-  BSPLoader *return_value = BSPLoader::get_global_ptr();
+  BSPLoader *return_value = (BSPLoader::get_global_ptr)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -8384,7 +8383,7 @@ static PyObject *Dtool_ShaderPermutations_add_permutation_232(PyObject *self, Py
   Py_ssize_t param2_len = 1;
   static const char *keyword_list[] = {"key", "value", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "s#|s#:add_permutation", (char **)keyword_list, &param1_str, &param1_len, &param2_str, &param2_len)) {
-    (*local_this).add_permutation(std::string(param1_str, param1_len), std::string(param2_str, param2_len));
+    ((*local_this).add_permutation)(std::string(param1_str, param1_len), std::string(param2_str, param2_len));
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -8412,7 +8411,7 @@ static PyObject *Dtool_ShaderPermutations_complete_233(PyObject *self, PyObject 
     return nullptr;
   }
   // 1-inline void ShaderPermutations::complete(void)
-  (*local_this).complete();
+  ((*local_this).complete)();
   return Dtool_Return_None();
 }
 
@@ -8436,7 +8435,7 @@ static PyObject *Dtool_ShaderPermutations_add_input_234(PyObject *self, PyObject
   // 1-inline void ShaderPermutations::add_input(ShaderInput const &inp)
   ShaderInput const *arg_this = (ShaderInput *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_ShaderInput, 1, "ShaderPermutations.add_input", true, true);
   if (arg_this != nullptr) {
-    (*local_this).add_input(*arg_this);
+    ((*local_this).add_input)(*arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -8473,7 +8472,7 @@ static PyObject *Dtool_ShaderPermutations_add_flag_235(PyObject *self, PyObject 
                           arg_val);
     }
 #endif
-    (*local_this).add_flag((int)arg_val);
+    ((*local_this).add_flag)((int)arg_val);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -8501,7 +8500,7 @@ static PyObject *Dtool_ShaderPermutations_get_hash_236(PyObject *self, PyObject 
     return nullptr;
   }
   // 1-inline std::size_t ShaderPermutations::get_hash(void) const
-  std::size_t return_value = (*(const ShaderPermutations*)local_this).get_hash();
+  std::size_t return_value = ((*(const ShaderPermutations*)local_this).get_hash)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -8625,7 +8624,7 @@ static PyObject *Dtool_ShaderSpec_read_shader_files_244(PyObject *self, PyObject
     if (!(param3_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param3, 3, "ShaderSpec.read_shader_files", "Filename");
     }
-    (*local_this).read_shader_files(*param1_this, *param2_this, *param3_this);
+    ((*local_this).read_shader_files)(*param1_this, *param2_this, *param3_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -8649,7 +8648,7 @@ static const char *Dtool_ShaderSpec_read_shader_files_244_comment = nullptr;
  */
 static PyObject *Dtool_ShaderSpec_get_class_type_245(PyObject *, PyObject *) {
   // 1-static TypeHandle ShaderSpec::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(ShaderSpec::get_class_type());
+  TypeHandle *return_value = new TypeHandle((ShaderSpec::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -8805,7 +8804,7 @@ static PyObject *Dtool_BSPShaderGenerator_set_sun_light_253(PyObject *self, PyOb
   // 1-void BSPShaderGenerator::set_sun_light(NodePath const &np)
   NodePath const *arg_this = (NodePath *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_NodePath, 1, "BSPShaderGenerator.set_sun_light", true, true);
   if (arg_this != nullptr) {
-    (*local_this).set_sun_light(*arg_this);
+    ((*local_this).set_sun_light)(*arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -8833,7 +8832,7 @@ static PyObject *Dtool_BSPShaderGenerator_start_update_254(PyObject *self, PyObj
     return nullptr;
   }
   // 1-void BSPShaderGenerator::start_update(void)
-  (*local_this).start_update();
+  ((*local_this).start_update)();
   return Dtool_Return_None();
 }
 
@@ -8859,7 +8858,7 @@ static PyObject *Dtool_BSPShaderGenerator_add_shader_255(PyObject *self, PyObjec
   if (!Dtool_Coerce_ShaderSpec(arg, arg_this)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "BSPShaderGenerator.add_shader", "ShaderSpec");
   }
-  (*local_this).add_shader(std::move(arg_this));
+  ((*local_this).add_shader)(std::move(arg_this));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -8886,7 +8885,7 @@ static PyObject *Dtool_BSPShaderGenerator_get_sun_vector_256(PyObject *self, PyO
     return nullptr;
   }
   // 1-inline LVector3 BSPShaderGenerator::get_sun_vector(void) const
-  LVector3 *return_value = new LVector3((*(const BSPShaderGenerator*)local_this).get_sun_vector());
+  LVector3 *return_value = new LVector3(((*(const BSPShaderGenerator*)local_this).get_sun_vector)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -8915,7 +8914,7 @@ static PyObject *Dtool_BSPShaderGenerator_has_shadow_sunlight_257(PyObject *self
     return nullptr;
   }
   // 1-inline bool BSPShaderGenerator::has_shadow_sunlight(void) const
-  bool return_value = (*(const BSPShaderGenerator*)local_this).has_shadow_sunlight();
+  bool return_value = ((*(const BSPShaderGenerator*)local_this).has_shadow_sunlight)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -8937,7 +8936,7 @@ static PyObject *Dtool_BSPShaderGenerator_get_pssm_array_texture_258(PyObject *s
     return nullptr;
   }
   // 1-inline Texture *BSPShaderGenerator::get_pssm_array_texture(void) const
-  Texture *return_value = (*(const BSPShaderGenerator*)local_this).get_pssm_array_texture();
+  Texture *return_value = ((*(const BSPShaderGenerator*)local_this).get_pssm_array_texture)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -8982,7 +8981,7 @@ static PyObject *Dtool_BSPShaderGenerator_set_shader_quality_260(PyObject *self,
                           arg_val);
     }
 #endif
-    (*local_this).set_shader_quality((int)arg_val);
+    ((*local_this).set_shader_quality)((int)arg_val);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -9010,7 +9009,7 @@ static PyObject *Dtool_BSPShaderGenerator_get_shader_quality_261(PyObject *self,
     return nullptr;
   }
   // 1-inline int BSPShaderGenerator::get_shader_quality(void) const
-  int return_value = (*(const BSPShaderGenerator*)local_this).get_shader_quality();
+  int return_value = ((*(const BSPShaderGenerator*)local_this).get_shader_quality)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -9037,7 +9036,7 @@ static PyObject *Dtool_BSPShaderGenerator_set_fog_262(PyObject *self, PyObject *
   // 1-inline void BSPShaderGenerator::set_fog(Fog *fog)
   Fog *arg_this = (Fog *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_Fog, 1, "BSPShaderGenerator.set_fog", false, true);
   if (arg_this != nullptr) {
-    (*local_this).set_fog(arg_this);
+    ((*local_this).set_fog)(arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -9065,7 +9064,7 @@ static PyObject *Dtool_BSPShaderGenerator_clear_fog_263(PyObject *self, PyObject
     return nullptr;
   }
   // 1-inline void BSPShaderGenerator::clear_fog(void)
-  (*local_this).clear_fog();
+  ((*local_this).clear_fog)();
   return Dtool_Return_None();
 }
 
@@ -9087,7 +9086,7 @@ static PyObject *Dtool_BSPShaderGenerator_get_fog_264(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline Fog *BSPShaderGenerator::get_fog(void) const
-  Fog *return_value = (*(const BSPShaderGenerator*)local_this).get_fog();
+  Fog *return_value = ((*(const BSPShaderGenerator*)local_this).get_fog)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -9123,7 +9122,7 @@ static PyObject *Dtool_BSPShaderGenerator_get_fog_data_265(PyObject *self, PyObj
     return nullptr;
   }
   // 1-inline PTA_LVecBase4f BSPShaderGenerator::get_fog_data(void) const
-  PTA_LVecBase4f *return_value = new PTA_LVecBase4f((*(const BSPShaderGenerator*)local_this).get_fog_data());
+  PTA_LVecBase4f *return_value = new PTA_LVecBase4f(((*(const BSPShaderGenerator*)local_this).get_fog_data)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -9153,7 +9152,7 @@ static PyObject *Dtool_BSPShaderGenerator_set_exposure_adustment_266(PyObject *s
   }
   // 1-inline void BSPShaderGenerator::set_exposure_adustment(float exposure)
   if (PyNumber_Check(arg)) {
-    (*local_this).set_exposure_adustment((float)PyFloat_AsDouble(arg));
+    ((*local_this).set_exposure_adustment)((float)PyFloat_AsDouble(arg));
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -9181,7 +9180,7 @@ static PyObject *Dtool_BSPShaderGenerator_get_exposure_adjustment_267(PyObject *
     return nullptr;
   }
   // 1-inline PTA_float BSPShaderGenerator::get_exposure_adjustment(void) const
-  PTA_float *return_value = new PTA_float((*(const BSPShaderGenerator*)local_this).get_exposure_adjustment());
+  PTA_float *return_value = new PTA_float(((*(const BSPShaderGenerator*)local_this).get_exposure_adjustment)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -9208,7 +9207,7 @@ static PyObject *Dtool_BSPShaderGenerator_set_identity_cubemap_268(PyObject *, P
   // 1-static void BSPShaderGenerator::set_identity_cubemap(Texture *tex)
   Texture *arg_this = (Texture *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_Texture, 0, "BSPShaderGenerator.set_identity_cubemap", false, true);
   if (arg_this != nullptr) {
-    BSPShaderGenerator::set_identity_cubemap(arg_this);
+    (BSPShaderGenerator::set_identity_cubemap)(arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -9232,7 +9231,7 @@ static const char *Dtool_BSPShaderGenerator_set_identity_cubemap_268_comment = n
  */
 static PyObject *Dtool_BSPShaderGenerator_get_identity_cubemap_269(PyObject *, PyObject *) {
   // 1-static Texture *BSPShaderGenerator::get_identity_cubemap(void)
-  Texture *return_value = BSPShaderGenerator::get_identity_cubemap();
+  Texture *return_value = (BSPShaderGenerator::get_identity_cubemap)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -9274,7 +9273,7 @@ static PyObject *Dtool_BSPShaderGenerator_make_shader_270(PyObject *, PyObject *
     }
     ShaderPermutations const *param1_this = (ShaderPermutations *)DTOOL_Call_GetPointerThisClass(param1, Dtool_Ptr_ShaderPermutations, 1, "BSPShaderGenerator.make_shader", true, true);
     if (param1_this != nullptr) {
-      ConstPointerTo< Shader > return_value = BSPShaderGenerator::make_shader(std::move(param0_this), param1_this);
+      ConstPointerTo< Shader > return_value = (BSPShaderGenerator::make_shader)(std::move(param0_this), param1_this);
       if (Dtool_CheckErrorOccurred()) {
         return nullptr;
       }
@@ -9310,7 +9309,7 @@ static const char *Dtool_BSPShaderGenerator_make_shader_270_comment = nullptr;
  */
 static PyObject *Dtool_BSPShaderGenerator_get_class_type_271(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPShaderGenerator::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BSPShaderGenerator::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BSPShaderGenerator::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -9553,7 +9552,7 @@ static void *Dtool_DowncastInterface_BSPShaderGenerator(void *from_this, Dtool_P
  */
 static PyObject *Dtool_BSPCullTraverser_get_class_type_275(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPCullTraverser::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BSPCullTraverser::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BSPCullTraverser::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -9786,7 +9785,7 @@ static void *Dtool_DowncastInterface_BSPCullTraverser(void *from_this, Dtool_PyT
  */
 static PyObject *Dtool_BSPRender_get_class_type_279(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPRender::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BSPRender::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BSPRender::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -10033,7 +10032,7 @@ static void *Dtool_DowncastInterface_BSPRender(void *from_this, Dtool_PyTypedObj
  */
 static PyObject *Dtool_BSPRoot_get_class_type_283(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPRoot::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BSPRoot::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BSPRoot::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -10302,7 +10301,7 @@ static void *Dtool_DowncastInterface_BSPRoot(void *from_this, Dtool_PyTypedObjec
  */
 static PyObject *Dtool_BSPProp_get_class_type_288(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPProp::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BSPProp::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BSPProp::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -10585,7 +10584,7 @@ static void *Dtool_DowncastInterface_BSPProp(void *from_this, Dtool_PyTypedObjec
  */
 static PyObject *Dtool_BSPModel_get_class_type_293(PyObject *, PyObject *) {
   // 1-static TypeHandle BSPModel::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BSPModel::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BSPModel::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -11419,7 +11418,7 @@ static void *Dtool_DowncastInterface_SkyBoxSpec(void *from_this, Dtool_PyTypedOb
  */
 static PyObject *Dtool_AmbientBoostEffect_make_316(PyObject *, PyObject *) {
   // 1-static ConstPointerTo< RenderEffect > AmbientBoostEffect::make(void)
-  ConstPointerTo< RenderEffect > return_value = AmbientBoostEffect::make();
+  ConstPointerTo< RenderEffect > return_value = (AmbientBoostEffect::make)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -11448,7 +11447,7 @@ static const char *Dtool_AmbientBoostEffect_make_316_comment = nullptr;
  */
 static PyObject *Dtool_AmbientBoostEffect_get_class_type_317(PyObject *, PyObject *) {
   // 1-static TypeHandle AmbientBoostEffect::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(AmbientBoostEffect::get_class_type());
+  TypeHandle *return_value = new TypeHandle((AmbientBoostEffect::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -11545,7 +11544,7 @@ static PyObject *Dtool_Audio3DManager_set_distance_factor_321(PyObject *self, Py
   }
   // 1-inline void Audio3DManager::set_distance_factor(PN_stdfloat factor)
   if (PyNumber_Check(arg)) {
-    (*local_this).set_distance_factor((PN_stdfloat)PyFloat_AsDouble(arg));
+    ((*local_this).set_distance_factor)((PN_stdfloat)PyFloat_AsDouble(arg));
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -11573,7 +11572,7 @@ static PyObject *Dtool_Audio3DManager_get_distance_factor_322(PyObject *self, Py
     return nullptr;
   }
   // 1-inline PN_stdfloat Audio3DManager::get_distance_factor(void) const
-  PN_stdfloat return_value = (*(const Audio3DManager*)local_this).get_distance_factor();
+  PN_stdfloat return_value = ((*(const Audio3DManager*)local_this).get_distance_factor)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -11599,7 +11598,7 @@ static PyObject *Dtool_Audio3DManager_set_doppler_factor_323(PyObject *self, PyO
   }
   // 1-inline void Audio3DManager::set_doppler_factor(PN_stdfloat factor)
   if (PyNumber_Check(arg)) {
-    (*local_this).set_doppler_factor((PN_stdfloat)PyFloat_AsDouble(arg));
+    ((*local_this).set_doppler_factor)((PN_stdfloat)PyFloat_AsDouble(arg));
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -11627,7 +11626,7 @@ static PyObject *Dtool_Audio3DManager_get_doppler_factor_324(PyObject *self, PyO
     return nullptr;
   }
   // 1-inline PN_stdfloat Audio3DManager::get_doppler_factor(void) const
-  PN_stdfloat return_value = (*(const Audio3DManager*)local_this).get_doppler_factor();
+  PN_stdfloat return_value = ((*(const Audio3DManager*)local_this).get_doppler_factor)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -11653,7 +11652,7 @@ static PyObject *Dtool_Audio3DManager_set_drop_off_factor_325(PyObject *self, Py
   }
   // 1-inline void Audio3DManager::set_drop_off_factor(PN_stdfloat factor)
   if (PyNumber_Check(arg)) {
-    (*local_this).set_drop_off_factor((PN_stdfloat)PyFloat_AsDouble(arg));
+    ((*local_this).set_drop_off_factor)((PN_stdfloat)PyFloat_AsDouble(arg));
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -11681,7 +11680,7 @@ static PyObject *Dtool_Audio3DManager_get_drop_off_factor_326(PyObject *self, Py
     return nullptr;
   }
   // 1-inline PN_stdfloat Audio3DManager::get_drop_off_factor(void) const
-  PN_stdfloat return_value = (*(const Audio3DManager*)local_this).get_drop_off_factor();
+  PN_stdfloat return_value = ((*(const Audio3DManager*)local_this).get_drop_off_factor)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -11712,7 +11711,7 @@ static PyObject *Dtool_Audio3DManager_set_sound_min_distance_327(PyObject *self,
   if (PyArg_ParseTupleAndKeywords(args, kwds, "Of:set_sound_min_distance", (char **)keyword_list, &param1, &param2)) {
     AudioSound *param1_this = (AudioSound *)DTOOL_Call_GetPointerThisClass(param1, Dtool_Ptr_AudioSound, 1, "Audio3DManager.set_sound_min_distance", false, true);
     if (param1_this != nullptr) {
-      (*local_this).set_sound_min_distance(param1_this, (PN_stdfloat)param2);
+      ((*local_this).set_sound_min_distance)(param1_this, (PN_stdfloat)param2);
       return Dtool_Return_None();
     }
   }
@@ -11743,7 +11742,7 @@ static PyObject *Dtool_Audio3DManager_get_sound_min_distance_328(PyObject *self,
   // 1-inline PN_stdfloat Audio3DManager::get_sound_min_distance(AudioSound *sound) const
   AudioSound *arg_this = (AudioSound *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_AudioSound, 1, "Audio3DManager.get_sound_min_distance", false, true);
   if (arg_this != nullptr) {
-    PN_stdfloat return_value = (*(const Audio3DManager*)local_this).get_sound_min_distance(arg_this);
+    PN_stdfloat return_value = ((*(const Audio3DManager*)local_this).get_sound_min_distance)(arg_this);
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -11780,7 +11779,7 @@ static PyObject *Dtool_Audio3DManager_set_sound_max_distance_329(PyObject *self,
   if (PyArg_ParseTupleAndKeywords(args, kwds, "Of:set_sound_max_distance", (char **)keyword_list, &param1, &param2)) {
     AudioSound *param1_this = (AudioSound *)DTOOL_Call_GetPointerThisClass(param1, Dtool_Ptr_AudioSound, 1, "Audio3DManager.set_sound_max_distance", false, true);
     if (param1_this != nullptr) {
-      (*local_this).set_sound_max_distance(param1_this, (PN_stdfloat)param2);
+      ((*local_this).set_sound_max_distance)(param1_this, (PN_stdfloat)param2);
       return Dtool_Return_None();
     }
   }
@@ -11811,7 +11810,7 @@ static PyObject *Dtool_Audio3DManager_get_sound_max_distance_330(PyObject *self,
   // 1-inline PN_stdfloat Audio3DManager::get_sound_max_distance(AudioSound *sound) const
   AudioSound *arg_this = (AudioSound *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_AudioSound, 1, "Audio3DManager.get_sound_max_distance", false, true);
   if (arg_this != nullptr) {
-    PN_stdfloat return_value = (*(const Audio3DManager*)local_this).get_sound_max_distance(arg_this);
+    PN_stdfloat return_value = ((*(const Audio3DManager*)local_this).get_sound_max_distance)(arg_this);
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -11844,7 +11843,7 @@ static PyObject *Dtool_Audio3DManager_attach_listener_331(PyObject *self, PyObje
   // 1-inline void Audio3DManager::attach_listener(NodePath const &listener)
   NodePath const *arg_this = (NodePath *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_NodePath, 1, "Audio3DManager.attach_listener", true, true);
   if (arg_this != nullptr) {
-    (*local_this).attach_listener(*arg_this);
+    ((*local_this).attach_listener)(*arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -11872,7 +11871,7 @@ static PyObject *Dtool_Audio3DManager_detach_listener_332(PyObject *self, PyObje
     return nullptr;
   }
   // 1-inline void Audio3DManager::detach_listener(void)
-  (*local_this).detach_listener();
+  ((*local_this).detach_listener)();
   return Dtool_Return_None();
 }
 
@@ -11904,7 +11903,7 @@ static PyObject *Dtool_Audio3DManager_load_sfx_333(PyObject *self, PyObject *arg
   }
 #endif
   if (param1_str != nullptr) {
-    PointerTo< AudioSound > return_value = (*local_this).load_sfx(std::string(param1_str, param1_len));
+    PointerTo< AudioSound > return_value = ((*local_this).load_sfx)(std::string(param1_str, param1_len));
     if (Dtool_CheckErrorOccurred()) {
       return nullptr;
     }
@@ -11950,7 +11949,7 @@ static PyObject *Dtool_Audio3DManager_attach_sound_to_object_334(PyObject *self,
     AudioSound *param1_this = (AudioSound *)DTOOL_Call_GetPointerThisClass(param1, Dtool_Ptr_AudioSound, 1, "Audio3DManager.attach_sound_to_object", false, true);
     NodePath const *param2_this = (NodePath *)DTOOL_Call_GetPointerThisClass(param2, Dtool_Ptr_NodePath, 2, "Audio3DManager.attach_sound_to_object", true, true);
     if (param1_this != nullptr && param2_this != nullptr) {
-      (*local_this).attach_sound_to_object(param1_this, *param2_this);
+      ((*local_this).attach_sound_to_object)(param1_this, *param2_this);
       return Dtool_Return_None();
     }
   }
@@ -11981,7 +11980,7 @@ static PyObject *Dtool_Audio3DManager_detach_sound_335(PyObject *self, PyObject 
   // 1-void Audio3DManager::detach_sound(AudioSound *sound)
   AudioSound *arg_this = (AudioSound *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_AudioSound, 1, "Audio3DManager.detach_sound", false, true);
   if (arg_this != nullptr) {
-    (*local_this).detach_sound(arg_this);
+    ((*local_this).detach_sound)(arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -12009,7 +12008,7 @@ static PyObject *Dtool_Audio3DManager_print_audio_digest_336(PyObject *self, PyO
     return nullptr;
   }
   // 1-void Audio3DManager::print_audio_digest(void)
-  (*local_this).print_audio_digest();
+  ((*local_this).print_audio_digest)();
   return Dtool_Return_None();
 }
 
@@ -12031,7 +12030,7 @@ static PyObject *Dtool_Audio3DManager_update_337(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-void Audio3DManager::update(void)
-  (*local_this).update();
+  ((*local_this).update)();
   return Dtool_Return_None();
 }
 
@@ -12170,7 +12169,7 @@ static PyObject *Dtool_CIOLib_set_pupil_direction_340(PyObject *, PyObject *args
     if (!(param3_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param3, 3, "CIOLib.set_pupil_direction", "LVector3f");
     }
-    CIOLib::set_pupil_direction((float)param0, (float)param1, *param2_this, *param3_this);
+    (CIOLib::set_pupil_direction)((float)param0, (float)param1, *param2_this, *param3_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -12207,7 +12206,7 @@ static PyObject *Dtool_CIOLib_look_pupils_at_341(PyObject *, PyObject *args, PyO
     }
     NodePath const *param2_this = (NodePath *)DTOOL_Call_GetPointerThisClass(param2, Dtool_Ptr_NodePath, 2, "CIOLib.look_pupils_at", true, true);
     if (param0_this != nullptr && param2_this != nullptr) {
-      LVector2 *return_value = new LVector2(CIOLib::look_pupils_at(*param0_this, *param1_this, *param2_this));
+      LVector2 *return_value = new LVector2((CIOLib::look_pupils_at)(*param0_this, *param1_this, *param2_this));
       if (return_value == nullptr) {
         return PyErr_NoMemory();
       }
@@ -12433,7 +12432,7 @@ static void *Dtool_DowncastInterface_DecalModulateSpec(void *from_this, Dtool_Py
  */
 static PyObject *Dtool_GlowNode_get_class_type_349(PyObject *, PyObject *) {
   // 1-static TypeHandle GlowNode::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(GlowNode::get_class_type());
+  TypeHandle *return_value = new TypeHandle((GlowNode::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -12854,7 +12853,7 @@ static void *Dtool_DowncastInterface_GlowNode(void *from_this, Dtool_PyTypedObje
  */
 static PyObject *Dtool_PostProcessEffect_get_class_type_357(PyObject *, PyObject *) {
   // 1-static TypeHandle PostProcessEffect::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(PostProcessEffect::get_class_type());
+  TypeHandle *return_value = new TypeHandle((PostProcessEffect::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -12883,7 +12882,7 @@ static PyObject *Dtool_PostProcessEffect_get_final_texture_358(PyObject *self, P
     return nullptr;
   }
   // 1-virtual Texture *PostProcessEffect::get_final_texture(void) = 0
-  Texture *return_value = (*local_this).get_final_texture();
+  Texture *return_value = ((*local_this).get_final_texture)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -12923,7 +12922,7 @@ static PyObject *Dtool_PostProcessEffect_add_pass_359(PyObject *self, PyObject *
   if (!Dtool_Coerce_PostProcessPass(arg, arg_this)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "PostProcessEffect.add_pass", "PostProcessPass");
   }
-  (*local_this).add_pass(std::move(arg_this));
+  ((*local_this).add_pass)(std::move(arg_this));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -12954,7 +12953,7 @@ static PyObject *Dtool_PostProcessEffect_remove_pass_360(PyObject *self, PyObjec
   if (!Dtool_Coerce_PostProcessPass(arg, arg_this)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "PostProcessEffect.remove_pass", "PostProcessPass");
   }
-  (*local_this).remove_pass(std::move(arg_this));
+  ((*local_this).remove_pass)(std::move(arg_this));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -12991,7 +12990,7 @@ static PyObject *Dtool_PostProcessEffect_get_pass_361(PyObject *self, PyObject *
   }
 #endif
   if (param1_str != nullptr) {
-    PostProcessPass *return_value = (*local_this).get_pass(std::string(param1_str, param1_len));
+    PostProcessPass *return_value = ((*local_this).get_pass)(std::string(param1_str, param1_len));
     if (return_value != nullptr) {
       return_value->ref();
     }
@@ -13028,7 +13027,7 @@ static PyObject *Dtool_PostProcessEffect_setup_362(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-virtual void PostProcessEffect::setup(void)
-  (*local_this).setup();
+  ((*local_this).setup)();
   return Dtool_Return_None();
 }
 
@@ -13050,7 +13049,7 @@ static PyObject *Dtool_PostProcessEffect_update_363(PyObject *self, PyObject *) 
     return nullptr;
   }
   // 1-virtual void PostProcessEffect::update(void)
-  (*local_this).update();
+  ((*local_this).update)();
   return Dtool_Return_None();
 }
 
@@ -13074,7 +13073,7 @@ static PyObject *Dtool_PostProcessEffect_window_event_364(PyObject *self, PyObje
   // 1-void PostProcessEffect::window_event(GraphicsOutput *win)
   GraphicsOutput *arg_this = (GraphicsOutput *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_GraphicsOutput, 1, "PostProcessEffect.window_event", false, true);
   if (arg_this != nullptr) {
-    (*local_this).window_event(arg_this);
+    ((*local_this).window_event)(arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -13102,7 +13101,7 @@ static PyObject *Dtool_PostProcessEffect_shutdown_365(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-virtual void PostProcessEffect::shutdown(void)
-  (*local_this).shutdown();
+  ((*local_this).shutdown)();
   return Dtool_Return_None();
 }
 
@@ -13245,7 +13244,7 @@ static void *Dtool_DowncastInterface_PostProcessEffect(void *from_this, Dtool_Py
  */
 static PyObject *Dtool_PostProcessPass_get_class_type_373(PyObject *, PyObject *) {
   // 1-static TypeHandle PostProcessPass::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(PostProcessPass::get_class_type());
+  TypeHandle *return_value = new TypeHandle((PostProcessPass::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -13274,7 +13273,7 @@ static PyObject *Dtool_PostProcessPass_get_quad_375(PyObject *self, PyObject *) 
     return nullptr;
   }
   // 1-inline NodePath PostProcessPass::get_quad(void) const
-  NodePath *return_value = new NodePath((*(const PostProcessPass*)local_this).get_quad());
+  NodePath *return_value = new NodePath(((*(const PostProcessPass*)local_this).get_quad)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -13303,7 +13302,7 @@ static PyObject *Dtool_PostProcessPass_get_back_buffer_dimensions_376(PyObject *
     return nullptr;
   }
   // 1-LVector2i PostProcessPass::get_back_buffer_dimensions(void) const
-  LVector2i *return_value = new LVector2i((*(const PostProcessPass*)local_this).get_back_buffer_dimensions());
+  LVector2i *return_value = new LVector2i(((*(const PostProcessPass*)local_this).get_back_buffer_dimensions)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -13332,7 +13331,7 @@ static PyObject *Dtool_PostProcessPass_get_camera_377(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline NodePath PostProcessPass::get_camera(void) const
-  NodePath *return_value = new NodePath((*(const PostProcessPass*)local_this).get_camera());
+  NodePath *return_value = new NodePath(((*(const PostProcessPass*)local_this).get_camera)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -13370,7 +13369,7 @@ static PyObject *Dtool_PostProcessPass_has_texture_bits_378(PyObject *self, PyOb
                           arg_val);
     }
 #endif
-    bool return_value = (*(const PostProcessPass*)local_this).has_texture_bits((int)arg_val);
+    bool return_value = ((*(const PostProcessPass*)local_this).has_texture_bits)((int)arg_val);
     return Dtool_Return_Bool(return_value);
   }
   if (!_PyErr_OCCURRED()) {
@@ -13402,7 +13401,7 @@ static PyObject *Dtool_PostProcessPass_set_div_size_379(PyObject *self, PyObject
   int param2;
   static const char *keyword_list[] = {"div_size", "div", nullptr};
   if (PyArg_ParseTupleAndKeywords(args, kwds, "Oi:set_div_size", (char **)keyword_list, &param1, &param2)) {
-    (*local_this).set_div_size((PyObject_IsTrue(param1) != 0), (int)param2);
+    ((*local_this).set_div_size)((PyObject_IsTrue(param1) != 0), (int)param2);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -13439,7 +13438,7 @@ static PyObject *Dtool_PostProcessPass_set_forced_size_380(PyObject *self, PyObj
     if (!(param2_this != nullptr)) {
       return Dtool_Raise_ArgTypeError(param2, 2, "PostProcessPass.set_forced_size", "LVector2i");
     }
-    (*local_this).set_forced_size((PyObject_IsTrue(param1) != 0), *param2_this);
+    ((*local_this).set_forced_size)((PyObject_IsTrue(param1) != 0), *param2_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -13469,7 +13468,7 @@ static PyObject *Dtool_PostProcessPass_set_framebuffer_properties_381(PyObject *
   // 1-inline void PostProcessPass::set_framebuffer_properties(FrameBufferProperties const &fbprops)
   FrameBufferProperties const *arg_this = (FrameBufferProperties *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_FrameBufferProperties, 1, "PostProcessPass.set_framebuffer_properties", true, true);
   if (arg_this != nullptr) {
-    (*local_this).set_framebuffer_properties(*arg_this);
+    ((*local_this).set_framebuffer_properties)(*arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -13506,7 +13505,7 @@ static PyObject *Dtool_PostProcessPass_set_output_texture_bits_382(PyObject *sel
                           arg_val);
     }
 #endif
-    (*local_this).set_output_texture_bits((int)arg_val);
+    ((*local_this).set_output_texture_bits)((int)arg_val);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -13539,7 +13538,7 @@ static PyObject *Dtool_PostProcessPass_get_corrected_size_383(PyObject *self, Py
   if (!(arg_this != nullptr)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "PostProcessPass.get_corrected_size", "LVector2i");
   }
-  LVector2i *return_value = new LVector2i((*local_this).get_corrected_size(*arg_this));
+  LVector2i *return_value = new LVector2i(((*local_this).get_corrected_size)(*arg_this));
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -13582,7 +13581,7 @@ static PyObject *Dtool_PostProcessPass_get_texture_384(PyObject *self, PyObject 
                           arg_val);
     }
 #endif
-    Texture *return_value = (*local_this).get_texture((int)arg_val);
+    Texture *return_value = ((*local_this).get_texture)((int)arg_val);
     if (return_value != nullptr) {
       return_value->ref();
     }
@@ -13624,7 +13623,7 @@ static PyObject *Dtool_PostProcessPass_get_color_texture_385(PyObject *self, PyO
     return nullptr;
   }
   // 1-inline Texture *PostProcessPass::get_color_texture(void)
-  Texture *return_value = (*local_this).get_color_texture();
+  Texture *return_value = ((*local_this).get_color_texture)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -13660,7 +13659,7 @@ static PyObject *Dtool_PostProcessPass_get_depth_texture_386(PyObject *self, PyO
     return nullptr;
   }
   // 1-inline Texture *PostProcessPass::get_depth_texture(void)
-  Texture *return_value = (*local_this).get_depth_texture();
+  Texture *return_value = ((*local_this).get_depth_texture)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -13696,7 +13695,7 @@ static PyObject *Dtool_PostProcessPass_setup_buffer_387(PyObject *self, PyObject
     return nullptr;
   }
   // 1-virtual bool PostProcessPass::setup_buffer(void)
-  bool return_value = (*local_this).setup_buffer();
+  bool return_value = ((*local_this).setup_buffer)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -13718,7 +13717,7 @@ static PyObject *Dtool_PostProcessPass_setup_textures_388(PyObject *self, PyObje
     return nullptr;
   }
   // 1-virtual void PostProcessPass::setup_textures(void)
-  (*local_this).setup_textures();
+  ((*local_this).setup_textures)();
   return Dtool_Return_None();
 }
 
@@ -13740,7 +13739,7 @@ static PyObject *Dtool_PostProcessPass_setup_quad_389(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-virtual void PostProcessPass::setup_quad(void)
-  (*local_this).setup_quad();
+  ((*local_this).setup_quad)();
   return Dtool_Return_None();
 }
 
@@ -13762,7 +13761,7 @@ static PyObject *Dtool_PostProcessPass_setup_camera_390(PyObject *self, PyObject
     return nullptr;
   }
   // 1-virtual void PostProcessPass::setup_camera(void)
-  (*local_this).setup_camera();
+  ((*local_this).setup_camera)();
   return Dtool_Return_None();
 }
 
@@ -13784,7 +13783,7 @@ static PyObject *Dtool_PostProcessPass_setup_region_391(PyObject *self, PyObject
     return nullptr;
   }
   // 1-virtual void PostProcessPass::setup_region(void)
-  (*local_this).setup_region();
+  ((*local_this).setup_region)();
   return Dtool_Return_None();
 }
 
@@ -13806,7 +13805,7 @@ static PyObject *Dtool_PostProcessPass_setup_392(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-virtual void PostProcessPass::setup(void)
-  (*local_this).setup();
+  ((*local_this).setup)();
   return Dtool_Return_None();
 }
 
@@ -13828,7 +13827,7 @@ static PyObject *Dtool_PostProcessPass_update_393(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-virtual void PostProcessPass::update(void)
-  (*local_this).update();
+  ((*local_this).update)();
   return Dtool_Return_None();
 }
 
@@ -13852,7 +13851,7 @@ static PyObject *Dtool_PostProcessPass_window_event_394(PyObject *self, PyObject
   // 1-virtual void PostProcessPass::window_event(GraphicsOutput *output)
   GraphicsOutput *arg_this = (GraphicsOutput *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_GraphicsOutput, 1, "PostProcessPass.window_event", false, true);
   if (arg_this != nullptr) {
-    (*local_this).window_event(arg_this);
+    ((*local_this).window_event)(arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -13880,7 +13879,7 @@ static PyObject *Dtool_PostProcessPass_shutdown_395(PyObject *self, PyObject *) 
     return nullptr;
   }
   // 1-virtual void PostProcessPass::shutdown(void)
-  (*local_this).shutdown();
+  ((*local_this).shutdown)();
   return Dtool_Return_None();
 }
 
@@ -13898,7 +13897,7 @@ static const char *Dtool_PostProcessPass_shutdown_395_comment = nullptr;
  */
 static PyObject *Dtool_PostProcessPass_get_default_fbprops_396(PyObject *, PyObject *) {
   // 1-static FrameBufferProperties PostProcessPass::get_default_fbprops(void)
-  FrameBufferProperties *return_value = new FrameBufferProperties(PostProcessPass::get_default_fbprops());
+  FrameBufferProperties *return_value = new FrameBufferProperties((PostProcessPass::get_default_fbprops)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -14347,7 +14346,7 @@ static PyObject *Dtool_PostProcessScenePass_setup_scene_camera_400(PyObject *sel
                           arg_val);
     }
 #endif
-    (*local_this).setup_scene_camera((int)arg_val);
+    ((*local_this).setup_scene_camera)((int)arg_val);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -14379,7 +14378,7 @@ static PyObject *Dtool_PostProcessScenePass_set_camera_state_401(PyObject *self,
   if (!Dtool_ConstCoerce_RenderState(arg, arg_this)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "PostProcessScenePass.set_camera_state", "RenderState");
   }
-  (*local_this).set_camera_state(std::move(arg_this));
+  ((*local_this).set_camera_state)(std::move(arg_this));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -14635,7 +14634,7 @@ static PyObject *Dtool_PostProcess_add_camera_405(PyObject *self, PyObject *arg)
   // 1-void PostProcess::add_camera(NodePath const &camera)
   NodePath const *arg_this = (NodePath *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_NodePath, 1, "PostProcess.add_camera", true, true);
   if (arg_this != nullptr) {
-    (*local_this).add_camera(*arg_this);
+    ((*local_this).add_camera)(*arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -14665,7 +14664,7 @@ static PyObject *Dtool_PostProcess_remove_camera_406(PyObject *self, PyObject *a
   // 1-void PostProcess::remove_camera(NodePath const &camera)
   NodePath const *arg_this = (NodePath *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_NodePath, 1, "PostProcess.remove_camera", true, true);
   if (arg_this != nullptr) {
-    (*local_this).remove_camera(*arg_this);
+    ((*local_this).remove_camera)(*arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -14697,7 +14696,7 @@ static PyObject *Dtool_PostProcess_add_effect_407(PyObject *self, PyObject *arg)
   if (!Dtool_Coerce_PostProcessEffect(arg, arg_this)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "PostProcess.add_effect", "PostProcessEffect");
   }
-  (*local_this).add_effect(std::move(arg_this));
+  ((*local_this).add_effect)(std::move(arg_this));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -14728,7 +14727,7 @@ static PyObject *Dtool_PostProcess_remove_effect_408(PyObject *self, PyObject *a
   if (!Dtool_Coerce_PostProcessEffect(arg, arg_this)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "PostProcess.remove_effect", "PostProcessEffect");
   }
-  (*local_this).remove_effect(std::move(arg_this));
+  ((*local_this).remove_effect)(std::move(arg_this));
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -14765,7 +14764,7 @@ static PyObject *Dtool_PostProcess_get_effect_409(PyObject *self, PyObject *arg)
   }
 #endif
   if (param1_str != nullptr) {
-    PostProcessEffect *return_value = (*local_this).get_effect(std::string(param1_str, param1_len));
+    PostProcessEffect *return_value = ((*local_this).get_effect)(std::string(param1_str, param1_len));
     if (return_value != nullptr) {
       return_value->ref();
     }
@@ -14802,7 +14801,7 @@ static PyObject *Dtool_PostProcess_get_scene_color_texture_410(PyObject *self, P
     return nullptr;
   }
   // 1-inline Texture *PostProcess::get_scene_color_texture(void) const
-  Texture *return_value = (*(const PostProcess*)local_this).get_scene_color_texture();
+  Texture *return_value = ((*(const PostProcess*)local_this).get_scene_color_texture)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -14838,7 +14837,7 @@ static PyObject *Dtool_PostProcess_get_scene_depth_texture_411(PyObject *self, P
     return nullptr;
   }
   // 1-inline Texture *PostProcess::get_scene_depth_texture(void) const
-  Texture *return_value = (*(const PostProcess*)local_this).get_scene_depth_texture();
+  Texture *return_value = ((*(const PostProcess*)local_this).get_scene_depth_texture)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -14874,7 +14873,7 @@ static PyObject *Dtool_PostProcess_get_scene_pass_412(PyObject *self, PyObject *
     return nullptr;
   }
   // 1-inline PostProcessScenePass *PostProcess::get_scene_pass(void) const
-  PostProcessScenePass *return_value = (*(const PostProcess*)local_this).get_scene_pass();
+  PostProcessScenePass *return_value = ((*(const PostProcess*)local_this).get_scene_pass)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -14905,7 +14904,7 @@ static PyObject *Dtool_PostProcess_get_output_413(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline GraphicsOutput *PostProcess::get_output(void) const
-  GraphicsOutput *return_value = (*(const PostProcess*)local_this).get_output();
+  GraphicsOutput *return_value = ((*(const PostProcess*)local_this).get_output)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -14950,7 +14949,7 @@ static PyObject *Dtool_PostProcess_get_camera_414(PyObject *self, PyObject *arg)
                           arg_val);
     }
 #endif
-    NodePath *return_value = new NodePath((*(const PostProcess*)local_this).get_camera((int)arg_val));
+    NodePath *return_value = new NodePath(((*(const PostProcess*)local_this).get_camera)((int)arg_val));
     if (return_value == nullptr) {
       return PyErr_NoMemory();
     }
@@ -14985,7 +14984,7 @@ static PyObject *Dtool_PostProcess_next_sort_415(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline int PostProcess::next_sort(void)
-  int return_value = (*local_this).next_sort();
+  int return_value = ((*local_this).next_sort)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -15010,7 +15009,7 @@ static PyObject *Dtool_PostProcess_get_output_display_region_416(PyObject *self,
     return nullptr;
   }
   // 1-inline DisplayRegion *PostProcess::get_output_display_region(void) const
-  DisplayRegion *return_value = (*(const PostProcess*)local_this).get_output_display_region();
+  DisplayRegion *return_value = ((*(const PostProcess*)local_this).get_output_display_region)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -15046,7 +15045,7 @@ static PyObject *Dtool_PostProcess_is_fullscreen_417(PyObject *self, PyObject *)
     return nullptr;
   }
   // 1-inline bool PostProcess::is_fullscreen(void) const
-  bool return_value = (*(const PostProcess*)local_this).is_fullscreen();
+  bool return_value = ((*(const PostProcess*)local_this).is_fullscreen)();
   return Dtool_Return_Bool(return_value);
 }
 
@@ -15077,7 +15076,7 @@ static PyObject *Dtool_PostProcess_set_scene_aux_bits_418(PyObject *self, PyObje
                           arg_val);
     }
 #endif
-    (*local_this).set_scene_aux_bits((int)arg_val);
+    ((*local_this).set_scene_aux_bits)((int)arg_val);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -15111,7 +15110,7 @@ static PyObject *Dtool_PostProcess_set_stacked_clears_419(PyObject *self, PyObje
   if (PyArg_ParseTupleAndKeywords(args, kwds, "iO:set_stacked_clears", (char **)keyword_list, &param1, &param2)) {
     DrawableRegion *param2_this = (DrawableRegion *)DTOOL_Call_GetPointerThisClass(param2, Dtool_Ptr_DrawableRegion, 2, "PostProcess.set_stacked_clears", false, true);
     if (param2_this != nullptr) {
-      (*local_this).set_stacked_clears((int)param1, param2_this);
+      ((*local_this).set_stacked_clears)((int)param1, param2_this);
       return Dtool_Return_None();
     }
   }
@@ -15142,7 +15141,7 @@ static PyObject *Dtool_PostProcess_set_window_clears_420(PyObject *self, PyObjec
   // 1-void PostProcess::set_window_clears(DrawableRegion *region)
   DrawableRegion *arg_this = (DrawableRegion *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_DrawableRegion, 1, "PostProcess.set_window_clears", false, true);
   if (arg_this != nullptr) {
-    (*local_this).set_window_clears(arg_this);
+    ((*local_this).set_window_clears)(arg_this);
     return Dtool_Return_None();
   }
   if (!_PyErr_OCCURRED()) {
@@ -15176,7 +15175,7 @@ static PyObject *Dtool_PostProcess_set_clears_421(PyObject *self, PyObject *args
   if (PyArg_ParseTupleAndKeywords(args, kwds, "iO:set_clears", (char **)keyword_list, &param1, &param2)) {
     DrawableRegion *param2_this = (DrawableRegion *)DTOOL_Call_GetPointerThisClass(param2, Dtool_Ptr_DrawableRegion, 2, "PostProcess.set_clears", false, true);
     if (param2_this != nullptr) {
-      (*local_this).set_clears((int)param1, param2_this);
+      ((*local_this).set_clears)((int)param1, param2_this);
       return Dtool_Return_None();
     }
   }
@@ -15205,7 +15204,7 @@ static PyObject *Dtool_PostProcess_shutdown_422(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-void PostProcess::shutdown(void)
-  (*local_this).shutdown();
+  ((*local_this).shutdown)();
   return Dtool_Return_None();
 }
 
@@ -15322,7 +15321,7 @@ static void *Dtool_DowncastInterface_PostProcess(void *from_this, Dtool_PyTypedO
  */
 static PyObject *Dtool_HDRPass_get_class_type_425(PyObject *, PyObject *) {
   // 1-static TypeHandle HDRPass::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(HDRPass::get_class_type());
+  TypeHandle *return_value = new TypeHandle((HDRPass::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -15356,7 +15355,7 @@ static PyObject *Dtool_HDRPass_set_exposure_output_427(PyObject *self, PyObject 
   if (!(arg_this != nullptr)) {
     return Dtool_Raise_ArgTypeError(arg, 1, "HDRPass.set_exposure_output", "PointerToArray");
   }
-  (*local_this).set_exposure_output(*arg_this);
+  ((*local_this).set_exposure_output)(*arg_this);
   return Dtool_Return_None();
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
@@ -15383,7 +15382,7 @@ static PyObject *Dtool_HDRPass_get_exposure_428(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline float HDRPass::get_exposure(void) const
-  float return_value = (*(const HDRPass*)local_this).get_exposure();
+  float return_value = ((*(const HDRPass*)local_this).get_exposure)();
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -15617,7 +15616,7 @@ static PyObject *Dtool_HDREffect_get_hdr_pass_432(PyObject *self, PyObject *) {
     return nullptr;
   }
   // 1-inline HDRPass *HDREffect::get_hdr_pass(void) const
-  HDRPass *return_value = (*(const HDREffect*)local_this).get_hdr_pass();
+  HDRPass *return_value = ((*(const HDREffect*)local_this).get_hdr_pass)();
   if (return_value != nullptr) {
     return_value->ref();
   }
@@ -15800,7 +15799,7 @@ static void *Dtool_DowncastInterface_HDREffect(void *from_this, Dtool_PyTypedObj
  */
 static PyObject *Dtool_BloomEffect_get_class_type_435(PyObject *, PyObject *) {
   // 1-static TypeHandle BloomEffect::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(BloomEffect::get_class_type());
+  TypeHandle *return_value = new TypeHandle((BloomEffect::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -15981,7 +15980,7 @@ static void *Dtool_DowncastInterface_BloomEffect(void *from_this, Dtool_PyTypedO
  */
 static PyObject *Dtool_LightingOriginEffect_get_class_type_439(PyObject *, PyObject *) {
   // 1-static TypeHandle LightingOriginEffect::get_class_type(void)
-  TypeHandle *return_value = new TypeHandle(LightingOriginEffect::get_class_type());
+  TypeHandle *return_value = new TypeHandle((LightingOriginEffect::get_class_type)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -16011,7 +16010,7 @@ static PyObject *Dtool_LightingOriginEffect_make_440(PyObject *, PyObject *arg) 
   if (!(arg_this != nullptr)) {
     return Dtool_Raise_ArgTypeError(arg, 0, "LightingOriginEffect.make", "LVector3f");
   }
-  ConstPointerTo< RenderEffect > return_value = LightingOriginEffect::make(*arg_this);
+  ConstPointerTo< RenderEffect > return_value = (LightingOriginEffect::make)(*arg_this);
   if (Dtool_CheckErrorOccurred()) {
     return nullptr;
   }
@@ -16049,7 +16048,7 @@ static PyObject *Dtool_LightingOriginEffect_get_lighting_origin_441(PyObject *se
     return nullptr;
   }
   // 1-inline LVector3 LightingOriginEffect::get_lighting_origin(void) const
-  LVector3 *return_value = new LVector3((*(const LightingOriginEffect*)local_this).get_lighting_origin());
+  LVector3 *return_value = new LVector3(((*(const LightingOriginEffect*)local_this).get_lighting_origin)());
   if (return_value == nullptr) {
     return PyErr_NoMemory();
   }
@@ -16086,7 +16085,7 @@ bool Dtool_ConstCoerce_LightingOriginEffect(PyObject *args, CPT(LightingOriginEf
     LVector3 const *arg_this = nullptr;
     DtoolInstance_GetPointer(arg, arg_this, *Dtool_Ptr_LVector3f);
     if (arg_this != nullptr) {
-      ConstPointerTo< RenderEffect > return_value = LightingOriginEffect::make(*arg_this);
+      ConstPointerTo< RenderEffect > return_value = (LightingOriginEffect::make)(*arg_this);
       if (_PyErr_OCCURRED()) {
         return false;
       } else {
@@ -16245,7 +16244,7 @@ struct Dtool_PyTypedObject Dtool_TextureStages = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.TextureStages",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_TextureStages,
 #if PY_VERSION_HEX >= 0x03080000
@@ -16499,7 +16498,7 @@ struct Dtool_PyTypedObject Dtool_BSPMaterial = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BSPMaterial",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPMaterial,
 #if PY_VERSION_HEX >= 0x03080000
@@ -16581,6 +16580,7 @@ static void Dtool_PyModuleClassInit_BSPMaterial(PyObject *module) {
     assert(Dtool_Ptr_TypedReferenceCount->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_TypedReferenceCount->_Dtool_ModuleClassInit(nullptr);
     Dtool_BSPMaterial._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_TypedReferenceCount);
+    Dtool_BSPMaterial._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BSPMaterial._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -16714,7 +16714,7 @@ struct Dtool_PyTypedObject Dtool_BSPMaterialAttrib = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BSPMaterialAttrib",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPMaterialAttrib,
 #if PY_VERSION_HEX >= 0x03080000
@@ -16796,6 +16796,7 @@ static void Dtool_PyModuleClassInit_BSPMaterialAttrib(PyObject *module) {
     assert(Dtool_Ptr_RenderAttrib->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_RenderAttrib->_Dtool_ModuleClassInit(nullptr);
     Dtool_BSPMaterialAttrib._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_RenderAttrib);
+    Dtool_BSPMaterialAttrib._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BSPMaterialAttrib._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -16926,7 +16927,7 @@ struct Dtool_PyTypedObject Dtool_BoundingKDOP = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BoundingKDOP",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BoundingKDOP,
 #if PY_VERSION_HEX >= 0x03080000
@@ -17016,6 +17017,7 @@ static void Dtool_PyModuleClassInit_BoundingKDOP(PyObject *module) {
     assert(Dtool_Ptr_FiniteBoundingVolume->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_FiniteBoundingVolume->_Dtool_ModuleClassInit(nullptr);
     Dtool_BoundingKDOP._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_FiniteBoundingVolume);
+    Dtool_BoundingKDOP._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BoundingKDOP._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -17152,7 +17154,7 @@ struct Dtool_PyTypedObject Dtool_CBaseEntity = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.CBaseEntity",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_CBaseEntity,
 #if PY_VERSION_HEX >= 0x03080000
@@ -17234,6 +17236,7 @@ static void Dtool_PyModuleClassInit_CBaseEntity(PyObject *module) {
     assert(Dtool_Ptr_TypedReferenceCount->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_TypedReferenceCount->_Dtool_ModuleClassInit(nullptr);
     Dtool_CBaseEntity._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_TypedReferenceCount);
+    Dtool_CBaseEntity._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_CBaseEntity._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -17360,7 +17363,7 @@ struct Dtool_PyTypedObject Dtool_CPointEntity = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.CPointEntity",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_CPointEntity,
 #if PY_VERSION_HEX >= 0x03080000
@@ -17440,6 +17443,7 @@ static void Dtool_PyModuleClassInit_CPointEntity(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_CBaseEntity(nullptr);
     Dtool_CPointEntity._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_CBaseEntity);
+    Dtool_CPointEntity._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_CPointEntity._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -17568,7 +17572,7 @@ struct Dtool_PyTypedObject Dtool_CBoundsEntity = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.CBoundsEntity",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_CBoundsEntity,
 #if PY_VERSION_HEX >= 0x03080000
@@ -17655,6 +17659,7 @@ static void Dtool_PyModuleClassInit_CBoundsEntity(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_CBaseEntity(nullptr);
     Dtool_CBoundsEntity._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_CBaseEntity);
+    Dtool_CBoundsEntity._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_CBoundsEntity._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -17781,7 +17786,7 @@ struct Dtool_PyTypedObject Dtool_CBrushEntity = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.CBrushEntity",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_CBrushEntity,
 #if PY_VERSION_HEX >= 0x03080000
@@ -17861,6 +17866,7 @@ static void Dtool_PyModuleClassInit_CBrushEntity(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_CBaseEntity(nullptr);
     Dtool_CBrushEntity._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_CBaseEntity);
+    Dtool_CBrushEntity._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_CBrushEntity._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -17947,7 +17953,7 @@ struct Dtool_PyTypedObject Dtool_PackResult = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.PackResult",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_PackResult,
 #if PY_VERSION_HEX >= 0x03080000
@@ -18116,7 +18122,7 @@ struct Dtool_PyTypedObject Dtool_TextureLocation = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.TextureLocation",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_TextureLocation,
 #if PY_VERSION_HEX >= 0x03080000
@@ -18282,7 +18288,7 @@ struct Dtool_PyTypedObject Dtool_TexturePacker = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.TexturePacker",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_TexturePacker,
 #if PY_VERSION_HEX >= 0x03080000
@@ -18443,7 +18449,7 @@ struct Dtool_PyTypedObject Dtool_RayTrace = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.RayTrace",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_RayTrace,
 #if PY_VERSION_HEX >= 0x03080000
@@ -18614,7 +18620,7 @@ struct Dtool_PyTypedObject Dtool_RayTraceHitResult = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.RayTraceHitResult",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_RayTraceHitResult,
 #if PY_VERSION_HEX >= 0x03080000
@@ -18828,7 +18834,7 @@ struct Dtool_PyTypedObject Dtool_RayTraceScene = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.RayTraceScene",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_RayTraceScene,
 #if PY_VERSION_HEX >= 0x03080000
@@ -18910,6 +18916,7 @@ static void Dtool_PyModuleClassInit_RayTraceScene(PyObject *module) {
     assert(Dtool_Ptr_ReferenceCount->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_ReferenceCount->_Dtool_ModuleClassInit(nullptr);
     Dtool_RayTraceScene._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_ReferenceCount);
+    Dtool_RayTraceScene._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = _PyDict_NewPresized(7);
     Dtool_RayTraceScene._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -19043,7 +19050,7 @@ struct Dtool_PyTypedObject Dtool_RayTraceGeometry = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.RayTraceGeometry",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_RayTraceGeometry,
 #if PY_VERSION_HEX >= 0x03080000
@@ -19125,6 +19132,7 @@ static void Dtool_PyModuleClassInit_RayTraceGeometry(PyObject *module) {
     assert(Dtool_Ptr_PandaNode->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_PandaNode->_Dtool_ModuleClassInit(nullptr);
     Dtool_RayTraceGeometry._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_PandaNode);
+    Dtool_RayTraceGeometry._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_RayTraceGeometry._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -19249,7 +19257,7 @@ struct Dtool_PyTypedObject Dtool_RayTraceTriangleMesh = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.RayTraceTriangleMesh",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_RayTraceTriangleMesh,
 #if PY_VERSION_HEX >= 0x03080000
@@ -19329,6 +19337,7 @@ static void Dtool_PyModuleClassInit_RayTraceTriangleMesh(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_RayTraceGeometry(nullptr);
     Dtool_RayTraceTriangleMesh._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_RayTraceGeometry);
+    Dtool_RayTraceTriangleMesh._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_RayTraceTriangleMesh._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -19462,7 +19471,7 @@ struct Dtool_PyTypedObject Dtool_BSPFaceAttrib = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BSPFaceAttrib",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPFaceAttrib,
 #if PY_VERSION_HEX >= 0x03080000
@@ -19552,6 +19561,7 @@ static void Dtool_PyModuleClassInit_BSPFaceAttrib(PyObject *module) {
     assert(Dtool_Ptr_RenderAttrib->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_RenderAttrib->_Dtool_ModuleClassInit(nullptr);
     Dtool_BSPFaceAttrib._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_RenderAttrib);
+    Dtool_BSPFaceAttrib._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BSPFaceAttrib._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -19752,7 +19762,7 @@ struct Dtool_PyTypedObject Dtool_BSPLoader = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BSPLoader",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPLoader,
 #if PY_VERSION_HEX >= 0x03080000
@@ -19885,7 +19895,7 @@ static Py_hash_t Dtool_ShaderPermutations_get_hash_236_tp_hash(PyObject *self) {
     return -1;
   }
 
-  return (Py_hash_t) (*local_this).get_hash();
+  return (Py_hash_t) ((*local_this).get_hash)();
 }
 
 static PyNumberMethods Dtool_NumberMethods_ShaderPermutations = {
@@ -19988,7 +19998,7 @@ struct Dtool_PyTypedObject Dtool_ShaderPermutations = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.ShaderPermutations",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_ShaderPermutations,
 #if PY_VERSION_HEX >= 0x03080000
@@ -20080,6 +20090,7 @@ static void Dtool_PyModuleClassInit_ShaderPermutations(PyObject *module) {
     assert(Dtool_Ptr_ReferenceCount->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_ReferenceCount->_Dtool_ModuleClassInit(nullptr);
     Dtool_ShaderPermutations._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_ReferenceCount);
+    Dtool_ShaderPermutations._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_ShaderPermutations._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -20206,7 +20217,7 @@ struct Dtool_PyTypedObject Dtool_ShaderSpec = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.ShaderSpec",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_ShaderSpec,
 #if PY_VERSION_HEX >= 0x03080000
@@ -20298,6 +20309,7 @@ static void Dtool_PyModuleClassInit_ShaderSpec(PyObject *module) {
     assert(Dtool_Ptr_Namable->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_Namable->_Dtool_ModuleClassInit(nullptr);
     Dtool_ShaderSpec._PyType.tp_bases = PyTuple_Pack(2, (PyTypeObject *)Dtool_Ptr_ReferenceCount, (PyTypeObject *)Dtool_Ptr_Namable);
+    Dtool_ShaderSpec._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_ShaderSpec._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -20454,7 +20466,7 @@ struct Dtool_PyTypedObject Dtool_BSPShaderGenerator = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BSPShaderGenerator",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPShaderGenerator,
 #if PY_VERSION_HEX >= 0x03080000
@@ -20536,6 +20548,7 @@ static void Dtool_PyModuleClassInit_BSPShaderGenerator(PyObject *module) {
     assert(Dtool_Ptr_ShaderGenerator->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_ShaderGenerator->_Dtool_ModuleClassInit(nullptr);
     Dtool_BSPShaderGenerator._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_ShaderGenerator);
+    Dtool_BSPShaderGenerator._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BSPShaderGenerator._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -20658,7 +20671,7 @@ struct Dtool_PyTypedObject Dtool_BSPCullTraverser = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BSPCullTraverser",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPCullTraverser,
 #if PY_VERSION_HEX >= 0x03080000
@@ -20740,6 +20753,7 @@ static void Dtool_PyModuleClassInit_BSPCullTraverser(PyObject *module) {
     assert(Dtool_Ptr_CullTraverser->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_CullTraverser->_Dtool_ModuleClassInit(nullptr);
     Dtool_BSPCullTraverser._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_CullTraverser);
+    Dtool_BSPCullTraverser._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BSPCullTraverser._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -20862,7 +20876,7 @@ struct Dtool_PyTypedObject Dtool_BSPRender = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BSPRender",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPRender,
 #if PY_VERSION_HEX >= 0x03080000
@@ -20951,6 +20965,7 @@ static void Dtool_PyModuleClassInit_BSPRender(PyObject *module) {
     assert(Dtool_Ptr_PandaNode->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_PandaNode->_Dtool_ModuleClassInit(nullptr);
     Dtool_BSPRender._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_PandaNode);
+    Dtool_BSPRender._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BSPRender._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -21073,7 +21088,7 @@ struct Dtool_PyTypedObject Dtool_BSPRoot = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BSPRoot",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPRoot,
 #if PY_VERSION_HEX >= 0x03080000
@@ -21155,6 +21170,7 @@ static void Dtool_PyModuleClassInit_BSPRoot(PyObject *module) {
     assert(Dtool_Ptr_PandaNode->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_PandaNode->_Dtool_ModuleClassInit(nullptr);
     Dtool_BSPRoot._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_PandaNode);
+    Dtool_BSPRoot._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BSPRoot._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -21277,7 +21293,7 @@ struct Dtool_PyTypedObject Dtool_BSPProp = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BSPProp",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPProp,
 #if PY_VERSION_HEX >= 0x03080000
@@ -21359,6 +21375,7 @@ static void Dtool_PyModuleClassInit_BSPProp(PyObject *module) {
     assert(Dtool_Ptr_ModelRoot->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_ModelRoot->_Dtool_ModuleClassInit(nullptr);
     Dtool_BSPProp._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_ModelRoot);
+    Dtool_BSPProp._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BSPProp._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -21481,7 +21498,7 @@ struct Dtool_PyTypedObject Dtool_BSPModel = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BSPModel",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BSPModel,
 #if PY_VERSION_HEX >= 0x03080000
@@ -21563,6 +21580,7 @@ static void Dtool_PyModuleClassInit_BSPModel(PyObject *module) {
     assert(Dtool_Ptr_ModelNode->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_ModelNode->_Dtool_ModuleClassInit(nullptr);
     Dtool_BSPModel._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_ModelNode);
+    Dtool_BSPModel._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BSPModel._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -21681,7 +21699,7 @@ struct Dtool_PyTypedObject Dtool_VertexLitGenericSpec = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.VertexLitGenericSpec",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_VertexLitGenericSpec,
 #if PY_VERSION_HEX >= 0x03080000
@@ -21761,6 +21779,7 @@ static void Dtool_PyModuleClassInit_VertexLitGenericSpec(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_ShaderSpec(nullptr);
     Dtool_VertexLitGenericSpec._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_ShaderSpec);
+    Dtool_VertexLitGenericSpec._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_VertexLitGenericSpec._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -21879,7 +21898,7 @@ struct Dtool_PyTypedObject Dtool_LightmappedGenericSpec = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.LightmappedGenericSpec",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_LightmappedGenericSpec,
 #if PY_VERSION_HEX >= 0x03080000
@@ -21959,6 +21978,7 @@ static void Dtool_PyModuleClassInit_LightmappedGenericSpec(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_ShaderSpec(nullptr);
     Dtool_LightmappedGenericSpec._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_ShaderSpec);
+    Dtool_LightmappedGenericSpec._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_LightmappedGenericSpec._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -22077,7 +22097,7 @@ struct Dtool_PyTypedObject Dtool_UnlitGenericSpec = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.UnlitGenericSpec",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_UnlitGenericSpec,
 #if PY_VERSION_HEX >= 0x03080000
@@ -22164,6 +22184,7 @@ static void Dtool_PyModuleClassInit_UnlitGenericSpec(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_ShaderSpec(nullptr);
     Dtool_UnlitGenericSpec._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_ShaderSpec);
+    Dtool_UnlitGenericSpec._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_UnlitGenericSpec._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -22282,7 +22303,7 @@ struct Dtool_PyTypedObject Dtool_UnlitNoMatSpec = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.UnlitNoMatSpec",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_UnlitNoMatSpec,
 #if PY_VERSION_HEX >= 0x03080000
@@ -22362,6 +22383,7 @@ static void Dtool_PyModuleClassInit_UnlitNoMatSpec(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_ShaderSpec(nullptr);
     Dtool_UnlitNoMatSpec._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_ShaderSpec);
+    Dtool_UnlitNoMatSpec._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_UnlitNoMatSpec._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -22480,7 +22502,7 @@ struct Dtool_PyTypedObject Dtool_CSMRenderSpec = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.CSMRenderSpec",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_CSMRenderSpec,
 #if PY_VERSION_HEX >= 0x03080000
@@ -22560,6 +22582,7 @@ static void Dtool_PyModuleClassInit_CSMRenderSpec(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_ShaderSpec(nullptr);
     Dtool_CSMRenderSpec._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_ShaderSpec);
+    Dtool_CSMRenderSpec._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_CSMRenderSpec._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -22678,7 +22701,7 @@ struct Dtool_PyTypedObject Dtool_SkyBoxSpec = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.SkyBoxSpec",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_SkyBoxSpec,
 #if PY_VERSION_HEX >= 0x03080000
@@ -22758,6 +22781,7 @@ static void Dtool_PyModuleClassInit_SkyBoxSpec(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_ShaderSpec(nullptr);
     Dtool_SkyBoxSpec._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_ShaderSpec);
+    Dtool_SkyBoxSpec._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_SkyBoxSpec._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -22879,7 +22903,7 @@ struct Dtool_PyTypedObject Dtool_AmbientBoostEffect = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.AmbientBoostEffect",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_AmbientBoostEffect,
 #if PY_VERSION_HEX >= 0x03080000
@@ -22961,6 +22985,7 @@ static void Dtool_PyModuleClassInit_AmbientBoostEffect(PyObject *module) {
     assert(Dtool_Ptr_RenderEffect->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_RenderEffect->_Dtool_ModuleClassInit(nullptr);
     Dtool_AmbientBoostEffect._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_RenderEffect);
+    Dtool_AmbientBoostEffect._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_AmbientBoostEffect._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -23074,7 +23099,7 @@ struct Dtool_PyTypedObject Dtool_Audio3DManager = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.Audio3DManager",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_Audio3DManager,
 #if PY_VERSION_HEX >= 0x03080000
@@ -23237,7 +23262,7 @@ struct Dtool_PyTypedObject Dtool_CIOLib = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.CIOLib",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_CIOLib,
 #if PY_VERSION_HEX >= 0x03080000
@@ -23434,7 +23459,7 @@ struct Dtool_PyTypedObject Dtool_DecalModulateSpec = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.DecalModulateSpec",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_DecalModulateSpec,
 #if PY_VERSION_HEX >= 0x03080000
@@ -23520,6 +23545,7 @@ static void Dtool_PyModuleClassInit_DecalModulateSpec(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_UnlitGenericSpec(nullptr);
     Dtool_DecalModulateSpec._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_UnlitGenericSpec);
+    Dtool_DecalModulateSpec._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_DecalModulateSpec._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -23642,7 +23668,7 @@ struct Dtool_PyTypedObject Dtool_GlowNode = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.GlowNode",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_GlowNode,
 #if PY_VERSION_HEX >= 0x03080000
@@ -23733,6 +23759,7 @@ static void Dtool_PyModuleClassInit_GlowNode(PyObject *module) {
     assert(Dtool_Ptr_GeomNode->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_GeomNode->_Dtool_ModuleClassInit(nullptr);
     Dtool_GlowNode._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_GeomNode);
+    Dtool_GlowNode._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_GlowNode._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -23870,7 +23897,7 @@ struct Dtool_PyTypedObject Dtool_PostProcessEffect = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.PostProcessEffect",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_PostProcessEffect,
 #if PY_VERSION_HEX >= 0x03080000
@@ -23955,6 +23982,7 @@ static void Dtool_PyModuleClassInit_PostProcessEffect(PyObject *module) {
     assert(Dtool_Ptr_Namable->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_Namable->_Dtool_ModuleClassInit(nullptr);
     Dtool_PostProcessEffect._PyType.tp_bases = PyTuple_Pack(2, (PyTypeObject *)Dtool_Ptr_ReferenceCount, (PyTypeObject *)Dtool_Ptr_Namable);
+    Dtool_PostProcessEffect._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_PostProcessEffect._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -24122,7 +24150,7 @@ struct Dtool_PyTypedObject Dtool_PostProcessPass = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.PostProcessPass",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_PostProcessPass,
 #if PY_VERSION_HEX >= 0x03080000
@@ -24207,6 +24235,7 @@ static void Dtool_PyModuleClassInit_PostProcessPass(PyObject *module) {
     assert(Dtool_Ptr_Namable->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_Namable->_Dtool_ModuleClassInit(nullptr);
     Dtool_PostProcessPass._PyType.tp_bases = PyTuple_Pack(2, (PyTypeObject *)Dtool_Ptr_ReferenceCount, (PyTypeObject *)Dtool_Ptr_Namable);
+    Dtool_PostProcessPass._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_PostProcessPass._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -24331,7 +24360,7 @@ struct Dtool_PyTypedObject Dtool_PostProcessScenePass = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.PostProcessScenePass",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_PostProcessScenePass,
 #if PY_VERSION_HEX >= 0x03080000
@@ -24411,6 +24440,7 @@ static void Dtool_PyModuleClassInit_PostProcessScenePass(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_PostProcessPass(nullptr);
     Dtool_PostProcessScenePass._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_PostProcessPass);
+    Dtool_PostProcessScenePass._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_PostProcessScenePass._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -24526,7 +24556,7 @@ struct Dtool_PyTypedObject Dtool_PostProcess = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.PostProcess",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_PostProcess,
 #if PY_VERSION_HEX >= 0x03080000
@@ -24731,7 +24761,7 @@ struct Dtool_PyTypedObject Dtool_HDRPass = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.HDRPass",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_HDRPass,
 #if PY_VERSION_HEX >= 0x03080000
@@ -24811,6 +24841,7 @@ static void Dtool_PyModuleClassInit_HDRPass(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_PostProcessPass(nullptr);
     Dtool_HDRPass._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_PostProcessPass);
+    Dtool_HDRPass._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_HDRPass._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -24931,7 +24962,7 @@ struct Dtool_PyTypedObject Dtool_HDREffect = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.HDREffect",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_HDREffect,
 #if PY_VERSION_HEX >= 0x03080000
@@ -25011,6 +25042,7 @@ static void Dtool_PyModuleClassInit_HDREffect(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_PostProcessEffect(nullptr);
     Dtool_HDREffect._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_PostProcessEffect);
+    Dtool_HDREffect._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_HDREffect._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -25131,7 +25163,7 @@ struct Dtool_PyTypedObject Dtool_BloomEffect = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.BloomEffect",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_BloomEffect,
 #if PY_VERSION_HEX >= 0x03080000
@@ -25211,6 +25243,7 @@ static void Dtool_PyModuleClassInit_BloomEffect(PyObject *module) {
     // Dependent objects
     Dtool_PyModuleClassInit_PostProcessEffect(nullptr);
     Dtool_BloomEffect._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_PostProcessEffect);
+    Dtool_BloomEffect._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_BloomEffect._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -25334,7 +25367,7 @@ struct Dtool_PyTypedObject Dtool_LightingOriginEffect = {
   {
     PyVarObject_HEAD_INIT(nullptr, 0)
     "bsp.LightingOriginEffect",
-    sizeof(Dtool_PyInstDef),
+    0, // tp_basicsize
     0, // tp_itemsize
     &Dtool_FreeInstance_LightingOriginEffect,
 #if PY_VERSION_HEX >= 0x03080000
@@ -25416,6 +25449,7 @@ static void Dtool_PyModuleClassInit_LightingOriginEffect(PyObject *module) {
     assert(Dtool_Ptr_RenderEffect->_Dtool_ModuleClassInit != nullptr);
     Dtool_Ptr_RenderEffect->_Dtool_ModuleClassInit(nullptr);
     Dtool_LightingOriginEffect._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)Dtool_Ptr_RenderEffect);
+    Dtool_LightingOriginEffect._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_LightingOriginEffect._PyType.tp_dict = dict;
     PyDict_SetItemString(dict, "DtoolClassDict", dict);
@@ -25769,7 +25803,7 @@ extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, nullp
 extern const struct LibraryDef bsp_moddef = {python_simple_funcs, exports, imports};
 #endif
 static InterrogateModuleDef _in_module_def = {
-  1573914645,  /* file_identifier */
+  1574033916,  /* file_identifier */
   "bsp",  /* library_name */
   "t5GT",  /* library_hash_name */
   "bsp",  /* module_name */

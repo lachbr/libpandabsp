@@ -13,6 +13,18 @@
 #include "bsploader.h"
 #include "bounding_kdop.h"
 
+entitydef_t::entitydef_t( CBaseEntity *cent, PyObject *pent, bool dyn )
+{
+	c_entity = cent;
+	py_entity = pent;
+	preserved = false;
+	dynamic = dyn;
+}
+
+entitydef_t::~entitydef_t()
+{
+}
+
 TypeDef( CBaseEntity );
 TypeDef( CPointEntity );
 TypeDef( CBrushEntity );

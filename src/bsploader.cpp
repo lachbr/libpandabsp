@@ -1803,6 +1803,7 @@ bool BSPLoader::read( const Filename &file, bool is_transition )
 
 void BSPLoader::add_dynamic_entity( PyObject *pyent )
 {
+	Py_INCREF( pyent );
 	_entities.push_back( entitydef_t( nullptr, pyent, true ) );
 }
 
@@ -1821,7 +1822,7 @@ void BSPLoader::remove_dynamic_entity( PyObject *pyent )
 
 	nassertv( itr != _entities.end() );
 
-	Py_DECREF( itr->py_entity );
+	Py_DECREF( pyent );
 	_entities.erase( itr );
 }
 

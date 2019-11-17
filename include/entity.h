@@ -43,13 +43,8 @@ struct entitydef_t
 
 	LMatrix4f landmark_relative_transform;
 
-	entitydef_t( CBaseEntity *cent, PyObject *pent = nullptr, bool dyn = false )
-	{
-		c_entity = cent;
-		py_entity = pent;
-		preserved = false;
-		dynamic = dyn;
-	}
+	entitydef_t( CBaseEntity *cent, PyObject *pent = nullptr, bool dyn = false );
+	~entitydef_t();
 };
 
 class EXPCL_PANDABSP CBaseEntity : public TypedReferenceCount

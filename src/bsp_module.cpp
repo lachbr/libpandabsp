@@ -211,8 +211,7 @@ PyObject *Dtool_Raise_AssertionError() {
 #else
   PyObject *message = PyString_FromString(notify->get_assert_error_message().c_str());
 #endif
-  Py_INCREF(PyExc_AssertionError);
-  PyErr_Restore(PyExc_AssertionError, message, nullptr);
+  PyErr_SetObject(PyExc_AssertionError, message);
   notify->clear_assert_failed();
   return nullptr;
 }
@@ -221,14 +220,7 @@ PyObject *Dtool_Raise_AssertionError() {
  * Raises a TypeError with the given message, and returns NULL.
  */
 PyObject *Dtool_Raise_TypeError(const char *message) {
-  // PyErr_Restore is what PyErr_SetString would have ended up calling
-  // eventually anyway, so we might as well just get to the point.
-  Py_INCREF(PyExc_TypeError);
-#if PY_MAJOR_VERSION >= 3
-  PyErr_Restore(PyExc_TypeError, PyUnicode_FromString(message), nullptr);
-#else
-  PyErr_Restore(PyExc_TypeError, PyString_FromString(message), nullptr);
-#endif
+  PyErr_SetString(PyExc_TypeError, message);
   return nullptr;
 }
 
@@ -249,8 +241,7 @@ PyObject *Dtool_Raise_ArgTypeError(PyObject *obj, int param, const char *functio
     function_name, param, type_name,
     Py_TYPE(obj)->tp_name);
 
-  Py_INCREF(PyExc_TypeError);
-  PyErr_Restore(PyExc_TypeError, message, nullptr);
+  PyErr_SetObject(PyExc_TypeError, message);
   return nullptr;
 }
 
@@ -269,8 +260,7 @@ PyObject *Dtool_Raise_AttributeError(PyObject *obj, const char *attribute) {
     "'%.100s' object has no attribute '%.200s'",
     Py_TYPE(obj)->tp_name, attribute);
 
-  Py_INCREF(PyExc_AttributeError);
-  PyErr_Restore(PyExc_AttributeError, message, nullptr);
+  PyErr_SetObject(PyExc_AttributeError, message);
   return nullptr;
 }
 
@@ -1052,7 +1042,7 @@ static PyObject *Dtool_SequenceWrapper_repr(PyObject *self) {
   }
 
   if (len < 0) {
-    PyErr_Restore(nullptr, nullptr, nullptr);
+    PyErr_Clear();
     return Dtool_WrapperBase_repr(self);
   }
 
@@ -1399,7 +1389,7 @@ static int Dtool_MappingWrapper_contains(PyObject *self, PyObject *key) {
     return 1;
   } else if (_PyErr_OCCURRED() == PyExc_KeyError ||
              _PyErr_OCCURRED() == PyExc_TypeError) {
-    PyErr_Restore(nullptr, nullptr, nullptr);
+    PyErr_Clear();
     return 0;
   } else {
     return -1;
@@ -1457,7 +1447,7 @@ static PyObject *Dtool_MappingWrapper_get(PyObject *self, PyObject *args) {
   if (value != nullptr) {
     return value;
   } else if (_PyErr_OCCURRED() == PyExc_KeyError) {
-    PyErr_Restore(nullptr, nullptr, nullptr);
+    PyErr_Clear();
     Py_INCREF(defvalue);
     return defvalue;
   } else {
@@ -1921,7 +1911,7 @@ static PyObject *Dtool_MutableMappingWrapper_pop(PyObject *self, PyObject *args)
       return nullptr;
     }
   } else if (_PyErr_OCCURRED() == PyExc_KeyError) {
-    PyErr_Restore(nullptr, nullptr, nullptr);
+    PyErr_Clear();
     Py_INCREF(defvalue);
     return defvalue;
   } else {
@@ -2021,7 +2011,7 @@ static PyObject *Dtool_MutableMappingWrapper_setdefault(PyObject *self, PyObject
   if (value != nullptr) {
     return value;
   } else if (_PyErr_OCCURRED() == PyExc_KeyError) {
-    PyErr_Restore(nullptr, nullptr, nullptr);
+    PyErr_Clear();
     if (wrap->_setitem_func(wrap->_base._self, key, defvalue) == 0) {
       Py_INCREF(defvalue);
       return defvalue;
