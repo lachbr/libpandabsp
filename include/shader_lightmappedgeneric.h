@@ -26,6 +26,8 @@ public:
         EnvmapFeature envmap;
         BumpmapFeature bumpmap;
         DetailFeature detail;
+
+	bool _uses_planar_reflection;
 };
 
 class LightmappedGenericSpec : public ShaderSpec

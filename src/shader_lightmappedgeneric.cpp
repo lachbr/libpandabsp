@@ -11,6 +11,8 @@
 
 #include "shader_lightmappedgeneric.h"
 #include "bsploader.h"
+#include "shader_generator.h"
+#include "planar_reflections.h"
 
 #include <lightRampAttrib.h>
 #include <textureStage.h>
@@ -27,6 +29,10 @@ void LMGConfig::parse_from_material_keyvalues( const BSPMaterial *mat )
         envmap.parse_from_material_keyvalues( mat, this );
         bumpmap.parse_from_material_keyvalues( mat, this );
         detail.parse_from_material_keyvalues( mat, this );
+
+	_uses_planar_reflection = mat->has_keyvalue( "$planarreflection" ) &&
+		mat->get_keyvalue_int( "$planarreflection" ) != 0 &&
+		!mat->has_keyvalue( "$envmap" );
 }
 
 LightmappedGenericSpec::LightmappedGenericSpec() :
@@ -59,6 +65,12 @@ void LightmappedGenericSpec::setup_permutations( ShaderPermutations &result,
         conf->envmap.add_permutations( result );
         conf->bumpmap.add_permutations( result );
         conf->detail.add_permutations( result );
+
+	if ( conf->_uses_planar_reflection )
+	{
+		result.add_permutation( "PLANAR_REFLECTION" );
+		result.add_input( ShaderInput( "reflectionRTT", generator->get_planar_reflections()->get_reflection_texture() ) );
+	}
 
         const TextureAttrib *tattr;
         rs->get_attrib_def( tattr );

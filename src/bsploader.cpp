@@ -22,6 +22,7 @@
 #include "bsptools.h"
 #include "postprocess/hdr.h"
 #include "static_props.h"
+#include "planar_reflections.h"
 
 #include <array>
 #include <bitset>
@@ -633,6 +634,17 @@ void BSPLoader::make_faces()
                         texref_t *texref = &_bspdata->dtexrefs[texinfo->texref];
 
                         CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
+			if ( bspmat->is_lightmapped() &&
+			     bspmat->has_keyvalue( "$planarreflection" ) &&
+			     bspmat->get_keyvalue_int( "$planarreflection" ) != 0 &&
+			     !bspmat->has_keyvalue( "$envmap" ) )
+			{
+				dplane_t *plane = _bspdata->dplanes + face->planenum;
+				LVector3 planevec = LVector3( plane->normal[0],
+							      plane->normal[1],
+							      plane->normal[2] );
+				_shgen->get_planar_reflections()->setup( planevec, plane->dist / 16.0 );
+			}
                         contents_t contents = ContentsFromName( bspmat->get_contents().c_str() );
                         if ( ( contents & ( CONTENTS_SOLID | CONTENTS_WATER | CONTENTS_SKY | CONTENTS_TRANSLUCENT ) ) == 0 )
                         {
@@ -2168,6 +2180,9 @@ void BSPLoader::cleanup( bool is_transition )
 {
 	if ( !_active_level )
 		return;
+
+	if ( !_ai )
+		_shgen->get_planar_reflections()->shutdown();
 
         _active_level = false;
 

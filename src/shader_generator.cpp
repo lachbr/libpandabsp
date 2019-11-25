@@ -74,9 +74,10 @@ PT( Texture ) BSPShaderGenerator::_identity_cubemap = nullptr;
 
 NotifyCategoryDef( bspShaderGenerator, "" );
 
-BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePath &camera, const NodePath &render ) :
+BSPShaderGenerator::BSPShaderGenerator( GraphicsOutput *output, GraphicsStateGuardian *gsg, const NodePath &camera, const NodePath &render ) :
 	ShaderGenerator( gsg ),
 	_gsg( gsg ),
+	_output( output ),
 	_update_task( new GenericAsyncTask( "PSSMShaderGenerator_update_pssm", update_pssm, this ) ),
 	_pssm_rig( new PSSMCameraRig( pssm_splits, this ) ),
 	_camera( camera ),
@@ -95,7 +96,7 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePa
 
         // Shadows need to be updated before literally anything else.
         // Any RTT of the main scene should happen after shadows are updated.
-        _update_task->set_sort( -10000 );
+        _update_task->set_sort( 47 );
         _pssm_rig->set_use_stable_csm( true );
         _pssm_rig->set_sun_distance( pssm_sun_distance );
         _pssm_rig->set_pssm_distance( pssm_max_distance );
@@ -103,6 +104,8 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePa
         _pssm_rig->set_use_fixed_film_size( true );
 
         BSPLoader::get_global_ptr()->set_shader_generator( this );
+
+	_planar_reflections = new PlanarReflections( this );
 
         if ( want_pssm )
         {
@@ -270,6 +273,8 @@ AsyncTask::DoneStatus BSPShaderGenerator::update_pssm( GenericAsyncTask *task, v
 
 		self->_pta_fogdata[1][3] = 1.0f;//self->_fog->get_linear
 	}
+
+	self->_planar_reflections->update();
 
         return AsyncTask::DS_cont;
 }

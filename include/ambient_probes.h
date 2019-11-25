@@ -141,6 +141,7 @@ public:
                 cubemap = nullptr;
                 state_with_input = nullptr;
                 cubemap_tex = new Texture( "cubemap_image" );
+		cubemap_tex->setup_cube_map( 32, Texture::T_unsigned_byte, Texture::F_rgb8 );
                 cubemap_tex->clear_image();
                 sky_idx = -1;
                 active_lights = 0;
@@ -190,7 +191,7 @@ public:
 
         void process_ambient_probes();
 
-	const RenderState *update_node( PandaNode *node, CPT( TransformState ) net_ts );
+	const RenderState *update_node( PandaNode *node, CPT( TransformState ) net_ts, bool should_update = true );
 
         void load_cubemaps();
 

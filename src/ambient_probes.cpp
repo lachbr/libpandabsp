@@ -479,7 +479,8 @@ INLINE void apply_lightdatas( int n, const light_t *light, nodeshaderinput_t *in
 }
 
 const RenderState *AmbientProbeManager::update_node( PandaNode *node,
-						     CPT( TransformState ) curr_trans )
+						     CPT( TransformState ) curr_trans,
+						     bool should_update )
 {
         PStatTimer timer( updatenode_collector );
 
@@ -541,6 +542,12 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
         {
                 return nullptr;
         }
+
+	if ( !should_update && !new_instance )
+	{
+		// Just retrieving the current state, no updating.
+		return input->state_with_input;
+	}
 
         input->cubemap_changed = false;
 

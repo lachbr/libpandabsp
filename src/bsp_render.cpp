@@ -319,7 +319,6 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
 			wsp_trav_collector.stop();
 		}
 		else if ( _loader->has_active_level() &&
-			  has_camera_bits( CAMERA_MAIN | CAMERA_VIEWMODEL ) &&
 			  node->is_of_type( ModelRoot::get_class_type() ) )
                 {
                         // Only run this logic on the main Camera and viewmodel.
@@ -340,7 +339,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                         {
                                 // Update the node's ambient probe stuff:
                                 const RenderState *input_state = _loader->_amb_probe_mgr.update_node(
-                                        node, data.get_net_transform( this ) );
+                                        node, data.get_net_transform( this ), has_camera_bits( CAMERA_MAIN | CAMERA_VIEWMODEL ) );
                                 if ( input_state )
                                 {
                                         data._state = data._state->compose( input_state );

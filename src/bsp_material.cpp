@@ -194,7 +194,7 @@ const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
                 ( mat->has_keyvalue( "$alpha" ) && atof( mat->get_keyvalue( "$alpha" ).c_str() ) < 1.0 );
 	mat->_has_bumpmap = mat->has_keyvalue( "$bumpmap" );
 	// UNDONE: This is hardcoded, maybe define a global list of lightmapped shaders?
-	mat->_lightmapped = mat->get_shader() == "LightmappedGeneric"; 
+	mat->_lightmapped = mat->get_shader() == "LightmappedGeneric";
 
         _material_cache[file] = mat;
 

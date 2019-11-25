@@ -21,6 +21,7 @@
 #include <fog.h>
 
 #include "shader_spec.h"
+#include "planar_reflections.h"
 
 class PSSMCameraRig;
 class GraphicsStateGuardian;
@@ -75,7 +76,7 @@ END_PUBLISH
 class BSPShaderGenerator : public ShaderGenerator
 {
 PUBLISHED:
-        BSPShaderGenerator( GraphicsStateGuardian *gsg, const NodePath &camera, const NodePath &render );
+        BSPShaderGenerator( GraphicsOutput *output, GraphicsStateGuardian *gsg, const NodePath &camera, const NodePath &render );
 
         virtual CPT( ShaderAttrib ) synthesize_shader( const RenderState *rs,
                                                        const GeomVertexAnimationSpec &anim );
@@ -103,6 +104,16 @@ PUBLISHED:
         {
                 return _pssm_rig;
         }
+
+	INLINE NodePath get_camera() const
+	{
+		return _camera;
+	}
+
+	INLINE NodePath get_render() const
+	{
+		return _render;
+	}
 
         void set_shader_quality( int quality );
         INLINE int get_shader_quality() const
@@ -138,6 +149,19 @@ PUBLISHED:
 		return _exposure_adjustment;
 	}
 
+	INLINE GraphicsStateGuardian *get_gsg() const
+	{
+		return _gsg;
+	}
+	INLINE GraphicsOutput *get_output() const
+	{
+		return _output;
+	}
+	INLINE PlanarReflections *get_planar_reflections() const
+	{
+		return _planar_reflections;
+	}
+
         static void set_identity_cubemap( Texture *tex );
         static Texture *get_identity_cubemap();
 
@@ -171,9 +195,11 @@ private:
         WeakNodePath _sunlight;
         PT( GenericAsyncTask ) _update_task;
         GraphicsStateGuardian *_gsg;
+	GraphicsOutput *_output;
         LVector3 _sun_vector;
         NodePath _camera;
         NodePath _render;
+	PT( PlanarReflections ) _planar_reflections;
 
         static PT( Texture ) _identity_cubemap;
 
