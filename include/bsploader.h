@@ -31,6 +31,8 @@
 #include <boundingBox.h>
 #include <lightReMutex.h>
 #include <graphicsWindow.h>
+#include <bulletWorld.h>
+#include <bulletRigidBodyNode.h>
 
 #include "lightmap_palettes.h"
 #include "ambient_probes.h"
@@ -161,6 +163,27 @@ struct dface_lightmap_info_t
 	LightmapPaletteDirectory::LightmapFacePaletteEntry *palette_entry;
 };
 
+struct brush_collision_data_t
+{
+	std::string material;
+	int modelnum;
+};
+
+struct brush_model_data_t
+{
+	int modelnum;
+	int merged_modelnum;
+	LPoint3 origin;
+	LMatrix4f origin_matrix;
+	NodePath model_root;
+	PT( RigidBodyCombiner ) decal_rbc;
+
+	brush_model_data_t()
+	{
+		decal_rbc = new RigidBodyCombiner( "decal-rbc" );
+	}
+};
+
 /**
  * Loads and handles the operations of PBSP files.
  */
@@ -168,6 +191,41 @@ class EXPCL_PANDABSP BSPLoader
 {
 PUBLISHED:
 	BSPLoader();
+
+	void remove_physics( const NodePath &root );
+
+	void set_physics_world( BulletWorld *world );
+	INLINE BulletWorld *get_physics_world() const
+	{
+		return _physics_world;
+	}
+
+	INLINE bool has_brush_collision_node( BulletRigidBodyNode *rbnode ) const
+	{
+		return _brush_collision_data.find( rbnode ) != _brush_collision_data.end();
+	}
+
+	INLINE bool has_brush_collision_triangle( BulletRigidBodyNode *rbnode, int triangle_idx )
+	{
+		return _brush_collision_data[rbnode].find( triangle_idx ) != _brush_collision_data[rbnode].end();
+	}
+
+	INLINE std::string get_brush_triangle_material( BulletRigidBodyNode *rbnode, int triangle_idx )
+	{
+		return _brush_collision_data[rbnode][triangle_idx].material;
+	}
+
+	INLINE int get_brush_triangle_model( BulletRigidBodyNode *rbnode, int triangle_idx )
+	{
+		return _brush_collision_data[rbnode][triangle_idx].modelnum;
+	}
+
+	int get_brush_triangle_model_fast( BulletRigidBodyNode *rbnode, int triangle_idx );
+
+	INLINE LPoint3 get_model_origin( int modelnum )
+	{
+		return _model_data[modelnum].origin;
+	}
 
 	void add_dynamic_entity( PyObject *pyent );
 	void remove_dynamic_entity( PyObject *pyent );
@@ -195,6 +253,7 @@ PUBLISHED:
 
         bool read( const Filename &file, bool is_transition = false );
 	void do_optimizations();
+	void spawn_entities();
 
 	void set_gamma( PN_stdfloat gamma, int overbright = 1 );
         INLINE PN_stdfloat get_gamma() const
@@ -328,6 +387,11 @@ PUBLISHED:
 	};
 
 public:
+	INLINE brush_model_data_t &get_brush_model_data( int modelnum )
+	{
+		return _model_data[modelnum];
+	}
+
         INLINE bspdata_t *get_bspdata() const
         {
                 return _bspdata;
@@ -363,8 +427,6 @@ public:
 	}
 
 private:
-	void spawn_entities();
-
 	void setup_raytrace_environment();
 
 	void update_leaf( int leaf );
@@ -372,7 +434,11 @@ private:
         void make_faces();
 
         void make_faces_ai();
-        NodePath make_faces_ai_base( const std::string &name, const vector_string &include_entities );
+        NodePath make_faces_ai_base( const std::string &name, const vector_string &include_entities,
+				     const vector_string &exclude_entities = vector_string() );
+	NodePath make_model_faces( int modelnum );
+
+	void make_brush_model_collisions( int modelnum = -1 );
 
 	void load_entities();
         void load_static_props();
@@ -427,6 +493,7 @@ private:
         bool _active_level;
         bool _ai;
 	int _physics_type;
+	BulletWorld *_physics_world;
 
 	PT( BSPTrace ) _trace;
 
@@ -459,8 +526,7 @@ private:
 	pvector<NodePath> _leaf_visnp;
 	pvector<PT( BoundingBox )> _leaf_bboxs;
 	pvector<entitydef_t> _entities;
-	pvector<NodePath> _model_roots;
-        pmap<NodePath, LPoint3> _model_origins;
+	pvector<brush_model_data_t> _model_data;
         LightmapPaletteDirectory _lightmap_dir;
 	pvector<dface_lightmap_info_t> _face_lightmap_info;
         AmbientProbeManager _amb_probe_mgr;
@@ -469,6 +535,10 @@ private:
 	
         PT( GenericAsyncTask ) _update_task;
         UpdateSeq _generated_shader_seq;
+
+	typedef unordered_map<int, brush_collision_data_t> TriangleIndex2BSPCollisionData_t;
+	typedef pmap<PT( BulletRigidBodyNode ), TriangleIndex2BSPCollisionData_t> BSPCollisionData_t;
+	BSPCollisionData_t _brush_collision_data;
 
         // A per-leaf list of world Geoms.
         // This list of Geoms will be rendered for the current leaf.

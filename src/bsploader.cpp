@@ -69,6 +69,11 @@
 #include <materialAttrib.h>
 #include <materialPool.h>
 #include <pnmFileTypeTGA.h>
+#include <bulletRigidBodyNode.h>
+#include <bulletTriangleMesh.h>
+#include <bulletTriangleMeshShape.h>
+#include <bulletWorld.h>
+#include <omniBoundingVolume.h>
 
 static LVector3 default_shadow_dir( 0.5, 0, -0.9 );
 static LVector4 default_shadow_color( 0.5, 0.5, 0.5, 1.0 );
@@ -76,6 +81,15 @@ static LVector4 default_shadow_color( 0.5, 0.5, 0.5, 1.0 );
 static PT( InternalName ) static_vertex_lighting_name = InternalName::make( "static_vertex_lighting" );
 
 static ConfigVariableBool dumpcubemaps( "dumpcubemaps", false );
+
+static const pvector<std::string> world_entities =
+{
+	"worldspawn",
+	"func_wall",
+	"func_detail",
+	"func_illusionary",
+	"func_clip" 
+};
 
 #define DEFAULT_BRUSH_SHADER "LightmappedGeneric"
 
@@ -402,7 +416,216 @@ CPT( BSPMaterial ) BSPLoader::try_load_texref( texref_t *tref )
         return nullptr;
 }
 
-NodePath BSPLoader::make_faces_ai_base( const std::string &name, const vector_string &include_entities )
+void BSPLoader::make_brush_model_collisions( int explicit_modelnum )
+{
+	// Bullet rigid body node -> triangle index -> [material, modelnum]
+	BSPLoader::BSPCollisionData_t data;
+
+	typedef unordered_map<int, pvector<int>> model2faces;
+	unordered_map<int, model2faces> type2model2faces;
+
+	std::ostringstream modelnums_ss;
+
+	for ( int entnum = 0; entnum < _bspdata->numentities; entnum++ )
+	{
+		entity_t *ent = _bspdata->entities + entnum;
+		std::string classname = ValueForKey( ent, "classname" );
+
+		if ( explicit_modelnum == -1 )
+		{
+			if ( std::find( world_entities.begin(), world_entities.end(), classname ) == world_entities.end() )
+			{
+				continue;
+			}
+				
+		}
+
+		int modelnum;
+		if ( entnum == 0 )
+			modelnum = 0;
+		else
+			modelnum = extract_modelnum_s( ent );
+
+		if ( modelnum == -1 || ( explicit_modelnum != -1 && modelnum != explicit_modelnum ) )
+			continue;
+
+		modelnums_ss << "_" << modelnum;
+
+		dmodel_t *mdl = _bspdata->dmodels + modelnum;
+		for ( int facenum = mdl->firstface; facenum < mdl->firstface + mdl->numfaces; facenum++ )
+		{
+			const dface_t *face = &_bspdata->dfaces[mdl->firstface + facenum];
+			const dplane_t *plane = _bspdata->dplanes + face->planenum;
+
+			int type;
+			if ( DotProduct( plane->normal, LVector3::up() ) >= 0.5f )
+			{
+				type = BSPFaceAttrib::FACETYPE_FLOOR;
+			}
+			else
+			{
+				type = BSPFaceAttrib::FACETYPE_WALL;
+			}
+
+			if ( type2model2faces.find( type ) == type2model2faces.end() )
+			{
+				type2model2faces[type] = model2faces();
+			}
+
+			if ( type2model2faces[type].find( modelnum ) == type2model2faces[type].end() )
+			{
+				type2model2faces[type][modelnum] = { facenum };
+			}
+			else
+			{
+				type2model2faces[type][modelnum].push_back( facenum );
+			}
+		}
+	}
+
+	for ( auto itr = type2model2faces.begin(); itr != type2model2faces.end(); itr++ )
+	{
+		int type = itr->first;
+		auto model2faces = itr->second;
+
+		BSPLoader::TriangleIndex2BSPCollisionData_t tdata;
+
+		PT( BulletTriangleMesh ) mesh = new BulletTriangleMesh;
+
+		
+		int total_tris = 0;
+		for ( auto mitr = model2faces.begin(); mitr != model2faces.end(); mitr++ )
+		{
+			auto modelnum = mitr->first;
+			auto faces = mitr->second;
+
+			for ( size_t j = 0; j < faces.size(); j++ )
+			{
+				int facenum = faces[j];
+				const dface_t *face = _bspdata->dfaces + facenum;
+				const texinfo_t *tinfo = _bspdata->texinfo + face->texinfo;
+				const texref_t *tref = _bspdata->dtexrefs + tinfo->texref;
+				const BSPMaterial *bspmat = BSPMaterial::get_from_file( tref->name );
+				std::string surfaceprop = "default";
+				if ( bspmat->has_keyvalue( "$surfaceprop" ) )
+					surfaceprop = bspmat->get_keyvalue( "$surfaceprop" );
+
+				int ntris = face->numedges - 2;
+				for ( int tri = 0; tri < ntris; tri++ )
+				{
+					mesh->add_triangle( VertCoord( _bspdata, face, 0 ) / 16.0f,
+							    VertCoord( _bspdata, face, ( tri + 1 ) % face->numedges ) / 16.0f,
+							    VertCoord( _bspdata, face, ( tri + 2 ) % face->numedges ) / 16.0f );
+					brush_collision_data_t bcdata;
+					bcdata.modelnum = modelnum;
+					bcdata.material = surfaceprop;
+					tdata[total_tris++] = bcdata;
+				}
+			}
+
+		}
+
+
+		PT( BulletTriangleMeshShape ) shape = new BulletTriangleMeshShape( mesh, false );
+		shape->set_margin( 0.1f );
+		std::ostringstream ss;
+		ss << "brush_model" << modelnums_ss.str() << "_collision_type_" << type;
+		PT( BulletRigidBodyNode ) rbnode = new BulletRigidBodyNode( ss.str().c_str() );
+		rbnode->add_shape( shape );
+		rbnode->set_kinematic( true );
+		NodePath rbnodenp = NodePath( rbnode );
+		rbnodenp.wrt_reparent_to( get_model( explicit_modelnum != -1 ? explicit_modelnum : 0 ) );
+		if ( type == BSPFaceAttrib::FACETYPE_FLOOR )
+		{
+			rbnodenp.set_collide_mask( BitMask32::bit( 2 ) );
+		}
+		else if ( type == BSPFaceAttrib::FACETYPE_WALL )
+		{
+			rbnodenp.set_collide_mask( BitMask32::bit( 1 ) );
+		}
+		_physics_world->attach( rbnode );
+
+		data[rbnode] = tdata;
+	}
+
+	for ( auto itr = data.begin(); itr != data.end(); itr++ )
+	{
+		_brush_collision_data[itr->first] = itr->second;
+	}
+}
+
+NodePath BSPLoader::make_model_faces( int modelnum )
+{
+	dmodel_t *mdl = _bspdata->dmodels + modelnum;
+
+	std::ostringstream ss;
+	ss << "model-faces-" << modelnum;
+	NodePath ret( ss.str() );
+
+	for ( int facenum = mdl->firstface; facenum < mdl->firstface + mdl->numfaces; facenum++ )
+	{
+		PT( EggData ) data = new EggData;
+		PT( EggVertexPool ) vpool = new EggVertexPool( "facevpool" );
+		data->add_child( vpool );
+
+		PT( EggPolygon ) poly = new EggPolygon;
+		data->add_child( poly );
+		dface_t *face = _bspdata->dfaces + facenum;
+		texinfo_t *texinfo = &_bspdata->texinfo[face->texinfo];
+		texref_t *texref = &_bspdata->dtexrefs[texinfo->texref];
+
+		CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
+		contents_t contents = ContentsFromName( bspmat->get_contents().c_str() );
+		if ( ( contents & ( CONTENTS_SOLID | CONTENTS_WATER | CONTENTS_TRANSLUCENT |
+				    CONTENTS_NULL | CONTENTS_EMPTY | CONTENTS_LAVA | CONTENTS_SLIME ) ) == 0 )
+		{
+			continue;
+		}
+
+		for ( int j = face->numedges - 1; j >= 0; j-- )
+		{
+			int surf_edge = _bspdata->dsurfedges[face->firstedge + j];
+
+			dedge_t *edge;
+			int index;
+			if ( surf_edge >= 0 )
+			{
+				edge = &_bspdata->dedges[surf_edge];
+				index = 0;
+			}
+
+			else
+			{
+				edge = &_bspdata->dedges[-surf_edge];
+				index = 1;
+			}
+
+			PT( EggVertex ) v = make_vertex_ai( vpool, poly, edge, index );
+			vpool->add_vertex( v );
+			poly->add_vertex( v );
+		}
+
+		data->remove_unused_vertices( true );
+		data->remove_invalid_primitives( true );
+
+		LNormald norm;
+		poly->calculate_normal( norm );
+		int face_type = BSPFaceAttrib::FACETYPE_WALL;
+		if ( norm.almost_equal( LNormald::up(), 0.5 ) )
+			face_type = BSPFaceAttrib::FACETYPE_FLOOR;
+
+		NodePath geom = ret.attach_new_node( load_egg_data( data ) );
+		geom.set_attrib( BSPFaceAttrib::make( bspmat->get_surface_prop(), face_type ) );
+		geom.set_attrib( BSPMaterialAttrib::make( bspmat ) );
+		geom.clear_model_nodes();
+		geom.flatten_strong();
+	}
+
+	return ret;
+}
+
+NodePath BSPLoader::make_faces_ai_base( const std::string &name, const vector_string &include_entities,
+					const vector_string &exclude_entities )
 {
         NodePath ret = NodePath( new BSPModel( name ) );
 
@@ -416,6 +639,10 @@ NodePath BSPLoader::make_faces_ai_base( const std::string &name, const vector_st
                 {
                         continue;
                 }
+		else if ( std::find( exclude_entities.begin(), exclude_entities.end(), classname ) != exclude_entities.end() )
+		{
+			continue;
+		}
 
                 int modelnum = entnum == 0 ? 0 : extract_modelnum_s( ent );
                 if ( modelnum == -1 )
@@ -423,66 +650,7 @@ NodePath BSPLoader::make_faces_ai_base( const std::string &name, const vector_st
                         continue;
                 }
 
-                dmodel_t *mdl = _bspdata->dmodels + modelnum;
-
-                for ( int facenum = mdl->firstface; facenum < mdl->firstface + mdl->numfaces; facenum++ )
-                {
-                        PT( EggData ) data = new EggData;
-                        PT( EggVertexPool ) vpool = new EggVertexPool( "facevpool" );
-                        data->add_child( vpool );
-
-                        PT( EggPolygon ) poly = new EggPolygon;
-                        data->add_child( poly );
-                        dface_t *face = _bspdata->dfaces + facenum;
-                        texinfo_t *texinfo = &_bspdata->texinfo[face->texinfo];
-                        texref_t *texref = &_bspdata->dtexrefs[texinfo->texref];
-
-                        CPT( BSPMaterial ) bspmat = BSPMaterial::get_from_file( std::string( texref->name ) );
-                        contents_t contents = ContentsFromName( bspmat->get_contents().c_str() );
-                        if ( ( contents & ( CONTENTS_SOLID | CONTENTS_WATER | CONTENTS_TRANSLUCENT |
-                                CONTENTS_NULL | CONTENTS_EMPTY | CONTENTS_LAVA | CONTENTS_SLIME ) ) == 0 )
-                        {
-                                continue;
-                        }
-
-                        for ( int j = face->numedges - 1; j >= 0; j-- )
-                        {
-                                int surf_edge = _bspdata->dsurfedges[face->firstedge + j];
-
-                                dedge_t *edge;
-				int index;
-				if ( surf_edge >= 0 )
-				{
-					edge = &_bspdata->dedges[surf_edge];
-					index = 0;
-				}
-                                        
-				else
-				{
-					edge = &_bspdata->dedges[-surf_edge];
-					index = 1;
-				}
-                                
-				PT( EggVertex ) v = make_vertex_ai( vpool, poly, edge, index );
-				vpool->add_vertex( v );
-				poly->add_vertex( v );
-                        }
-
-                        data->remove_unused_vertices( true );
-                        data->remove_invalid_primitives( true );
-
-                        LNormald norm;
-                        poly->calculate_normal( norm );
-                        int face_type = BSPFaceAttrib::FACETYPE_WALL;
-                        if ( norm.almost_equal( LNormald::up(), 0.5 ) )
-                                face_type = BSPFaceAttrib::FACETYPE_FLOOR;
-
-                        NodePath geom = ret.attach_new_node( load_egg_data( data ) );
-                        geom.set_attrib( BSPFaceAttrib::make( bspmat->get_surface_prop(), face_type ) );
-                        geom.set_attrib( BSPMaterialAttrib::make( bspmat ) );
-                        geom.clear_model_nodes();
-                        geom.flatten_strong();
-                }
+		make_model_faces( modelnum ).reparent_to( ret );
 
         }
 
@@ -526,22 +694,29 @@ void BSPLoader::make_faces_ai()
 
         make_faces_ai_base( "navmesh", { "func_wall", "func_detail", "func_illusionary", "func_clip", "func_npc_clip" } )
                 .reparent_to( _result );
-        make_faces_ai_base( "hull", { "func_wall", "func_detail", "func_illusionary", "func_clip" } )
-                .reparent_to( _result );
 
-        _result.set_scale( 1 / 16.0 );
-        _result.clear_model_nodes();
-        flatten_node( _result );
+	_result.set_scale( 1 / 16.0 );
+	_result.clear_model_nodes();
+	flatten_node( _result );
+
+	_model_data.resize( _bspdata->nummodels );
 
 	for ( int modelnum = 0; modelnum < _bspdata->nummodels; modelnum++ )
 	{
 		const dmodel_t *model = _bspdata->dmodels + modelnum;
+
 		LVector3 center;
 		get_model_data( model, center );
+
 		NodePath modelroot = setup_model( modelnum, _result );
-		_model_origins[modelroot] = center;
 		modelroot.set_pos( center );
-		_model_roots.push_back( modelroot );
+
+		brush_model_data_t mdata;
+		mdata.modelnum = modelnum;
+		mdata.model_root = modelroot;
+		mdata.origin = center;
+		mdata.origin_matrix = LMatrix4f::translate_mat( center );
+		_model_data[modelnum] = mdata;
 	}
 }
 
@@ -590,10 +765,6 @@ void BSPLoader::make_faces()
 
 	_face_lightmap_info.resize( _bspdata->numfaces );
 
-        NodePath hull = make_faces_ai_base( "hull", { "func_wall", "func_detail", "func_illusionary", "func_clip", "func_player_clip" } );
-        hull.reparent_to( _result );
-        hull.hide();
-
         // build table of per-face beginning index into vertnormalindices
         int face_vertnormalindices[MAX_MAP_FACES];
         memset( face_vertnormalindices, -1, sizeof( int ) * MAX_MAP_FACES );
@@ -603,6 +774,8 @@ void BSPLoader::make_faces()
                 face_vertnormalindices[i] = normal_index;
                 normal_index += _bspdata->dfaces[i].numedges;
         }
+
+	_model_data.resize( _bspdata->nummodels );
 
         // In BSP files, models are brushes that have been grouped together to be used as an entity.
         // We can group all of the face GeomNodes of the model to a root node.
@@ -615,7 +788,22 @@ void BSPLoader::make_faces()
 		LVector3 center;
 		get_model_data( model, center );
 		NodePath modelroot = setup_model( modelnum, _result );
-		_model_origins[modelroot] = center;
+
+		brush_model_data_t mdata;
+		mdata.modelnum = modelnum;
+		mdata.model_root = modelroot;
+		mdata.origin = center;
+		mdata.origin_matrix = LMatrix4f::translate_mat( center );
+		if ( modelnum != 0 )
+		{
+			mdata.model_root.attach_new_node( mdata.decal_rbc );
+		}
+		else
+		{
+			_result.attach_new_node( mdata.decal_rbc );
+		}
+		
+		_model_data[modelnum] = mdata;
 
                 for ( int facenum = firstface; facenum < firstface + numfaces; facenum++ )
                 {
@@ -806,8 +994,6 @@ void BSPLoader::make_faces()
                                 faceroot.hide();
                         }
                 }
-
-                _model_roots.push_back( modelroot );
         }
 
         bspfile_cat.info()
@@ -1058,7 +1244,6 @@ void BSPLoader::load_static_props()
 					ColorRGBExp32ToVector( *sample, vtx_rgb );
 					vtx_rgb /= 255.0f;
                                         LColorf vtx_color( vtx_rgb[0], vtx_rgb[1], vtx_rgb[2], 1.0 );
-					std::cout << vtx_color << std::endl;
                                         // now apply it to the modified vertex data
                                         color_mod.set_data4f( vtx_color );
                                 }
@@ -1285,6 +1470,10 @@ void BSPLoader::load_entities()
                                 if ( modelnum != -1 )
                                 {
                                         remove_model( modelnum );
+					_model_data[modelnum].model_root = get_model( 0 );
+					_model_data[modelnum].merged_modelnum = 0;
+					NodePath( _model_data[modelnum].decal_rbc ).remove_node();
+					_model_data[modelnum].decal_rbc = nullptr;
 
                                         dmodel_t *mdl = &_bspdata->dmodels[modelnum];
 
@@ -1324,6 +1513,10 @@ void BSPLoader::load_entities()
                                                         npc[n].wrt_reparent_to( get_model( 0 ) );
                                                 }
                                                 remove_model( modelnum );
+						_model_data[modelnum].model_root = _model_data[0].model_root;
+						NodePath( _model_data[modelnum].decal_rbc ).remove_node();
+						_model_data[modelnum].decal_rbc = _model_data[0].decal_rbc;
+						_model_data[modelnum].merged_modelnum = 0;
                                                 continue;
                                         }
 
@@ -1336,6 +1529,15 @@ void BSPLoader::load_entities()
 					_entities.push_back( entitydef_t( entity, linked ) );
                                 }
                         }
+			else if ( !strncmp( classname.c_str(), "infodecal", 9 ) )
+			{
+				const char *mat = ValueForKey( ent, "texture" );
+				const BSPMaterial *bspmat = BSPMaterial::get_from_file( mat );
+				Texture *tex = TexturePool::load_texture( bspmat->get_keyvalue( "$basetexture" ) );
+				LPoint3 vpos( origin[0], origin[1], origin[2] );
+				_decal_mgr.decal_trace( mat, LPoint2( tex->get_orig_file_x_size() / 16.0, tex->get_orig_file_y_size() / 16.0 ),
+							0.0, vpos, vpos, LColorf( 1.0 ), DECALFLAGS_STATIC );
+			}
                         else
                         {
 				if ( classname == "light_environment" )
@@ -1456,13 +1658,14 @@ PyObject *BSPLoader::make_pyent( PyObject *py_ent, const string &classname )
 
 void BSPLoader::remove_model( int modelnum )
 {
-        NodePath modelroot = get_model( modelnum );
-        if ( !modelroot.is_empty() )
+	brush_model_data_t &mdata = _model_data[modelnum];
+        if ( !mdata.model_root.is_empty() )
         {
-                _model_roots.erase( find( _model_roots.begin(), _model_roots.end(), modelroot ) );
-                _model_origins.erase( modelroot );
-                modelroot.remove_node();
+		remove_physics( mdata.model_root );
+                mdata.model_root.remove_node();
         }
+
+	//_model_data.erase( _model_data.begin() + modelnum );
 }
 
 bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
@@ -1703,6 +1906,26 @@ bool BSPLoader::read( const Filename &file, bool is_transition )
                 make_faces_ai();
         }
 
+	for ( int entnum = 0; entnum < _bspdata->numentities; entnum++ )
+	{
+		entity_t *ent = _bspdata->entities + entnum;
+		std::string classname = ValueForKey( ent, "classname" );
+		if ( std::find( world_entities.begin(), world_entities.end(), classname ) != world_entities.end() )
+			continue;
+
+		int modelnum = extract_modelnum_s( ent );
+		if ( modelnum == -1 )
+			continue;
+
+		std::cout << "Making non-static collisions for model " << modelnum << " entity " << entnum << std::endl;
+		// Make collisions for a non-static brush model.
+		make_brush_model_collisions( modelnum );
+	}
+	// This makes collisions for static brush models (func_wall, func_detail, worldspawn, etc),
+	// but combines all the meshes into one collision node for optimization purposes.
+	std::cout << "Making static collisions" << std::endl;
+	make_brush_model_collisions( -1 );
+
         load_entities();
 
         _active_level = true;
@@ -1761,7 +1984,7 @@ bool BSPLoader::read( const Filename &file, bool is_transition )
 
 	spawn_entities();
 
-	if ( is_transition )
+	if ( is_transition && _ai )
 	{
 		// Find the destination landmark
 		entitydef_t *dest_landmark = nullptr;
@@ -1874,9 +2097,15 @@ void BSPLoader::do_optimizations()
 {
         // Do some house keeping
 
-        for ( size_t i = 0; i < _model_roots.size(); i++ )
+        for ( size_t i = 0; i < _bspdata->nummodels; i++ )
         {
-                NodePath mdlroot = _model_roots[i];
+		brush_model_data_t &mdata = _model_data[i];
+		NodePath mdlroot = mdata.model_root;
+
+		// Entity that was merged with the world
+		if ( i != 0 && mdlroot == get_model( 0 ) )
+			continue;
+
                 BSPModel *mdlnode = DCAST( BSPModel, mdlroot.node() );
                 if ( i == 0 )
                 {
@@ -1907,7 +2136,7 @@ void BSPLoader::do_optimizations()
                         NodePath temp( "temp" );
                         temp.node()->steal_children( mdlnode );
 
-                        mdlroot.set_pos( _model_origins[mdlroot] );
+                        mdlroot.set_pos( mdata.origin );
 
                         NodePathCollection children = temp.get_children();
                         for ( int j = 0; j < children.get_num_paths(); j++ )
@@ -2186,6 +2415,13 @@ void BSPLoader::cleanup( bool is_transition )
 
         _active_level = false;
 
+	for ( auto itr = _brush_collision_data.begin(); itr != _brush_collision_data.end(); itr++ )
+	{
+		BulletRigidBodyNode *rbnode = itr->first;
+		_physics_world->remove( rbnode );
+	}
+	_brush_collision_data.clear();
+
 	// Clear raytracing scene
 	_trace->clear();
 
@@ -2202,13 +2438,13 @@ void BSPLoader::cleanup( bool is_transition )
 
         _amb_probe_mgr.cleanup();
 
-        _model_origins.clear();
-        for ( size_t i = 0; i < _model_roots.size(); i++ )
+        for ( size_t i = 0; i < _bspdata->nummodels; i++ )
         {
-                if ( !_model_roots[i].is_empty() )
-                        _model_roots[i].remove_node();
+		brush_model_data_t &data = _model_data[i];
+                if ( !data.model_root.is_empty() )
+                        data.model_root.remove_node();
         }
-        _model_roots.clear();
+        _model_data.clear();
 
         _materials.clear();
 
@@ -2229,56 +2465,84 @@ void BSPLoader::cleanup( bool is_transition )
 
         _has_pvs_data = false;
 
-	// If we are in a transition to another level, unload any entities
-	// that aren't being perserved. Or if we are not in a transition,
-	// unload all entities.
-	for ( auto itr = _entities.begin(); itr != _entities.end(); )
+	if ( _ai )
 	{
-		entitydef_t &def = *itr;
-		if ( ( is_transition && !def.preserved ) || !is_transition )
+		// If we are in a transition to another level, unload any entities
+		// that aren't being perserved. Or if we are not in a transition,
+		// unload all entities.
+		for ( auto itr = _entities.begin(); itr != _entities.end(); )
 		{
-			PyObject *py_ent = def.py_entity;
-			if ( py_ent )
+			entitydef_t &def = *itr;
+			if ( ( is_transition && !def.preserved ) || !is_transition )
 			{
-				PyObject_CallMethod( py_ent, "unload", NULL );
-				Py_DECREF( py_ent );
-				def.py_entity = nullptr;
-			}
-			itr = _entities.erase( itr );
-			continue;
-		}
-		else if ( def.c_entity )
-		{
-			// This entity is being preserved.
-			// The entnum is now invalid since the BSP file is changing.
-			// This avoids conflicts with future entities from the new BSP file.
-			def.c_entity->_bsp_entnum = -1;
-		}
-		itr++;
-	}
-
-	if ( !is_transition )
-	{
-		_entities.clear();
-	}
-	else if ( !_transition_source_landmark.is_empty() )
-	{
-		// We are in a transition to another level.
-		// Store all entity transforms relative to the source landmark.
-		for ( size_t i = 0; i < _entities.size(); i++ )
-		{
-			entitydef_t &ent = _entities[i];
-			if ( ent.py_entity && DtoolInstance_Check( ent.py_entity ) )
-			{
-				NodePath *pyent_np = (NodePath *)
-					DtoolInstance_VOID_PTR( ent.py_entity );
-				if ( pyent_np )
+				PyObject *py_ent = def.py_entity;
+				if ( py_ent )
 				{
-					ent.landmark_relative_transform =
-						pyent_np->get_mat( _transition_source_landmark );
+					PyObject_CallMethod( py_ent, "unload", NULL );
+					Py_DECREF( py_ent );
+					def.py_entity = nullptr;
+				}
+				itr = _entities.erase( itr );
+				continue;
+			}
+			else if ( def.c_entity )
+			{
+				// This entity is being preserved.
+				// The entnum is now invalid since the BSP file is changing.
+				// This avoids conflicts with future entities from the new BSP file.
+				def.c_entity->_bsp_entnum = -1;
+			}
+			itr++;
+		}
+
+		if ( !is_transition )
+		{
+			_entities.clear();
+		}
+		else if ( !_transition_source_landmark.is_empty() )
+		{
+			// We are in a transition to another level.
+			// Store all entity transforms relative to the source landmark.
+			for ( size_t i = 0; i < _entities.size(); i++ )
+			{
+				entitydef_t &ent = _entities[i];
+				if ( ent.py_entity && DtoolInstance_Check( ent.py_entity ) )
+				{
+					NodePath *pyent_np = (NodePath *)
+						DtoolInstance_VOID_PTR( ent.py_entity );
+					if ( pyent_np )
+					{
+						ent.landmark_relative_transform =
+							pyent_np->get_mat( _transition_source_landmark );
+					}
 				}
 			}
 		}
+	}
+	else
+	{
+		// Unload any client-side only entities.
+		// Assume the server will take care of unloading networked entities.
+		//
+		// UNDONE: Client-side only entities are an obsolete feature.
+		//         All entities should eventually be networked and client-side
+		//         entity functionality should be removed.
+		for ( auto itr = _entities.begin(); itr != _entities.end(); itr++ )
+		{
+			entitydef_t &def = *itr;
+			if ( def.py_entity )
+			{
+				if ( _entity_to_class.find( def.c_entity->get_classname() ) != _entity_to_class.end() )
+				{
+					// This is a client-sided entity. Unload it.
+					PyObject_CallMethod( def.py_entity, "unload", NULL );
+				}
+
+				Py_DECREF( def.py_entity );
+				def.py_entity = nullptr;
+			}
+		}
+		_entities.clear();
 	}
 
         _lightmap_dir.face_index.clear();
@@ -2328,8 +2592,14 @@ BSPLoader::BSPLoader() :
 	_wireframe( false ),
 	_bspdata( nullptr ),
 	_colldata( nullptr ),
-	_trace( new BSPTrace( this ) )
+	_trace( new BSPTrace( this ) ),
+	_physics_world( nullptr )
 {
+}
+
+void BSPLoader::set_physics_world( BulletWorld *world )
+{
+	_physics_world = world;
 }
 
 void BSPLoader::set_shader_generator( BSPShaderGenerator *shgen )
@@ -2420,21 +2690,48 @@ NodePath BSPLoader::get_model( int modelnum ) const
 void BSPLoader::link_cent_to_pyent( int entnum, PyObject *pyent )
 {
 	entitydef_t *pdef = nullptr;
+	bool found_pdef = false;
+
+	entity_t *ent = _bspdata->entities + entnum;
+	std::string targetname = ValueForKey( ent, "targetname" );
+
+	pvector<entitydef_t *> children;
+	children.reserve( 32 );
+
 	for ( size_t i = 0; i < _entities.size(); i++ )
 	{
 		entitydef_t &def = _entities[i];
 		if ( !def.c_entity )
 			continue;
-		if ( def.c_entity->get_bsp_entnum() == entnum )
+
+		if ( !found_pdef && def.c_entity->get_bsp_entnum() == entnum )
 		{
 			pdef = &def;
-			break;
+			found_pdef = true;
+		}
+
+		if ( def.c_entity->get_bsp_entnum() != entnum &&
+		     targetname.length() > 0u &&
+		     def.py_entity != nullptr )
+		{
+			std::string parentname = def.c_entity->get_entity_value( "parent" );
+			if ( !parentname.compare( targetname ) )
+			{
+				// This entity is parented to the specified entity.
+				children.push_back( &def );
+			}
 		}
 	}
 
 	nassertv( pdef != nullptr );
 	Py_INCREF( pyent );
 	pdef->py_entity = pyent;
+
+	for ( size_t i = 0; i < children.size(); i++ )
+	{
+		entitydef_t *def = children[i];
+		PyObject_CallMethod( def->py_entity, "parentGenerated", NULL );
+	}
 }
 
 PyObject *BSPLoader::get_py_entity_by_target_name( const string &targetname ) const
@@ -2445,6 +2742,8 @@ PyObject *BSPLoader::get_py_entity_by_target_name( const string &targetname ) co
 		if ( !def.c_entity )
 			continue;
 		PyObject *pyent = def.py_entity;
+		if ( !pyent )
+			continue;
 		string tname = def.c_entity->get_entity_value( "targetname" );
                 if ( tname == targetname )
                 {
@@ -2615,4 +2914,27 @@ CBaseEntity *BSPLoader::get_c_entity( const int entnum ) const
         }
 
         return nullptr;
+}
+
+int BSPLoader::get_brush_triangle_model_fast( BulletRigidBodyNode *rbnode, int triangle_idx )
+{
+	auto nodeitr = _brush_collision_data.find( rbnode );
+	if ( nodeitr == _brush_collision_data.end() )
+		return -1;
+
+	TriangleIndex2BSPCollisionData_t &modeldata = nodeitr->second;
+	auto triangleitr = modeldata.find( triangle_idx );
+	if ( triangleitr == modeldata.end() )
+		return -1;
+	return triangleitr->second.modelnum;
+}
+
+void BSPLoader::remove_physics( const NodePath &root )
+{
+	NodePathCollection npc = root.find_all_matches( "**/+BulletRigidBodyNode" );
+	for ( int i = 0; i < npc.get_num_paths(); i++ )
+	{
+		BulletRigidBodyNode *rbnode = DCAST( BulletRigidBodyNode, npc[i].node() );
+		_physics_world->remove( rbnode );
+	}
 }

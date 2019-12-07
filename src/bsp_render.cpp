@@ -245,6 +245,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
 		     node->is_of_type( BSPModel::get_class_type() ) &&
 		     node->get_name() == "model-0" ) // UNDONE: think of a better way to identify world geometry?
 		{
+			//std::cout << "Render world" << std::endl;
 			wsp_trav_collector.start();
 
 			CPT( TransformState ) internal_transform = data.get_internal_transform( this );
@@ -319,7 +320,8 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
 			wsp_trav_collector.stop();
 		}
 		else if ( _loader->has_active_level() &&
-			  node->is_of_type( ModelRoot::get_class_type() ) )
+			  node->is_of_type( ModelRoot::get_class_type() ) &&
+			  has_camera_bits( CAMERA_MASK_LIGHTING ) )
                 {
                         // Only run this logic on the main Camera and viewmodel.
 

@@ -35,10 +35,11 @@ set(BSP_COMMON_INCLUDE ..\\common CACHE PATH "BSP Common directory")
 set(BSP_COMMON_LIB ..\\common\\Release\\bsp_common.lib CACHE FILEPATH "BSP Common lib file")
 set(VIF_INCLUDE keyvalue-parser\\include CACHE PATH "keyvalue-parser include directory")
 set(VIF_LIB keyvalue-parser\\Release\\libvif.lib CACHE FILEPATH "keyvalue-parser lib file")
+set(BULLET_DIR ..\\cio-panda3d\\thirdparty\\win-libs-vc14-x64\\bullet CACHE PATH "Bullet thirdparty dir")
 
-include_directories(./include ${PANDA3D_DIR}/include ${PANDA3D_DIR}/python/include ${BSP_COMMON_INCLUDE} ${VIF_INCLUDE})
+include_directories(./include ${PANDA3D_DIR}/include ${PANDA3D_DIR}/python/include ${BSP_COMMON_INCLUDE} ${VIF_INCLUDE} ${BULLET_DIR}/include)
 link_directories(${PANDA3D_DIR}/lib ${PANDA3D_DIR}/python/libs)
-link_directories(${EMBREE_DIR}/lib)
+link_directories(${EMBREE_DIR}/lib ${BULLET_DIR}/lib)
 include_directories(${EMBREE_DIR}/include)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -96,6 +97,7 @@ target_link_libraries(libpandabsp libpanda.lib
                             tbbmalloc.lib
 							libpandagl.lib
                             ${BSP_COMMON_LIB}
-                            ${VIF_LIB})
+                            ${VIF_LIB}
+							libpandabullet.lib)
                             
 add_dependencies(libpandabsp vifparser)

@@ -15,6 +15,7 @@
 #include "config_bsp.h"
 
 #include <pdeque.h>
+#include <pvector.h>
 #include <nodePath.h>
 #include <boundingBox.h>
 #include <rigidBodyCombiner.h>
@@ -33,6 +34,7 @@ public:
         NodePath decalnp;
         PT( BoundingBox ) bounds;
         int flags;
+	int brush_modelnum;
 };
 
 class DecalManager
@@ -42,10 +44,15 @@ public:
 
 	void init();
 
-        // Trace a decal onto the world
+        // Trace a decal onto a brush model
 	void decal_trace( const std::string &decal_material, const LPoint2 &decal_scale,
 		float rotate, const LPoint3 &start, const LPoint3 &end,
-		const LColorf &decal_color = LColorf( 1 ) );
+		const LColorf &decal_color = LColorf( 1 ), const int flags = 0 );
+
+	// Trace a decal onto a studio model
+	void studio_decal_trace( const std::string &decal_material, const LPoint2 &decal_scale,
+				 float rotate, const LPoint3 &start, const LPoint3 &end,
+				 const LColorf &decal_color = LColorf( 1 ), const int flags = 0 );
 
         void cleanup();
 
@@ -59,6 +66,7 @@ private:
 	NodePath _decal_root;
         BSPLoader *_loader;
         pdeque<PT( Decal )> _decals;
+	pvector<PT( Decal )> _map_decals;
 };
 
 #endif // BSP_DECALS_H

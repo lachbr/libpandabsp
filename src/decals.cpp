@@ -17,6 +17,8 @@
 #include "bsploader.h"
 #include "bsp_material.h"
 #include "shader_generator.h"
+#include "bsp_render.h"
+#include "mathlib.h"
 
 #include <geomVertexFormat.h>
 #include <geomVertexData.h>
@@ -35,6 +37,12 @@
 #include <depthWriteAttrib.h>
 #include <colorWriteAttrib.h>
 #include <rigidBodyCombiner.h>
+#include <bulletWorld.h>
+#include <bulletClosestHitRayResult.h>
+#include <bitMask.h>
+#include <geomTristrips.h>
+
+static const BitMask32 world_bitmask = BitMask32::bit( 1 ) | BitMask32::bit( 2 );
 
 static PStatCollector decal_collector( "BSP:DecalTrace" );
 static PStatCollector decal_trace_collector( "BSP:DecalTrace:FindDecalPosition" );
@@ -175,6 +183,7 @@ struct decalinfo_t
 	float decal_size;
 	const bspdata_t *data;
 	LColor decal_color;
+	LMatrix4f decal_world_to_model;
 
 	//////////////////////////////////////////////////
 	// Updated for each surface being decalled
@@ -470,12 +479,15 @@ void R_DecalSurface( const dface_t *face, decalinfo_t *pinfo )
 		lm_uv_writer.set_row( first_row );
 	}
 
+	LVector3 local_normal = pinfo->decal_world_to_model.xform_vec( pinfo->surface_normal );
+
 	for ( int i = pinfo->vert_count - 1; i >= 0; i-- )
 	{
 		decalvert_t *cvert = g_DecalClipVerts + i;
 
-		vtx_writer.add_data3f( cvert->position / 16.0f );
-		norm_writer.add_data3f( pinfo->surface_normal );
+		LPoint3 local_pos = pinfo->decal_world_to_model.xform_point( cvert->position / 16.0f );
+		vtx_writer.add_data3f( local_pos );
+		norm_writer.add_data3f( local_normal );
 		uv_writer.add_data2f( cvert->coords );
 		col_writer.add_data4f( pinfo->decal_color );
 		if ( pinfo->lightmap )
@@ -559,7 +571,8 @@ void R_DecalNode( int nodenum, decalinfo_t *info )
  * Trace a decal onto the world.
  */
 void DecalManager::decal_trace( const std::string &decal_material, const LPoint2 &decal_scale,
-        float rotate, const LPoint3 &start, const LPoint3 &end, const LColorf &decal_color )
+				float rotate, const LPoint3 &start, const LPoint3 &end, const LColorf &decal_color,
+				const int flags )
 {
 	PStatTimer timer( decal_collector );
 
@@ -567,23 +580,57 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
         // Find the surface to decal
 	LVector3 decal_origin;
 	int headnode = 0;
+	int modelnum = 0;
+	int merged_modelnum = 0;
+	brush_model_data_t mdata = _loader->get_brush_model_data( 0 );
+	bool is_studio = false;
+	NodePath hitbox;
 	{
 		PStatTimer trace_timer( decal_trace_collector );
 
-		RayTraceHitResult tr = _loader->get_trace()->get_scene()->trace_line( start * 16, end * 16, TRACETYPE_WORLD | TRACETYPE_DETAIL );
-		// Do we have a surface to decal?
-		if ( !tr.has_hit() )
+		BulletClosestHitRayResult result = _loader->get_physics_world()->
+			ray_test_closest( start, end, world_bitmask );
+
+		if ( !result.has_hit() )
 			return;
 
-		const dface_t *face = _loader->get_trace()->lookup_dface( tr.get_geom_id() );
-		if ( face )
+		int triangle_idx = result.get_triangle_index();
+		hitbox = NodePath( result.get_node() );
+		BulletRigidBodyNode *node = DCAST( BulletRigidBodyNode, result.get_node() );
+		int temp_modelnum = _loader->get_brush_triangle_model_fast( node, triangle_idx );
+		if ( temp_modelnum != -1 )
 		{
-			const dmodel_t *model = _loader->dmodel_for_dface( face );
-			if ( model )
-				headnode = model->headnode[0];
+			modelnum = temp_modelnum;
+			mdata = _loader->get_brush_model_data( modelnum );
+			merged_modelnum = mdata.merged_modelnum;
+			const dmodel_t *model = _loader->get_bspdata()->dmodels + modelnum;
+			headnode = model->headnode[0];
 		}
+		//else
+		//{
+		//	is_studio = true;
+		//}
 
-		VectorLerp( start, end, tr.get_hit_fraction(), decal_origin );
+		VectorLerp( start, end, result.get_hit_fraction(), decal_origin );
+		
+		if ( merged_modelnum != 0 && !is_studio )
+		{
+			// A non-world model can be moved around.
+			// In order to correctly decal, we must move the decal position back
+			// relative to the model's original transform.
+			CPT( TransformState ) ts = mdata.model_root.get_net_transform();
+
+			LPoint3 delta_origin = ts->get_pos() - mdata.origin;
+			LQuaternion delta_quat = ts->get_norm_quat();
+			LVector3 delta_scale = ts->get_scale();
+
+			CPT( TransformState ) delta_ts = TransformState::make_pos_quat_scale( delta_origin, delta_quat, delta_scale );
+			LMatrix4 matrix = delta_ts->get_mat();
+			matrix.invert_in_place();
+
+			decal_origin = matrix.xform_point( decal_origin );
+		}
+		
 		decal_origin *= 16.0f;
 	}
 	
@@ -599,11 +646,59 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
 		decal_color,
 		mat,
 		_loader->get_bspdata() );
-	decal_init_collector.stop();
-	
-	decal_node_collector.start();
-	R_DecalNode( headnode, &info );
-	decal_node_collector.stop();
+	if ( !is_studio )
+	{
+		if ( merged_modelnum != 0 )
+		{
+			info.decal_world_to_model = mdata.origin_matrix;
+		}
+		else
+		{
+			info.decal_world_to_model = LMatrix4f::ident_mat();
+		}
+		info.decal_world_to_model.invert_in_place();
+		decal_init_collector.stop();
+
+		decal_node_collector.start();
+		R_DecalNode( headnode, &info );
+		decal_node_collector.stop();
+	}
+	else
+	{
+		NodePath studio_root = hitbox.get_parent();
+		NodePathCollection geom_nodes = studio_root.find_all_matches( "**/+GeomNode" );
+		for ( int i = 0; i < geom_nodes.size(); i++ )
+		{
+			NodePath geom_np = geom_nodes[i];
+			GeomNode *gn = DCAST( GeomNode, geom_np.node() );
+			for ( int j = 0; j < gn->get_num_geoms(); j++ )
+			{
+				const Geom *geom = gn->get_geom( j );
+				const GeomVertexData *vdata = geom->get_vertex_data();
+				for ( int k = 0; k < geom->get_num_primitives(); k++ )
+				{
+					const GeomPrimitive *prim = geom->get_primitive( k );
+					for ( int l = 0; l < prim->get_num_primitives(); l++ )
+					{
+						int start = prim->get_primitive_start( l );
+						int end = prim->get_primitive_end( l );
+						if ( prim->is_of_type( GeomTristrips::get_class_type() ) )
+						{
+							for ( int vidx = start; vidx < end - 2; vidx++ )
+							{
+								bool ccw = ( vidx & 0x1 ) == 0;
+								int ti1 = vidx;
+								int ti2 = vidx + 1 + ccw;
+								int ti3 = vidx + 2 - ccw;
+								
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////////
 	// Setup decal render state / geometry
@@ -671,7 +766,9 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
 	decal_add_geom_collector.start();
 	PT( GeomNode ) decal_geomnode = new GeomNode( "decal" );
 	decal_geomnode->add_geom( info.geom, decal_state );
-	NodePath decalnp = _decal_root.attach_new_node( decal_geomnode );
+	NodePath decalnp = NodePath( decal_geomnode );
+	NodePath rbcnp = NodePath( mdata.decal_rbc );
+	decalnp.reparent_to( rbcnp );
 	decal_add_geom_collector.stop();
 
 	///////////////////////////////////////////////////////////////////////////////////////
@@ -680,7 +777,7 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
         //decalnp.calc_tight_bounds( mins, maxs );
         PT( BoundingBox ) bounds = new BoundingBox( mins, maxs );
 
-        if ( decals_remove_overlapping.get_value() )
+	if ( decals_remove_overlapping.get_value() && ( flags & DECALFLAGS_STATIC ) == 0 )
         {
                 for ( int i = (int)_decals.size() - 1; i >= 0; i-- )
                 {
@@ -697,6 +794,8 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
                         {
                                 if ( !other->decalnp.is_empty() )
                                         other->decalnp.remove_node();
+				if ( other->brush_modelnum != merged_modelnum )
+					_loader->get_brush_model_data( other->brush_modelnum ).decal_rbc->collect();
                                 _decals.erase( std::find( _decals.begin(), _decals.end(), other ) );
                         }
                 }
@@ -714,16 +813,28 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
         PT( Decal ) decal = new Decal;
         decal->decalnp = decalnp;
         decal->bounds = bounds;
-        decal->flags = DECALFLAGS_NONE;
-        _decals.push_front( decal );
+        decal->flags = flags;
+	decal->brush_modelnum = merged_modelnum;
+	if ( ( flags & DECALFLAGS_STATIC ) != 0 )
+		_map_decals.push_back( decal );
+	else
+		_decals.push_front( decal );
         
         // Decals should not cast shadows
         decalnp.hide( CAMERA_SHADOW );
 
 	decal_collect.start();
-	_decal_rbc->collect();
+	mdata.decal_rbc->collect();
+	//_decal_rbc->collect();
 	decal_collect.stop();
 	//_decal_rbc->get_internal_scene().ls();
+}
+
+void DecalManager::studio_decal_trace( const std::string &decal_material, const LPoint2 &decal_scale,
+				       float rotate, const LPoint3 &start, const LPoint3 &end,
+				       const LColorf &decal_color, const int flags )
+{
+
 }
 
 void DecalManager::cleanup()
@@ -735,6 +846,14 @@ void DecalManager::cleanup()
                         d->decalnp.remove_node();
         }
         _decals.clear();
+
+	for ( size_t i = 0; i < _map_decals.size(); i++ )
+	{
+		Decal *d = _map_decals[i];
+		if ( !d->decalnp.is_empty() )
+			d->decalnp.remove_node();
+	}
+	_map_decals.clear();
 
 	if ( !_decal_root.is_empty() )
 		_decal_root.remove_node();
