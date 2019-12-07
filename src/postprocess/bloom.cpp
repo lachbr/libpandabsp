@@ -44,7 +44,7 @@ public:
 		get_quad().set_shader_input( "tapOffsets", _tap_offsets );
 
 		// Pixel shader
-		get_quad().set_shader_input( "fbColorSampler", _pp->get_scene_color_texture() );
+		get_quad().set_shader_input( "fbColorSampler", _pp->get_scene_pass()->get_texture( bits_PASSTEXTURE_AUX2 ) );
 		get_quad().set_shader_input( "params", LVecBase4f( r_bloomtintr,
 								   r_bloomtintg,
 								   r_bloomtintb,

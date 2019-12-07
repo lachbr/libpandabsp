@@ -44,10 +44,10 @@ PostProcess::PostProcess( GraphicsOutput *output )
 	EventHandler::get_global_event_handler()->add_hook( "window-event", handle_window_event, this );
 
 	int scene_flags = ( bits_PASSTEXTURE_COLOR |
-			    bits_PASSTEXTURE_DEPTH );//|
+			    bits_PASSTEXTURE_DEPTH |
 			    //bits_PASSTEXTURE_AUX0 |
 			    //bits_PASSTEXTURE_AUX1 |
-			    //bits_PASSTEXTURE_AUX2 |
+			    bits_PASSTEXTURE_AUX2 );// |
 			    //bits_PASSTEXTURE_AUX3 );
 
 	_scene_pass = new PostProcessScenePass( this, scene_flags );

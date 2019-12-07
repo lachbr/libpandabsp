@@ -24,7 +24,9 @@
 #include "postprocess/postprocess.h"
 #include "postprocess/hdr.h"
 #include "postprocess/bloom.h"
+#include "postprocess/fxaa.h"
 #include "static_props.h"
+#include "bloom_attrib.h"
 
 #include <texturePool.h>
 #include "texture_filter.h"
@@ -64,6 +66,7 @@ void init_libpandabsp()
 
         AuxDataAttrib::init_type();
 	StaticPropAttrib::init_type();
+	BloomAttrib::init_type();
 
         ShaderSpec::init_type();
 
@@ -78,6 +81,7 @@ void init_libpandabsp()
 
 	HDRPass::init_type();
 	BloomEffect::init_type();
+	FXAA_Effect::init_type();
 
 	BSPTextureFilter::init_type();
 	TexturePool::get_global_ptr()->register_filter( new BSPTextureFilter );

@@ -14,6 +14,7 @@
 #include "bsp_material.h"
 #include "bsploader.h"
 #include "static_props.h"
+#include "bloom_attrib.h"
 
 #include <virtualFileSystem.h>
 #include <colorBlendAttrib.h>
@@ -126,6 +127,14 @@ void ShaderSpec::setup_permutations( ShaderPermutations &result,
 	if ( spa->has_static_lighting() )
 	{
 		result.add_permutation( "STATIC_PROP_LIGHTING" );
+	}
+
+	result.add_permutation( "NEED_AUX_BLOOM" );
+	const BloomAttrib *ba;
+	state->get_attrib_def( ba );
+	if ( !ba->is_bloom_enabled() )
+	{
+		result.add_permutation( "NO_BLOOM" );
 	}
 }
 
