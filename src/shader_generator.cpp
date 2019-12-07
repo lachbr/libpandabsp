@@ -347,20 +347,6 @@ CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs
         {
                 // no overrided shader, use the one specified on the material
                 shader_name = mat->get_shader();
-                if ( shader_name.empty() )
-                {
-                        shader_name = DEFAULT_SHADER;
-                }
-		else
-		{
-			// Another hack. Switch to UnlitGeneric if setLightOff() was set on a VertexLitGeneric material.
-			//const LightAttrib *la;
-			//rs->get_attrib_def( la );
-			//if ( la->has_all_off() && shader_name == "VertexLitGeneric" )
-			//{
-			//	shader_name = "UnlitGeneric";
-			//}
-		}
         }
 
         if ( _shaders.find( shader_name ) == _shaders.end() )

@@ -1,4 +1,4 @@
-1575685186
+1575690119
 3 3
 3 bsp 4 t5GT 3 bsp 
 393
@@ -53,8 +53,8 @@ inline TextureStages::TextureStages(TextureStages const &) = default;
 TextureStages::~TextureStages(void);
 
 382 11 BSPMaterial 0 4 764 24 BSPMaterial::BSPMaterial 0 2 14 15 0
-137
-inline explicit BSPMaterial::BSPMaterial(std::string const &name = "material");
+139
+inline explicit BSPMaterial::BSPMaterial(std::string const &name = "UnlitNoMat");
 inline BSPMaterial::BSPMaterial(BSPMaterial const &copy);
 
 383 10 operator = 0 4 764 23 BSPMaterial::operator = 0 1 16 0

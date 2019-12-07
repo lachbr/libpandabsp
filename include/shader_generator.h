@@ -37,8 +37,6 @@ extern ConfigVariableColor ambient_light_identifier;
 extern ConfigVariableColor ambient_light_min;
 extern ConfigVariableDouble ambient_light_scale;
 
-#define DEFAULT_SHADER "UnlitNoMat"
-
 NotifyCategoryDeclNoExport(bspShaderGenerator);
 
 class nodeshaderinput_t;

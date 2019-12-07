@@ -365,7 +365,9 @@ void enable_srgb_read( Texture *tex, bool enable )
 			tex->set_format( Texture::F_sluminance_alpha );
 			break;
 		case 1:
-			tex->set_format( Texture::F_sluminance );
+			// Don't screw up text
+			if (tex->get_format() != Texture::F_alpha )
+				tex->set_format( Texture::F_sluminance );
 			break;
 		}
 	}

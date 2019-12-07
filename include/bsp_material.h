@@ -20,6 +20,8 @@
 #include <textureStage.h>
 #include <renderAttrib.h>
 
+#define DEFAULT_SHADER	"UnlitNoMat"
+
 /**
  * This simple interface maintains a single TextureStage object for each unique name.
  * It avoids the creation of duplicate TextureStages with the same name, which
@@ -63,7 +65,7 @@ class EXPCL_PANDABSP BSPMaterial : public TypedReferenceCount
 #endif
 {
 PUBLISHED:
-	INLINE explicit BSPMaterial( const std::string &name = "material" ) :
+	INLINE explicit BSPMaterial( const std::string &name = DEFAULT_SHADER ) :
 		TypedReferenceCount(),
 		_has_env_cubemap( false ),
 		_cached_env_cubemap( false ),

@@ -45,7 +45,6 @@ void UnlitNoMatSpec::setup_permutations( ShaderPermutations &result,
 			// Convert from gamma to linear in shader
 			enable_srgb_read( tex, true );
 			result.add_permutation( "HAS_TEXTURE" );
-			result.add_input( ShaderInput( "baseTextureSampler", tex ) );
 		}
 	}
 
