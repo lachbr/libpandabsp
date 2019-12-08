@@ -532,7 +532,7 @@ void BSPLoader::make_brush_model_collisions( int explicit_modelnum )
 		ss << "brush_model" << modelnums_ss.str() << "_collision_type_" << type;
 		PT( BulletRigidBodyNode ) rbnode = new BulletRigidBodyNode( ss.str().c_str() );
 		rbnode->add_shape( shape );
-		rbnode->set_kinematic( true );
+		rbnode->set_kinematic( explicit_modelnum != -1 ); // non-static brush models are kinematic
 		NodePath rbnodenp = NodePath( rbnode );
 		rbnodenp.wrt_reparent_to( get_model( explicit_modelnum != -1 ? explicit_modelnum : 0 ) );
 		if ( type == BSPFaceAttrib::FACETYPE_FLOOR )
@@ -713,6 +713,7 @@ void BSPLoader::make_faces_ai()
 
 		brush_model_data_t mdata;
 		mdata.modelnum = modelnum;
+		mdata.merged_modelnum = modelnum;
 		mdata.model_root = modelroot;
 		mdata.origin = center;
 		mdata.origin_matrix = LMatrix4f::translate_mat( center );
@@ -791,17 +792,22 @@ void BSPLoader::make_faces()
 
 		brush_model_data_t mdata;
 		mdata.modelnum = modelnum;
+		mdata.merged_modelnum = modelnum;
 		mdata.model_root = modelroot;
 		mdata.origin = center;
 		mdata.origin_matrix = LMatrix4f::translate_mat( center );
+		NodePath rbcnp = NodePath( mdata.decal_rbc );
 		if ( modelnum != 0 )
 		{
-			mdata.model_root.attach_new_node( mdata.decal_rbc );
+			rbcnp.reparent_to( mdata.model_root );
 		}
 		else
 		{
-			_result.attach_new_node( mdata.decal_rbc );
+			rbcnp.reparent_to( _result );
 		}
+		// Decals should not cast shadows
+		rbcnp.hide( CAMERA_SHADOW );
+		rbcnp.clear_transform();
 		
 		_model_data[modelnum] = mdata;
 
@@ -2145,6 +2151,7 @@ void BSPLoader::do_optimizations()
                                 child.wrt_reparent_to( mdlroot );
                         }
                         
+			mdata.decal_rbc->clear_transform();
                 }
         }
 

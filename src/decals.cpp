@@ -36,6 +36,7 @@
 #include <alphaTestAttrib.h>
 #include <depthWriteAttrib.h>
 #include <colorWriteAttrib.h>
+#include <cullFaceAttrib.h>
 #include <rigidBodyCombiner.h>
 #include <bulletWorld.h>
 #include <bulletClosestHitRayResult.h>
@@ -118,6 +119,7 @@ DEFINE_ATTRIB( decal_alpha, AlphaTestAttrib::make( AlphaTestAttrib::M_greater, 0
 DEFINE_ATTRIB( depth_write_off, DepthWriteAttrib::make( DepthWriteAttrib::M_off ) )
 DEFINE_ATTRIB( no_alpha_write, ColorWriteAttrib::make( ColorWriteAttrib::C_rgb ) )
 DEFINE_ATTRIB( vertex_color, ColorAttrib::make_vertex() )
+DEFINE_ATTRIB( double_side, CullFaceAttrib::make( CullFaceAttrib::M_cull_none ) )
 
 struct decalvert_t
 {
@@ -630,7 +632,7 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
 
 			decal_origin = matrix.xform_point( decal_origin );
 		}
-		
+
 		decal_origin *= 16.0f;
 	}
 	
@@ -651,12 +653,12 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
 		if ( merged_modelnum != 0 )
 		{
 			info.decal_world_to_model = mdata.origin_matrix;
+			info.decal_world_to_model.invert_in_place();
 		}
 		else
 		{
 			info.decal_world_to_model = LMatrix4f::ident_mat();
 		}
-		info.decal_world_to_model.invert_in_place();
 		decal_init_collector.stop();
 
 		decal_node_collector.start();
@@ -805,8 +807,12 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
         {
                 // Remove the oldest decal to make space for the new one.
                 Decal *d = _decals.back();
-                if ( !d->decalnp.is_empty() )
-                        d->decalnp.remove_node();
+		if ( !d->decalnp.is_empty() )
+		{
+			d->decalnp.remove_node();
+			if ( d->brush_modelnum != merged_modelnum )
+				_loader->get_brush_model_data( d->brush_modelnum ).decal_rbc->collect();
+		}
                 _decals.pop_back();
         }
 
@@ -819,9 +825,6 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
 		_map_decals.push_back( decal );
 	else
 		_decals.push_front( decal );
-        
-        // Decals should not cast shadows
-        decalnp.hide( CAMERA_SHADOW );
 
 	decal_collect.start();
 	mdata.decal_rbc->collect();
