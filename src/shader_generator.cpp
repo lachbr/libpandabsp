@@ -239,6 +239,9 @@ void BSPShaderGenerator::start_update()
 AsyncTask::DoneStatus BSPShaderGenerator::update_pssm( GenericAsyncTask *task, void *data )
 {
         BSPShaderGenerator *self = (BSPShaderGenerator *)data;
+
+	self->_planar_reflections->update();
+
         if ( want_pssm )
         {
                 if ( self->_sunlight.is_empty() || !self->_has_shadow_sunlight )
@@ -273,8 +276,6 @@ AsyncTask::DoneStatus BSPShaderGenerator::update_pssm( GenericAsyncTask *task, v
 
 		self->_pta_fogdata[1][3] = 1.0f;//self->_fog->get_linear
 	}
-
-	self->_planar_reflections->update();
 
         return AsyncTask::DS_cont;
 }
