@@ -556,7 +556,7 @@ private:
         // While BSPLoader updates the visible leaf AABBs on the App thread,
         // BSPGeomNode needs to access them from the Cull thread.
         // So we'll use a mutex.
-        LightReMutex _leaf_aabb_lock;
+        LightMutex _leaf_aabb_lock;
 };
 
 extern LColor color_from_value( const std::string &value, bool scale = true, bool gamma = false );

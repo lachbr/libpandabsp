@@ -491,7 +491,6 @@ void BSPLoader::make_brush_model_collisions( int explicit_modelnum )
 		BSPLoader::TriangleIndex2BSPCollisionData_t tdata;
 
 		PT( BulletTriangleMesh ) mesh = new BulletTriangleMesh;
-
 		
 		int total_tris = 0;
 		for ( auto mitr = model2faces.begin(); mitr != model2faces.end(); mitr++ )
@@ -873,8 +872,6 @@ void BSPLoader::make_faces()
 			dface_lightmap_info_t lminfo;
 			init_dface_lightmap_info( &lminfo, facenum );
 			_face_lightmap_info[facenum] = lminfo;
-
-                        LNormald poly_normal( 0 );
                         LVertexd centroid( 0 );
                         int verts = 0;
 
@@ -888,8 +885,6 @@ void BSPLoader::make_faces()
                                         VectorCopy( _bspdata->vertnormals[_bspdata->vertnormalindices[vert_normal_idx]].point, normalf_v );
                                         normal = LNormald( normalf_v[0], normalf_v[1], normalf_v[2] );
                                 }
-
-                                poly_normal += normal;
 
                                 int surf_edge = _bspdata->dsurfedges[face->firstedge + j];
                                 dedge_t *edge;
@@ -917,17 +912,7 @@ void BSPLoader::make_faces()
                         data->remove_unused_vertices( true );
                         data->remove_invalid_primitives( true );
 
-                        poly_normal /= face->numedges;
-
                         centroid /= verts;
-
-                        if ( poly_normal.almost_equal( LNormald::up(), 0.5 ) )
-                        {
-                                // A polygon facing upwards could be considered a ground.
-                                // Give it the ground bin.
-                                poly->set_bin( "ground" );
-                                poly->set_draw_order( 18 );
-                        }
 
                         data->recompute_tangent_binormal( GlobPattern( "*" ) );
 
@@ -1697,7 +1682,7 @@ bool BSPLoader::is_cluster_visible( int curr_cluster, int cluster ) const
 
 void BSPLoader::update_leaf( int leaf )
 {
-	LightReMutexHolder holder( _leaf_aabb_lock );
+	LightMutexHolder holder( _leaf_aabb_lock );
 
 	_curr_leaf_idx = leaf;
 	_visible_leaf_bboxs.clear();
@@ -1835,6 +1820,7 @@ bool BSPLoader::read( const Filename &file, bool is_transition )
 
         PT( BSPRoot ) root = new BSPRoot( "maproot" );
         _result = NodePath( root );
+	_result.show_through( CAMERA_SHADOW );
 
         if ( !_ai )
         {
@@ -2833,7 +2819,7 @@ BSPLoader *BSPLoader::get_global_ptr()
  */
 bool BSPLoader::pvs_bounds_test( const GeometricBoundingVolume *bounds, unsigned int required_leaf_flags )
 {
-        LightReMutexHolder holder( _leaf_aabb_lock );
+        LightMutexHolder holder( _leaf_aabb_lock );
 
         size_t num_aabbs = _visible_leaf_bboxs.size();
         for ( size_t i = 0; i < num_aabbs; i++ )
