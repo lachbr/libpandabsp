@@ -584,7 +584,7 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
 	int headnode = 0;
 	int modelnum = 0;
 	int merged_modelnum = 0;
-	brush_model_data_t mdata = _loader->get_brush_model_data( 0 );
+	brush_model_data_t mdata;
 	bool is_studio = false;
 	NodePath hitbox;
 	{
@@ -608,10 +608,10 @@ void DecalManager::decal_trace( const std::string &decal_material, const LPoint2
 			const dmodel_t *model = _loader->get_bspdata()->dmodels + modelnum;
 			headnode = model->headnode[0];
 		}
-		//else
-		//{
-		//	is_studio = true;
-		//}
+		else
+		{
+			return;
+		}
 
 		VectorLerp( start, end, result.get_hit_fraction(), decal_origin );
 		
