@@ -16,6 +16,8 @@
 
 #include <aa_luse.h>
 #include <nodePath.h>
+#include <mouseWatcher.h>
+#include <graphicsWindow.h>
 
 class CIOLib
 {
@@ -23,6 +25,26 @@ PUBLISHED:
 	static void set_pupil_direction( float x, float y, LVector3 &left, LVector3 &right );
 	static LVector2 look_pupils_at( const NodePath &node, const LVector3 &point, const NodePath &eyes );
 };
+
+/*
+class CFPSCamera
+{
+PUBLISHED:
+	CFPSCamera( const NodePath &vm, const NodePath &vmroot, const NodePath &vmroot2,
+		    const NodePath &camroot, GraphicsWindow *win, MouseWatcher *mw );
+
+	//void do_
+
+private:
+	NodePath _vm;
+	NodePath _vmroot;
+	NodePath _vmroot2;
+	NodePath _camroot;
+	GraphicsWindow *_win;
+	MouseWatcher *_mw;
+};
+
+*/
 
 #endif // CIOLIB_H
 
