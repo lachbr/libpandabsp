@@ -74,7 +74,8 @@ PUBLISHED:
 		_surfaceprop( "default" ),
 		_contents( "solid" ),
 		_has_bumpmap( false ),
-		_lightmapped( false )
+		_lightmapped( false ),
+		_skybox( false )
         {
         }
 
@@ -89,7 +90,8 @@ PUBLISHED:
 		_contents( copy._contents ),
 		_has_transparency( copy._has_transparency ),
 		_lightmapped( copy._lightmapped ),
-		_has_bumpmap( copy._has_bumpmap )
+		_has_bumpmap( copy._has_bumpmap ),
+		_skybox( copy._skybox )
         {
         }
 
@@ -106,6 +108,7 @@ PUBLISHED:
                 _has_transparency = copy._has_transparency;
 		_lightmapped = copy._lightmapped;
 		_has_bumpmap = copy._has_bumpmap;
+		_skybox = copy._skybox;
         }
 
         INLINE void set_keyvalue( const std::string &key, const std::string &value )
@@ -182,6 +185,11 @@ PUBLISHED:
 		return _lightmapped;
 	}
 
+	INLINE bool is_skybox() const
+	{
+		return _skybox;
+	}
+
 	INLINE bool has_bumpmap() const
 	{
 		return _has_bumpmap;
@@ -196,6 +204,7 @@ private:
         bool _cached_env_cubemap;
         bool _has_transparency;
 	bool _lightmapped;
+	bool _skybox;
 	bool _has_bumpmap;
         std::string _surfaceprop;
         std::string _contents;
