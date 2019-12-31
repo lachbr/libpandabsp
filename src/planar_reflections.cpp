@@ -44,7 +44,7 @@ PlanarReflections::PlanarReflections( BSPShaderGenerator *shgen ) :
 	_reflection_texture->set_wrap_v( SamplerState::WM_clamp );
 	_reflection_texture->set_wrap_u( SamplerState::WM_clamp );
 	_reflection_buffer->set_sort( -100000 );
-	_reflection_buffer->set_clear_color_active( true );
+	_reflection_buffer->set_clear_color_active( false );
 	_reflection_buffer->set_clear_stencil_active( false );
 	_reflection_buffer->set_clear_depth_active( true );
 
