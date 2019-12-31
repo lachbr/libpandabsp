@@ -203,7 +203,7 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                 makecullable_geomnode_collector.start();
                 CullableObject *object =
                         new CullableObject( std::move( geom ), std::move( state ), internal_transform );
-		if ( has_camera_bits( CAMERA_MAIN ) && node->is_of_type( GlowNode::get_class_type() ) )
+		if ( has_camera_bits( CAMERA_MASK_LIGHTING ) && node->is_of_type( GlowNode::get_class_type() ) )
 		{
 			object->set_draw_callback( new GlowNode::DrawCallback( DCAST( GlowNode, node ) ) );
 		}
@@ -271,7 +271,7 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
 						if ( bma )
 						{
 							const BSPMaterial *mat = bma->get_material();
-							if ( mat && mat->get_shader() == "SkyBox" )
+							if ( mat && mat->is_skybox() )
 							{
 								// This is a terrible hack to make skybox
 								// faces not render to shadow maps.
