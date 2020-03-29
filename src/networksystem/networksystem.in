@@ -1,0 +1,303 @@
+1585470428
+3 3
+13 networksystem 4 XHsk 13 networksystem 
+33
+26 12 get_datagram 0 4 59 28 NetworkMessage::get_datagram 0 1 3 0
+51
+Datagram const &NetworkMessage::get_datagram(void);
+
+27 21 get_datagram_iterator 0 4 59 37 NetworkMessage::get_datagram_iterator 0 1 4 0
+62
+DatagramIterator &NetworkMessage::get_datagram_iterator(void);
+
+28 14 get_connection 0 4 59 30 NetworkMessage::get_connection 0 1 5 0
+61
+NetworkConnectionHandle NetworkMessage::get_connection(void);
+
+29 14 NetworkMessage 0 4 59 30 NetworkMessage::NetworkMessage 0 2 1 2 0
+127
+inline NetworkMessage::NetworkMessage(void) = default;
+inline NetworkMessage::NetworkMessage(NetworkMessage const &) = default;
+
+30 15 ~NetworkMessage 0 4 59 31 NetworkMessage::~NetworkMessage 0 0 0
+38
+NetworkMessage::~NetworkMessage(void);
+
+31 21 connect_by_IP_address 0 4 60 36 NetworkSystem::connect_by_IP_address 0 1 8 0
+85
+NetworkConnectionHandle NetworkSystem::connect_by_IP_address(NetAddress const &addr);
+
+32 19 get_connection_info 0 4 60 34 NetworkSystem::get_connection_info 0 1 9 0
+101
+bool NetworkSystem::get_connection_info(NetworkConnectionHandle hConn, NetworkConnectionInfo *pInfo);
+
+33 13 send_datagram 0 4 60 28 NetworkSystem::send_datagram 0 1 10 0
+156
+void NetworkSystem::send_datagram(NetworkConnectionHandle hConn, Datagram const &dg, NetworkSystem::NetworkSendFlags flags = ::NetworkSystem::NSF_reliable);
+
+34 16 close_connection 0 4 60 31 NetworkSystem::close_connection 0 1 11 0
+68
+void NetworkSystem::close_connection(NetworkConnectionHandle hConn);
+
+35 13 run_callbacks 0 4 60 28 NetworkSystem::run_callbacks 0 1 12 0
+64
+void NetworkSystem::run_callbacks(NetworkCallbacks *pCallbacks);
+
+36 17 accept_connection 0 4 60 32 NetworkSystem::accept_connection 0 1 13 0
+69
+bool NetworkSystem::accept_connection(NetworkConnectionHandle hConn);
+
+37 25 set_connection_poll_group 0 4 60 40 NetworkSystem::set_connection_poll_group 0 1 14 0
+112
+bool NetworkSystem::set_connection_poll_group(NetworkConnectionHandle hConn, NetworkPollGroupHandle hPollGroup);
+
+38 29 receive_message_on_connection 0 4 60 44 NetworkSystem::receive_message_on_connection 0 1 15 0
+102
+bool NetworkSystem::receive_message_on_connection(NetworkConnectionHandle hConn, NetworkMessage &msg);
+
+39 29 receive_message_on_poll_group 0 4 60 44 NetworkSystem::receive_message_on_poll_group 0 1 16 0
+106
+bool NetworkSystem::receive_message_on_poll_group(NetworkPollGroupHandle hPollGroup, NetworkMessage &msg);
+
+40 17 create_poll_group 0 4 60 32 NetworkSystem::create_poll_group 0 1 17 0
+62
+NetworkPollGroupHandle NetworkSystem::create_poll_group(void);
+
+41 20 create_listen_socket 0 4 60 35 NetworkSystem::create_listen_socket 0 1 18 0
+72
+NetworkListenSocketHandle NetworkSystem::create_listen_socket(int port);
+
+42 14 get_global_ptr 0 4 60 29 NetworkSystem::get_global_ptr 0 1 19 0
+58
+static NetworkSystem *NetworkSystem::get_global_ptr(void);
+
+43 13 NetworkSystem 0 4 60 28 NetworkSystem::NetworkSystem 0 2 6 7 0
+122
+inline NetworkSystem::NetworkSystem(void) = default;
+inline NetworkSystem::NetworkSystem(NetworkSystem const &) = default;
+
+44 14 ~NetworkSystem 0 4 60 29 NetworkSystem::~NetworkSystem 0 0 0
+36
+NetworkSystem::~NetworkSystem(void);
+
+45 42 upcast_to_ISteamNetworkingSocketsCallbacks 0 12 63 60 NetworkCallbacks::upcast_to_ISteamNetworkingSocketsCallbacks 0 1 23 64
+upcast from NetworkCallbacks to ISteamNetworkingSocketsCallbacks
+101
+ISteamNetworkingSocketsCallbacks *NetworkCallbacks::upcast_to_ISteamNetworkingSocketsCallbacks(void);
+
+46 61 downcast_ISteamNetworkingSocketsCallbacks_to_NetworkCallbacks 0 8 0 61 downcast_ISteamNetworkingSocketsCallbacks_to_NetworkCallbacks 0 0 66
+downcast from ISteamNetworkingSocketsCallbacks to NetworkCallbacks
+120
+NetworkCallbacks *downcast_ISteamNetworkingSocketsCallbacks_to_NetworkCallbacks(ISteamNetworkingSocketsCallbacks *this);
+
+47 16 NetworkCallbacks 0 4 63 34 NetworkCallbacks::NetworkCallbacks 0 2 20 21 0
+120
+NetworkCallbacks::NetworkCallbacks(void);
+inline NetworkCallbacks::NetworkCallbacks(NetworkCallbacks const &) = default;
+
+48 17 ~NetworkCallbacks 0 4 63 35 NetworkCallbacks::~NetworkCallbacks 0 0 0
+42
+NetworkCallbacks::~NetworkCallbacks(void);
+
+49 12 set_callback 0 4 63 30 NetworkCallbacks::set_callback 0 1 22 0
+59
+void NetworkCallbacks::set_callback(PyObject *pPyCallback);
+
+50 16 get_listenSocket 0 20 65 39 NetworkConnectionInfo::get_listenSocket 0 0 73
+getter for NetworkListenSocketHandle NetworkConnectionInfo::listenSocket;
+78
+NetworkListenSocketHandle NetworkConnectionInfo::get_listenSocket(void) const;
+
+51 16 set_listenSocket 0 36 65 39 NetworkConnectionInfo::set_listenSocket 0 0 73
+setter for NetworkListenSocketHandle NetworkConnectionInfo::listenSocket;
+78
+void NetworkConnectionInfo::set_listenSocket(NetworkListenSocketHandle value);
+
+52 14 get_netAddress 0 20 65 37 NetworkConnectionInfo::get_netAddress 0 0 56
+getter for NetAddress NetworkConnectionInfo::netAddress;
+68
+NetAddress const &NetworkConnectionInfo::get_netAddress(void) const;
+
+53 9 get_state 0 20 65 32 NetworkConnectionInfo::get_state 0 0 78
+getter for NetworkSystem::NetworkConnectionState NetworkConnectionInfo::state;
+83
+NetworkSystem::NetworkConnectionState NetworkConnectionInfo::get_state(void) const;
+
+54 9 set_state 0 36 65 32 NetworkConnectionInfo::set_state 0 0 78
+setter for NetworkSystem::NetworkConnectionState NetworkConnectionInfo::state;
+83
+void NetworkConnectionInfo::set_state(NetworkSystem::NetworkConnectionState value);
+
+55 13 get_endReason 0 20 65 36 NetworkConnectionInfo::get_endReason 0 0 48
+getter for int NetworkConnectionInfo::endReason;
+53
+int NetworkConnectionInfo::get_endReason(void) const;
+
+56 13 set_endReason 0 36 65 36 NetworkConnectionInfo::set_endReason 0 0 48
+setter for int NetworkConnectionInfo::endReason;
+53
+void NetworkConnectionInfo::set_endReason(int value);
+
+57 21 NetworkConnectionInfo 0 4 65 44 NetworkConnectionInfo::NetworkConnectionInfo 0 2 24 25 0
+162
+inline NetworkConnectionInfo::NetworkConnectionInfo(void) = default;
+inline NetworkConnectionInfo::NetworkConnectionInfo(NetworkConnectionInfo const &) = default;
+
+58 22 ~NetworkConnectionInfo 0 4 65 45 NetworkConnectionInfo::~NetworkConnectionInfo 0 0 0
+52
+NetworkConnectionInfo::~NetworkConnectionInfo(void);
+
+25
+1 0 0 7 5 71 30 0 0 0 
+2 0 0 7 5 71 30 0 0 1 6 param0 0 72  
+3 0 0 6 2 74 0 0 0 1 4 this 3 71  
+4 0 0 6 3 77 0 0 0 1 4 this 3 71  
+5 0 0 6 4 79 0 0 0 1 4 this 3 71  
+6 0 0 7 22 80 44 0 0 0 
+7 0 0 7 22 80 44 0 0 1 6 param0 0 81  
+8 0 0 6 10 79 0 0 0 2 4 this 3 80  4 addr 1 83  
+9 0 0 6 11 86 0 0 0 3 4 this 3 80  5 hConn 1 79  5 pInfo 1 85  
+10 0 0 4 12 87 0 0 0 4 4 this 3 80  5 hConn 1 79  2 dg 1 74  5 flags 1 61  
+11 0 0 4 13 87 0 0 0 2 4 this 3 80  5 hConn 1 79  
+12 0 0 4 14 87 0 0 0 2 4 this 3 80  10 pCallbacks 1 88  
+13 0 0 6 15 86 0 0 0 2 4 this 3 80  5 hConn 1 79  
+14 0 0 6 16 86 0 0 0 3 4 this 3 80  5 hConn 1 79  10 hPollGroup 1 89  
+15 0 0 6 17 86 0 0 0 3 4 this 3 80  5 hConn 1 79  3 msg 1 71  
+16 0 0 6 18 86 0 0 0 3 4 this 3 80  10 hPollGroup 1 89  3 msg 1 71  
+17 0 0 6 19 89 0 0 0 1 4 this 3 80  
+18 0 0 6 20 66 0 0 0 2 4 this 3 80  4 port 1 70  
+19 0 0 6 21 80 0 0 0 0 
+20 0 0 7 28 88 48 0 0 0 
+21 0 0 7 28 88 48 0 0 1 6 param0 0 90  
+22 0 0 4 30 87 0 0 0 2 4 this 3 88  11 pPyCallback 1 92  
+23 0 0 6 26 95 0 0 0 1 4 this 3 88  
+24 0 0 7 48 85 58 0 0 0 
+25 0 0 7 48 85 58 0 0 1 6 param0 0 96  
+39
+59 14 NetworkMessage 0 141313 14 NetworkMessage 14 NetworkMessage 0 0 0 1 29 30 0 3 26 27 28 0 0 0 0 0 0
+
+60 13 NetworkSystem 0 141313 13 NetworkSystem 13 NetworkSystem 0 0 0 1 43 44 0 12 31 32 33 34 35 36 37 38 39 40 41 42 0 0 0 0 2 61 62 0
+
+61 16 NetworkSendFlags 0 794624 31 NetworkSystem::NetworkSendFlags 31 NetworkSystem::NetworkSendFlags 60 0 0 0 0 0 0 0 0 0 8 14 NSF_unreliable 29 NetworkSystem::NSF_unreliable 0
+0 12 NSF_no_nagle 27 NetworkSystem::NSF_no_nagle 0
+1 23 NSF_unreliable_no_nagle 38 NetworkSystem::NSF_unreliable_no_nagle 0
+1 12 NSF_no_delay 27 NetworkSystem::NSF_no_delay 0
+4 23 NSF_unreliable_no_delay 38 NetworkSystem::NSF_unreliable_no_delay 0
+5 12 NSF_reliable 27 NetworkSystem::NSF_reliable 0
+8 21 NSF_reliable_no_nagle 36 NetworkSystem::NSF_reliable_no_nagle 0
+9 22 NSF_use_current_thread 37 NetworkSystem::NSF_use_current_thread 0
+16 0 33
+// Copy of k_nSteamNetworkingSend
+
+62 22 NetworkConnectionState 0 794624 37 NetworkSystem::NetworkConnectionState 37 NetworkSystem::NetworkConnectionState 60 0 0 0 0 0 0 0 0 0 6 8 NCS_none 23 NetworkSystem::NCS_none 0
+0 14 NCS_connecting 29 NetworkSystem::NCS_connecting 0
+1 17 NCS_finding_route 32 NetworkSystem::NCS_finding_route 0
+2 13 NCS_connected 28 NetworkSystem::NCS_connected 0
+3 18 NCS_closed_by_peer 33 NetworkSystem::NCS_closed_by_peer 0
+4 28 NCS_problem_detected_locally 43 NetworkSystem::NCS_problem_detected_locally 0
+5 0 42
+// Copy of ESteamNetworkingConnectionState
+
+63 16 NetworkCallbacks 0 26625 16 NetworkCallbacks 16 NetworkCallbacks 0 0 0 1 47 48 0 1 49 0 0 1 3 64 45 46 0 0 0
+
+64 32 ISteamNetworkingSocketsCallbacks 0 2048 32 ISteamNetworkingSocketsCallbacks 32 ISteamNetworkingSocketsCallbacks 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+65 21 NetworkConnectionInfo 0 141313 21 NetworkConnectionInfo 21 NetworkConnectionInfo 0 0 0 1 57 58 4 98 99 100 101 0 0 0 0 0 0 0
+
+66 25 NetworkListenSocketHandle 0 2105344 25 NetworkListenSocketHandle 25 NetworkListenSocketHandle 0 0 67 0 0 0 0 0 0 0 0 0 0
+
+67 8 uint32_t 0 2105344 8 uint32_t 8 uint32_t 0 0 68 0 0 0 0 0 0 0 0 0 0
+
+68 12 unsigned int 0 8198 12 unsigned int 12 unsigned int 0 1 0 0 0 0 0 0 0 0 0 0 0
+
+69 10 NetAddress 0 2048 10 NetAddress 10 NetAddress 0 0 0 0 0 0 0 0 0 0 0 0 114
+/**
+ * Represents a network address to which UDP packets may be sent or to which a
+ * TCP socket may be bound.
+ */
+
+70 3 int 0 8194 3 int 3 int 0 1 0 0 0 0 0 0 0 0 0 0 0
+
+71 16 NetworkMessage * 0 8576 16 NetworkMessage * 16 NetworkMessage * 0 0 59 0 0 0 0 0 0 0 0 0 0
+
+72 22 NetworkMessage const * 0 8576 22 NetworkMessage const * 22 NetworkMessage const * 0 0 73 0 0 0 0 0 0 0 0 0 0
+
+73 20 NetworkMessage const 0 8832 20 NetworkMessage const 20 NetworkMessage const 0 0 59 0 0 0 0 0 0 0 0 0 0
+
+74 16 Datagram const * 0 8576 16 Datagram const * 16 Datagram const * 0 0 75 0 0 0 0 0 0 0 0 0 0
+
+75 14 Datagram const 0 8832 14 Datagram const 14 Datagram const 0 0 76 0 0 0 0 0 0 0 0 0 0
+
+76 8 Datagram 0 2048 8 Datagram 8 Datagram 0 0 0 0 0 0 0 0 0 0 0 0 565
+/**
+ * An ordered list of data elements, formatted in memory for transmission over
+ * a socket or writing to a data file.
+ *
+ * Data elements should be added one at a time, in order, to the Datagram.
+ * The nature and contents of the data elements are totally up to the user.
+ * When a Datagram has been transmitted and received, its data elements may be
+ * extracted using a DatagramIterator; it is up to the caller to know the
+ * correct type of each data element in order.
+ *
+ * A Datagram is itself headerless; it is simply a collection of data
+ * elements.
+ */
+
+77 18 DatagramIterator * 0 8576 18 DatagramIterator * 18 DatagramIterator * 0 0 78 0 0 0 0 0 0 0 0 0 0
+
+78 16 DatagramIterator 0 2048 16 DatagramIterator 16 DatagramIterator 0 0 0 0 0 0 0 0 0 0 0 0 215
+/**
+ * A class to retrieve the individual data elements previously stored in a
+ * Datagram.  Elements may be retrieved one at a time; it is up to the caller
+ * to know the correct type and order of each element.
+ */
+
+79 23 NetworkConnectionHandle 0 2105344 23 NetworkConnectionHandle 23 NetworkConnectionHandle 0 0 67 0 0 0 0 0 0 0 0 0 0
+
+80 15 NetworkSystem * 0 8576 15 NetworkSystem * 15 NetworkSystem * 0 0 60 0 0 0 0 0 0 0 0 0 0
+
+81 21 NetworkSystem const * 0 8576 21 NetworkSystem const * 21 NetworkSystem const * 0 0 82 0 0 0 0 0 0 0 0 0 0
+
+82 19 NetworkSystem const 0 8832 19 NetworkSystem const 19 NetworkSystem const 0 0 60 0 0 0 0 0 0 0 0 0 0
+
+83 18 NetAddress const * 0 8576 18 NetAddress const * 18 NetAddress const * 0 0 84 0 0 0 0 0 0 0 0 0 0
+
+84 16 NetAddress const 0 8832 16 NetAddress const 16 NetAddress const 0 0 69 0 0 0 0 0 0 0 0 0 0
+
+85 23 NetworkConnectionInfo * 0 8576 23 NetworkConnectionInfo * 23 NetworkConnectionInfo * 0 0 65 0 0 0 0 0 0 0 0 0 0
+
+86 4 bool 0 8194 4 bool 4 bool 0 4 0 0 0 0 0 0 0 0 0 0 0
+
+87 4 void 0 8194 4 void 4 void 0 6 0 0 0 0 0 0 0 0 0 0 0
+
+88 18 NetworkCallbacks * 0 8576 18 NetworkCallbacks * 18 NetworkCallbacks * 0 0 63 0 0 0 0 0 0 0 0 0 0
+
+89 22 NetworkPollGroupHandle 0 2105344 22 NetworkPollGroupHandle 22 NetworkPollGroupHandle 0 0 67 0 0 0 0 0 0 0 0 0 0
+
+90 24 NetworkCallbacks const * 0 8576 24 NetworkCallbacks const * 24 NetworkCallbacks const * 0 0 91 0 0 0 0 0 0 0 0 0 0
+
+91 22 NetworkCallbacks const 0 8832 22 NetworkCallbacks const 22 NetworkCallbacks const 0 0 63 0 0 0 0 0 0 0 0 0 0
+
+92 10 PyObject * 0 8576 10 PyObject * 10 PyObject * 0 0 93 0 0 0 0 0 0 0 0 0 0
+
+93 8 PyObject 0 2105344 8 PyObject 8 PyObject 0 0 94 0 0 0 0 0 0 0 0 0 0
+
+94 7 _object 0 1024 7 _object 7 _object 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+95 34 ISteamNetworkingSocketsCallbacks * 0 8576 34 ISteamNetworkingSocketsCallbacks * 34 ISteamNetworkingSocketsCallbacks * 0 0 64 0 0 0 0 0 0 0 0 0 0
+
+96 29 NetworkConnectionInfo const * 0 8576 29 NetworkConnectionInfo const * 29 NetworkConnectionInfo const * 0 0 97 0 0 0 0 0 0 0 0 0 0
+
+97 27 NetworkConnectionInfo const 0 8832 27 NetworkConnectionInfo const 27 NetworkConnectionInfo const 0 0 65 0 0 0 0 0 0 0 0 0 0
+
+0
+4
+98 12 listenSocket 0 6 66 50 51 0 0 0 0 0 0 35 NetworkConnectionInfo::listenSocket 0
+
+99 10 netAddress 0 2 69 52 0 0 0 0 0 0 0 33 NetworkConnectionInfo::netAddress 0
+
+100 5 state 0 6 62 53 54 0 0 0 0 0 0 28 NetworkConnectionInfo::state 0
+
+101 9 endReason 0 6 70 55 56 0 0 0 0 0 0 32 NetworkConnectionInfo::endReason 0
+
+0
