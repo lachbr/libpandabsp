@@ -1,0 +1,111 @@
+macro PROJECT_NAME "bsp_common"
+
+macro SRCDIR "../.."
+macro OUTBINDIR "$BINDEFAULT"
+
+include "$SRCDIR/_qpc_scripts/bsp_dll_base.qpc"
+
+configuration
+{
+	general
+	{
+		include_directories { "$INCPANDA" }
+	}
+	
+	compiler
+	{
+		preprocessor_definitions
+		{
+			"BUILDING_BSPCOMMON"
+		}
+	}
+	
+	linker
+	{
+		"$LIBPANDA/libp3dtool"
+		"$LIBPANDA/libp3dtoolconfig"
+		"$LIBPANDA/libpanda"
+		"$LIBPANDA/libpandaexpress"
+	}
+}
+
+files
+{
+	folder "Source Files"
+	{
+		folder "mathlib"
+		{
+			"powsse.cpp"
+			"sse.cpp"
+			"sseconst.cpp
+		}
+		
+		"anorms.cpp"
+		"blockmem.cpp"
+		"bspfile.cpp"
+		"bsptools.cpp"
+		"clhelper.cpp"
+		"cmdlib.cpp"
+		"cmdlinecfg.cpp"
+		"filelib.cpp"
+		"files.cpp"
+		"halton.cpp"
+		"log.cpp"
+		"mathlib.cpp"
+		"messages.cpp"
+		"resourcelock.cpp"
+		"scriplib.cpp"
+		"threads.cpp"
+		"winding.cpp"
+	}
+	
+	folder "Header Files"
+	{
+		folder "mathlib"
+		{
+			"sse.h"
+			"ssemath.h"
+		}
+		
+		folder "CL"
+		{
+			"cl.h"
+			"cl_d3d10.h"
+			"cl_d3d11.h"
+			"cl_dx9_media_sharing.h"
+			"cl_dx9_media_sharing_intel.h"
+			"cl_egl.h"
+			"cl_ext.h"
+			"cl_ext_intel.h"
+			"cl_gl.h"
+			"cl_gl_ext.h"
+			"cl_platform.h"
+			"cl_va_api_media_sharing_intel.h"
+			"cl_version.h"
+			"opencl.h"
+		}
+		
+		"anorms.h"
+		"blockmem.h"
+		"boundingbox.h"
+		"bspfile.h"
+		"bsptools.h"
+		"clhelper.h"
+		"cmdlib.h"
+		"cmdlinecfg.h"
+		"common_config.h"
+		"filelib.h"
+		"halton.h"
+		"hlassert.h"
+		"log.h"
+		"mathlib.h"
+		"mathtypes.h"
+		"messages.h"
+		"resourcelock.h"
+		"scriplib.h"
+		"threads.h"
+		"TimeCounter.h"
+		"win32fix.h"
+		"winding.h"
+	}
+}

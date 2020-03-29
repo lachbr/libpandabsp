@@ -2,7 +2,6 @@ obj
 CMakeFiles
 cmake_install.cmake
 Release
-RelWithDebInfo
 Debug
 Win32
 CMakeCache.txt
