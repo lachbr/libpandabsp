@@ -9,6 +9,7 @@
 #ifndef BOUNDINGBOX_H__
 #define BOUNDINGBOX_H__
 #include "cmdlib.h" //--vluzacn
+#include "mathlib.h"
 
 #if _MSC_VER >= 1000
 #pragma once

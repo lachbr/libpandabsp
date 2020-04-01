@@ -23,7 +23,7 @@ struct bspdata_t;
 /**
  * Enumerates the BSP tree checking for intersections with any non TEX_SPECIAL faces.
  */
-class FaceFinder : public BaseBSPEnumerator
+class EXPCL_PANDABSP FaceFinder : public BaseBSPEnumerator
 {
 public:
         FaceFinder( bspdata_t *data );
@@ -52,9 +52,9 @@ struct collbspdata_t
         cboxbrush_t boxbrushes[MAX_MAP_BRUSHES];
 };
 
-extern collbspdata_t *SetupCollisionBSPData( const bspdata_t *bspdata );
+extern EXPCL_PANDABSP collbspdata_t *SetupCollisionBSPData( const bspdata_t *bspdata );
 
-extern void CM_BoxTrace( const Ray &ray, int headnode, int brushmask,
+extern EXPCL_PANDABSP void CM_BoxTrace( const Ray &ray, int headnode, int brushmask,
                          bool compute_endpoint, const collbspdata_t *bspdata, Trace &trace );
 
 class BSPLoader;
@@ -65,7 +65,7 @@ enum
 	TRACETYPE_DETAIL = 1 << 1,
 };
 
-class BSPTrace : public ReferenceCount
+class EXPCL_PANDABSP BSPTrace : public ReferenceCount
 {
 public:
 	BSPTrace( BSPLoader *loader );

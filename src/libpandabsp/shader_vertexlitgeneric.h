@@ -15,7 +15,7 @@
 #include "shader_spec.h"
 #include "shader_features.h"
 
-class VLGShaderConfig : public ShaderConfig
+class EXPCL_PANDABSP VLGShaderConfig : public ShaderConfig
 {
 public:
 
@@ -33,7 +33,7 @@ public:
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat );
 };
 
-class VertexLitGenericSpec : public ShaderSpec
+class EXPCL_PANDABSP VertexLitGenericSpec : public ShaderSpec
 {
 PUBLISHED:
         VertexLitGenericSpec();

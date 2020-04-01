@@ -37,7 +37,7 @@ public:
 	int brush_modelnum;
 };
 
-class DecalManager
+class EXPCL_PANDABSP DecalManager
 {
 public:
 	DecalManager( BSPLoader *loader );

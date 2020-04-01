@@ -38,7 +38,7 @@ static int calc_num_pixels( float point_size )
 	return (int)roundf( powf( point_size, 2 ) );
 }
 
-TypeDef( GlowNode );
+IMPLEMENT_CLASS( GlowNode );
 
 GlowNode::GlowNode( const std::string &name, float query_size ) :
 	GeomNode( name ),
@@ -163,15 +163,15 @@ void GlowNode::draw_callback( CallbackData *data )
 	geom_cbdata->set_lost_state( false );
 }
 
-TypeDef( GlowNode::DrawCallback );
+IMPLEMENT_CLASS( GlowNodeDrawCallback );
 
-GlowNode::DrawCallback::DrawCallback( GlowNode *node ) :
+GlowNodeDrawCallback::GlowNodeDrawCallback( GlowNode *node ) :
 	CallbackObject(),
 	_node( node )
 {
 }
 
-void GlowNode::DrawCallback::do_callback( CallbackData *data )
+void GlowNodeDrawCallback::do_callback( CallbackData *data )
 {
 	_node->draw_callback( data );
 }

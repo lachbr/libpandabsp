@@ -20,7 +20,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // PostProcessPass
 
-TypeDef( PostProcessPass );
+IMPLEMENT_CLASS( PostProcessPass );
 
 FrameBufferProperties *PostProcessPass::_default_fbprops = nullptr;
 FrameBufferProperties PostProcessPass::get_default_fbprops()
@@ -37,7 +37,7 @@ FrameBufferProperties PostProcessPass::get_default_fbprops()
 		_default_fbprops->set_aux_hrgba( 0 );
 		_default_fbprops->set_coverage_samples( 0 );
 		_default_fbprops->set_rgb_color( true );
-		_default_fbprops->set_rgba_bits( 8, 8, 8, 8 );
+		_default_fbprops->set_rgba_bits( 16, 16, 16, 8 );
 	}
 
 	return *_default_fbprops;
@@ -100,7 +100,7 @@ bool PostProcessPass::setup_buffer()
 	winprops.set_size( get_corrected_size( window->get_size() ) );
 
 	FrameBufferProperties fbprops = _fbprops;
-	fbprops.set_back_buffers( 1 );
+	fbprops.set_back_buffers( 0 );
 	if ( has_texture_bits( bits_PASSTEXTURE_DEPTH ) )
 	{
 		fbprops.set_depth_bits( 32 );
@@ -233,12 +233,7 @@ void PostProcessPass::setup_region()
 void PostProcessPass::setup()
 {
 	setup_textures();
-	if ( !setup_buffer() )
-	{
-		postprocess_cat.error()
-			<< "Unable to create a graphics buffer for post-processing! Behavior from this point is undefined.\n";
-		return;
-	}
+	nassertv( setup_buffer() );
 	setup_quad();
 	setup_camera();
 	setup_region();

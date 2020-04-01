@@ -23,10 +23,6 @@
 #include <geom.h>
 #include <graphicsStateGuardian.h>
 #include <texture.h>
-#ifdef HAVE_PYTHON
-#include <py_panda.h>
-#endif
-#include "entity.h"
 #include <renderAttrib.h>
 #include <boundingBox.h>
 #include <lightReMutex.h>
@@ -49,11 +45,13 @@ struct dvertex_s;
 struct texref_s;
 struct dface_s;
 struct dedge_s;
+struct entity_s;
 typedef texinfo_s texinfo_t;
 typedef dvertex_s dvertex_t;
 typedef texref_s texref_t;
 typedef dface_s dface_t;
 typedef dedge_s dedge_t;
+typedef entity_s entity_t;
 struct bspdata_t;
 
 class EggVertex;
@@ -227,33 +225,8 @@ PUBLISHED:
 		return _model_data[modelnum].origin;
 	}
 
-	void add_dynamic_entity( PyObject *pyent );
-	void remove_dynamic_entity( PyObject *pyent );
-	void mark_entity_preserved( int n, bool preserved = true );
-	INLINE int get_num_entities() const
-	{
-		return _entities.size();
-	}
-	PyObject *get_entity( int n ) const;
-
-	INLINE void set_transition_landmark( const std::string &name,
-					     const LVector3 &origin,
-					     const LVector3 &angles )
-	{
-		// Preserved entity transforms are stored relative to this node,
-		// and applied relative to the destination landmark in the new level.
-		_transition_source_landmark = NodePath( name );
-		_transition_source_landmark.set_pos( origin );
-		_transition_source_landmark.set_hpr( angles );
-	}
-	INLINE void clear_transition_landmark()
-	{
-		_transition_source_landmark = NodePath();
-	}
-
-        bool read( const Filename &file, bool is_transition = false );
+        virtual bool read( const Filename &file, bool is_transition = false );
 	void do_optimizations();
-	void spawn_entities();
 
 	void set_gamma( PN_stdfloat gamma, int overbright = 1 );
         INLINE PN_stdfloat get_gamma() const
@@ -296,11 +269,6 @@ PUBLISHED:
         int extract_modelnum( int entnum );
         void get_model_bounds( int modelnum, LPoint3 &mins, LPoint3 &maxs );
 
-#ifdef HAVE_PYTHON
-        void set_server_entity_dispatcher( PyObject *dispatcher );
-        void link_server_entity_to_class( const string &name, PyTypeObject *type );
-#endif
-
         void set_ai( bool ai );
         INLINE bool is_ai() const
         {
@@ -310,18 +278,7 @@ PUBLISHED:
         bool trace_line( const LPoint3 &start, const LPoint3 &end );
         LPoint3 clip_line( const LPoint3 &start, const LPoint3 &end );
 
-#ifdef HAVE_PYTHON
-	void link_entity_to_class( const string &entname, PyTypeObject *type );
-	PyObject *get_py_entity_by_target_name( const string &targetname ) const;
-        PyObject *find_all_entities( const string &classname );
-        void get_entity_keyvalues( PyObject *list, const int entnum );
-        void link_cent_to_pyent( int entum, PyObject *pyent );
-        void remove_py_entity( PyObject *ent );
-#endif
-
 	NodePath get_model( int modelnum ) const;
-
-        CBaseEntity *get_c_entity( const int entnum ) const;
 
 	INLINE int find_leaf( const NodePath &np )
         {
@@ -372,8 +329,7 @@ PUBLISHED:
 
 	LTexCoord get_lightcoords( int facenum, const LVector3 &point );
 
-	void update();
-
+	static void set_global_ptr( BSPLoader *ptr );
         static BSPLoader *get_global_ptr();
 
 PUBLISHED:
@@ -426,7 +382,16 @@ public:
 		return nullptr;
 	}
 
-private:
+	void update_visibility( const LPoint3 &pos );
+
+protected:
+	virtual void load_geometry() = 0;
+	virtual void cleanup_entities( bool is_transition );
+
+	static int extract_modelnum_s( entity_t *ent );
+	static void flatten_node( const NodePath &node );
+	static void clear_model_nodes_below( const NodePath &top );
+
 	void setup_raytrace_environment();
 
 	void update_leaf( int leaf );
@@ -440,17 +405,13 @@ private:
 
 	void make_brush_model_collisions( int modelnum = -1 );
 
-	void load_entities();
+	virtual void load_entities() = 0;
         void load_static_props();
         void load_cubemaps();
 
 	void read_materials_file();
 
         void remove_model( int modelnum );
-
-#ifdef HAVE_PYTHON
-	PyObject *make_pyent( PyObject *pyent, const string &classname );
-#endif
 
 	LTexCoord get_vertex_uv( texinfo_t *texinfo, dvertex_t *vert, bool lightmap = false ) const;
 
@@ -467,7 +428,7 @@ private:
 
         static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
 
-private:
+protected:
         bspdata_t *_bspdata;
         BSPShaderGenerator *_shgen;
         collbspdata_t *_colldata;
@@ -475,8 +436,6 @@ private:
         NodePath _camera;
 	NodePath _render;
         NodePath _fake_dl;
-	NodePath _transition_source_landmark;
-	NodePath _transition_dest_landmark;
         LVector3 _shadow_dir;
         bool _want_shadows;
         entity_t *_light_environment;
@@ -507,25 +466,11 @@ private:
 	int _curr_leaf_idx;
         Filename _map_file;
 
-        // for purely client-sided, non networked entities
-        //
-        // utilized only by the client
-	pmap<string, PyTypeObject *> _entity_to_class;
-
-        // entity name to distributed object class
-        // createServerEntity is called on the dispatcher object
-        // to generate the networked entity
-        //
-        // utilized only by the AI
-        PyObject *_sv_ent_dispatch;
-        pmap<string, PyTypeObject *> _svent_to_class;
-
 	std::unordered_map<const dface_t *, const dmodel_t *> _dface_dmodels;
         pmap<texref_t *, CPT( BSPMaterial )> _texref_materials;
         vector<uint8_t *> _leaf_pvs;
 	pvector<NodePath> _leaf_visnp;
 	pvector<PT( BoundingBox )> _leaf_bboxs;
-	pvector<entitydef_t> _entities;
 	pvector<brush_model_data_t> _model_data;
         LightmapPaletteDirectory _lightmap_dir;
 	pvector<dface_lightmap_info_t> _face_lightmap_info;
@@ -559,6 +504,6 @@ private:
         LightMutex _leaf_aabb_lock;
 };
 
-extern LColor color_from_value( const std::string &value, bool scale = true, bool gamma = false );
+extern EXPCL_PANDABSP LColor color_from_value( const std::string &value, bool scale = true, bool gamma = false );
 
 #endif // BSPLOADER_H

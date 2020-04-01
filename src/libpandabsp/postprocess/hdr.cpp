@@ -58,7 +58,7 @@ private:
 	HDRPass *_pass;
 };
 
-TypeDef( HDRPass );
+IMPLEMENT_CLASS( HDRPass );
 
 HDRPass::HDRPass( PostProcess *pp ) :
 	PostProcessPass( pp, "hdr", bits_PASSTEXTURE_COLOR ),
@@ -220,6 +220,8 @@ void HDRPass::update()
 
 	_exposure = new_exposure;
 	_exposure_output[0] = _exposure;
+
+	//std::cout << "HDR buffer size: " << _buffer->get_x_size() << "x" << _buffer->get_y_size() << std::endl;
 }
 
 void HDRPass::setup_quad()

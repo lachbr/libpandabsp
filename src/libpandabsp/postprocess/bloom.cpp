@@ -197,7 +197,7 @@ private:
 	PTA_LVecBase2f _ps_tap_offsets;
 };
 
-TypeDef( BloomEffect );
+IMPLEMENT_CLASS( BloomEffect );
 
 BloomEffect::BloomEffect( PostProcess *pp ) :
 	PostProcessEffect( pp, "bloom" )

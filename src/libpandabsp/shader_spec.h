@@ -20,6 +20,8 @@
 
 #include <unordered_map>
 
+#include "config_bsp.h"
+
 #define SHADER_PERMS_UNORDERED_MAP
 
 class RenderState;
@@ -67,7 +69,7 @@ public:
 	pvector<ShaderPrecacheComboSkipCondition_t> skips;
 };
 
-class ShaderConfig : public ReferenceCount
+class EXPCL_PANDABSP ShaderConfig : public ReferenceCount
 {
 public:
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat ) = 0;
@@ -162,7 +164,7 @@ PUBLISHED:
  * Serves to setup the permutations for a specific shader
  * when setting up a shader for a specific RenderState.
  */
-class ShaderSpec : public ReferenceCount, public Namable
+class EXPCL_PANDABSP ShaderSpec : public ReferenceCount, public Namable
 {
 public:
         struct ShaderSource
@@ -239,6 +241,6 @@ private:
         static TypeHandle _type_handle;
 };
 
-void enable_srgb_read( Texture *tex, bool enable );
+extern EXPCL_PANDABSP void enable_srgb_read( Texture *tex, bool enable );
 
 #endif // SHADER_SPEC_H

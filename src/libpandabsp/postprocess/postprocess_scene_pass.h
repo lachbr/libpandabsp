@@ -18,7 +18,7 @@
 
 class PostProcess;
 
-class PostProcessScenePass : public PostProcessPass
+class EXPCL_PANDABSP PostProcessScenePass : public PostProcessPass
 {
 PUBLISHED:
 	PostProcessScenePass( PostProcess *pp, int output_texture_bits = bits_PASSTEXTURE_COLOR, int auxbits = 0 );

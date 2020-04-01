@@ -23,14 +23,6 @@ typedef void q_threadfunction( int );
 #define DEFAULT_NUMTHREADS 1
 #endif
 
-#ifdef VERSION_64BIT
-#define intp unsigned long long
-#elif defined(VERSION_32BIT)
-#define intp unsigned long
-#else
-#pragma error("Only 32 and 64 bit architecture supported!")
-#endif
-
 class _BSPEXPORT BSPThread : public Thread
 {
 public:

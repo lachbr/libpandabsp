@@ -14,13 +14,13 @@
 
 #include "shader_spec.h"
 
-class UNMConfig : public ShaderConfig
+class EXPCL_PANDABSP UNMConfig : public ShaderConfig
 {
 public:
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat );
 };
 
-class UnlitNoMatSpec : public ShaderSpec
+class EXPCL_PANDABSP UnlitNoMatSpec : public ShaderSpec
 {
 PUBLISHED:
         UnlitNoMatSpec();

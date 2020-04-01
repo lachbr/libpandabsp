@@ -16,7 +16,7 @@
 
 #include <renderEffect.h>
 
-class AmbientBoostEffect : public RenderEffect
+class EXPCL_PANDABSP AmbientBoostEffect : public RenderEffect
 {
 private:
         INLINE AmbientBoostEffect() :
@@ -25,29 +25,29 @@ private:
         }
 
 PUBLISHED:
-        static CPT( RenderEffect ) make();
+        static CPT( RenderEffect ) Make();
 
 protected:
         virtual bool safe_to_combine() const;
         virtual int compare_to_impl( const RenderEffect *other ) const;
 
 public:
-        static void register_with_read_factory();
+        static void RegisterWithReadFactory();
         virtual void write_datagram( BamWriter *manager, Datagram &dg );
 
 protected:
-        static TypedWritable *make_from_bam( const FactoryParams &params );
+        static TypedWritable *MakeFromBam( const FactoryParams &params );
         void fillin( DatagramIterator &scan, BamReader *manager );
 
 public:
         static TypeHandle get_class_type()
         {
-                return _type_handle;
+                return m_sTypeHandle;
         }
         static void init_type()
         {
                 RenderEffect::init_type();
-                register_type( _type_handle, "AmbientBoostEffect",
+                register_type( m_sTypeHandle, "AmbientBoostEffect",
                         RenderEffect::get_class_type() );
         }
         virtual TypeHandle get_type() const
@@ -60,7 +60,7 @@ public:
         }
 
 private:
-        static TypeHandle _type_handle;
+        static TypeHandle m_sTypeHandle;
 };
 
 #endif // AMBIENT_BOOST_EFFECT_H

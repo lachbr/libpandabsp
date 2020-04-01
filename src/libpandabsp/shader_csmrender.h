@@ -4,7 +4,7 @@
 #include "shader_spec.h"
 #include "shader_features.h"
 
-class CSMRenderConfig : public ShaderConfig
+class EXPCL_PANDABSP CSMRenderConfig : public ShaderConfig
 {
 public:
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat );
@@ -13,7 +13,7 @@ public:
         AlphaFeature alpha;
 };
 
-class CSMRenderSpec : public ShaderSpec
+class EXPCL_PANDABSP CSMRenderSpec : public ShaderSpec
 {
 PUBLISHED:
         CSMRenderSpec();

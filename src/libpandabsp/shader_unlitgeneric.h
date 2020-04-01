@@ -15,7 +15,7 @@
 #include "shader_spec.h"
 #include "shader_features.h"
 
-class ULGConfig : public ShaderConfig
+class EXPCL_PANDABSP ULGConfig : public ShaderConfig
 {
 public:
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat );
@@ -28,7 +28,7 @@ public:
  * Shader that only supports a basetexture, no fancy lighting effects or anything.
  * Could be used for UI elements, emissive materials, particles, etc.
  */
-class UnlitGenericSpec : public ShaderSpec
+class EXPCL_PANDABSP UnlitGenericSpec : public ShaderSpec
 {
 PUBLISHED:
         UnlitGenericSpec();

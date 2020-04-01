@@ -45,6 +45,8 @@
 PStatCollector PSSMCameraRig::_update_collector( "App:CSM:Update" );
 static PStatCollector create_union_collector( "App:CSM:Update:MakeCullBounds" );
 
+static LightMutex csm_mutex( "CSMMutex" );
+
 static MeshDrawer dbg_draw;
 static NodePath dbg_root( "dbgRoot" );
 
@@ -62,6 +64,8 @@ static NodePath dbg_root( "dbgRoot" );
 */
 PSSMCameraRig::PSSMCameraRig( size_t num_splits, BSPShaderGenerator *gen )
 {
+	LightMutexHolder holder( csm_mutex );
+
         nassertv( num_splits > 0 );
         _num_splits = num_splits;
         _pssm_distance = 100.0;
@@ -636,8 +640,7 @@ static PT( BoundingKDOP ) make_shadow_cull_bounds( const BoundingHexahedron *vie
 * @param light_vector Sun-Vector
 */
 void PSSMCameraRig::compute_pssm_splits( const LMatrix4& transform, float max_distance,
-                                         const LVecBase3& light_vector, Camera *main_cam,
-                                         const GeometricBoundingVolume *light_bounds )
+                                         const LVecBase3& light_vector, Camera *main_cam )
 {
         nassertv( !_parent.is_empty() );
 
@@ -801,8 +804,13 @@ void PSSMCameraRig::compute_pssm_splits( const LMatrix4& transform, float max_di
 * @param cam_node Target camera node
 * @param light_vector The vector from the light to any point
 */
-void PSSMCameraRig::update( NodePath cam_node, const LVecBase3 &light_vector, const GeometricBoundingVolume *light_bounds )
+void PSSMCameraRig::update( NodePath cam_node, const LVecBase3 &light_vector )
 {
+	LightMutexHolder holder( csm_mutex );
+
+	if ( !_is_setup )
+		return;
+
         nassertv( !cam_node.is_empty() );
         _update_collector.start();
 
@@ -812,7 +820,7 @@ void PSSMCameraRig::update( NodePath cam_node, const LVecBase3 &light_vector, co
         LMatrix4 transform = cam_node.get_net_transform()->get_mat();
 
         // Get Camera and Lens pointers
-        Camera* cam = DCAST( Camera, cam_node.get_child( 0 ).node() );
+	Camera* cam = DCAST( Camera, cam_node.node() );//cam_node.get_child( 0 ).node() );
         nassertv( cam != nullptr );
         Lens* lens = cam->get_lens();
 
@@ -835,7 +843,7 @@ void PSSMCameraRig::update( NodePath cam_node, const LVecBase3 &light_vector, co
         }
 
         // Do the actual PSSM
-        compute_pssm_splits( transform, _pssm_distance / lens->get_far(), light_vector, cam, light_bounds );
+        compute_pssm_splits( transform, _pssm_distance / lens->get_far(), light_vector, cam );
 
         _update_collector.stop();
 }

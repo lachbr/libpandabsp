@@ -35,7 +35,7 @@ public:
 	}
 };
 
-TypeDef( FXAA_Effect );
+IMPLEMENT_CLASS( FXAA_Effect );
 
 FXAA_Effect::FXAA_Effect( PostProcess *pp ) :
 	PostProcessEffect( pp, "fxaa" )

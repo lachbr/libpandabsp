@@ -15,6 +15,8 @@
 #include <texture.h>
 #include <aa_luse.h>
 
+#include "config_bsp.h"
+
 class BSPMaterial;
 class ShaderConfig;
 class ShaderPermutations;
@@ -43,7 +45,7 @@ void clsname::parse_from_material_keyvalues(const BSPMaterial *mat, ShaderConfig
 #define SHADERFEATURE_SETUP_FUNC(clsname)\
 void clsname::add_permutations(ShaderPermutations &perms)
 
-class ShaderFeature
+class EXPCL_PANDABSP ShaderFeature
 {
 public:
         INLINE ShaderFeature() :
@@ -61,7 +63,7 @@ public:
  * Diffuse/albedo map. If $selfillum is 1, alpha channel
  * is the selfillum mask.
  */
-class BaseTextureFeature : public ShaderFeature
+class EXPCL_PANDABSP BaseTextureFeature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 public:
@@ -77,7 +79,7 @@ public:
 /**
  * A normal map.
  */
-class BumpmapFeature : public ShaderFeature
+class EXPCL_PANDABSP BumpmapFeature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 public:
@@ -96,7 +98,7 @@ public:
  *
  * Or explicit values for each.
  */
-class ARME_Feature : public ShaderFeature
+class EXPCL_PANDABSP ARME_Feature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 public:
@@ -124,7 +126,7 @@ public:
  * channel of the basetexture. Since the mask is only one
  * channel, an optional $selfillumtint can be specified.
  */
-class SelfIllumFeature : public ShaderFeature
+class EXPCL_PANDABSP SelfIllumFeature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 public:
@@ -142,7 +144,7 @@ public:
  * If translucent, alpha value is read from $basetexture.
  * Or provides an explicit alpha value.
  */
-class AlphaFeature : public ShaderFeature
+class EXPCL_PANDABSP AlphaFeature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 
@@ -161,7 +163,7 @@ public:
 /**
  * Texture which warps the NdotL term.
  */
-class LightwarpFeature : public ShaderFeature
+class EXPCL_PANDABSP LightwarpFeature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 public:
@@ -178,7 +180,7 @@ public:
  * Specifies if the material should use the half-lambert warping function
  * of the NdotL term.
  */
-class HalfLambertFeature : public ShaderFeature
+class EXPCL_PANDABSP HalfLambertFeature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 public:
@@ -196,7 +198,7 @@ public:
  * Gives extra highlights to the outer edges near the top of
  * an object to help them stand out more against the environment.
  */
-class RimLightFeature : public ShaderFeature
+class EXPCL_PANDABSP RimLightFeature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 public:
@@ -211,7 +213,7 @@ public:
         float exponent;
 };
 
-class EnvmapFeature : public ShaderFeature
+class EXPCL_PANDABSP EnvmapFeature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 public:
@@ -230,7 +232,7 @@ public:
  * Not used anywhere yet, but gives higher detail up close
  * to a surface. Derived from Half-Life 2.
  */
-class DetailFeature : public ShaderFeature
+class EXPCL_PANDABSP DetailFeature : public ShaderFeature
 {
         DECLARE_SHADERFEATURE();
 public:

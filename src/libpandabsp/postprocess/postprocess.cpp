@@ -21,12 +21,14 @@
 #include <asyncTaskManager.h>
 #include <auxBitplaneAttrib.h>
 
-NotifyCategoryDef(postprocess, "")
-
 /////////////////////////////////////////////////////////////////////////////////////////
 // PostProcess
 
-PostProcess::PostProcess( GraphicsOutput *output )
+PostProcess::PostProcess()
+{
+}
+
+void PostProcess::startup( GraphicsOutput *output )
 {
 	_output = output;
 	// Create the region that displays our final output image

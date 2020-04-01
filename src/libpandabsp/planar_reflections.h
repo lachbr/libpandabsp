@@ -19,12 +19,14 @@
 #include <graphicsOutput.h>
 #include <planeNode.h>
 
+#include "config_bsp.h"
+
 class BSPShaderGenerator;
 class Camera;
 class GraphicsOutput;
 class Texture;
 
-class PlanarReflections : public ReferenceCount
+class EXPCL_PANDABSP PlanarReflections : public ReferenceCount
 {
 public:
 	PlanarReflections( BSPShaderGenerator *shgen );

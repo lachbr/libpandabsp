@@ -166,7 +166,7 @@ private:
 
 class EXPCL_PANDABSP RayTraceGeometry : public PandaNode
 {
-        TypeDecl( RayTraceGeometry, PandaNode );
+        DECLARE_CLASS( RayTraceGeometry, PandaNode );
 
 PUBLISHED:
         INLINE RayTraceGeometry( const std::string &name = "" ) :
@@ -222,7 +222,7 @@ protected:
 
 class EXPCL_PANDABSP RayTraceTriangleMesh : public RayTraceGeometry
 {
-        TypeDecl( RayTraceTriangleMesh, RayTraceGeometry );
+        DECLARE_CLASS( RayTraceTriangleMesh, RayTraceGeometry );
 
 PUBLISHED:
         RayTraceTriangleMesh( const std::string &name = "" );

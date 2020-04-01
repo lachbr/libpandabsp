@@ -16,9 +16,9 @@
 #include <renderEffect.h>
 #include <aa_luse.h>
 
-class LightingOriginEffect : public RenderEffect
+class EXPCL_PANDABSP LightingOriginEffect : public RenderEffect
 {
-	TypeDecl( LightingOriginEffect, RenderEffect );
+	DECLARE_CLASS( LightingOriginEffect, RenderEffect );
 
 private:
 	INLINE LightingOriginEffect() :

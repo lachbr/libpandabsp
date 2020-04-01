@@ -12,9 +12,11 @@
 #ifndef AUXDATAATTRIB_H
 #define AUXDATAATTRIB_H
 
+#include "config_bsp.h"
+
 #include <renderAttrib.h>
 
-class AuxDataAttrib : public RenderAttrib
+class EXPCL_PANDABSP AuxDataAttrib : public RenderAttrib
 {
 private:
         INLINE AuxDataAttrib() :

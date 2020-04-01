@@ -25,9 +25,9 @@
 
 class PostProcess;
 
-class PostProcessPass : public ReferenceCount, public Namable
+class EXPCL_PANDABSP PostProcessPass : public ReferenceCount, public Namable
 {
-	TypeDecl2( PostProcessPass, ReferenceCount, Namable );
+	DECLARE_CLASS2( PostProcessPass, ReferenceCount, Namable );
 
 PUBLISHED:
 	PostProcessPass( PostProcess *pp, const std::string &name = "pass", int texture_output_bits = 0,

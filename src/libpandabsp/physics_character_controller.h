@@ -20,6 +20,8 @@
 #include <aa_luse.h>
 #include <py_panda.h>
 
+#include "config_bsp.h"
+
 BEGIN_PUBLISH
 enum MovementState
 {
@@ -67,7 +69,7 @@ struct CapsuleData
 	NodePath capsule_np;
 };
 
-class PhysicsCharacterController
+class EXPCL_PANDABSP PhysicsCharacterController : public ReferenceCount
 {
 PUBLISHED:
 	PhysicsCharacterController( BulletWorld *world, const NodePath &render, const NodePath &parent, float walk_height,
@@ -78,6 +80,7 @@ PUBLISHED:
 
 	void set_collide_mask( const BitMask32 &mask );
 
+#ifdef HAVE_PYTHON
 	INLINE void set_event_enter_callback( PyObject *callback )
 	{
 		if ( _event_enter_callback )
@@ -93,6 +96,7 @@ PUBLISHED:
 		Py_INCREF( callback );
 		_event_exit_callback = callback;
 	}
+#endif
 
 	INLINE void set_active_jump_limiter( bool limiter )
 	{
@@ -153,6 +157,7 @@ PUBLISHED:
 		return _movement_state;
 	}
 
+#ifdef HAVE_PYTHON
 	INLINE void set_stand_up_callback( PyObject *callback )
 	{
 		if ( _stand_up_callback )
@@ -168,6 +173,7 @@ PUBLISHED:
 		Py_INCREF( callback );
 		_fall_callback = callback;
 	}
+#endif
 
 	void start_crouch();
 	void stop_crouch();
@@ -181,7 +187,7 @@ PUBLISHED:
 
 	void place_on_ground();
 
-	void update();
+	void update( float frametime );
 
 	void remove_capsules();
 
@@ -267,10 +273,12 @@ private:
 	std::string _default_material;
 	bool _touching_water;
 
+#ifdef HAVE_PYTHON
 	PyObject *_stand_up_callback;
 	PyObject *_fall_callback;
 	PyObject *_event_enter_callback;
 	PyObject *_event_exit_callback;
+#endif
 };
 
 #endif // PHYSICS_CHARACTER_CONTROLLER_H

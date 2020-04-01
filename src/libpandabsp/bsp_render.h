@@ -26,21 +26,14 @@
 class BSPLoader;
 class nodeshaderinput_t;
 
-class BSPCullTraverser : public CullTraverser
+class EXPCL_PANDABSP BSPCullTraverser : public CullTraverser
 {
-        TypeDecl( BSPCullTraverser, CullTraverser );
+        DECLARE_CLASS( BSPCullTraverser, CullTraverser );
 
 PUBLISHED:
         BSPCullTraverser( CullTraverser *trav, BSPLoader *loader );
 
         virtual void traverse_below( CullTraverserData &data );
-
-protected:
-        virtual bool is_in_view( CullTraverserData &data );
-
-private:
-        INLINE void add_geomnode_for_draw( GeomNode *node, CullTraverserData &data );
-        static CPT( RenderState ) get_depth_offset_state();
 
 	INLINE bool has_camera_bits( unsigned int bits ) const
 	{
@@ -67,6 +60,13 @@ private:
 		return 0u;
 	}
 
+protected:
+        virtual bool is_in_view( CullTraverserData &data );
+
+private:
+        INLINE void add_geomnode_for_draw( GeomNode *node, CullTraverserData &data );
+        static CPT( RenderState ) get_depth_offset_state();
+
 private:
         BSPLoader *_loader;
 };
@@ -75,9 +75,9 @@ private:
  * Top of the scene graph when a BSP level is in effect.
  * Culls nodes against the PVS, operates ambient cubes, etc.
  */
-class BSPRender : public PandaNode
+class EXPCL_PANDABSP BSPRender : public PandaNode
 {
-        TypeDecl( BSPRender, PandaNode );
+        DECLARE_CLASS( BSPRender, PandaNode );
 
 PUBLISHED:
         BSPRender( const std::string &name, BSPLoader *loader );
@@ -89,9 +89,9 @@ private:
         BSPLoader * _loader;
 };
 
-class BSPRoot : public PandaNode
+class EXPCL_PANDABSP BSPRoot : public PandaNode
 {
-        TypeDecl( BSPRoot, PandaNode );
+        DECLARE_CLASS( BSPRoot, PandaNode );
 
 PUBLISHED:
         BSPRoot( const std::string &name );
@@ -101,9 +101,9 @@ public:
         virtual bool safe_to_flatten() const;
 };
 
-class BSPProp : public ModelRoot
+class EXPCL_PANDABSP BSPProp : public ModelRoot
 {
-        TypeDecl( BSPProp, ModelRoot );
+        DECLARE_CLASS( BSPProp, ModelRoot );
 
 PUBLISHED:
         BSPProp( const std::string &name );
@@ -113,9 +113,9 @@ public:
         virtual bool safe_to_flatten() const;
 };
 
-class BSPModel : public ModelNode
+class EXPCL_PANDABSP BSPModel : public ModelNode
 {
-        TypeDecl( BSPModel, ModelNode );
+        DECLARE_CLASS( BSPModel, ModelNode );
 
 PUBLISHED:
         BSPModel( const std::string &name );

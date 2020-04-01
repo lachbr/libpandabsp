@@ -20,6 +20,8 @@
 #include "TexturePacker.h"
 #include "mathlib.h"
 
+#include "config_bsp.h"
+
 class BSPLoader;
 class TexturePacker;
 
@@ -91,7 +93,7 @@ INLINE LRGBColor color_shift_pixel( colorrgbexp32_t *colsample, PN_stdfloat gamm
                           gamma_encode( sample[2] / 255.0, gamma ) );
 }
 
-class LightmapPalettizer
+class EXPCL_PANDABSP LightmapPalettizer
 {
 public:
         LightmapPalettizer( const BSPLoader *loader );

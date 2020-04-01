@@ -35,7 +35,7 @@
  * If you apply a texture to a node with the get_normalmap() stage, the shader specification
  * will know that the texture you supplied is to be treated as a normal map.
  */
-class TextureStages
+class EXPCL_PANDABSP TextureStages
 {
 PUBLISHED:
         static TextureStage *get( const std::string &name );

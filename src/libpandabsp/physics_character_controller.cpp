@@ -50,15 +50,17 @@ PhysicsCharacterController::PhysicsCharacterController( BulletWorld *world, cons
 	_timestep = 0.0f;
 	_movement_state = MOVEMENTSTATE_GROUND;
 	_intelligent_jump = true;
+#ifdef HAVE_PYTHON
 	_stand_up_callback = nullptr;
 	_fall_callback = nullptr;
+	_event_enter_callback = nullptr;
+	_event_exit_callback = nullptr;
+#endif
 	_jump_time = 0.0f;
 	_jump_speed = 0.0f;
 	_jump_max_height = 0.0f;
 	_jump_start_pos = 0.0f;
 	_event_sphere = nullptr;
-	_event_enter_callback = nullptr;
-	_event_exit_callback = nullptr;
 
 	_movement_parent = parent.attach_new_node( "physicsMovementParent" );
 	setup( _walk_height, _crouch_height, _step_height, _radius );
@@ -145,7 +147,7 @@ void PhysicsCharacterController::set_max_slope( float degs, bool affects_speed )
 
 void PhysicsCharacterController::set_angular_movement( float omega )
 {
-	_movement_parent.set_h( _movement_parent, omega * _timestep );
+	_movement_parent.set_h( _movement_parent, omega );
 }
 
 void PhysicsCharacterController::set_linear_movement( const LVector3 &speed )
@@ -159,7 +161,7 @@ void PhysicsCharacterController::place_on_ground()
 	_linear_velocity = LVector3::zero();
 }
 
-void PhysicsCharacterController::update()
+void PhysicsCharacterController::update( float frametime )
 {
 	_current_pos = _movement_parent.get_pos( _render );
 	_target_pos = LVector3( _current_pos );
@@ -172,7 +174,7 @@ void PhysicsCharacterController::update()
 	// Prevents the character from falling out of the world.
 	_above_ground = result.has_hit();
 
-	_timestep = ClockObject::get_global_clock()->get_dt();
+	_timestep = frametime;
 
 	update_event_sphere();
 	update_eye_ray();
@@ -405,15 +407,17 @@ void PhysicsCharacterController::update_event_sphere()
 		if ( !_prev_overlapping.has_path( np ) )
 		{
 			// The avatar has entered this node.
+#ifdef HAVE_PYTHON
 			if ( _event_enter_callback )
 			{
 				// Tell python code about it.
-				PyObject *py_np =
-					DTool_CreatePyInstance( &np, *(Dtool_PyTypedObject *)np.get_class_type().get_python_type(), true, true );
-				Py_INCREF( py_np );
-				PyObject *args = PyTuple_Pack( 1, py_np );
-				PyObject_CallObject( _event_enter_callback, args );
+				//PyObject *py_np =
+				//	DTool_CreatePyInstance( &np, *(Dtool_PyTypedObject *)np.get_class_type().get_python_type(), true, true );
+				//Py_INCREF( py_np );
+				//PyObject *args = PyTuple_Pack( 1, py_np );
+				//PyObject_CallObject( _event_enter_callback, args );
 			}
+#endif
 		}
 
 		overlapping.add_path( np );
@@ -425,15 +429,17 @@ void PhysicsCharacterController::update_event_sphere()
 		if ( !overlapping.has_path( np ) )
 		{
 			// The avatar has exited this node.
+#ifdef HAVE_PYTHON
 			if ( _event_exit_callback )
 			{
 				// Tell python code about it.
-				PyObject *py_np =
-					DTool_CreatePyInstance( &np, *(Dtool_PyTypedObject *)np.get_class_type().get_python_type(), true, true );
-				Py_INCREF( py_np );
-				PyObject *args = PyTuple_Pack( 1, py_np );
-				PyObject_CallObject( _event_exit_callback, args );
+				//PyObject *py_np =
+				//	DTool_CreatePyInstance( &np, *(Dtool_PyTypedObject *)np.get_class_type().get_python_type(), true, true );
+				//Py_INCREF( py_np );
+				//PyObject *args = PyTuple_Pack( 1, py_np );
+				//PyObject_CallObject( _event_exit_callback, args );
 			}
+#endif
 		}
 	}
 
@@ -552,6 +558,9 @@ void PhysicsCharacterController::update_head_contact()
 
 void PhysicsCharacterController::start_crouch()
 {
+	if ( _enabled_crouch )
+		return;
+
 	_is_crouching = true;
 	_enabled_crouch = true;
 
@@ -631,11 +640,13 @@ void PhysicsCharacterController::stand_up()
 	_capsule_offset = _capsule_data->height * 0.5f + _capsule_data->levitation;
 	_foot_distance = 3.0f;//_capsule_offset + _capsule_data->levitation;
 
+#ifdef HAVE_PYTHON
 	if ( _stand_up_callback != nullptr )
 	{
 		PyObject *args = PyTuple_New( 0 );
 		PyObject_CallObject( _stand_up_callback, args );
 	}
+#endif
 }
 
 void PhysicsCharacterController::land()
@@ -682,11 +693,13 @@ void PhysicsCharacterController::process_falling()
 		// until the next frame.
 		_target_pos[2] = _foot_contact.hit_pos[2];
 
+#ifdef HAVE_PYTHON
 		if ( _fall_callback != nullptr )
 		{
 			PyObject *args = PyTuple_Pack( 1, PyFloat_FromDouble( _fall_start_pos - new_pos[2] ) );
 			PyObject_CallObject( _fall_callback, args );
 		}
+#endif
 	}
 }
 

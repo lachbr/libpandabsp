@@ -6,7 +6,7 @@
 /**
  * This is just an alias of UnlitGeneric that enables color blending on the decal.
  */
-class DecalModulateSpec : public UnlitGenericSpec
+class EXPCL_PANDABSP DecalModulateSpec : public UnlitGenericSpec
 {
 PUBLISHED:
 	DecalModulateSpec();

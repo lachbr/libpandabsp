@@ -39,7 +39,7 @@
 #include "bsp_trace.h"
 #include "aux_data_attrib.h"
 
-TypeDef( nodeshaderinput_t );
+IMPLEMENT_CLASS( nodeshaderinput_t );
 
 static PStatCollector updatenode_collector              ( "AmbientProbes:UpdateNodes" );
 static PStatCollector finddata_collector                ( "AmbientProbes:UpdateNodes:FindNodeData" );

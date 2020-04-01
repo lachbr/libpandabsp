@@ -26,11 +26,7 @@
 #include <unordered_map>
 #include <bitset>
 
-#ifndef CPPPARSER
 #include "kdtree/KDTree.h"
-#else
-class KDTree;
-#endif
 
 #include "config_bsp.h"
 
@@ -82,7 +78,7 @@ struct light_t : public ReferenceCount
 #ifndef CPPPARSER
 class nodeshaderinput_t : public TypedReferenceCount
 {
-        TypeDecl( nodeshaderinput_t, TypedReferenceCount );
+        DECLARE_CLASS( nodeshaderinput_t, TypedReferenceCount );
 
 public:
         // This is the ambient cube actually used by the shader
@@ -187,7 +183,7 @@ public:
 class nodeshaderinput_t;
 #endif
 
-class AmbientProbeManager
+class EXPCL_PANDABSP AmbientProbeManager
 {
 public:
         AmbientProbeManager();

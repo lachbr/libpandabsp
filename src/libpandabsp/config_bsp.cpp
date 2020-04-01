@@ -10,7 +10,6 @@
  */
 
 #include "config_bsp.h"
-#include "entity.h"
 #include "bsploader.h"
 #include "bsp_render.h"
 #include "shader_generator.h"
@@ -31,6 +30,28 @@
 #include <texturePool.h>
 #include "texture_filter.h"
 
+vector_string parse_cmd( const std::string &cmd )
+{
+	vector_string result;
+
+	std::string current = "";
+	for ( size_t i = 0; i < cmd.size(); i++ )
+	{
+		char c = cmd[i];
+		if ( c == ' ' )
+		{
+			result.push_back( current );
+			current = "";
+			continue;
+		}
+		current += c;
+		if ( i == cmd.size() - 1 ) // add last argument
+			result.push_back( current );
+	}
+
+	return result;
+}
+
 ConfigureDef( config_bsp );
 ConfigureFn( config_bsp )
 {
@@ -45,10 +66,6 @@ void init_libpandabsp()
         initialized = true;
 
 	BSPFaceAttrib::init_type();
-	CBaseEntity::init_type();
-        CPointEntity::init_type();
-	CBrushEntity::init_type();
-        CBoundsEntity::init_type();
         BSPRender::init_type();
         BSPCullTraverser::init_type();
         BSPRoot::init_type();
@@ -58,7 +75,7 @@ void init_libpandabsp()
 	GlowNode::init_type();
 
         AmbientBoostEffect::init_type();
-        AmbientBoostEffect::register_with_read_factory();
+        AmbientBoostEffect::RegisterWithReadFactory();
 
         BSPMaterial::init_type();
         BSPMaterialAttrib::init_type();

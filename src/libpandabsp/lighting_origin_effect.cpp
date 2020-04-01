@@ -11,7 +11,7 @@
 
 #include "lighting_origin_effect.h"
 
-TypeDef( LightingOriginEffect );
+IMPLEMENT_CLASS( LightingOriginEffect );
 
 CPT( RenderEffect ) LightingOriginEffect::make( const LVector3 &origin )
 {

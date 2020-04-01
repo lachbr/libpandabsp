@@ -15,7 +15,7 @@
 #include "shader_spec.h"
 #include "shader_features.h"
 
-class LMGConfig : public ShaderConfig
+class EXPCL_PANDABSP LMGConfig : public ShaderConfig
 {
 public:
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat );
@@ -30,7 +30,7 @@ public:
 	bool _uses_planar_reflection;
 };
 
-class LightmappedGenericSpec : public ShaderSpec
+class EXPCL_PANDABSP LightmappedGenericSpec : public ShaderSpec
 {
 PUBLISHED:
         LightmappedGenericSpec();

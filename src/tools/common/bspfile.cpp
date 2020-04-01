@@ -1,10 +1,9 @@
+#include "bspfile.h"
 #include "cmdlib.h"
 #include "filelib.h"
 #include "messages.h"
 #include "hlassert.h"
 #include "log.h"
-#include "mathlib.h"
-#include "bspfile.h"
 #include "scriplib.h"
 #include "blockmem.h"
 #include <string>

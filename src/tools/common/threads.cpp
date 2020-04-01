@@ -355,7 +355,7 @@ q_threadfunction *q_entry;
 
 static DWORD WINAPI ThreadEntryStub( LPVOID pParam )
 {
-        q_entry( (intp)pParam );
+        q_entry( (int)pParam );
         return 0;
 }
 

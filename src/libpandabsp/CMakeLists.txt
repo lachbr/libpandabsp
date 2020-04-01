@@ -16,12 +16,11 @@ source_group("Source Files\\dxgsg11" FILES ${DX11_SRCS})
 source_group("Source Files\\postprocess" FILES ${PP_SRCS})
 source_group("Header Files\\postprocess" FILES ${PP_HDRS})
 
-add_library(libpandabsp ${LIB_TYPE} ${SRCS} ${HEADERS} ${KD_SRCS} ${KD_HDRS} ${PP_SRCS} ${PP_HDRS} interrogate.bat)
+add_library(libpandabsp ${LIB_TYPE} ${SRCS} ${HEADERS} ${KD_SRCS} ${KD_HDRS} ${PP_SRCS} ${PP_HDRS})# interrogate.bat)
 
 target_include_directories(libpandabsp PRIVATE
 	./
 	${INCPANDA}
-	${INCPANDA_PY}
 	./../tools/common
 	./../tools/keyvalue-parser
 	${INCBULLET}
@@ -29,7 +28,6 @@ target_include_directories(libpandabsp PRIVATE
 )
 target_link_directories(libpandabsp PRIVATE
 	${LIBPANDA}
-	${LIBPANDA_PY}
 	${LIBEMBREE}
 	${LIBBULLET}
 )
@@ -38,11 +36,11 @@ target_compile_definitions(libpandabsp PRIVATE NOMINMAX BUILDING_LIBPANDABSP STD
 if (DEFINED LINK_ALL_STATIC)
     set(OUT_EXT .lib)
 else ()
-    set(OUT_EXT .pyd)
+    set(OUT_EXT .dll)
 endif ()
 
 set(bsp_suff ${OUT_EXT})
-set(bsp_out bsp)
+set(bsp_out libpandabsp)
 
 set_target_properties(libpandabsp PROPERTIES SUFFIX ${bsp_suff})
 set_target_properties(libpandabsp PROPERTIES OUTPUT_NAME ${bsp_out})
@@ -54,7 +52,7 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG")
 #string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 #string(REPLACE "/DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
-add_custom_command(TARGET libpandabsp PRE_BUILD COMMAND interrogate.bat)
+#add_custom_command(TARGET libpandabsp PRE_BUILD COMMAND interrogate.bat)
 
 if (DEFINED LINK_ALL_STATIC)
     add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${LIBPANDA_BACK}\\${bsp_out}${bsp_suff})
@@ -72,10 +70,6 @@ target_link_libraries(libpandabsp libpanda.lib
 					        libp3direct.lib
 						    libp3framework.lib
                             libpandaegg.lib
-							libp3interrogatedb.lib
-							interrogatedb.lib
-							core.lib
-							python27.lib
                             embree3.lib
                             tbb.lib
                             tbbmalloc.lib

@@ -22,34 +22,36 @@
 
 extern ConfigVariableDouble r_glow_querysize;
 
+class GlowNode;
+
+class EXPCL_PANDABSP GlowNodeDrawCallback : public CallbackObject
+{
+	DECLARE_CLASS( GlowNodeDrawCallback, CallbackObject );
+
+public:
+	ALLOC_DELETED_CHAIN( GlowNodeDrawCallback );
+	GlowNodeDrawCallback( GlowNode *node );
+	virtual void do_callback( CallbackData *cbdata );
+
+private:
+	GlowNode *_node;
+};
+
 /**
  * This is a specialization on GeomNode that uses a pixel occlusion query
  * to determine if the Geoms on the node should be rendered.
  *
  * This is useful for things like light glows or lens flares.
  */
-class GlowNode : public GeomNode
+class EXPCL_PANDABSP GlowNode : public GeomNode
 {
-	TypeDecl( GlowNode, GeomNode );
+	DECLARE_CLASS( GlowNode, GeomNode );
 
 PUBLISHED:
 	GlowNode( const std::string &name, float query_size = r_glow_querysize );
 	GlowNode( const GeomNode &copy, float query_size = r_glow_querysize );
 
 public:
-	class DrawCallback : public CallbackObject
-	{
-		TypeDecl( DrawCallback, CallbackObject );
-
-	public:
-		ALLOC_DELETED_CHAIN( DrawCallback );
-		DrawCallback( GlowNode *node );
-		virtual void do_callback( CallbackData *cbdata );
-
-	private:
-		GlowNode *_node;
-	};
-
 	virtual void add_for_draw( CullTraverser *trav, CullTraverserData &data );
 
 private:
@@ -66,6 +68,8 @@ private:
 	PT( OcclusionQueryContext ) _ctx;
 	// Number of pixels that passed the query
 	int _occlusion_query_pixels;
+
+	friend class GlowNodeDrawCallback;
 };
 
 #endif // GLOWNODE_H

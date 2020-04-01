@@ -16,12 +16,13 @@
 #include <iostream>
 #include <unordered_map>
 #include "utils.h"
+#include "config_bsp.h"
 
 #include <referenceCount.h>
 
 using namespace std;
 
-class KDTree : public ReferenceCount {
+class EXPCL_PANDABSP KDTree : public ReferenceCount {
 public:
     explicit KDTree(unsigned int dim)
             : dim(dim), num_samples(0), Datas(), root(nullptr) {}

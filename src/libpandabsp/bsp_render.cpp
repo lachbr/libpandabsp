@@ -30,14 +30,13 @@ static PStatCollector pvs_xform_collector( "Cull:BSP:AddForDraw:Geom_LeafBoundsX
 static PStatCollector pvs_node_xform_collector( "Cull:BSP:Node_LeafBoundsXForm" );
 static PStatCollector addfordraw_collector( "Cull:BSP:AddForDraw" );
 static PStatCollector findgeomshader_collector( "Cull:BSP:FindGeomShader" );
-static PStatCollector ambientprobe_nodes_collector( "BSP Dynamic Nodes" );
 static PStatCollector applyshaderattrib_collector( "Cull:BSP:ApplyShaderAttrib" );
 static PStatCollector makecullable_geomnode_collector( "Cull:BSP:AddForDraw:MakeCullableObject" );
 
 static ConfigVariableColor dynamic_wf_color( "bsp-dynamic-wireframe-color", LColor( 0, 1.0, 1.0, 1.0 ) );
 static ConfigVariableColor brush_wf_color( "bsp-brush-wireframe-color", LColor( 231 / 255.0, 129 / 255.0, 129 / 255.0, 1.0 ) );
 
-TypeDef( BSPCullTraverser );
+IMPLEMENT_CLASS( BSPCullTraverser );
 
 BSPCullTraverser::BSPCullTraverser( CullTraverser *trav, BSPLoader *loader ) :
         CullTraverser( *trav ),
@@ -205,7 +204,7 @@ INLINE void BSPCullTraverser::add_geomnode_for_draw( GeomNode *node, CullTravers
                         new CullableObject( std::move( geom ), std::move( state ), internal_transform );
 		if ( has_camera_bits( CAMERA_MASK_LIGHTING ) && node->is_of_type( GlowNode::get_class_type() ) )
 		{
-			object->set_draw_callback( new GlowNode::DrawCallback( DCAST( GlowNode, node ) ) );
+			object->set_draw_callback( new GlowNodeDrawCallback( DCAST( GlowNode, node ) ) );
 		}
                 get_cull_handler()->record_object( object, this );
                 makecullable_geomnode_collector.stop();
@@ -346,7 +345,6 @@ void BSPCullTraverser::traverse_below( CullTraverserData &data )
                                 {
                                         data._state = data._state->compose( input_state );
                                 }
-                                ambientprobe_nodes_collector.add_level( 1 );
                         }
                 }
                 else if ( node->is_of_type( GeomNode::get_class_type() ) )
@@ -410,7 +408,7 @@ CPT( RenderState ) BSPCullTraverser::get_depth_offset_state()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-TypeDef( BSPRender );
+IMPLEMENT_CLASS( BSPRender );
 
 BSPRender::BSPRender( const std::string &name, BSPLoader *loader ) :
         PandaNode( name ),
@@ -421,38 +419,27 @@ BSPRender::BSPRender( const std::string &name, BSPLoader *loader ) :
 
 bool BSPRender::cull_callback( CullTraverser *trav, CullTraverserData &data )
 {
-        BSPLoader *loader = _loader;
-        //if ( loader->has_visibility() )
-        //{
-                ambientprobe_nodes_collector.flush_level();
-                ambientprobe_nodes_collector.set_level( 0 );
+        BSPCullTraverser bsp_trav( trav, _loader );
+        bsp_trav.local_object();
 
-                // Transform all of the potentially visible lights into view space for this frame.
-		// Not for shadow passes though (doesn't need lighting information)
-		//
-		// TODO: perform lighting calculations in world space so we don't even have to do this
-		//if ( ( trav->get_camera_mask() & CAMERA_MAIN ) != 0u )
-		//{
-		//	loader->_amb_probe_mgr.xform_lights( trav->get_scene()->get_cs_world_transform() );
-		//}
+	if ( bsp_trav.has_camera_bits( CAMERA_MAIN ) && _loader->has_visibility() )
+	{
+		// Update visible leafs on main camera pass.
+		_loader->update_visibility(
+			trav->get_camera_transform()->get_pos() );
+	}
 
-                BSPCullTraverser bsp_trav( trav, _loader );
-                bsp_trav.local_object();
-                bsp_trav.traverse_below( data );
-                bsp_trav.end_traverse();
+        bsp_trav.traverse_below( data );
+        bsp_trav.end_traverse();
 
-                // No need for CullTraverser to go further down this node,
-                // the BSPCullTraverser has already handled it.
-                return false;
-        //}
-
-        // If no BSP level, do regular culling.
-        //return true;
+        // No need for CullTraverser to go further down this node,
+        // the BSPCullTraverser has already handled it.
+        return false;
 }
 
-TypeDef( BSPRoot );
-TypeDef( BSPProp );
-TypeDef( BSPModel );
+IMPLEMENT_CLASS( BSPRoot );
+IMPLEMENT_CLASS( BSPProp );
+IMPLEMENT_CLASS( BSPModel );
 
 BSPRoot::BSPRoot( const std::string &name ) :
         PandaNode( name )

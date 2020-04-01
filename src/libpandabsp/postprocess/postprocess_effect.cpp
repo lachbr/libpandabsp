@@ -15,7 +15,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // PostProcessEffect
 
-TypeDef( PostProcessEffect );
+IMPLEMENT_CLASS( PostProcessEffect );
 
 void PostProcessEffect::setup()
 {

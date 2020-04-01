@@ -71,7 +71,7 @@ END_PUBLISH
 // Which cameras should use view frustum culling?
 #define CAMERA_MASK_CULLING ( CAMERA_MAIN | CAMERA_REFLECTION | CAMERA_REFRACTION )
 
-class BSPShaderGenerator : public ShaderGenerator
+class EXPCL_PANDABSP BSPShaderGenerator : public ShaderGenerator
 {
 PUBLISHED:
         BSPShaderGenerator( GraphicsOutput *output, GraphicsStateGuardian *gsg, const NodePath &camera, const NodePath &render );

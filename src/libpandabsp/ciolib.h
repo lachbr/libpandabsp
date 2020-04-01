@@ -19,7 +19,9 @@
 #include <mouseWatcher.h>
 #include <graphicsWindow.h>
 
-class CIOLib
+#include "config_bsp.h"
+
+class EXPCL_PANDABSP CIOLib
 {
 PUBLISHED:
 	static void set_pupil_direction( float x, float y, LVector3 &left, LVector3 &right );

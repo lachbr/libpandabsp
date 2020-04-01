@@ -1,6 +1,6 @@
 #include "texture_filter.h"
 
-TypeDef( BSPTextureFilter );
+IMPLEMENT_CLASS( BSPTextureFilter );
 
 PT( Texture ) BSPTextureFilter::post_load( Texture *tex )
 {

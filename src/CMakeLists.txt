@@ -11,8 +11,6 @@ set(LIBPANDA_BACK ${PANDA_BACK}\\lib)
 set(INCPANDA ${PANDA}/include)
 set(BINPANDA ${PANDA}/bin)
 set(BINPANDA_BACK ${PANDA_BACK}\\bin)
-set(LIBPANDA_PY ${PANDA}/python/libs)
-set(INCPANDA_PY ${PANDA}/python/include)
 
 set(EMBREE C:/Users/brian/OneDrive/Documents/Projects/embree-3.5.0.x64.vc14.windows CACHE PATH "Path to root Embree SDK directory.")
 set(INCEMBREE ${EMBREE}/include)
@@ -24,6 +22,8 @@ set(LIBBULLET ${BULLET}/lib)
 
 set(INCGNS C:/Users/brian/OneDrive/Documents/Projects/libpandabsp/src/dependencies/GameNetworkingSockets/include CACHE PATH "Path to GameNetworkingSockets include directory.")
 set(LIBGNS C:/Users/brian/OneDrive/Documents/Projects/libpandabsp/src/dependencies/GameNetworkingSockets/src/RelWithDebInfo/GameNetworkingSockets CACHE FILEPATH "Path to GameNetworkingSockets library.")
+
+set(INCFREETYPE C:/Users/brian/OneDrive/Documents/Projects/cio-panda3d/thirdparty/win-libs-vc14-x64/freetype/include/freetype2 CACHE PATH "Path to thirdparty FreeType include directory.")
 
 add_compile_definitions(WITHIN_PANDA)
 
@@ -60,11 +60,31 @@ macro(bsp_setup_target targetname)
 	endif()
 endmacro()
 
+macro(bsp_setup_target_exe targetname)
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG")
+	#string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+	#string(REPLACE "/DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+
+	if (DEFINED LINK_ALL_STATIC)
+		add_custom_command(TARGET ${targetname} POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${targetname}.exe ${LIBPANDA_BACK}\\${targetname}.exe)
+	else()
+		add_custom_command(TARGET ${targetname} POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${targetname}.exe ${BINPANDA_BACK}\\${targetname}.exe)
+		add_custom_command(TARGET ${targetname} POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${targetname}.pdb ${BINPANDA_BACK}\\${targetname}.pdb)
+	endif()
+endmacro()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275")
+
 
 add_subdirectory(tools/keyvalue-parser)
 add_subdirectory(tools/common)
 add_subdirectory(libpandabsp)
 add_subdirectory(networksystem)
+
+add_subdirectory(game/server)
+add_subdirectory(game/client)
+add_subdirectory(game/dedicated)
 
 #add_subdirectory(tools/p3csg)
 #add_subdirectory(tools/p3bsp)

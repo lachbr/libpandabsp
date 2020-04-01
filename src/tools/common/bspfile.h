@@ -417,7 +417,7 @@ typedef struct epair_s
 }
 epair_t;
 
-typedef struct
+typedef struct entity_s
 {
         float           origin[3];
         int             firstbrush;

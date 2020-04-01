@@ -23,13 +23,15 @@
 #include <boundingBox.h>
 #include <boundingHexahedron.h>
 
+#include "config_bsp.h"
+
 
 /**
  * This defines a bounding convex volume.  It may represent any enclosing convex volume,
  * including simple boxes.  However, if all you want is an axis-aligned
  * bounding box, you may be better off with the simpler BoundingBox class.
  */
-class BoundingKDOP : public FiniteBoundingVolume
+class EXPCL_PANDABSP BoundingKDOP : public FiniteBoundingVolume
 {
 public:
         INLINE BoundingKDOP() :

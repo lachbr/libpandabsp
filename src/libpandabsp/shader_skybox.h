@@ -3,13 +3,13 @@
 
 #include "shader_spec.h"
 
-class SkyBoxConfig : public ShaderConfig
+class EXPCL_PANDABSP SkyBoxConfig : public ShaderConfig
 {
 public:
         virtual void parse_from_material_keyvalues( const BSPMaterial *mat );
 };
 
-class SkyBoxSpec : public ShaderSpec
+class EXPCL_PANDABSP SkyBoxSpec : public ShaderSpec
 {
 PUBLISHED:
         SkyBoxSpec();

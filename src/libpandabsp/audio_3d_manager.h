@@ -20,6 +20,7 @@
 #include <genericAsyncTask.h>
 #include <audioManager.h>
 #include <weakPointerCallback.h>
+#include <referenceCount.h>
 
 struct nodeentry_t
 {
@@ -28,7 +29,7 @@ struct nodeentry_t
 	pvector<PT( AudioSound )> sounds;
 };
 
-class EXPCL_PANDABSP Audio3DManager
+class EXPCL_PANDABSP Audio3DManager : public ReferenceCount
 {
 PUBLISHED:
 	Audio3DManager( AudioManager *mgr, const NodePath &listener_target = NodePath(),

@@ -48,6 +48,9 @@
 
 using namespace std;
 
+static LightMutex cubemap_mutex( "CubemapMutex" );
+static LightMutex synthesize_mutex( "SynthesizeMutex" );
+
 static PStatCollector findmatshader_collector( "*:Munge:BSPShaderGen:FindMatShader" );
 static PStatCollector lookup_collector( "*:Munge:BSPShaderGen:Lookup" );
 static PStatCollector synthesize_collector( "*:Munge:BSPShaderGen:CreateShader" );
@@ -246,21 +249,13 @@ AsyncTask::DoneStatus BSPShaderGenerator::update_pssm( GenericAsyncTask *task, v
         {
                 if ( self->_sunlight.is_empty() || !self->_has_shadow_sunlight )
                 {
-                        self->_sunlight = NodePath();
-                        self->_has_shadow_sunlight = false;
-                        self->_pssm_rig->reparent_to( NodePath() );
+                        //self->_sunlight = NodePath();
+                        //self->_has_shadow_sunlight = false;
+                        //self->_pssm_rig->reparent_to( NodePath() );
                         return AsyncTask::DS_cont;
                 }
 
-                DirectionalLight *dlight = DCAST( DirectionalLight, self->_sunlight.node() );
-                PT( BoundingHexahedron ) bounds = DCAST( BoundingHexahedron, dlight->get_lens()->make_bounds() );
-
-                // move from local space into camera space
-                LMatrix4 inv_cammat = NodePath( self->_camera ).get_transform(
-                        self->_sunlight.get_node_path() )->get_mat();
-                bounds->xform( inv_cammat );
-
-                self->_pssm_rig->update( self->_camera, self->_sun_vector, bounds );
+		self->_pssm_rig->update( self->_camera.get_child( 0 ), self->_sun_vector );
         }
 
 	if ( self->_fog )
@@ -329,6 +324,8 @@ CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib 
 CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs,
         const GeomVertexAnimationSpec &anim )
 {
+	LightMutexHolder holder( synthesize_mutex );
+
         findmatshader_collector.start();
 
         // First figure out which shader to use.
@@ -443,12 +440,16 @@ CPT( ShaderAttrib ) BSPShaderGenerator::synthesize_shader( const RenderState *rs
 
 void BSPShaderGenerator::set_identity_cubemap( Texture *tex )
 {
+	LightMutexHolder holder( cubemap_mutex );
+
         _identity_cubemap = tex;
 	enable_srgb_read( tex, true );
 }
 
 Texture *BSPShaderGenerator::get_identity_cubemap()
 {
+	LightMutexHolder holder( cubemap_mutex );
+
         if ( !_identity_cubemap )
         {
                 _identity_cubemap = TexturePool::load_cube_map( "materials/engine/defaultcubemap/defaultcubemap_#.jpg" );

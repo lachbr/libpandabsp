@@ -29,11 +29,9 @@
 #include "postprocess/postprocess_effect.h"
 #include "postprocess/postprocess_scene_pass.h"
 
-NotifyCategoryDeclNoExport(postprocess)
-
 class GraphicsOutput;
 
-class PostProcess
+class EXPCL_PANDABSP PostProcess : public ReferenceCount
 {
 public:
 	struct clearinfo_t
@@ -76,7 +74,9 @@ public:
 	}
 
 PUBLISHED:
-	PostProcess( GraphicsOutput *output );
+	PostProcess();
+
+	void startup( GraphicsOutput *output );
 
 	void add_camera( const NodePath &camera );
 	void remove_camera( const NodePath &camera );

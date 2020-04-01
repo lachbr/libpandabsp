@@ -17,9 +17,9 @@
 class Texture;
 class PostProcess;
 
-class BloomEffect : public PostProcessEffect
+class EXPCL_PANDABSP BloomEffect : public PostProcessEffect
 {
-	TypeDecl( BloomEffect, PostProcessEffect );
+	DECLARE_CLASS( BloomEffect, PostProcessEffect );
 
 PUBLISHED:
 	BloomEffect( PostProcess *pp );

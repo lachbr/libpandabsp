@@ -16,9 +16,9 @@
 
 #include <renderAttrib.h>
 
-class BloomAttrib : public RenderAttrib
+class EXPCL_PANDABSP BloomAttrib : public RenderAttrib
 {
-	AttribDecl( BloomAttrib, RenderAttrib );
+	DECLARE_ATTRIB( BloomAttrib, RenderAttrib );
 
 private:
 	INLINE BloomAttrib() :

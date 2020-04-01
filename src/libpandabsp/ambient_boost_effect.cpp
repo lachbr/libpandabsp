@@ -11,9 +11,9 @@
 
 #include "ambient_boost_effect.h"
 
-TypeHandle AmbientBoostEffect::_type_handle;
+TypeHandle AmbientBoostEffect::m_sTypeHandle;
 
-CPT( RenderEffect ) AmbientBoostEffect::make()
+CPT( RenderEffect ) AmbientBoostEffect::Make()
 {
         AmbientBoostEffect *effect = new AmbientBoostEffect;
         return return_new( effect );
@@ -29,9 +29,9 @@ int AmbientBoostEffect::compare_to_impl( const RenderEffect *other ) const
         return 0;
 }
 
-void AmbientBoostEffect::register_with_read_factory()
+void AmbientBoostEffect::RegisterWithReadFactory()
 {
-        BamReader::get_factory()->register_factory( get_class_type(), make_from_bam );
+        BamReader::get_factory()->register_factory( get_class_type(), MakeFromBam );
 }
 
 void AmbientBoostEffect::write_datagram( BamWriter *manager, Datagram &dg )
@@ -39,7 +39,7 @@ void AmbientBoostEffect::write_datagram( BamWriter *manager, Datagram &dg )
         RenderEffect::write_datagram( manager, dg );
 }
 
-TypedWritable *AmbientBoostEffect::make_from_bam( const FactoryParams &params )
+TypedWritable *AmbientBoostEffect::MakeFromBam( const FactoryParams &params )
 {
         AmbientBoostEffect *effect = new AmbientBoostEffect;
         DatagramIterator scan;

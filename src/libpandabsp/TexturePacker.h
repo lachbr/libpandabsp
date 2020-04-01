@@ -3,6 +3,7 @@
 #define TEXTURE_PACKER_H
 
 #include <dtoolbase_cc.h>
+#include "config_bsp.h"
 
 /*!
 **
@@ -147,7 +148,7 @@ private:
         bool _rotated;
 };
 
-class TexturePacker
+class EXPCL_PANDABSP TexturePacker
 {
 PUBLISHED:
         virtual int   getTextureCount( void ) = 0;

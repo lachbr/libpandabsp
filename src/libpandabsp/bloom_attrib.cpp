@@ -11,7 +11,7 @@
 
 #include "bloom_attrib.h"
 
-AttribDef( BloomAttrib );
+IMPLEMENT_ATTRIB( BloomAttrib );
 
 CPT( RenderAttrib ) BloomAttrib::make( bool bloom_enabled )
 {

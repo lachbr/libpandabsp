@@ -6,9 +6,9 @@
 /**
  * Converts all textures to SRGB space when loaded.
  */
-class BSPTextureFilter : public TexturePoolFilter
+class EXPCL_PANDABSP BSPTextureFilter : public TexturePoolFilter
 {
-	TypeDecl( BSPTextureFilter, TexturePoolFilter );
+	DECLARE_CLASS( BSPTextureFilter, TexturePoolFilter );
 public:
 	virtual PT( Texture ) post_load( Texture *tex );
 };

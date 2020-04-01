@@ -31,7 +31,7 @@ void RayTrace::destruct()
 
 //==================================================================//
 
-TypeDef( RayTraceGeometry );
+IMPLEMENT_CLASS( RayTraceGeometry );
 
 RayTraceGeometry::RayTraceGeometry( int type, const std::string &name ) :
         PandaNode( name )
@@ -92,7 +92,7 @@ void RayTraceGeometry::set_build_quality( int quality )
 
 //==================================================================//
 
-TypeDef( RayTraceTriangleMesh );
+IMPLEMENT_CLASS( RayTraceTriangleMesh );
 
 RayTraceTriangleMesh::RayTraceTriangleMesh( const std::string &name) :
         RayTraceGeometry( RTC_GEOMETRY_TYPE_TRIANGLE, name )

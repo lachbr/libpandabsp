@@ -23,11 +23,11 @@
 #define EXPTP_PANDABSP IMPORT_TEMPL
 #endif
 
-//
+extern EXPCL_PANDABSP vector_string parse_cmd( const std::string &cmd );
 
 ConfigureDecl( config_bsp, EXPCL_PANDABSP, EXPTP_PANDABSP );
 
-#define TypeDecl2(classname, parentname1, parentname2)\
+#define DECLARE_CLASS2(classname, parentname1, parentname2)\
 private:\
     static TypeHandle _type_handle;\
 public:\
@@ -46,10 +46,12 @@ public:\
   }\
   virtual TypeHandle force_init_type() { init_type(); return get_class_type(); }
 
-#define TypeDecl(classname, parentname)\
+#define DECLARE_CLASS(classname, parentname)\
 private:\
     static TypeHandle _type_handle;\
 public:\
+  typedef parentname BaseClass;\
+  typedef classname MyClass;\
   static TypeHandle get_class_type() {\
     return _type_handle;\
   }\
@@ -63,10 +65,16 @@ public:\
   }\
   virtual TypeHandle force_init_type() { init_type(); return get_class_type(); }
 
-#define TypeDef(classname)\
-TypeHandle classname::_type_handle;
+#define IMPLEMENT_CLASS(classname)\
+TypeHandle classname::_type_handle; \
+static int __init__##classname##_typehandle() \
+{\
+	classname::init_type(); \
+	return 1; \
+} \
+int __##classname##_init_value = __init__##classname##_typehandle();
 
-#define AttribDecl(classname, parentname)\
+#define DECLARE_ATTRIB(classname, parentname)\
 private:\
   static TypeHandle _type_handle;\
   static int _attrib_slot;\
@@ -96,17 +104,17 @@ public:\
   }\
   virtual TypeHandle force_init_type() { init_type(); return get_class_type(); }
 
-#define AttribDef(classname)\
+#define IMPLEMENT_ATTRIB(classname)\
 TypeHandle classname::_type_handle;\
 int classname::_attrib_slot;
 
-#define StubAttrib(classname)\
+#define STUB_ATTRIB(classname)\
 class classname : public RenderAttrib {\
-  AttribDecl(classname, RenderAttrib);\
+  DECLARE_ATTRIB(classname, RenderAttrib);\
   PUBLISHED:\
     static CPT(RenderAttrib) make();\
 };\
-AttribDef(classname);\
+IMPLEMENT_ATTRIB(classname);\
 CPT(RenderAttrib) classname::make()\
 {\
         classname *attr = new classname;\

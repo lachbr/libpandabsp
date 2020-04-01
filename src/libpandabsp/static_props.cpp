@@ -11,7 +11,7 @@
 
 #include "static_props.h"
 
-AttribDef( StaticPropAttrib );
+IMPLEMENT_ATTRIB( StaticPropAttrib );
 
 CPT( RenderAttrib ) StaticPropAttrib::make( bool static_lighting )
 {

@@ -19,6 +19,10 @@
 
 #define ALIGN16_POST
 
+#define YAW	0
+#define PITCH	1
+#define ROLL	2
+
 #if !defined(qmax) 
 #define qmax(a,b)            (((a) > (b)) ? (a) : (b)) // changed 'max' to 'qmax'. --vluzacn
 #endif
@@ -375,6 +379,14 @@ _BSPEXPORT extern bool SolveInverseQuadratic( float x1, float y1, float x2, floa
 _BSPEXPORT extern bool SolveInverseQuadraticMonotonic( float x1, float y1, float x2, float y2,
                                             float x3, float y3, float &a, float &b, float &c );
 
+// Returns A + (B-A)*flPercent.
+// float Lerp( float flPercent, float A, float B );
+template <class T>
+INLINE T TLerp( float flPercent, T const &A, T const &B )
+{
+	return A + ( B - A ) * flPercent;
+}
+
 static INLINE float FLerp( float f1, float f2, float t )
 {
         return f1 + ( f2 - f1 ) * t;
@@ -383,6 +395,64 @@ static INLINE float FLerp( float f1, float f2, float t )
 static INLINE float FLerp( float f1, float f2, float i1, float i2, float x )
 {
         return f1 + ( f2 - f1 ) * ( x - i1 ) / ( i2 - i1 );
+}
+
+// assuming the matrix is orthonormal, transform in1 by the transpose (also the inverse in this case) of in2.
+INLINE void VectorITransform( const LVector3 &in1, const LMatrix4f& in2, LVector3 &out )
+{
+	float in1t[3];
+
+	in1t[0] = in1[0] - in2[0][3];
+	in1t[1] = in1[1] - in2[1][3];
+	in1t[2] = in1[2] - in2[2][3];
+
+	out[0] = in1t[0] * in2[0][0] + in1t[1] * in2[1][0] + in1t[2] * in2[2][0];
+	out[1] = in1t[0] * in2[0][1] + in1t[1] * in2[1][1] + in1t[2] * in2[2][1];
+	out[2] = in1t[0] * in2[0][2] + in1t[1] * in2[1][2] + in1t[2] * in2[2][2];
+}
+
+INLINE void AngleMatrix( const LVector3 &angles, LMatrix4f& matrix )
+{
+	float sr, sp, sy, cr, cp, cy;
+
+	float rady = deg_2_rad( angles[YAW] );
+	sy = std::sin( rady );
+	cy = std::cos( rady );
+
+	float radp = deg_2_rad( angles[PITCH] );
+	sp = std::sin( radp );
+	cp = std::cos( radp );
+
+	float radr = deg_2_rad( angles[ROLL] );
+	sr = std::sin( radr );
+	cr = std::cos( radr );
+
+	// matrix = (YAW * PITCH) * ROLL
+	matrix[0][0] = cp * cy;
+	matrix[1][0] = cp * sy;
+	matrix[2][0] = -sp;
+
+	float crcy = cr * cy;
+	float crsy = cr * sy;
+	float srcy = sr * cy;
+	float srsy = sr * sy;
+	matrix[0][1] = sp * srcy - crsy;
+	matrix[1][1] = sp * srsy + crcy;
+	matrix[2][1] = sr * cp;
+
+	matrix[0][2] = ( sp*crcy + srsy );
+	matrix[1][2] = ( sp*crsy - srcy );
+	matrix[2][2] = cr * cp;
+
+	matrix[0][3] = 0.0f;
+	matrix[1][3] = 0.0f;
+	matrix[2][3] = 0.0f;
+}
+
+INLINE void AngleMatrix( const LVector3 &angles, const LVector3 &position, LMatrix4f& matrix )
+{
+	AngleMatrix( angles, matrix );
+	matrix.set_col( 3, position );
 }
 
 #endif //MATHLIB_H__

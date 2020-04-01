@@ -24,9 +24,9 @@ class PostProcess;
 class GraphicsOutput;
 class Texture;
 
-class PostProcessEffect : public ReferenceCount, public Namable
+class EXPCL_PANDABSP PostProcessEffect : public ReferenceCount, public Namable
 {
-	TypeDecl2( PostProcessEffect, ReferenceCount, Namable );
+	DECLARE_CLASS2( PostProcessEffect, ReferenceCount, Namable );
 
 PUBLISHED:
 	INLINE PostProcessEffect( PostProcess *pp, const std::string &name = "effect" ) :
