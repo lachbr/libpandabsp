@@ -33,7 +33,7 @@ class EXPCL_PANDABSP Audio3DManager : public ReferenceCount
 {
 PUBLISHED:
 	Audio3DManager( AudioManager *mgr, const NodePath &listener_target = NodePath(),
-		const NodePath &root = NodePath(), int task_priority = 51 );
+		const NodePath &root = NodePath() );
 
 	INLINE void set_distance_factor( PN_stdfloat factor )
 	{
@@ -101,9 +101,6 @@ PUBLISHED:
 	void print_audio_digest();
 
 	void update();
-
-private:
-	static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
 	
 
 private:
@@ -112,7 +109,6 @@ private:
 	LPoint3 _listener_last_pos;
 	NodePath _root;
 	SimpleHashMap<PandaNode *, nodeentry_t, pointer_hash> _nodes;
-	PT( GenericAsyncTask ) _update_task;
 
 	friend class Audio3DNodeWeakCallback;
 };

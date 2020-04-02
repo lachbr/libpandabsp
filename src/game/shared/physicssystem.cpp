@@ -1,14 +1,56 @@
-#include "physics_utils.h"
+#include "physicssystem.h"
 #include "masks.h"
 
-#include <bulletTriangleMesh.h>
 #include <bulletTriangleMeshShape.h>
-#include <bulletWorld.h>
 
-pvector<BulletRayHit> ray_test_all_stored( BulletWorld *world, const LPoint3 &from, const LPoint3 &to,
+IMPLEMENT_CLASS( PhysicsSystem )
+
+static constexpr float meters_to_feet = 3.2808399f;
+static constexpr float panda_phys_gravity = -9.8f * meters_to_feet;
+
+static ConfigVariableInt phys_substeps( "phys_substeps", 1 );
+
+PhysicsSystem::PhysicsSystem()
+{
+	_physics_world = nullptr;
+}
+
+bool PhysicsSystem::initialize()
+{
+	_physics_world = new BulletWorld;
+	_physics_world->set_gravity( 0.0f, 0.0f, panda_phys_gravity );
+}
+
+void PhysicsSystem::shutdown()
+{
+
+}
+
+void PhysicsSystem::update( double frametime )
+{
+	if ( !_physics_world )
+	{
+		return;
+	}
+
+	if ( frametime <= 0.016 )
+	{
+		_physics_world->do_physics( frametime, phys_substeps, 0.016f );
+	}
+	else if ( frametime <= 0.033 )
+	{
+		_physics_world->do_physics( frametime, phys_substeps, 0.033f );
+	}
+	else
+	{
+		_physics_world->do_physics( frametime, 0 );
+	}
+}
+
+pvector<BulletRayHit> PhysicsSystem::ray_test_all_stored( const LPoint3 &from, const LPoint3 &to,
 					   const BitMask32 &mask )
 {
-	BulletAllHitsRayResult result = world->ray_test_all( from, to, mask );
+	BulletAllHitsRayResult result = _physics_world->ray_test_all( from, to, mask );
 	pvector<BulletRayHit> sorted_hits;
 
 	if ( result.get_num_hits() > 0 )
@@ -22,11 +64,11 @@ pvector<BulletRayHit> ray_test_all_stored( BulletWorld *world, const LPoint3 &fr
 			return ( a.get_hit_fraction() < b.get_hit_fraction() );
 		} );
 	}
-	
+
 	return sorted_hits;
 }
 
-void ray_test_closest_not_me( BulletWorld *world, RayTestClosestNotMeResult_t &result, const NodePath &me,
+void PhysicsSystem::ray_test_closest_not_me( RayTestClosestNotMeResult_t &result, const NodePath &me,
 			      const LPoint3 &from, const LPoint3 &to,
 			      const BitMask32 &mask )
 {
@@ -35,7 +77,7 @@ void ray_test_closest_not_me( BulletWorld *world, RayTestClosestNotMeResult_t &r
 	if ( me.is_empty() )
 		return;
 
-	pvector<BulletRayHit> hits = ray_test_all_stored( world, from, to, mask );
+	pvector<BulletRayHit> hits = ray_test_all_stored( from, to, mask );
 	for ( BulletRayHit brh : hits )
 	{
 		NodePath hitnp( brh.get_node() );
@@ -48,7 +90,7 @@ void ray_test_closest_not_me( BulletWorld *world, RayTestClosestNotMeResult_t &r
 	}
 }
 
-void optimize_phys( const NodePath &root )
+void PhysicsSystem::optimize_phys( const NodePath &root )
 {
 	int colls = 0;
 	NodePathCollection npc;
@@ -85,7 +127,7 @@ void optimize_phys( const NodePath &root )
 	}
 }
 
-void make_bullet_coll_from_panda_coll( const NodePath &root_node, const vector_string &exclusions )
+void PhysicsSystem::make_bullet_coll_from_panda_coll( const NodePath &root_node, const vector_string &exclusions )
 {
 	// First combine any redundant CollisionNodes.
 	optimize_phys( root_node );
@@ -133,33 +175,13 @@ void make_bullet_coll_from_panda_coll( const NodePath &root_node, const vector_s
 	}
 }
 
-void create_and_attach_bullet_nodes( const NodePath &root_node )
+void PhysicsSystem::create_and_attach_bullet_nodes( const NodePath &root_node )
 {
 	make_bullet_coll_from_panda_coll( root_node );
 	attach_bullet_nodes( root_node );
 }
 
-void attach_bullet_nodes( BulletWorld *world, const NodePath &root_node )
-{
-	if ( root_node.is_empty() )
-		return;
-
-	NodePathCollection npc;
-	int i;
-	
-	npc = root_node.find_all_matches( "**/+BulletRigidBodyNode" );
-	for ( i = 0; i < npc.get_num_paths(); i++ )
-	{
-		world->attach( npc[i].node() );
-	}
-	npc = root_node.find_all_matches( "**/+BulletGhostNode" );
-	for ( i = 0; i < npc.get_num_paths(); i++ )
-	{
-		world->attach( npc[i].node() );
-	}
-}
-
-void detach_bullet_nodes( BulletWorld *world, const NodePath &root_node )
+void PhysicsSystem::attach_bullet_nodes( const NodePath &root_node )
 {
 	if ( root_node.is_empty() )
 		return;
@@ -170,16 +192,36 @@ void detach_bullet_nodes( BulletWorld *world, const NodePath &root_node )
 	npc = root_node.find_all_matches( "**/+BulletRigidBodyNode" );
 	for ( i = 0; i < npc.get_num_paths(); i++ )
 	{
-		world->remove( npc[i].node() );
+		_physics_world->attach( npc[i].node() );
 	}
 	npc = root_node.find_all_matches( "**/+BulletGhostNode" );
 	for ( i = 0; i < npc.get_num_paths(); i++ )
 	{
-		world->remove( npc[i].node() );
+		_physics_world->attach( npc[i].node() );
 	}
 }
 
-void remove_bullet_nodes( const NodePath &root_node )
+void PhysicsSystem::detach_bullet_nodes( const NodePath &root_node )
+{
+	if ( root_node.is_empty() )
+		return;
+
+	NodePathCollection npc;
+	int i;
+
+	npc = root_node.find_all_matches( "**/+BulletRigidBodyNode" );
+	for ( i = 0; i < npc.get_num_paths(); i++ )
+	{
+		_physics_world->remove( npc[i].node() );
+	}
+	npc = root_node.find_all_matches( "**/+BulletGhostNode" );
+	for ( i = 0; i < npc.get_num_paths(); i++ )
+	{
+		_physics_world->remove( npc[i].node() );
+	}
+}
+
+void PhysicsSystem::remove_bullet_nodes( const NodePath &root_node )
 {
 	if ( root_node.is_empty() )
 		return;
@@ -199,18 +241,18 @@ void remove_bullet_nodes( const NodePath &root_node )
 	}
 }
 
-void detach_and_remove_bullet_nodes( const NodePath &root_node )
+void PhysicsSystem::detach_and_remove_bullet_nodes( const NodePath &root_node )
 {
 	detach_bullet_nodes( root_node );
 	remove_bullet_nodes( root_node );
 }
 
-LVector3 get_throw_vector( BulletWorld *world, const LPoint3 &trace_origin, const LVector3 &trace_vector,
+LVector3 PhysicsSystem::get_throw_vector( const LPoint3 &trace_origin, const LVector3 &trace_vector,
 			   const LPoint3 &throw_origin, const NodePath &me )
 {
 	LPoint3 trace_end = trace_origin + ( trace_vector * 10000 );
 	RayTestClosestNotMeResult_t result;
-	ray_test_closest_not_me( world, result, me,
+	ray_test_closest_not_me( result, me,
 				 trace_origin,
 				 trace_end,
 				 WORLD_MASK );
@@ -222,3 +264,4 @@ LVector3 get_throw_vector( BulletWorld *world, const LPoint3 &trace_origin, cons
 
 	return ( hit_pos - throw_origin ).normalized();
 }
+

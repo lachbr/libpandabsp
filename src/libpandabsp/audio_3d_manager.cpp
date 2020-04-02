@@ -47,16 +47,11 @@ static PStatCollector attach_collector( "App:Audio3DManager:AttachSound" );
 static PStatCollector detach_collector( "App:Audio3DManager:DetachSound" );
 static PStatCollector update_collector( "App:Audio3DManager:Update" );
 
-Audio3DManager::Audio3DManager( AudioManager *mgr, const NodePath &listener_target, const NodePath &root, int task_priority )
+Audio3DManager::Audio3DManager( AudioManager *mgr, const NodePath &listener_target, const NodePath &root )
 {
 	_root = root;
 	attach_listener( listener_target );
 	_mgr = mgr;
-
-	AsyncTaskManager *task_mgr = AsyncTaskManager::get_global_ptr();
-	_update_task = new GenericAsyncTask( "Audio3DManager-updateTask", &Audio3DManager::update_task, this );
-	_update_task->set_priority( task_priority );
-	task_mgr->add( _update_task );
 }
 
 void Audio3DManager::print_audio_digest()
@@ -106,14 +101,6 @@ void Audio3DManager::attach_sound_to_object( AudioSound *sound, const NodePath &
 
 void Audio3DManager::detach_sound( AudioSound *sound )
 {
-}
-
-AsyncTask::DoneStatus Audio3DManager::update_task( GenericAsyncTask *task, void *data )
-{
-	Audio3DManager *self = (Audio3DManager *)data;
-	self->update();
-
-	return AsyncTask::DS_cont;
 }
 
 void Audio3DManager::update()

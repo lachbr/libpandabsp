@@ -35,17 +35,12 @@ void PostProcess::startup( GraphicsOutput *output )
 	_output_display_region = _output->make_display_region();
 	_output_display_region->set_sort( 0 );
 
-	_update_task = new GenericAsyncTask( "postprocess-update", update_task, this );
-
 	_buffer_sort = _output->get_sort() - 1000;
 
 	get_clears( _output, _window_clears );
 	// We don't have to clear the window anymore.
 	// The scene pass buffer will perform clearing.
 	_output->disable_clears();
-
-	AsyncTaskManager::get_global_ptr()->add( _update_task );
-	EventHandler::get_global_event_handler()->add_hook( "window-event", handle_window_event, this );
 
 	int scene_flags = ( bits_PASSTEXTURE_COLOR |
 			    bits_PASSTEXTURE_DEPTH |
@@ -171,8 +166,6 @@ void PostProcess::set_scene_aux_bits( int bits )
 
 void PostProcess::shutdown()
 {
-	EventHandler::get_global_event_handler()->remove_hook( "window-event", handle_window_event, this );
-
 	for ( size_t i = 0; i < _effects.size(); i++ )
 	{
 		_effects.get_data( i )->shutdown();
@@ -181,9 +174,6 @@ void PostProcess::shutdown()
 
 	_scene_pass->shutdown();
 	_scene_pass = nullptr;
-
-	_update_task->remove();
-	_update_task = nullptr;
 
 	_output = nullptr;
 
@@ -195,37 +185,31 @@ void PostProcess::shutdown()
 	_camera_info.clear();
 }
 
-AsyncTask::DoneStatus PostProcess::update_task( GenericAsyncTask *task, void *data )
+void PostProcess::update()
 {
-	PostProcess *self = (PostProcess *)data;
-
-	size_t num_effects = self->_effects.size();
+	size_t num_effects = _effects.size();
 	for ( size_t i = 0; i < num_effects; i++ )
 	{
-		self->_effects.get_data( i )->update();
+		_effects.get_data( i )->update();
 	}
 
 	// Don't forget the main pass
-	self->_scene_pass->update();
-
-	return AsyncTask::DS_cont;
+	_scene_pass->update();
 }
 
-void PostProcess::handle_window_event( const Event *e, void *data )
+void PostProcess::window_event()
 {
-	PostProcess *self = (PostProcess *)data;
-
 	// Something happened to the window.
 	// Pass this along to all the effects.
 
-	size_t num_effects = self->_effects.size();
+	size_t num_effects = _effects.size();
 	for ( size_t i = 0; i < num_effects; i++ )
 	{
-		self->_effects.get_data( i )->window_event( self->_output );
+		_effects.get_data( i )->window_event( _output );
 	}
 
 	// Don't forget the main pass
-	self->_scene_pass->window_event( self->_output );
+	_scene_pass->window_event( _output );
 }
 
 void PostProcess::set_window_clears( DrawableRegion *region )

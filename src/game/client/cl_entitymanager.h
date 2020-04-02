@@ -1,57 +1,39 @@
-#pragma once
+#include "baseentitysystem.h"
+#include "iclientdatagramhandler.h"
 
-#include "config_clientdll.h"
-#include "entityshared.h"
-#include "simpleHashMap.h"
-#include "c_baseentity.h"
+class C_BaseEntity;
+class C_BasePlayer;
 
-class EXPORT_CLIENT_DLL ClientEntityManager
+class ClientEntitySystem : public BaseEntitySystem, public IClientDatagramHandler
 {
-public:
-	ClientEntityManager();
+	DECLARE_CLASS( ClientEntitySystem, BaseEntitySystem )
 
-	void insert_entity( C_BaseEntity *ent );
-	void remove_entity( entid_t entnum );
-	void remove_entity( C_BaseEntity *ent );
-	C_BaseEntity *get_entity( entid_t entnum ) const;
+public:
+	ClientEntitySystem();
+
+	virtual const char *get_name() const;
+	virtual bool initialize();
+
+	virtual bool handle_datagram( int msgtype, DatagramIterator &dgi );
+
 	C_BaseEntity *make_entity( const std::string &network_name, entid_t entnum );
 
-public:
-	SimpleHashMap<entid_t, PT( C_BaseEntity ), int_hash> edict;
+	void set_local_player_id( entid_t id );
+
+private:
+	void receive_snapshot( DatagramIterator &dgi );
+
+private:
+	C_BasePlayer *_local_player;
+	entid_t _local_player_id;
 };
 
-INLINE ClientEntityManager::ClientEntityManager()
+INLINE void ClientEntitySystem::set_local_player_id( entid_t id )
 {
+	_local_player_id = id;
 }
 
-INLINE void ClientEntityManager::insert_entity( C_BaseEntity *ent )
+INLINE const char *ClientEntitySystem::get_name() const
 {
-	edict[ent->get_entnum()] = ent;
-}
-
-INLINE void ClientEntityManager::remove_entity( entid_t entnum )
-{
-	int ient = edict.find( entnum );
-	if ( ient != -1 )
-	{
-		C_BaseEntity *ent = edict.get_data( ient );
-		ent->despawn();
-		edict.remove_element( ient );
-	}
-}
-
-INLINE void ClientEntityManager::remove_entity( C_BaseEntity *ent )
-{
-	remove_entity( ent->get_entnum() );
-}
-
-INLINE C_BaseEntity *ClientEntityManager::get_entity( entid_t entnum ) const
-{
-	int ient = edict.find( entnum );
-	if ( ient == -1 )
-	{
-		return nullptr;
-	}
-
-	return edict.get_data( ient );
+	return "ClientEntitySystem";
 }

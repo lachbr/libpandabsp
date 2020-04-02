@@ -4,6 +4,8 @@
 #include "c_entregistry.h"
 #include "clockdelta.h"
 #include "usercmd.h"
+#include "cl_bsploader.h"
+#include "cl_entitymanager.h"
 
 #include <datagramIterator.h>
 #include <clockObject.h>
@@ -11,8 +13,6 @@
 #include <pStatCollector.h>
 
 NotifyCategoryDef( c_client, "" )
-
-ClientNetInterface *g_client = nullptr;
 
 static ConfigVariableDouble cl_heartbeat_rate( "cl_heartbeat_rate", 1.0 );
 static ConfigVariableDouble cl_sync_rate( "cl_sync_rate", 30.0 );
@@ -30,8 +30,6 @@ ClientNetInterface::ClientNetInterface() :
 	_server_frametime( 0.0f ),
 	_cmd_mgr( this )
 {
-	g_client = this;
-
 	SteamNetworkingErrMsg msg;
 	GameNetworkingSockets_Init( nullptr, msg );
 }
@@ -81,9 +79,15 @@ void ClientNetInterface::connect_success( DatagramIterator &dgi )
 	c_client_cat.info() << "Connected to " << _server_addr << std::endl;
 	cl->set_tick_rate( dgi.get_uint8() );
 	_my_client_id = dgi.get_uint16();
-	cl->set_local_player_entnum( dgi.get_uint32() );
+
+	ClientEntitySystem *esys;
+	ClientBSPSystem *bsys;
+	cl->get_game_system( esys );
+	cl->get_game_system( bsys );
+
+	esys->set_local_player_id( dgi.get_uint32() );
 	std::string mapname = dgi.get_string();
-	cl->load_bsp_level( cl->get_map_filename( mapname ) );
+	bsys->load_bsp_level( bsys->get_map_filename( mapname ) );
 }
 
 void ClientNetInterface::set_client_state( int state )
@@ -110,28 +114,24 @@ void ClientNetInterface::handle_datagram( const Datagram &dg )
 	case NETMSG_HELLO_RESP:
 		connect_success( dgi );
 		break;
-	case NETMSG_SNAPSHOT:
-		receive_snapshot( dgi );
-		break;
 	case NETMSG_SERVER_HEARTBEAT:
 		// todo
 		break;
-	case NETMSG_DELETE_ENTITY:
-	{
-		entid_t entnum = dgi.get_uint32();
-		cl->get_entity_mgr()->remove_entity( entnum );
-		break;
-	}
-	case NETMSG_CHANGE_LEVEL:
-	{
-		std::string mapname = dgi.get_string();
-		bool is_transition = (bool)dgi.get_uint8();
-		cl->load_bsp_level( cl->get_map_filename( mapname ), is_transition );
-		break;
-	}
 	case NETMSG_TICK:
 	{
 		handle_server_tick( dgi );
+		break;
+	}
+	default:
+	{
+		// Don't have our own handler for this, delegate to our datagram handlers
+		for ( size_t i = 0; i < _datagram_handlers.size(); i++ )
+		{
+			if ( _datagram_handlers[i]->handle_datagram( msgtype, dgi ) )
+			{
+				break;
+			}
+		}
 		break;
 	}
 	}
@@ -155,70 +155,31 @@ void ClientNetInterface::send_tick()
 
 void ClientNetInterface::read_incoming_messages()
 {
-	ISteamNetworkingMessage *msg = nullptr;
-	int num_msgs = SteamNetworkingSockets()->ReceiveMessagesOnConnection( _connection, &msg, 1 );
-	if ( num_msgs <= 0 )
-		return;
+	ISteamNetworkingMessage *msg;
+	int num_msgs;
+	Datagram dg;
 
-	Datagram dg( msg->m_pData, msg->m_cbSize );
-	handle_datagram( dg );
+	// Read until there are no more messages
+	while ( true )
+	{
+		num_msgs = SteamNetworkingSockets()->ReceiveMessagesOnConnection( _connection, &msg, 1 );
+		if ( !msg || num_msgs <= 0 )
+			break;
 
-	msg->Release();
+		dg = Datagram( msg->m_pData, msg->m_cbSize );
+		handle_datagram( dg );
+
+		msg->Release();
+	}
 }
 
-void ClientNetInterface::tick()
+void ClientNetInterface::update( double frametime )
 {
 	if ( _connected )
 	{
 		read_incoming_messages();
 	}
 	SteamNetworkingSockets()->RunCallbacks( this );
-}
-
-void ClientNetInterface::receive_snapshot( DatagramIterator &dgi )
-{
-	ClientEntityManager *mgr = cl->get_entity_mgr();
-
-	pvector<C_BaseEntity *> new_ents;
-	pvector<C_BaseEntity *> changed_ents;
-	int num_ents = dgi.get_uint32();
-	for ( int ient = 0; ient < num_ents; ient++ )
-	{
-		entid_t entnum = dgi.get_uint32();
-		std::string network_name = dgi.get_string();
-		int num_props = dgi.get_uint16();
-
-		// Make sure this entity exists, if not, create it.
-		bool new_ent = false;
-		PT( C_BaseEntity ) ent = mgr->get_entity( entnum );
-		if ( !ent )
-		{
-			ent = mgr->make_entity( network_name, entnum );
-			new_ent = true;
-		}
-
-		nassertv( ent != nullptr );
-
-		for ( int iprop = 0; iprop < num_props; iprop++ )
-		{
-			std::string prop_name = dgi.get_string();
-			RecvProp *prop = ent->get_client_class()->
-				get_recv_table().find_recv_prop( prop_name );
-			nassertv( prop != nullptr );
-			void *out = (unsigned char *)ent.p() + prop->get_offset();
-			prop->get_proxy()( prop, ent, out, dgi );
-		}
-
-		if ( new_ent )
-			new_ents.push_back( ent );
-		if ( num_props > 0 )
-			changed_ents.push_back( ent );
-	}
-
-	for ( C_BaseEntity *ent : new_ents )
-		ent->spawn();
-	for ( C_BaseEntity *ent : changed_ents )
-		ent->post_data_update();
 }
 
 void ClientNetInterface::cmd_tick()

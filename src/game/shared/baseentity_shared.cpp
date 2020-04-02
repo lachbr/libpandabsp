@@ -3,6 +3,8 @@
 
 #include <modelRoot.h>
 
+IMPLEMENT_CLASS( CBaseEntityShared )
+
 CBaseEntityShared::CBaseEntityShared() :
 	_spawned( false ),
 	_np( new ModelRoot( "entity" ) ),

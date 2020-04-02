@@ -2,6 +2,7 @@
 
 #include "hostbase.h"
 #include "sv_netinterface.h"
+#include "sv_entitymanager.h"
 
 class ServerBase;
 extern EXPORT_SERVER_DLL ServerBase *sv;
@@ -35,6 +36,8 @@ public:
 	int time_to_ticks( double dt );
 	double ticks_to_time( double dt );
 
+	ServerEntityManager *get_entity_mgr();
+
 	static INLINE ServerBase *ptr()
 	{
 		return sv;
@@ -46,6 +49,7 @@ protected:
 
 public:
 	PT( ServerNetInterface ) _server;
+	ServerEntityManager _entmgr;
 };
 
 INLINE double ServerBase::ticks_to_time( double dt )
@@ -61,4 +65,9 @@ INLINE int ServerBase::time_to_ticks( double dt )
 INLINE ServerNetInterface *ServerBase::get_net_interface() const
 {
 	return _server;
+}
+
+INLINE ServerEntityManager *ServerBase::get_entity_mgr()
+{
+	return &_entmgr;
 }

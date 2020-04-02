@@ -145,9 +145,8 @@ PUBLISHED:
 
 	void shutdown();
 
-private:
-	static void handle_window_event( const Event *e, void *data );
-	static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
+	void update();
+	void window_event();
 
 private:
 	ClearInfoArray _window_clears;
@@ -159,8 +158,6 @@ private:
 
 	SimpleHashMap<std::string, PT( PostProcessEffect ), string_hash> _effects;
 	GraphicsOutput *_output;
-
-	PT( GenericAsyncTask ) _update_task;
 
 	PT( DisplayRegion ) _output_display_region;
 

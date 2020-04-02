@@ -51,9 +51,9 @@ public:
 };
 
 
-class EXPORT_CLIENT_DLL C_BaseEntity : public TypedReferenceCount, public CBaseEntityShared
+class EXPORT_CLIENT_DLL C_BaseEntity : public CBaseEntityShared
 {
-	DECLARE_CLASS( C_BaseEntity, TypedReferenceCount );
+	DECLARE_CLASS( C_BaseEntity, CBaseEntityShared );
 	DECLARE_CLIENTCLASS();
 
 public:

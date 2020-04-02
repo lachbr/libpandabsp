@@ -5,9 +5,12 @@
 #include "entity_think.h"
 #include <simpleHashMap.h>
 #include <nodePath.h>
+#include <typedReferenceCount.h>
 
-class EXPORT_GAME_SHARED CBaseEntityShared
+class EXPORT_GAME_SHARED CBaseEntityShared : public TypedReferenceCount
 {
+	DECLARE_CLASS( CBaseEntityShared, TypedReferenceCount )
+
 public:
 	CBaseEntityShared();
 

@@ -1,4 +1,9 @@
 #include "cl_bsploader.h"
+#include "clientbase.h"
+#include "rendersystem.h"
+#include "physicssystem.h"
+#include "cl_netinterface.h"
+#include "netmessages.h"
 
 #include <texturePool.h>
 #include <sceneGraphReducer.h>
@@ -109,4 +114,78 @@ void CL_BSPLoader::load_entities()
 				_light_environment = ent;
 		}
 	}
+}
+
+IMPLEMENT_CLASS( ClientBSPSystem )
+
+bool ClientBSPSystem::initialize()
+{
+	RenderSystem *rsys;
+	cl->get_game_system( rsys );
+	PhysicsSystem *psys;
+	cl->get_game_system( psys );
+
+	_bsp_loader = new CL_BSPLoader;
+	_bsp_loader->set_gamma( 2.2f );
+	_bsp_loader->set_render( rsys->get_render() );
+	_bsp_loader->set_want_visibility( true );
+	_bsp_loader->set_want_lightmaps( true );
+	_bsp_loader->set_visualize_leafs( false );
+	_bsp_loader->set_physics_world( psys->get_physics_world() );
+	_bsp_loader->set_win( rsys->get_graphics_window() );
+	_bsp_loader->set_camera( rsys->get_camera() );
+	BSPLoader::set_global_ptr( _bsp_loader );
+}
+
+void ClientBSPSystem::load_bsp_level( const Filename &path, bool is_transition )
+{
+	RenderSystem *rsys;
+	ClientNetInterface *nsys;
+	PhysicsSystem *psys;
+	cl->get_game_system( rsys );
+	cl->get_game_system( nsys );
+	cl->get_game_system( psys );
+
+	nsys->set_client_state( CLIENTSTATE_LOADING );
+
+	BaseBSPSystem::load_bsp_level( path, is_transition );
+	_bsp_loader->do_optimizations();
+	NodePathCollection props = _bsp_level.find_all_matches( "**/+BSPProp" );
+	for ( int i = 0; i < props.get_num_paths(); i++ )
+	{
+		psys->create_and_attach_bullet_nodes( props[i] );
+	}
+
+	_bsp_level.reparent_to( rsys->get_render() );
+
+	nsys->set_client_state( CLIENTSTATE_PLAYING );
+}
+
+void ClientBSPSystem::cleanup_bsp_level()
+{
+	if ( !_bsp_level.is_empty() )
+	{
+		PhysicsSystem *psys;
+		cl->get_game_system( psys );
+		psys->detach_and_remove_bullet_nodes( _bsp_level );
+
+		_bsp_level.remove_node();
+	}
+	_bsp_loader->cleanup();
+}
+
+bool ClientBSPSystem::handle_datagram( int msgtype, DatagramIterator &dgi )
+{
+	switch ( msgtype )
+	{
+	case NETMSG_CHANGE_LEVEL:
+		{
+			std::string mapname = dgi.get_string();
+			bool is_transition = dgi.get_bool();
+			load_bsp_level( get_map_filename( mapname ), is_transition );
+			return true;
+		}
+	}
+
+	return false;
 }

@@ -7,25 +7,31 @@
 
 #include "c_baseentity.h"
 #include "client_commandmgr.h"
+#include "iclientdatagramhandler.h"
+#include "igamesystem.h"
 
 class CUserCmd;
 
 NotifyCategoryDeclNoExport( c_client )
 
-class EXPORT_CLIENT_DLL ClientNetInterface : public ISteamNetworkingSocketsCallbacks, public ReferenceCount
+class EXPORT_CLIENT_DLL ClientNetInterface : public ISteamNetworkingSocketsCallbacks, public IGameSystem
 {
+	DECLARE_CLASS( ClientNetInterface, IGameSystem )
 public:
 	ClientNetInterface();
 
-	void receive_snapshot( DatagramIterator &dgi );
+	virtual const char *get_name() const;
+	virtual bool initialize();
+	virtual void shutdown();
+	virtual void update( double frametime );
+
+	void add_datagram_handler( IClientDatagramHandler *handler );
 
 	void set_client_state( int state );
 
 	void send_datagram( Datagram &dg );
 
 	void connect( const NetAddress &addr );
-
-	void tick();
 
 	virtual void OnSteamNetConnectionStatusChanged( SteamNetConnectionStatusChangedCallback_t *clbk ) override;
 
@@ -50,6 +56,8 @@ private:
 	void connect_success( DatagramIterator &dgi );
 
 public:
+	pvector<IClientDatagramHandler *> _datagram_handlers;
+
 	NetAddress _server_addr;
 
 	HSteamNetConnection _connection;
@@ -73,4 +81,12 @@ public:
 	CClientCMDManager _cmd_mgr;
 };
 
-extern EXPORT_CLIENT_DLL ClientNetInterface *g_client;
+INLINE const char *ClientNetInterface::get_name() const
+{
+	return "ClientNetSystem";
+}
+
+INLINE void ClientNetInterface::add_datagram_handler( IClientDatagramHandler *handler )
+{
+	_datagram_handlers.push_back( handler );
+}

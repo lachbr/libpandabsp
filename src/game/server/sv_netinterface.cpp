@@ -5,7 +5,6 @@
 #include "clockdelta.h"
 #include "baseplayer.h"
 #include "usercmd.h"
-#include "globalvars_server.h"
 
 #include <configVariableInt.h>
 #include <datagramIterator.h>
@@ -21,8 +20,6 @@ static ConfigVariableInt server_port( "server_port", 27015 );
 static ConfigVariableDouble sv_heartbeat_tolerance( "sv_heartbeat_tolerance", 20.0 );
 
 ServerNetInterface::ServerNetInterface() :
-	// Reserve 0 for the world
-	_entnum_alloc( 1, ENTID_MAX ),
 	_client_id_alloc( 0, 0xFFFF ),
 	_listen_socket( k_HSteamListenSocket_Invalid ),
 	_poll_group( k_HSteamNetPollGroup_Invalid ),
@@ -128,7 +125,7 @@ void ServerNetInterface::process_cmd( Client *cl, const std::string &cmd )
 	sv->run_cmd( cmd, cl );
 }
 
-void ServerNetInterface::handle_datagram( Datagram &dg, Client *cl )
+void ServerNetInterface::handle_datagram( Datagram &dg, Client *client )
 {
 	DatagramIterator dgi( dg );
 
@@ -139,29 +136,39 @@ void ServerNetInterface::handle_datagram( Datagram &dg, Client *cl )
 	case NETMSG_CLIENT_STATE:
 	{
 		int state = dgi.get_uint8();
-		update_client_state( cl, state );
+		update_client_state( client, state );
 		break;
 	}
 	case NETMSG_CMD:
 	{
 		std::string cmd = dgi.get_string();
-		process_cmd( cl, cmd );
+		process_cmd( client, cmd );
 		break;
 	}
 	case NETMSG_USERCMD:
 	{
-		cl->handle_cmd( dgi );
+		client->handle_cmd( dgi );
 		break;
 	}
 	case NETMSG_TICK:
 	{
 		int tick = dgi.get_int32();
 		float frametime = dgi.get_float32();
-		cl->set_tick( tick, frametime );
+		client->set_tick( tick, frametime );
 		break;
 	}
 	default:
+	{
+		// Delegate to one of our datagram handlers
+		for ( size_t i = 0; i < _datagram_handlers.size(); i++ )
+		{
+			if ( _datagram_handlers[i]->handle_datagram( client, msgtype, dgi ) )
+			{
+				break;
+			}
+		}
 		break;
+	}
 	}
 }
 
@@ -264,27 +271,6 @@ bool ServerNetInterface::startup()
 	_is_started = true;
 
 	return true;
-}
-
-PT( CBaseEntity ) ServerNetInterface::make_entity_by_name( const std::string &name, bool spawn,
-					      bool bexplicit_entnum, entid_t explicit_entnum )
-{
-	CBaseEntity *singleton = CEntRegistry::ptr()->_networkname_to_class[name];
-	PT( CBaseEntity ) ent = singleton->make_new();
-	if ( bexplicit_entnum )
-		ent->init( explicit_entnum );
-	else
-		ent->init( _entnum_alloc.allocate() );
-	ent->precache();
-
-	if ( spawn )
-		ent->spawn();
-
-	_entlist.insert( entmap_t::value_type( ent->get_entnum(), ent ) );
-
-	server_cat.debug() << "Made new " << name << ", entnum" << ent->get_entnum() << std::endl;
-
-	return ent;
 }
 
 void ServerNetInterface::send_datagram( Datagram &dg, HSteamNetConnection conn )

@@ -4,6 +4,7 @@
 #include "config_game_shared.h"
 #include "bsploader.h"
 #include "tasks.h"
+#include "igamesystem.h"
 
 #include <filename.h>
 #include <asyncTaskManager.h>
@@ -23,30 +24,35 @@
 #include <inputDeviceManager.h>
 #include <eventHandler.h>
 #include <virtualFileSystem.h>
+#include <simpleHashMap.h>
+#include <pvector.h>
 
 class EXPORT_GAME_SHARED HostBase : public ReferenceCount
 {
 public:
 	HostBase();
 
+	void add_game_system( IGameSystem *system, int sort = 0, bool per_frame = false );
+	void remove_game_system( IGameSystem *system );
+	void remove_game_system( TypeHandle handle );
+
+	template <class Type>
+	bool get_game_system( Type *&system ) const;
+	template <class Type>
+	bool get_game_system( PT( Type ) &system ) const;
+
+	IGameSystem *get_game_system( TypeHandle handle ) const;
+
 	void load_cfg_file( const Filename &cfgpath );
 	void load_cfg_data( const std::string &data );
 
-	virtual Filename get_map_filename( const std::string &mapname );
-
 	void mount_multifile( const Filename &mfpath );
-
-	virtual void cleanup_bsp_level();
-	virtual void load_bsp_level( const Filename &path, bool is_transition = false );
 
 	virtual bool startup();
 	virtual void shutdown();
 
 	virtual void do_frame();
 	void run();
-
-	virtual void do_net_tick() = 0;
-	virtual void do_game_tick() = 0;
 
 	void set_tick_rate( int tickrate );
 
@@ -64,64 +70,44 @@ public:
 		return _loader;
 	}
 
-	INLINE AsyncTaskManager *get_task_manager() const
-	{
-		return _task_manager;
-	}
-
-	INLINE BSPLoader *get_bsp_loader() const
-	{
-		return _bsp_loader;
-	}
-
 	INLINE VirtualFileSystem *get_vfs() const
 	{
 		return _vfs;
 	}
 
 protected:
-	virtual void make_bsp() = 0;
-	virtual void setup_rendering();
-	virtual void setup_scene();
-	virtual void setup_camera();
-	virtual void setup_dgraph();
-	virtual void setup_physics();
-	virtual void setup_audio();
-	virtual void setup_tasks();
-	virtual void setup_shaders();
-	virtual void setup_bsp();
+	virtual void add_game_systems() = 0;
+
 	virtual void load_cfg_files();
 	virtual void mount_multifiles();
 
-private:
-	DECLARE_TASK_FUNC( physics_task );
-	DECLARE_TASK_FUNC( garbage_collect_task );
-	DECLARE_TASK_FUNC( ival_task );
-	DECLARE_TASK_FUNC( reset_prev_transform_task );
-
 public:
 	ClockObject *_global_clock;
-	AsyncTaskManager *_task_manager;
 	Loader *_loader;
-	BSPLoader *_bsp_loader;
-	NodePath _bsp_level;
 	EventHandler *_event_mgr;
-	CIntervalManager *_ival_mgr;
 	VirtualFileSystem *_vfs;
-	PT( BulletWorld ) _physics_world;
-
-	std::string _map;
-	
-	NodePath _render;
-	NodePath _hidden;
 
 protected:
-	bool _quit;
+	class GameSystemEntry
+	{
+	public:
+		int sort;
+		PT( IGameSystem ) system;
+		bool per_frame;
 
-	PT( GenericAsyncTask ) _garbage_collect_task;
-	PT( GenericAsyncTask ) _ival_task;
-	PT( GenericAsyncTask ) _physics_task;
-	PT( GenericAsyncTask ) _reset_prev_transform_task;
+		class Sorter
+		{
+			constexpr bool operator()( const GameSystemEntry &left, const GameSystemEntry &right ) const
+			{
+				return left.sort < right.sort;
+			}
+		};
+	};
+
+	SimpleHashMap<TypeHandle, GameSystemEntry> _game_systems;
+	ordered_vector<GameSystemEntry, GameSystemEntry::Sorter> _game_systems_sorted;
+
+	bool _quit;
 
 	int _tickcount;
 	int _frameticks;
@@ -140,6 +126,48 @@ protected:
 	int _timestamp_randomize_window;
 	bool _paused;
 };
+
+INLINE void HostBase::remove_game_system( IGameSystem *sys )
+{
+	remove_game_system( sys->get_type() );
+}
+
+INLINE void HostBase::remove_game_system( TypeHandle type )
+{
+	int isys = _game_systems.find( type );
+	if ( isys != -1 )
+	{
+		GameSystemEntry entry = _game_systems.get_data( isys );
+		entry.system->shutdown();
+		_game_systems_sorted.erase( entry );
+		_game_systems.remove_element( isys );
+	}
+}
+
+template <class Type>
+INLINE bool HostBase::get_game_system( Type *&system ) const
+{
+	system = (Type *)get_game_system( Type::get_class_type() );
+	return system != nullptr;
+}
+
+template <class Type>
+INLINE bool HostBase::get_game_system( PT( Type ) &system ) const
+{
+	system = (Type *)get_game_system( Type::get_class_type() );
+	return system != nullptr;
+}
+
+INLINE IGameSystem *HostBase::get_game_system( TypeHandle handle ) const
+{
+	int isys = _game_systems.find( handle );
+	if ( isys != -1 )
+	{
+		return _game_systems.get_data( isys ).system;
+	}
+
+	return nullptr;
+}
 
 INLINE ClockObject *HostBase::get_clock() const
 {

@@ -7,6 +7,7 @@
 #include "baseentity.h"
 #include "bsploader.h"
 #include "client.h"
+#include "iserverdatagramhandler.h"
 
 #include <steam\steamnetworkingsockets.h>
 
@@ -17,11 +18,9 @@ class EXPORT_SERVER_DLL ServerNetInterface : private ISteamNetworkingSocketsCall
 public:
 	ServerNetInterface();
 
-	virtual PT( CBaseEntity ) make_player();
+	void add_datagram_handler( IServerDatagramHandler *handler );
 
-	PT( CBaseEntity ) make_entity_by_name( const std::string &name, bool spawn = true,
-					      bool bexplicit_entnum = false, entid_t explicit_entnum = 0 );
-	void remove_entity( CBaseEntity *ent );
+	virtual PT( CBaseEntity ) make_player();
 
 	bool startup();
 
@@ -49,8 +48,6 @@ public:
 	void read_incoming_messages();
 	void run_networking_events();
 
-	typedef pmap<entid_t, PT( CBaseEntity )> entmap_t;
-	entmap_t *get_entlist();
 	clientmap_t *get_clients();
 
 private:
@@ -62,9 +59,9 @@ private:
 	void handle_client_hello( SteamNetConnectionStatusChangedCallback_t *info );
 
 private:
-	UniqueIdAllocator _entnum_alloc;
+	pvector<IServerDatagramHandler *> _datagram_handlers;
+
 	UniqueIdAllocator _client_id_alloc;
-	entmap_t _entlist;
 
 	clientmap_t _clients_by_address;
 
@@ -74,12 +71,12 @@ private:
 	bool _is_started;
 };
 
+INLINE void ServerNetInterface::add_datagram_handler( IServerDatagramHandler *handler )
+{
+	_datagram_handlers.push_back( handler );
+}
+
 INLINE ServerNetInterface::clientmap_t *ServerNetInterface::get_clients()
 {
 	return &_clients_by_address;
-}
-
-INLINE ServerNetInterface::entmap_t *ServerNetInterface::get_entlist()
-{
-	return &_entlist;
 }
