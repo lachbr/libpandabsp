@@ -1,17 +1,102 @@
 #include "baseentity.h"
-#include "server.h"
-#include "clockdelta.h"
-#include "globalvars_server.h"
-#include "basegame.h"
+#include "serverbase.h"
+#include "sv_entitymanager.h"
+#include "physicssystem.h"
 
 #include <modelRoot.h>
+#include <bulletBoxShape.h>
 
 CBaseEntity::CBaseEntity() :
 	CBaseEntityShared(),
 	_map_entity( false ),
 	_preserved( false ),
-	_num_changed_offsets( MAX_CHANGED_OFFSETS )
+	_num_changed_offsets( MAX_CHANGED_OFFSETS ),
+	_kinematic( false ),
+	_mass( 0.0f ),
+	_solid( SOLID_NONE ),
+	_bodynode( nullptr ),
+	_phys_mask( BitMask32::all_on() ),
+	_physics_setup( false ),
+	_state( 0 ),
+	_state_time( 0.0f )
 {
+}
+
+void CBaseEntity::set_state( int state )
+{
+	_state = state;
+	_state_time = _simulation_time;
+}
+
+PT( BulletRigidBodyNode ) CBaseEntity::get_phys_body()
+{
+	PT( BulletRigidBodyNode ) bnode = new BulletRigidBodyNode( "entity-phys" );
+	bnode->set_mass( _mass );
+
+	bnode->set_ccd_motion_threshold( 1e-7 );
+	bnode->set_ccd_swept_sphere_radius( 0.5f );
+
+	switch ( _solid )
+	{
+	case SOLID_MESH:
+		{
+			CollisionNode *cnode = DCAST( CollisionNode, _np.find( "**/+CollisionNode" ).node() );
+			PT( BulletConvexHullShape ) convex_hull = PhysicsSystem::
+				make_convex_hull_from_collision_solids( cnode );
+			bnode->add_shape( convex_hull );
+			break;
+		}
+	case SOLID_BBOX:
+		{
+			LPoint3 mins, maxs;
+			_np.calc_tight_bounds( mins, maxs );
+			LVector3f extents = PhysicsSystem::extents_from_min_max( mins, maxs );
+			CPT( TransformState ) ts_center = TransformState::make_pos(
+				PhysicsSystem::center_from_min_max( mins, maxs ) );
+			PT( BulletBoxShape ) shape = new BulletBoxShape( extents );
+			bnode->add_shape( shape, ts_center );
+			break;
+		}
+	case SOLID_SPHERE:
+		{
+			break;
+		}
+	}
+
+	return bnode;
+}
+
+void CBaseEntity::init_physics()
+{
+	if ( _solid == SOLID_NONE )
+	{
+		return;
+	}
+
+	bool underneath_self = !_kinematic;
+	_bodynode = get_phys_body();
+	_bodynode->set_kinematic( false );
+
+	NodePath parent = _np.get_parent();
+	_bodynp = parent.attach_new_node( _bodynode );
+	_bodynp.set_collide_mask( _phys_mask );
+	if ( !underneath_self )
+	{
+		_np.reparent_to( _bodynp );
+		_np = _bodynp;
+	}
+	else
+	{
+		_bodynp.reparent_to( _np );
+	}
+
+	PhysicsSystem *phys;
+	sv->get_game_system( phys );
+	phys->get_physics_world()->attach( _bodynode );
+
+	//sv->get_root().ls();
+
+	_physics_setup = true;
 }
 
 void CBaseEntity::transition_xform( const NodePath &landmark_np, const LMatrix4 &transform )
@@ -127,10 +212,36 @@ void CBaseEntity::init( entid_t entnum )
 void CBaseEntity::spawn()
 {
 	CBaseEntityShared::spawn();
+
+	_np.reparent_to( sv->get_root() );
+}
+
+void CBaseEntity::despawn()
+{
+	if ( _physics_setup )
+	{
+		PhysicsSystem *phys;
+		sv->get_game_system( phys );
+
+		phys->get_physics_world()->remove( _bodynode );
+		_bodynp.remove_node();
+		_bodynode = nullptr;
+		_physics_setup = false;
+	}
+
+	CBaseEntityShared::despawn();
 }
 
 void CBaseEntity::simulate()
 {
+	_simulation_time = sv->get_curtime();
+
+	if ( _physics_setup && _kinematic )
+	{
+		_origin = _bodynp.get_pos();
+		_angles = _bodynp.get_hpr();
+		//std::cout << _origin << " | " << _angles << std::endl;
+	}
 }
 
 void CBaseEntity::set_origin( const LPoint3 &origin )
@@ -151,14 +262,28 @@ void CBaseEntity::set_scale( const LVector3 &scale )
 	_np.set_scale( scale );
 }
 
+void CBaseEntity::receive_entity_message( int msgtype, uint32_t client_id, DatagramIterator &dgi )
+{
+}
+
+void CBaseEntity::send_entity_message( Datagram &dg )
+{
+	svnet->broadcast_datagram( dg, true );
+}
+
+void CBaseEntity::send_entity_message( Datagram &dg, const vector_uint32 &client_ids )
+{
+	svnet->send_datagram_to_clients( dg, client_ids );
+}
+
 void SendProxy_SimulationTime( SendProp *prop, void *object, void *data, Datagram &out )
 {
 	CBaseEntity *ent = (CBaseEntity *)object;
 
-	int ticknumber = g_globals->game->time_to_ticks( ent->_simulation_time );
+	int ticknumber = sv->time_to_ticks( ent->_simulation_time );
 	// tickbase is current tick rounded down to closest 100 ticks
 	int tickbase =
-		g_globals->get_network_base( g_globals->tickcount, ent->get_entnum() );
+		sv->get_network_base( sv->get_tickcount(), ent->get_entnum() );
 	int addt = 0;
 	if ( ticknumber >= tickbase )
 	{
@@ -180,5 +305,5 @@ END_SEND_TABLE()
 
 PT( CBaseEntity ) CreateEntityByName( const std::string &name )
 {
-	return g_server->make_entity_by_name( name );
+	return svents->make_entity_by_name( name );
 }

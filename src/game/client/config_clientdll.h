@@ -14,3 +14,7 @@ extern EXPORT_CLIENT_DLL ConfigVariableDouble cl_runspeed;
 extern EXPORT_CLIENT_DLL ConfigVariableDouble cl_mousesensitivity;
 extern EXPORT_CLIENT_DLL ConfigVariableDouble cl_duckspeed;
 extern EXPORT_CLIENT_DLL ConfigVariableInt cl_cmdrate;
+extern EXPORT_CLIENT_DLL ConfigVariableInt cl_updaterate;
+extern EXPORT_CLIENT_DLL ConfigVariableDouble cl_interp;
+
+extern EXPORT_CLIENT_DLL float get_client_interp_amount();

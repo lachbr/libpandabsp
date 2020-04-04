@@ -1,5 +1,4 @@
 #include "c_baseanimating.h"
-#include "c_basegame.h"
 
 C_BaseAnimating::C_BaseAnimating() :
 	C_BaseEntity(),

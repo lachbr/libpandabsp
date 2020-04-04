@@ -100,6 +100,8 @@ public:
 	const NodePath &get_a2d_left_center() const;
 	const NodePath &get_a2d_right_center() const;
 
+	BSPShaderGenerator *get_shader_generator() const;
+
 	void adjust_window_aspect_ratio( float ratio );
 
 protected:
@@ -153,6 +155,11 @@ protected:
 	NodePath _a2d_bottom_right;
 	NodePath _a2d_bottom_right_ns;
 };
+
+INLINE BSPShaderGenerator *RenderSystem::get_shader_generator() const
+{
+	return _shader_generator;
+}
 
 INLINE const NodePath &RenderSystem::get_render() const
 {

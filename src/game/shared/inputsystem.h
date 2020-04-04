@@ -24,6 +24,7 @@ public:
 
 		int button_type;
 		ButtonHandle button;
+		InputSystem *sys;
 
 		bool is_down() const;
 	};
@@ -40,12 +41,13 @@ public:
 	void detach_device( InputDevice *device );
 
 	void add_mapping( int button_type, const ButtonHandle &btn );
+	size_t get_num_mappings() const;
 	CKeyMapping &get_mapping( int button_type );
 
 	InputDeviceManager *get_mgr() const;
 
 private:
-	SimpleHashMap<int, CKeyMapping, int_hash> _mappings;
+	pvector<CKeyMapping> _mappings;
 
 	DataGraphTraverser _dgtrav;
 	NodePath _dataroot;
@@ -58,6 +60,11 @@ private:
 	HostBase *_host;
 	InputDeviceManager *_mgr;
 };
+
+INLINE size_t InputSystem::get_num_mappings() const
+{
+	return _mappings.size();
+}
 
 INLINE InputSystem::CKeyMapping &InputSystem::get_mapping( int button_type )
 {
@@ -72,4 +79,16 @@ INLINE const char *InputSystem::get_name() const
 INLINE InputDeviceManager *InputSystem::get_mgr() const
 {
 	return _mgr;
+}
+
+INLINE InputSystem::CKeyMapping::CKeyMapping() :
+	button_type( 0 ),
+	button( 0 )
+{
+}
+
+INLINE InputSystem::CKeyMapping::CKeyMapping( int type, const ButtonHandle &btn ) :
+	button_type( type ),
+	button( btn )
+{
 }

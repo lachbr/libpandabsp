@@ -1,18 +1,18 @@
 #include "c_brushentity.h"
-#include "c_basegame.h"
+#include "cl_bsploader.h"
 
 void C_BrushEntity::spawn()
 {
 	BaseClass::spawn();
 
-	int modelnum = g_game->_bsp_loader->extract_modelnum( _bsp_entnum );
+	int modelnum = clbsp->get_bsp_loader()->extract_modelnum( _bsp_entnum );
 	if ( get_entnum() == 0 )
 	{
-		_np = g_game->_bsp_loader->get_model( modelnum );
+		_np = clbsp->get_bsp_loader()->get_model( modelnum );
 	}
 	else
 	{
-		g_game->_bsp_loader->get_model( modelnum ).reparent_to( _np );
+		clbsp->get_bsp_loader()->get_model( modelnum ).reparent_to( _np );
 	}
 	
 }

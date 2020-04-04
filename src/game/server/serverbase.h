@@ -17,26 +17,13 @@ class EXPORT_SERVER_DLL ServerBase : public HostBase
 public:
 	ServerBase();
 
-	ServerNetInterface *get_net_interface() const;
-
 	virtual void run_cmd( const std::string &full_cmd, Client *cl = nullptr );
 
-	virtual void load_bsp_level( const Filename &path, bool is_transition = false );
+	virtual void mount_multifiles();
+	virtual void end_tick();
+	virtual void add_game_systems();
 
-	virtual bool startup();
-	virtual void make_bsp();
-	virtual void setup_bsp();
-	virtual void do_net_tick();
-	virtual void do_game_tick();
-	virtual void do_frame();
-	virtual void run_entities( bool simulating );
-
-	void send_tick();
-
-	int time_to_ticks( double dt );
-	double ticks_to_time( double dt );
-
-	ServerEntityManager *get_entity_mgr();
+	INLINE const NodePath &get_root() const;
 
 	static INLINE ServerBase *ptr()
 	{
@@ -44,30 +31,12 @@ public:
 	}
 
 protected:
-	virtual void setup_tasks();
 	virtual void load_cfg_files();
 
-public:
-	PT( ServerNetInterface ) _server;
-	ServerEntityManager _entmgr;
+	NodePath _root;
 };
 
-INLINE double ServerBase::ticks_to_time( double dt )
+INLINE const NodePath &ServerBase::get_root() const
 {
-	return ( _intervalpertick * (float)( dt ) );
-}
-
-INLINE int ServerBase::time_to_ticks( double dt )
-{
-	return ( (int)( 0.5f + (float)( dt ) / _intervalpertick ) );
-}
-
-INLINE ServerNetInterface *ServerBase::get_net_interface() const
-{
-	return _server;
-}
-
-INLINE ServerEntityManager *ServerBase::get_entity_mgr()
-{
-	return &_entmgr;
+	return _root;
 }

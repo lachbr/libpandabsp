@@ -1,6 +1,9 @@
 #include "c_baseplayer.h"
-#include "globalvars_client.h"
-#include "c_basegame.h"
+#include "cl_rendersystem.h"
+#include "cl_entitymanager.h"
+#include "clientbase.h"
+#include "physicssystem.h"
+#include "masks.h"
 
 C_BasePlayer::C_BasePlayer() :
 	C_BaseCombatCharacter(),
@@ -15,11 +18,18 @@ void C_BasePlayer::simulate()
 
 void C_BasePlayer::setup_controller()
 {
-	CBasePlayerShared::setup_controller();
+	PhysicsSystem *phys;
+	cl->get_game_system_of_type( phys );
+
+	//CBasePlayerShared::setup_controller();
+	_controller = new PhysicsCharacterController( phys->get_physics_world(), clrender->get_render(),
+						      clrender->get_render(), 4.0f, 2.0f, 0.3f, 1.0f,
+						      phys->get_physics_world()->get_gravity()[0],
+						      wall_mask, floor_mask, event_mask );
 	_np.reparent_to( _controller->get_movement_parent() );
 	_np = _controller->get_movement_parent();
 	std::cout << "Client controller setup" << std::endl;
-	g_game->_render.ls();
+	clrender->get_render().ls();
 }
 
 void C_BasePlayer::spawn()
@@ -29,16 +39,16 @@ void C_BasePlayer::spawn()
 	setup_controller();
 
 	// Check if we're the local player
-	if ( g_globals->game->get_local_player_entnum() == get_entnum() )
+	if ( clents->get_local_player_id() == get_entnum() )
 	{
-		g_globals->game->set_local_player( this );
+		clents->set_local_player( this );
 		std::cout << "Set local player!" << std::endl;
 	}
 }
 
 bool C_BasePlayer::is_local_player() const
 {
-	return g_globals->game->get_local_player() == this;
+	return clents->get_local_player() == this;
 }
 
 IMPLEMENT_CLIENTCLASS_RT( C_BasePlayer, DT_BasePlayer, CBasePlayer )

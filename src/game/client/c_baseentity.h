@@ -50,7 +50,6 @@ public:
 	float m_lastInterpolationTime;
 };
 
-
 class EXPORT_CLIENT_DLL C_BaseEntity : public CBaseEntityShared
 {
 	DECLARE_CLASS( C_BaseEntity, CBaseEntityShared );
@@ -58,6 +57,10 @@ class EXPORT_CLIENT_DLL C_BaseEntity : public CBaseEntityShared
 
 public:
 	C_BaseEntity();
+
+	void send_entity_message( Datagram &dg );
+
+	virtual void receive_entity_message( int msgtype, DatagramIterator &dgi );
 
 	virtual bool is_predictable();
 	virtual void post_data_update();
@@ -116,6 +119,7 @@ public:
 	unsigned short _teleport_list_entry;
 
 public:
+
 	int _bsp_entnum;
 	int _parent_entity;
 	float _simulation_time;

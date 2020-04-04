@@ -81,8 +81,6 @@ PUBLISHED:
 
         void set_sun_light( const NodePath &np );
 
-        void start_update();
-
         void add_shader( PT( ShaderSpec ) spec );
 
 	INLINE LVector3 get_sun_vector() const
@@ -165,6 +163,8 @@ PUBLISHED:
 
 	static CPT( Shader ) make_shader( const ShaderSpec *spec, const ShaderPermutations *perms );
 
+        void update();
+
 private:
         struct SplitShadowMap
         {
@@ -186,12 +186,9 @@ private:
 
 	PTA_float _exposure_adjustment;
 
-        static AsyncTask::DoneStatus update_pssm( GenericAsyncTask *task, void *data );
-
         int _shader_quality;
         bool _has_shadow_sunlight;
         WeakNodePath _sunlight;
-        PT( GenericAsyncTask ) _update_task;
         GraphicsStateGuardian *_gsg;
 	GraphicsOutput *_output;
         LVector3 _sun_vector;

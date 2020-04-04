@@ -1,5 +1,6 @@
 #include "baseanimating_shared.h"
-#include "basegame_shared.h"
+#include <virtualFileSystem.h>
+#include <loader.h>
 
 #include "vifparser.h"
 
@@ -20,12 +21,15 @@ CBaseAnimatingShared::CBaseAnimatingShared() :
 
 void CBaseAnimatingShared::set_model( const std::string &path )
 {
+	VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
+	Loader *loader = Loader::get_global_ptr();
+
 	Filename modelfile( path );
 	if ( modelfile.get_extension() == "act" )
 	{
 		// This is an actor definition file, which maps a model to a list of
 		// animation names and their correspoding animation files.
-		std::string adef_data = g_game->_vfs->read_file( modelfile, true );
+		std::string adef_data = vfs->read_file( modelfile, true );
 		TokenVec toks = tokenizer( adef_data );
 		Parser p( toks );
 		Object actor = p.get_base_objects_with_name( "actor" )[0];
@@ -33,7 +37,7 @@ void CBaseAnimatingShared::set_model( const std::string &path )
 		std::string model_path = p.get_property_value( actor, "model" );
 
 		// Load the mesh.
-		_model_np = NodePath( g_game->get_loader()->load_sync( model_path ) );
+		_model_np = NodePath( loader->load_sync( model_path ) );
 		nassertv( !_model_np.is_empty() );
 
 		// Make sure this model is set up to be animated.
@@ -67,7 +71,7 @@ void CBaseAnimatingShared::set_model( const std::string &path )
 
 			pvector<Object> events = p.get_objects_with_name( animdef, "event" );
 
-			NodePath anim_np( g_game->_loader->load_sync( apath ) );
+			NodePath anim_np( loader->load_sync( apath ) );
 			if ( anim_np.is_empty() )
 			{
 				nassert_raise( "Could not load animation " + apath + " from actor def " + path );
@@ -154,7 +158,7 @@ void CBaseAnimatingShared::set_model( const std::string &path )
 	else if ( !modelfile.empty() )
 	{
 		// Non-animated model
-		_model_np = NodePath( g_game->get_loader()->load_sync( path ) );
+		_model_np = NodePath( loader->load_sync( path ) );
 		nassertv( !_model_np.is_empty() );
 	}
 	else

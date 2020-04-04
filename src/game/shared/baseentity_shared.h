@@ -3,9 +3,11 @@
 #include "config_game_shared.h"
 #include "entityshared.h"
 #include "entity_think.h"
+#include "netmessages.h"
 #include <simpleHashMap.h>
 #include <nodePath.h>
 #include <typedReferenceCount.h>
+#include <datagram.h>
 
 class EXPORT_GAME_SHARED CBaseEntityShared : public TypedReferenceCount
 {
@@ -42,6 +44,8 @@ public:
 
 	void run_thinks();
 
+	void begin_entity_message( Datagram &dg, int msgtype );
+
 private:
 	static void think_func( CEntityThinkFunc *func, void *data );
 	static void simulate_func( CEntityThinkFunc *func, void *data );
@@ -55,3 +59,15 @@ protected:
 	CEntityThinkFunc *_main_think;
 	pvector<PT( CEntityThinkFunc )> _thinks;
 };
+
+/**
+ * Builds the header of an entity message.
+ * Entity messages can be sent from a client to the server,
+ * or from the server to client(s).
+ */
+INLINE void CBaseEntityShared::begin_entity_message( Datagram &dg, int msgtype )
+{
+	dg.add_uint16( NETMSG_ENTITY_MSG );
+	dg.add_uint32( _entnum );
+	dg.add_uint8( msgtype );
+}

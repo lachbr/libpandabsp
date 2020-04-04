@@ -1814,98 +1814,101 @@ void BSPLoader::do_optimizations()
                 }
         }
 
-        // We can flatten the props since they just sit there.
-        NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
-        for ( int i = 0; i < npc.get_num_paths(); i++ )
-        {
-                DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
-                clear_model_nodes_below( npc[i] );
-                npc[i].flatten_strong();
-        }
-
         std::cout << "There are " << _bspdata->dmodels[0].numfaces << " world faces." << std::endl;
 
-        // Another very important optimization is to try and flatten all faces together that are in the same PVS
-        // For each leaf, we will combine all potentially visible Geoms into as few batches as possible.
-        // This means that we will be duplicating Geoms (and lose a lot of view frustum culling on worldspawn, but
-        // it is worth it due to fewer batches).
-
-        NodePath worldspawn = get_model( 0 );
-        NodePath npgn = worldspawn.find( "**/+GeomNode" );
-        PT( GeomNode ) gn = DCAST( GeomNode, npgn.node() );
-        int num_geoms = gn->get_num_geoms();
-        CPT( RenderState ) node_state = npgn.get_net_state();
-
-        int numvisleafs = _bspdata->dmodels[0].visleafs + 1;
-
-        // List of potentially visible Geoms in each leaf
-        // ( concatenation of Geoms in that leaf + Geoms of leafs in PVS )
-        _leaf_world_geoms.clear();
-        _leaf_world_geoms.resize( numvisleafs + 1 );
-
-	_leaf_aabb_lock.acquire();
-
-        for ( int leafnum = 1; leafnum < numvisleafs; leafnum++ )
+        if ( !_ai )
         {
-                // Build a list of worldspawn Geoms that we can render from this leaf.
-                // We will then flatten those Geoms into as few batches as possible.
-
-                PT( GeomNode ) lgn = new GeomNode( "leafnode" );
-                NodePath leafnode( lgn );
-
-                for ( int geomnum = 0; geomnum < num_geoms; geomnum++ )
+                // We can flatten the props since they just sit there.
+                NodePathCollection npc = _result.find_all_matches( "**/+BSPProp" );
+                for ( int i = 0; i < npc.get_num_paths(); i++ )
                 {
-                        const Geom *geom = gn->get_geom( geomnum );
-
-                        // We are going to assume that world Geoms are already in world space
-                        // ( and they definitely should be )
-                        CPT( GeometricBoundingVolume ) geom_gbv = geom->get_bounds()
-                                ->as_geometric_bounding_volume();
-
-                        for ( size_t pvsidx = 1; pvsidx < numvisleafs; pvsidx++ )
-                        {
-                                if ( !is_cluster_visible( leafnum, pvsidx ) )
-                                        continue;
-
-                                BoundingBox *leaf_bounds = _leaf_bboxs[pvsidx];
-
-                                if ( leaf_bounds->contains( geom_gbv ) != BoundingVolume::IF_no_intersection )
-                                {
-                                        lgn->add_geom( gn->modify_geom( geomnum ), gn->get_geom_state( geomnum ) );
-                                        break;
-                                }
-                        }
+                        DCAST( BSPProp, npc[i].node() )->set_preserve_transform( ModelNode::PT_local );
+                        clear_model_nodes_below( npc[i] );
+                        npc[i].flatten_strong();
                 }
 
-                // aggressively combine all geoms visibible from this leaf
-                leafnode.clear_model_nodes();
-                leafnode.flatten_strong();
+                // Another very important optimization is to try and flatten all faces together that are in the same PVS
+                // For each leaf, we will combine all potentially visible Geoms into as few batches as possible.
+                // This means that we will be duplicating Geoms (and lose a lot of view frustum culling on worldspawn, but
+                // it is worth it due to fewer batches).
 
-                // We've created a batched list of Geoms to render when we are in this leaf.
-		_leaf_world_geoms[leafnum] = lgn->get_geoms();
+                NodePath worldspawn = get_model( 0 );
+                NodePath npgn = worldspawn.find( "**/+GeomNode" );
+                PT( GeomNode ) gn = DCAST( GeomNode, npgn.node() );
+                int num_geoms = gn->get_num_geoms();
+                CPT( RenderState ) node_state = npgn.get_net_state();
+
+                int numvisleafs = _bspdata->dmodels[0].visleafs + 1;
+
+                // List of potentially visible Geoms in each leaf
+                // ( concatenation of Geoms in that leaf + Geoms of leafs in PVS )
+                _leaf_world_geoms.clear();
+                _leaf_world_geoms.resize( numvisleafs + 1 );
+
+                _leaf_aabb_lock.acquire();
+
+                for ( int leafnum = 1; leafnum < numvisleafs; leafnum++ )
+                {
+                        // Build a list of worldspawn Geoms that we can render from this leaf.
+                        // We will then flatten those Geoms into as few batches as possible.
+
+                        PT( GeomNode ) lgn = new GeomNode( "leafnode" );
+                        NodePath leafnode( lgn );
+
+                        for ( int geomnum = 0; geomnum < num_geoms; geomnum++ )
+                        {
+                                const Geom *geom = gn->get_geom( geomnum );
+
+                                // We are going to assume that world Geoms are already in world space
+                                // ( and they definitely should be )
+                                CPT( GeometricBoundingVolume ) geom_gbv = geom->get_bounds()
+                                        ->as_geometric_bounding_volume();
+
+                                for ( size_t pvsidx = 1; pvsidx < numvisleafs; pvsidx++ )
+                                {
+                                        if ( !is_cluster_visible( leafnum, pvsidx ) )
+                                                continue;
+
+                                        BoundingBox *leaf_bounds = _leaf_bboxs[pvsidx];
+
+                                        if ( leaf_bounds->contains( geom_gbv ) != BoundingVolume::IF_no_intersection )
+                                        {
+                                                lgn->add_geom( gn->modify_geom( geomnum ), gn->get_geom_state( geomnum ) );
+                                                break;
+                                        }
+                                }
+                        }
+
+                        // aggressively combine all geoms visibible from this leaf
+                        leafnode.clear_model_nodes();
+                        leafnode.flatten_strong();
+
+                        // We've created a batched list of Geoms to render when we are in this leaf.
+                        _leaf_world_geoms[leafnum] = lgn->get_geoms();
+                }
+
+                _leaf_aabb_lock.release();
         }
 
-	_leaf_aabb_lock.release();
+        for ( int entnum = 0; entnum < _bspdata->numentities; entnum++ )
+        {
+                entity_t *ent = _bspdata->entities + entnum;
+                std::string classname = ValueForKey( ent, "classname" );
+                if ( std::find( world_entities.begin(), world_entities.end(), classname ) != world_entities.end() )
+                        continue;
 
-	for ( int entnum = 0; entnum < _bspdata->numentities; entnum++ )
-	{
-		entity_t *ent = _bspdata->entities + entnum;
-		std::string classname = ValueForKey( ent, "classname" );
-		if ( std::find( world_entities.begin(), world_entities.end(), classname ) != world_entities.end() )
-			continue;
+                int modelnum = extract_modelnum_s( ent );
+                if ( modelnum == -1 )
+                        continue;
 
-		int modelnum = extract_modelnum_s( ent );
-		if ( modelnum == -1 )
-			continue;
-
-		std::cout << "Making non-static collisions for model " << modelnum << " entity " << entnum << std::endl;
-		// Make collisions for a non-static brush model.
-		make_brush_model_collisions( modelnum );
-	}
-	// This makes collisions for static brush models (func_wall, func_detail, worldspawn, etc),
-	// but combines all the meshes into one collision node for optimization purposes.
-	std::cout << "Making static collisions" << std::endl;
-	make_brush_model_collisions( -1 );
+                std::cout << "Making non-static collisions for model " << modelnum << " entity " << entnum << std::endl;
+                // Make collisions for a non-static brush model.
+                make_brush_model_collisions( modelnum );
+        }
+        // This makes collisions for static brush models (func_wall, func_detail, worldspawn, etc),
+        // but combines all the meshes into one collision node for optimization purposes.
+        std::cout << "Making static collisions" << std::endl;
+        make_brush_model_collisions( -1 );
 
         //_result.premunge_scene( _win->get_gsg() );
         //_result.prepare_scene( _win->get_gsg() );

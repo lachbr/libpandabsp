@@ -1,5 +1,5 @@
 #include "client.h"
-#include "globalvars_server.h"
+#include "serverbase.h"
 #include "usercmd.h"
 #include "baseplayer.h"
 #include <datagramIterator.h>
@@ -11,7 +11,7 @@ void Client::handle_cmd( DatagramIterator &dgi )
 	sv_client_cat.debug()
 		<< "Received cmd message from client " << get_client_id() << "\n";
 
-	if ( _last_movement_tick == g_globals->tickcount )
+	if ( _last_movement_tick == sv->get_tickcount() )
 	{
 		// Only one movement command per frame.
 		sv_client_cat.debug()
@@ -19,7 +19,7 @@ void Client::handle_cmd( DatagramIterator &dgi )
 		return;
 	}
 
-	_last_movement_tick = g_globals->tickcount;
+	_last_movement_tick = sv->get_tickcount();
 
 	if ( !_player )
 		return;

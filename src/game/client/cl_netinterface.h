@@ -5,7 +5,6 @@
 #include <referenceCount.h>
 #include <steam/steamnetworkingsockets.h>
 
-#include "c_baseentity.h"
 #include "client_commandmgr.h"
 #include "iclientdatagramhandler.h"
 #include "igamesystem.h"
@@ -14,7 +13,7 @@ class CUserCmd;
 
 NotifyCategoryDeclNoExport( c_client )
 
-class EXPORT_CLIENT_DLL ClientNetInterface : public ISteamNetworkingSocketsCallbacks, public IGameSystem
+class ClientNetInterface : public ISteamNetworkingSocketsCallbacks, public IGameSystem
 {
 	DECLARE_CLASS( ClientNetInterface, IGameSystem )
 public:
@@ -90,3 +89,5 @@ INLINE void ClientNetInterface::add_datagram_handler( IClientDatagramHandler *ha
 {
 	_datagram_handlers.push_back( handler );
 }
+
+extern ClientNetInterface *clnet;

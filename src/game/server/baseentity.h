@@ -20,6 +20,9 @@
 #include "server_class.h"
 #include "baseentity_shared.h"
 
+#include <bulletRigidBodyNode.h>
+#include <bitMask.h>
+
 #include <aa_luse.h>
 
 #define MAX_CHANGED_OFFSETS	20
@@ -32,7 +35,28 @@ class EXPORT_SERVER_DLL CBaseEntity : public CBaseEntityShared
 	DECLARE_CLASS( CBaseEntity, CBaseEntityShared );
 	DECLARE_SERVERCLASS();
 public:
+	enum SolidType
+	{
+		SOLID_BBOX,
+		SOLID_MESH,
+		SOLID_SPHERE,
+		SOLID_NONE,
+	};
+
 	CBaseEntity();
+
+	virtual void set_state( int state );
+
+	int get_state() const;
+	float get_state_elapsed() const;
+	float get_state_time() const;
+
+	// Physics methods
+	void set_solid( SolidType type );
+	void set_mass( float mass );
+	void init_physics();
+	BulletRigidBodyNode *get_physics_node() const;
+	PT( BulletRigidBodyNode ) get_phys_body();
 
 	virtual void transition_xform( const NodePath &landmark_np, const LMatrix4 &mat );
 
@@ -40,6 +64,7 @@ public:
 
 	virtual void init( entid_t entnum );
 	virtual void spawn();
+	virtual void despawn();
 
 	void network_state_changed();
 	void network_state_changed( void *ptr );
@@ -114,6 +139,10 @@ public:
 	void set_angles( const LVector3 &angles );
 	void set_scale( const LVector3 &scale );
 
+	virtual void receive_entity_message( int msgtype, uint32_t client_id, DatagramIterator &dgi );
+	void send_entity_message( Datagram &dg );
+	void send_entity_message( Datagram &dg, const vector_uint32 &client_ids );
+
 	void update_network_time();
 
 	virtual void simulate();
@@ -127,6 +156,19 @@ public:
 	NetworkVar( float, _simulation_time );
 	NetworkVar( int, _simulation_tick );
 
+	// State
+	int _state;
+	float _state_time;
+
+	// Physics things
+	float _mass;
+	SolidType _solid;
+	bool _kinematic;
+	bool _physics_setup;
+	PT( BulletRigidBodyNode ) _bodynode;
+	NodePath _bodynp;
+	BitMask32 _phys_mask;
+
 	LMatrix4f _landmark_relative_transform;
 	bool _map_entity;
 	bool _preserved;
@@ -137,6 +179,40 @@ public:
 private:
 	SimpleHashMap<std::string, std::string, string_hash> _entity_keyvalues;
 };
+
+INLINE BulletRigidBodyNode *CBaseEntity::get_physics_node() const
+{
+	return _bodynode;
+}
+
+INLINE void CBaseEntity::set_solid( SolidType type )
+{
+	_solid = type;
+}
+
+INLINE void CBaseEntity::set_mass( float mass )
+{
+	_mass = mass;
+	if ( _mass > 0 )
+	{
+		_kinematic = true;
+	}
+}
+
+INLINE int CBaseEntity::get_state() const
+{
+	return _state;
+}
+
+INLINE float CBaseEntity::get_state_time() const
+{
+	return _state_time;
+}
+
+INLINE float CBaseEntity::get_state_elapsed() const
+{
+	return _simulation_time - _state_time;
+}
 
 EXPORT_SERVER_DLL PT( CBaseEntity ) CreateEntityByName( const std::string &name );
 

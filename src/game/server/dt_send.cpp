@@ -183,9 +183,9 @@ SendProp SendPropVec2( const char *varname, size_t offset, size_t varsize, int f
 	return SendProp( varname, offset, varsize, 0, SendProxy_Vec<LVector2>, flags );
 }
 
-SendProp SendPropDataTable( const char *varname, SendTable *table )
+SendProp SendPropDataTable( const char *varname, const char *dtname )
 {
 	SendProp ret( varname, 0, 0 );
-	ret.set_send_table( table );
+	ret.set_send_table( dtname );
 	return ret;
 }

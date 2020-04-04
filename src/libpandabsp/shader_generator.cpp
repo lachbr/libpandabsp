@@ -81,7 +81,6 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsOutput *output, GraphicsStateGua
 	ShaderGenerator( gsg ),
 	_gsg( gsg ),
 	_output( output ),
-	_update_task( new GenericAsyncTask( "PSSMShaderGenerator_update_pssm", update_pssm, this ) ),
 	_pssm_rig( new PSSMCameraRig( pssm_splits, this ) ),
 	_camera( camera ),
 	_render( render ),
@@ -99,14 +98,13 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsOutput *output, GraphicsStateGua
 
         // Shadows need to be updated before literally anything else.
         // Any RTT of the main scene should happen after shadows are updated.
-        _update_task->set_sort( 47 );
         _pssm_rig->set_use_stable_csm( true );
         _pssm_rig->set_sun_distance( pssm_sun_distance );
         _pssm_rig->set_pssm_distance( pssm_max_distance );
         _pssm_rig->set_resolution( pssm_size );
         _pssm_rig->set_use_fixed_film_size( true );
 
-        BSPLoader::get_global_ptr()->set_shader_generator( this );
+        //BSPLoader::get_global_ptr()->set_shader_generator( this );
 
 	_planar_reflections = new PlanarReflections( this );
 
@@ -232,47 +230,36 @@ void BSPShaderGenerator::set_sun_light( const NodePath &np )
         _pssm_rig->reparent_to( _render );
 }
 
-void BSPShaderGenerator::start_update()
+void BSPShaderGenerator::update()
 {
-        AsyncTaskManager *mgr = AsyncTaskManager::get_global_ptr();
-        mgr->remove( _update_task );
-        mgr->add( _update_task );
-}
-
-AsyncTask::DoneStatus BSPShaderGenerator::update_pssm( GenericAsyncTask *task, void *data )
-{
-        BSPShaderGenerator *self = (BSPShaderGenerator *)data;
-
-	self->_planar_reflections->update();
+	_planar_reflections->update();
 
         if ( want_pssm )
         {
-                if ( self->_sunlight.is_empty() || !self->_has_shadow_sunlight )
+                if ( _sunlight.is_empty() || !_has_shadow_sunlight )
                 {
                         //self->_sunlight = NodePath();
                         //self->_has_shadow_sunlight = false;
                         //self->_pssm_rig->reparent_to( NodePath() );
-                        return AsyncTask::DS_cont;
+                        return;
                 }
 
-		self->_pssm_rig->update( self->_camera.get_child( 0 ), self->_sun_vector );
+		_pssm_rig->update( _camera.get_child( 0 ), _sun_vector );
         }
 
-	if ( self->_fog )
+	if ( _fog )
 	{
-		self->_pta_fogdata[0] = self->_fog->get_color();
+		_pta_fogdata[0] = _fog->get_color();
 
-		self->_pta_fogdata[1][0] = self->_fog->get_exp_density();
+		_pta_fogdata[1][0] = _fog->get_exp_density();
 
 		float start, stop;
-		self->_fog->get_linear_range( start, stop );
-		self->_pta_fogdata[1][1] = start;
-		self->_pta_fogdata[1][2] = stop;
+		_fog->get_linear_range( start, stop );
+		_pta_fogdata[1][1] = start;
+		_pta_fogdata[1][2] = stop;
 
-		self->_pta_fogdata[1][3] = 1.0f;//self->_fog->get_linear
+		_pta_fogdata[1][3] = 1.0f;//self->_fog->get_linear
 	}
-
-        return AsyncTask::DS_cont;
 }
 
 CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib ) shattr )

@@ -25,6 +25,8 @@ private:
 	PT( TextNode ) _tn;
 	NodePath _tnnp;
 	double _last_update_time;
+	double _total_frametime;
+	int _num_frames;
 };
 
 #endif // FRAMERATEMETER_H_

@@ -1,5 +1,5 @@
 #include "game_postprocess.h"
-#include "clientbase.h"
+#include "cl_rendersystem.h"
 
 GamePostProcess::GamePostProcess() :
 	PostProcess(),
@@ -49,7 +49,7 @@ void GamePostProcess::setup()
 	{
 		_hdr = new HDREffect( this );
 		_hdr->get_hdr_pass()->set_exposure_output(
-			cl->_shader_generator->get_exposure_adjustment() );
+			clrender->get_shader_generator()->get_exposure_adjustment() );
 		add_effect( _hdr );
 	}
 

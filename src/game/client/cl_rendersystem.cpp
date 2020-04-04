@@ -2,6 +2,8 @@
 
 #include <lightRampAttrib.h>
 
+ClientRenderSystem *clrender = nullptr;
+
 static ConfigVariableBool mat_hdr( "mat_hdr", true );
 static ConfigVariableBool mat_bloom( "mat_bloom", true );
 static ConfigVariableBool mat_fxaa( "mat_fxaa", true );
@@ -11,6 +13,7 @@ IMPLEMENT_CLASS( ClientRenderSystem )
 ClientRenderSystem::ClientRenderSystem() :
 	RenderSystem()
 {
+	clrender = this;
 	_post_process = nullptr;
 }
 
@@ -35,9 +38,19 @@ bool ClientRenderSystem::initialize()
 		_render.set_attrib( LightRampAttrib::make_default() );
 
 	_post_process->setup();
+
+	return true;
+}
+
+void ClientRenderSystem::shutdown()
+{
+	BaseClass::shutdown();
+	_post_process->shutdown();
+	_post_process = nullptr;
 }
 
 void ClientRenderSystem::update( double frametime )
 {
+	BaseClass::update( frametime );
 	_post_process->update();
 }

@@ -11,6 +11,10 @@
 
 #include "bsp_material.h"
 
+#include <lightMutex.h>
+
+static LightMutex g_matmutex( "MaterialMutex" );
+
 //====================================================================//
 
 TextureStages::tspool_t TextureStages::_stage_pool;
@@ -114,6 +118,8 @@ BSPMaterial::materialcache_t BSPMaterial::_material_cache;
 
 const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
 {
+        LightMutexHolder holder( g_matmutex );
+
         int idx = _material_cache.find( file );
         if ( idx != -1 )
         {

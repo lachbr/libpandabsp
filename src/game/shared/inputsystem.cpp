@@ -12,6 +12,8 @@
 NotifyCategoryDeclNoExport( inputsystem )
 NotifyCategoryDef( inputsystem, "" )
 
+IMPLEMENT_CLASS( InputSystem )
+
 InputSystem::InputSystem( HostBase *host )
 {
 	_host = host;
@@ -21,7 +23,7 @@ InputSystem::InputSystem( HostBase *host )
 bool InputSystem::initialize()
 {
 	RenderSystem *rsys;
-	if ( !_host->get_game_system( rsys ) )
+	if ( !_host->get_game_system_of_type( rsys ) )
 	{
 		inputsystem_cat.error()
 			<< "The input system requires the render system!\n";
@@ -86,6 +88,8 @@ bool InputSystem::initialize()
 	{
 		rsys->set_gui_mouse_watcher( DCAST( MouseWatcher, _mouse_watcher[0].node() ) );
 	}
+
+	return true;
 }
 
 void InputSystem::shutdown()
@@ -163,5 +167,13 @@ void InputSystem::detach_device( InputDevice *device )
 
 void InputSystem::add_mapping( int button_type, const ButtonHandle &btn )
 {
-	_mappings[button_type] = CKeyMapping( button_type, btn );
+	CKeyMapping mapping( button_type, btn );
+	mapping.sys = this;
+	_mappings.push_back( mapping );
+}
+
+bool InputSystem::CKeyMapping::is_down() const
+{
+	MouseWatcher *mw = DCAST( MouseWatcher, sys->_mouse_watcher[0].node() );
+	return mw->is_button_down( button );
 }

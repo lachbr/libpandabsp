@@ -1,6 +1,6 @@
 #include "cl_bsploader.h"
 #include "clientbase.h"
-#include "rendersystem.h"
+#include "cl_rendersystem.h"
 #include "physicssystem.h"
 #include "cl_netinterface.h"
 #include "netmessages.h"
@@ -116,11 +116,19 @@ void CL_BSPLoader::load_entities()
 	}
 }
 
+ClientBSPSystem *clbsp = nullptr;
+
 IMPLEMENT_CLASS( ClientBSPSystem )
+
+ClientBSPSystem::ClientBSPSystem() :
+	BaseBSPSystem()
+{
+	clbsp = this;
+}
 
 bool ClientBSPSystem::initialize()
 {
-	RenderSystem *rsys;
+	ClientRenderSystem *rsys;
 	cl->get_game_system( rsys );
 	PhysicsSystem *psys;
 	cl->get_game_system( psys );
@@ -135,11 +143,15 @@ bool ClientBSPSystem::initialize()
 	_bsp_loader->set_win( rsys->get_graphics_window() );
 	_bsp_loader->set_camera( rsys->get_camera() );
 	BSPLoader::set_global_ptr( _bsp_loader );
+
+	_bsp_loader->set_shader_generator( clrender->get_shader_generator() );
+
+	return true;
 }
 
 void ClientBSPSystem::load_bsp_level( const Filename &path, bool is_transition )
 {
-	RenderSystem *rsys;
+	ClientRenderSystem *rsys;
 	ClientNetInterface *nsys;
 	PhysicsSystem *psys;
 	cl->get_game_system( rsys );

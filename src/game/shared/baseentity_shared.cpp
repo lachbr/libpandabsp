@@ -1,6 +1,4 @@
 #include "baseentity_shared.h"
-#include <clockObject.h>
-
 #include <modelRoot.h>
 
 IMPLEMENT_CLASS( CBaseEntityShared )

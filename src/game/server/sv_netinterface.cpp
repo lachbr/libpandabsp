@@ -2,15 +2,20 @@
 #include "netmessages.h"
 #include "serverbase.h"
 #include "entregistry.h"
-#include "clockdelta.h"
 #include "baseplayer.h"
 #include "usercmd.h"
+#include "sv_entitymanager.h"
+#include "sv_bsploader.h"
 
 #include <configVariableInt.h>
 #include <datagramIterator.h>
 #include <clockObject.h>
 #include <pStatCollector.h>
 #include <pStatTimer.h>
+
+ServerNetInterface *svnet = nullptr;
+
+IMPLEMENT_CLASS( ServerNetInterface )
 
 static PStatCollector snapshot_collector( "Server:Snapshot" );
 
@@ -25,6 +30,51 @@ ServerNetInterface::ServerNetInterface() :
 	_poll_group( k_HSteamNetPollGroup_Invalid ),
 	_is_started( false )
 {
+	svnet = this;
+}
+
+bool ServerNetInterface::initialize()
+{
+	SteamNetworkingErrMsg err;
+	if ( !GameNetworkingSockets_Init( nullptr, err ) )
+	{
+		server_cat.error() << "ERROR initializing networking library: " << err << std::endl;
+		return false;
+	}
+
+	SteamNetworkingIPAddr server_local_addr;
+	server_local_addr.Clear();
+	server_local_addr.m_port = server_port;
+
+	_listen_socket = SteamNetworkingSockets()->CreateListenSocketIP( server_local_addr, 0, nullptr );
+	if ( _listen_socket == k_HSteamListenSocket_Invalid )
+	{
+		server_cat.error() << "Failed to listen on port " << server_port << std::endl;
+		return false;
+	}
+
+	_poll_group = SteamNetworkingSockets()->CreatePollGroup();
+	if ( _poll_group == k_HSteamNetPollGroup_Invalid )
+	{
+		server_cat.error() << "Failed to listen on port " << server_port << std::endl;
+		return false;
+	}
+
+	_is_started = true;
+
+	return true;
+}
+
+void ServerNetInterface::shutdown()
+{
+}
+
+void ServerNetInterface::update( double frametime )
+{
+	read_incoming_messages();
+	run_networking_events();
+
+	send_tick();
 }
 
 void ServerNetInterface::run_networking_events()
@@ -36,23 +86,11 @@ int ServerNetInterface::remove_client( Client *cl )
 {
 	if ( cl->get_player() )
 	{
-		remove_entity( cl->get_player() );
+		svents->remove_entity( cl->get_player()->get_entnum() );
 	}
 	_client_id_alloc.free( cl->get_client_id() );
+	_clients_by_id.remove( cl->get_client_id() );
 	return (int)_clients_by_address.erase( cl->get_connection() );
-}
-
-void ServerNetInterface::remove_entity( CBaseEntity *ent )
-{
-	server_cat.debug() << "removing entity " << ent << std::endl;
-	ent->despawn();
-	_entnum_alloc.free( ent->get_entnum() );
-
-	Datagram dg = BeginMessage( NETMSG_DELETE_ENTITY );
-	dg.add_uint32( ent->get_entnum() );
-	broadcast_datagram( dg, true );
-
-	_entlist.erase( _entlist.find( ent->get_entnum() ) );
 }
 
 void ServerNetInterface::handle_client_hello( SteamNetConnectionStatusChangedCallback_t *info )
@@ -79,6 +117,7 @@ void ServerNetInterface::handle_client_hello( SteamNetConnectionStatusChangedCal
 
 	PT( Client ) cl = new Client( info->m_info.m_addrRemote, info->m_hConn, _client_id_alloc.allocate() );
 	_clients_by_address[info->m_hConn] = cl;
+	_clients_by_id[cl->get_client_id()] = cl;
 
 	PT( CBaseEntity ) plyr = make_player();
 	if ( plyr->is_of_type( CBasePlayer::get_class_type() ) )
@@ -93,18 +132,26 @@ void ServerNetInterface::handle_client_hello( SteamNetConnectionStatusChangedCal
 	}
 
 	NetDatagram dg = BeginMessage( NETMSG_HELLO_RESP );
-	dg.add_float32( sv_tickrate );
+	dg.add_uint8( sv_tickrate );
 	dg.add_uint16( cl->get_client_id() );
 	dg.add_uint32( plyr->get_entnum() );
-	dg.add_string( sv->_map );
+	dg.add_string( svbsp->get_map() );
 	send_datagram( dg, cl->get_connection() );
 
 	update_client_state( cl, CLIENTSTATE_NONE );
 }
 
+void ServerNetInterface::send_tick()
+{
+	Datagram dg = BeginMessage( NETMSG_TICK );
+	dg.add_int32( sv->get_tickcount() );
+	dg.add_float32( sv->get_interval_per_tick() );
+	broadcast_datagram( dg );
+}
+
 PT( CBaseEntity ) ServerNetInterface::make_player()
 {
-	return make_entity_by_name( "baseplayer" );
+	return svents->make_entity_by_name( "baseplayer" );
 }
 
 void ServerNetInterface::update_client_state( Client *cl, int state )
@@ -174,26 +221,33 @@ void ServerNetInterface::handle_datagram( Datagram &dg, Client *client )
 
 void ServerNetInterface::read_incoming_messages()
 {
-	ISteamNetworkingMessage *incoming_msg = nullptr;
-	int num_msgs = SteamNetworkingSockets()->ReceiveMessagesOnPollGroup( _poll_group, &incoming_msg, 1 );
-	if ( num_msgs == 0 )
-		return;
-	if ( num_msgs < 0 )
-	{
-		server_cat.error() << "Error checking for messages" << std::endl;
-		return;
-	}
-
-	nassertv( num_msgs == 1 && incoming_msg );
-	auto iclient = _clients_by_address.find( incoming_msg->GetConnection() );
-	nassertv( iclient != _clients_by_address.end() );
-	Client *cl = iclient->second;
-
+	ISteamNetworkingMessage *incoming_msg;
+	int num_msgs;
+	Client *cl;
 	Datagram dg;
-	dg.append_data( incoming_msg->m_pData, incoming_msg->m_cbSize );
-	handle_datagram( dg, cl );
 
-	incoming_msg->Release();
+	while ( true )
+	{
+		num_msgs = SteamNetworkingSockets()->ReceiveMessagesOnPollGroup( _poll_group, &incoming_msg, 1 );
+		if ( !incoming_msg || num_msgs == 0 )
+			break;
+		if ( num_msgs < 0 )
+		{
+			server_cat.error() << "Error checking for messages" << std::endl;
+			break;
+		}
+
+		nassertv( num_msgs == 1 && incoming_msg );
+		auto iclient = _clients_by_address.find( incoming_msg->GetConnection() );
+		nassertv( iclient != _clients_by_address.end() );
+		cl = iclient->second;
+
+		dg = Datagram( incoming_msg->m_pData, incoming_msg->m_cbSize );
+		handle_datagram( dg, cl );
+
+		incoming_msg->Release();
+	}
+	
 }
 
 void ServerNetInterface::OnSteamNetConnectionStatusChanged( SteamNetConnectionStatusChangedCallback_t *info )
@@ -241,38 +295,6 @@ void ServerNetInterface::OnSteamNetConnectionStatusChanged( SteamNetConnectionSt
 	}
 }
 
-bool ServerNetInterface::startup()
-{
-	SteamNetworkingErrMsg err;
-	if ( !GameNetworkingSockets_Init( nullptr, err ) )
-	{
-		server_cat.error() << "ERROR initializing networking library: " << err << std::endl;
-		return false;
-	}
-
-	SteamNetworkingIPAddr server_local_addr;
-	server_local_addr.Clear();
-	server_local_addr.m_port = server_port;
-
-	_listen_socket = SteamNetworkingSockets()->CreateListenSocketIP( server_local_addr, 0, nullptr );
-	if ( _listen_socket == k_HSteamListenSocket_Invalid )
-	{
-		server_cat.error() << "Failed to listen on port " << server_port << std::endl;
-		return false;
-	}
-
-	_poll_group = SteamNetworkingSockets()->CreatePollGroup();
-	if ( _poll_group == k_HSteamNetPollGroup_Invalid )
-	{
-		server_cat.error() << "Failed to listen on port " << server_port << std::endl;
-		return false;
-	}
-
-	_is_started = true;
-
-	return true;
-}
-
 void ServerNetInterface::send_datagram( Datagram &dg, HSteamNetConnection conn )
 {
 	SteamNetworkingSockets()->SendMessageToConnection( conn, dg.get_data(),
@@ -280,46 +302,21 @@ void ServerNetInterface::send_datagram( Datagram &dg, HSteamNetConnection conn )
 							   k_nSteamNetworkingSend_Reliable, nullptr );
 }
 
-void ServerNetInterface::build_snapshot( Datagram &dg, bool full_snapshot )
+void ServerNetInterface::send_datagram_to_clients( Datagram &dg, const vector_uint32 &client_ids )
 {
-	PStatTimer timer( snapshot_collector );
-
-	dg.add_uint16( NETMSG_SNAPSHOT );
-	dg.add_uint32( _entlist.size() );
-
-	for ( auto itr = _entlist.begin();
-	      itr != _entlist.end(); ++itr )
+	size_t count = client_ids.size();
+	for ( size_t i = 0; i < count; i++ )
 	{
-		CBaseEntity *ent = itr->second;
-		ServerClass *cls = ent->get_server_class();
-		SendTable &st = cls->get_send_table();
+		send_datagram_to_client( dg, client_ids[i] );
+	}
+}
 
-		dg.add_uint32( ent->get_entnum() );
-		dg.add_string( cls->get_network_name() );
-
-		int num_props;
-		if ( full_snapshot || ent->is_entity_fully_changed() )
-			num_props = st.get_num_props();
-		else
-			num_props = ent->get_num_changed_offsets();
-
-		dg.add_uint16( num_props );
-
-		int total_props = st.get_num_props();
-		for ( int j = 0; j < total_props; j++ )
-		{
-			SendProp &prop = st.get_send_props()[j];
-			if ( full_snapshot || ent->is_property_changed( &prop ) )
-			{
-				
-				dg.add_string( prop.get_prop_name() );
-				void *data = (unsigned char *)ent + prop.get_offset();
-				prop.get_proxy()( &prop, ent, data, dg );
-			}
-		}
-
-		if ( !full_snapshot )
-			ent->reset_changed_offsets();
+void ServerNetInterface::send_datagram_to_client( Datagram &dg, uint32_t client_id )
+{
+	int iidclient = _clients_by_id.find( client_id );
+	if ( iidclient != -1 )
+	{
+		send_datagram( dg, _clients_by_id.get_data( iidclient )->get_connection() );
 	}
 }
 
@@ -340,7 +337,7 @@ void ServerNetInterface::send_full_snapshot_to_client( Client *cl )
 {
 	send_tick( cl );
 	Datagram dg;
-	build_snapshot( dg, true );
+	svents->build_snapshot( dg, true );
 	send_datagram( dg, cl->get_connection() );
 }
 
@@ -350,7 +347,7 @@ void ServerNetInterface::snapshot()
 	broadcast_datagram( tickdg, true );
 
 	Datagram dg;
-	build_snapshot( dg, false );
+	svents->build_snapshot( dg, false );
 
 	// Send snapshot to all clients
 	broadcast_datagram( dg, true );

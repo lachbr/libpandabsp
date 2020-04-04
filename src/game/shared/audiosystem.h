@@ -6,8 +6,8 @@
 #include "audio_3d_manager.h"
 
 #include <audioManager.h>
-
-class HostBase;
+#include <pvector.h>
+#include <simpleHashMap.h>
 
 class EXPORT_GAME_SHARED AudioSystem : public IGameSystem
 {
@@ -21,36 +21,52 @@ public:
 	virtual void shutdown();
 	virtual void update( double frametime );
 
-	AudioManager *get_music_mgr() const;
 	AudioManager *get_sfx_mgr( int n = 0 ) const;
-	Audio3DManager *get_audio3d( int n = 0 ) const;
 
-	PT( AudioSound ) load_sfx( int mgr, const Filename &audiofile, bool is3d = false );
-	PT( AudioSound ) load_sfx( int mgr, const Filename &audiofile, const NodePath &attachto );
+	AudioSound *load_music( const Filename &musicfile );
+	AudioManager *get_music_mgr() const;
+	void play_music( const std::string &songname, bool loop = true, float volume = 1.0f );
+	void stop_music();
 
-	void attach_sound( int mgr, AudioSound *snd, const NodePath &attachto );
-	void detach_sound( int mgr, AudioSound *snd );
+	AudioSound *load_sfx( const Filename &audiofile, bool positional = false, int mgr = 0 );
 
 	int create_sfx_mgr();
-	// Creates an audio manager with 3D positioning enabled
-	int create_sfx_mgr( const NodePath &listener_target, const NodePath &root );
 
-private:
-	class SFXManager
+	void release_all_sounds();
+	void release_all_music();
+
+protected:
+	class SFXEntry
 	{
 	public:
-		PT( AudioManager ) sfxmgr;
-		PT( Audio3DManager ) audio3d;
+		int mgr;
+		bool positional;
+		Filename filename;
+		PT( AudioSound ) sound;
+
+		SFXEntry()
+		{
+		}
+
+		SFXEntry( const SFXEntry &other )
+		{
+			mgr = other.mgr;
+			positional = other.positional;
+			filename = other.filename;
+			sound = other.sound;
+		}
 	};
 
 	PT( AudioManager ) _music_manager;
-	pvector<SFXManager> _sfx_managers;
-};
+	pvector<PT( AudioManager )> _sfx_managers;
 
-INLINE const char *AudioSystem::get_name() const
-{
-	return "AudioSystem";
-}
+	AudioSound *_current_song;
+
+	// Maintains a reference count on all loaded sounds so the sound data
+	// doesn't get deleted until we want it to.
+	SimpleHashMap<std::string, PT( AudioSound ), string_hash> _music_cache;
+	pvector<SFXEntry> _audio_cache;
+};
 
 INLINE AudioManager *AudioSystem::get_music_mgr() const
 {
@@ -59,10 +75,5 @@ INLINE AudioManager *AudioSystem::get_music_mgr() const
 
 INLINE AudioManager *AudioSystem::get_sfx_mgr( int n ) const
 {
-	return _sfx_managers[n].sfxmgr;
-}
-
-INLINE Audio3DManager *AudioSystem::get_audio3d( int n ) const
-{
-	return _sfx_managers[n].audio3d;
+	return _sfx_managers[n];
 }

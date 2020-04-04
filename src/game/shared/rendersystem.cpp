@@ -8,6 +8,7 @@
 #include <orthographicLens.h>
 #include <perspectiveLens.h>
 #include <configVariableInt.h>
+#include <eventHandler.h>
 
 // Shaders
 #include "shader_vertexlitgeneric.h"
@@ -42,7 +43,7 @@ void RenderSystem::update( double frametime )
 {
 	if ( _shader_generator )
 	{
-		//_shader_generator->update();
+		_shader_generator->update();
 	}
 
 	if ( _graphics_engine )
@@ -82,6 +83,9 @@ bool RenderSystem::init_rendering()
 	// Rendering
 	//
 
+	_graphics_pipe_selection = GraphicsPipeSelection::get_global_ptr();
+	_graphics_engine = GraphicsEngine::get_global_ptr();
+
 	_graphics_pipe = _graphics_pipe_selection->make_default_pipe();
 	if ( !_graphics_pipe )
 	{
@@ -119,6 +123,9 @@ bool RenderSystem::init_rendering()
 		<< "\tDevice ID: " << dinfo->get_device_id() << "\n"
 		<< "\tVideo memory: " << dinfo->get_video_memory() << "\n"
 		<< "\tTexture memory: " << dinfo->get_texture_memory() << "\n";
+
+	EventHandler::get_global_event_handler()
+		->add_hook( "window-event", handle_window_event, this );
 
 	return true;
 }
@@ -262,7 +269,7 @@ bool RenderSystem::init_shaders()
 
 	_shader_generator = new BSPShaderGenerator( _graphics_window, _gsg, _camera, _render );
 	_gsg->set_shader_generator( _shader_generator );
-	_shader_generator->start_update();
+	//_shader_generator->start_update();
 	_shader_generator->add_shader( new VertexLitGenericSpec );
 	_shader_generator->add_shader( new UnlitGenericSpec );
 	_shader_generator->add_shader( new UnlitNoMatSpec );
@@ -276,6 +283,9 @@ bool RenderSystem::init_shaders()
 
 void RenderSystem::shutdown()
 {
+	EventHandler::get_global_event_handler()
+		->remove_hook( "window-event", handle_window_event, this );
+
 	_graphics_window->remove_all_display_regions();
 	_graphics_engine->remove_all_windows();
 	_graphics_window = nullptr;

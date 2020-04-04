@@ -1,5 +1,4 @@
 #include "hostbase.h"
-#include "physics_utils.h"
 
 #include "bsp_render.h"
 
@@ -32,6 +31,9 @@ HostBase::HostBase() :
 	_global_clock = ClockObject::get_global_clock();
 	_global_clock->set_mode( ClockObject::M_slave );
 
+	_timestamp_networking_base = 100;
+	_timestamp_randomize_window = 32;
+
 	_tickcount = 0;
 	_frameticks = 0;
 	_currentframetick = 0;
@@ -46,6 +48,14 @@ HostBase::HostBase() :
 	_intervalpertick = 1.0 / _tickrate;
 	_interpolationamount = 0.0;
 	_paused = false;
+}
+
+void HostBase::begin_tick()
+{
+}
+
+void HostBase::end_tick()
+{
 }
 
 /**
@@ -99,18 +109,6 @@ bool HostBase::startup()
 
 	add_game_systems();
 
-	// Now initialize all the game systems
-	size_t count = _game_systems_sorted.size();
-	for ( size_t i = 0; i < count; i++ )
-	{
-		IGameSystem *sys = _game_systems_sorted[i].system;
-		if ( !sys->initialize() )
-		{
-			hostbase_cat.error()
-				<< "Unable to initialize game system " << std::string( sys->get_name() ) << "\n";
-		}
-	}
-
 	_quit = false;
 
 	return true;
@@ -119,7 +117,7 @@ bool HostBase::startup()
 void HostBase::shutdown()
 {
 	int num_systems = (int)_game_systems_sorted.size();
-	for ( int i = num_systems - 1; i >= 0; i++ )
+	for ( int i = num_systems - 1; i >= 0; i-- )
 	{
 		_game_systems_sorted[i].system->shutdown();
 	}
@@ -132,9 +130,10 @@ void HostBase::shutdown()
 void HostBase::do_frame()
 {
 	double curtime = _global_clock->get_real_time();
-	_frametime = curtime - _curtime;
+	_frametime = curtime - _oldcurtime;
 	_realframetime = _frametime;
 	_curtime = curtime;
+	_oldcurtime = curtime;
 	_framecount++;
 
 	double prevremainder = _remainder;
@@ -174,6 +173,8 @@ void HostBase::do_frame()
 
 		PandaNode::reset_all_prev_transform();
 
+		begin_tick();
+
 		// Run all of our per-tick game systems
 		size_t num_systems = _game_systems_sorted.size();
 		for ( size_t isys = 0; isys < num_systems; isys++ )
@@ -185,13 +186,14 @@ void HostBase::do_frame()
 			}
 		}
 
+		end_tick();
+
 		_tickcount++;
 		_currentframetick++;
 		_simticksthisframe++;
 	}
 
-	_oldcurtime = _curtime;
-	_curtime = _tickcount * _intervalpertick * _remainder;
+	_curtime = _tickcount * _intervalpertick + _remainder;
 	_frametime = _realframetime;
 	_global_clock->set_frame_time( _curtime );
 	_global_clock->set_dt( _frametime );
@@ -210,6 +212,11 @@ void HostBase::do_frame()
 
 	TransformState::garbage_collect();
 	RenderState::garbage_collect();
+
+	//if ( PStatClient::is_connected() )
+	///{
+	//	PStatClient::main_tick();
+	//}
 }
 
 void HostBase::run()
@@ -218,19 +225,4 @@ void HostBase::run()
 	{
 		do_frame();
 	}
-}
-
-DEFINE_TASK_FUNC( HostBase::physics_task )
-{
-	HostBase *self = (HostBase *)data;
-	double dt = ClockObject::get_global_clock()->get_dt();
-	
-	return AsyncTask::DS_cont;
-}
-
-
-DEFINE_TASK_FUNC( HostBase::ival_task )
-{
-	InputDeviceManager::get_global_ptr()->update();
-	return AsyncTask::DS_cont;
 }

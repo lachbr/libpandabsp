@@ -1,13 +1,20 @@
 #include "cl_input.h"
 #include "usercmd.h"
-#include "globalvars_client.h"
-#include "c_basegame.h"
 #include "in_buttons.h"
 #include <mouseWatcher.h>
+#include "clientbase.h"
+#include "cl_rendersystem.h"
+#include "inputsystem.h"
+
+CInput *clinput = nullptr;
+
+IMPLEMENT_CLASS( CInput )
 
 CInput::CInput() :
+	InputSystem( cl ),
 	_enabled( false )
 {
+	clinput = this;
 }
 
 float CInput::get_walk_speed() const
@@ -120,25 +127,23 @@ void CInput::setup_mouse( CUserCmd *cmd )
 	if ( !is_enabled() )
 		return;
 
-	ClientBase *game = ClientBase::ptr();
-	MouseWatcher *mw = DCAST( MouseWatcher, game->_mouse_watcher[0].node() );
-	if ( mw->has_mouse() )
+	MouseData md = clrender->get_graphics_window()->get_pointer( 0 );
+	if ( md.get_in_window() )
 	{
-		MouseData md = game->get_graphics_window()->get_pointer( 0 );
-		LVector2 center( game->get_graphics_window()->get_x_size() / 2.0f,
-				 game->get_graphics_window()->get_y_size() / 2.0f );
+		LVector2 center( clrender->get_graphics_window()->get_x_size() / 2.0f,
+				 clrender->get_graphics_window()->get_y_size() / 2.0f );
 
 		cmd->mousedx = ( md.get_x() - center.get_x() ) * cl_mousesensitivity;
 		cmd->mousedy = ( md.get_y() - center.get_y() ) * cl_mousesensitivity;
 
-		game->get_graphics_window()->move_pointer( 0, (int)center[0], (int)center[1] );
+		clrender->get_graphics_window()->move_pointer( 0, (int)center[0], (int)center[1] );
 	}
 }
 
 void CInput::setup_view( CUserCmd *cmd )
 {
 	ClientBase *game = ClientBase::ptr();
-	cmd->viewangles = game->_camera.get_hpr( game->_render );
+	cmd->viewangles = clrender->get_camera().get_hpr( clrender->get_render() );
 }
 
 void CInput::create_cmd( CUserCmd *cmd, int commandnumber, float input_sample_frametime, bool active )
@@ -146,12 +151,12 @@ void CInput::create_cmd( CUserCmd *cmd, int commandnumber, float input_sample_fr
 	cmd->clear();
 
 	cmd->commandnumber = commandnumber;
-	cmd->tickcount = g_globals->tickcount;
+	cmd->tickcount = cl->get_tickcount();
 
-	CKeyMappings *map = g_globals->game->get_key_mappings();
-	for ( size_t i = 0; i < map->mappings.size(); i++ )
+	size_t count = get_num_mappings();
+	for ( size_t i = 0; i < count; i++ )
 	{
-		const CKeyMapping &km = map->mappings.get_data( i );
+		const InputSystem::CKeyMapping &km = get_mapping( i );
 		if ( km.is_down() )
 			cmd->buttons |= km.button_type;
 	}

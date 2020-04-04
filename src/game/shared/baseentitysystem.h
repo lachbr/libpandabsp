@@ -18,7 +18,7 @@ public:
 	virtual void update( double frametime );
 
 	void insert_entity( CBaseEntityShared *ent );
-	void remove_entity( entid_t entnum );
+	virtual void remove_entity( entid_t entnum );
 	void remove_entity( CBaseEntityShared *ent );
 	size_t get_num_entities() const;
 	CBaseEntityShared *get_entity( entid_t entnum ) const;
@@ -29,24 +29,6 @@ public:
 
 INLINE BaseEntitySystem::BaseEntitySystem() :
 	IGameSystem()
-{
-}
-
-bool BaseEntitySystem::initialize()
-{
-}
-
-void BaseEntitySystem::shutdown()
-{
-	size_t count = edict.size();
-	for ( size_t i = 0; i < count; i++ )
-	{
-		edict.get_data( i )->despawn();
-	}
-	edict.clear();
-}
-
-void BaseEntitySystem::update( double frametime )
 {
 }
 

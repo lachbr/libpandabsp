@@ -7,13 +7,15 @@
 
 // Game systems we need
 #include "cl_rendersystem.h"
-#include "inputsystem.h"
-#include "audiosystem.h"
+#include "cl_input.h"
+#include "cl_audiosystem.h"
 #include "physicssystem.h"
 #include "intervalsystem.h"
 #include "cl_entitymanager.h"
 #include "cl_netinterface.h"
 #include "cl_bsploader.h"
+#include "tasksystem.h"
+#include "eventsystem.h"
 
 ClientBase *cl = nullptr;
 
@@ -56,7 +58,7 @@ void ClientBase::start_game( const std::string &mapname )
 	// Start a local host game
 
 	// Start the server process
-	FILE *hserver = _popen( std::string( "p3d_server.exe +map " + mapname ).c_str(), "wt" );
+	FILE *hserver = _popen( std::string( "..\\..\\cio-panda3d\\built_x64\\bin\\dedicated.exe +map " + mapname ).c_str(), "wt" );
 	if ( hserver == NULL )
 	{
 		nassert_raise( "Could not start server process!" );
@@ -75,10 +77,13 @@ void ClientBase::start_game( const std::string &mapname )
 void ClientBase::add_game_systems()
 {
 	// Per-tick systems
+	PT( EventSystem ) events = new EventSystem;
+	add_game_system( events, -60 );
+
 	PT( ClientNetInterface ) netsys = new ClientNetInterface;
 	add_game_system( netsys, -50 );
 
-	PT( InputSystem ) input = new InputSystem( this );
+	PT( CInput ) input = new CInput;
 	add_game_system( input, -40 );
 
 	PT( IntervalSystem ) intervals = new IntervalSystem;
@@ -95,14 +100,30 @@ void ClientBase::add_game_systems()
 	netsys->add_datagram_handler( bsp );
 	add_game_system( bsp, 0 );
 
+	PT( TaskSystem ) tasks = new TaskSystem;
+	add_game_system( tasks, 10 );
+
 	// Per-frame systems (after all ticks)
+	PT( TaskSystemPerFrame ) pftasks = new TaskSystemPerFrame;
+	add_game_system( pftasks, 20, true );
+
 	PT( ClientRenderSystem ) render = new ClientRenderSystem;
-	// InputSystem relies on RenderSystem, so make sure we
-	// initialize RenderSystem before InputSystem.
-	add_game_system( render, -31, true );
+	add_game_system( render, 30, true );
 	
-	PT( AudioSystem ) audio = new AudioSystem;
-	add_game_system( audio, 20, true );
+	PT( ClientAudioSystem ) audio = new ClientAudioSystem;
+	add_game_system( audio, 40, true );
+
+	events->initialize();
+	netsys->initialize();
+	render->initialize(); // need to initialize render before input
+	input->initialize();
+	intervals->initialize();
+	entities->initialize();
+	physics->initialize();
+	bsp->initialize();
+	tasks->initialize();
+	pftasks->initialize();
+	audio->initialize();
 }
 
 void ClientBase::do_frame()
@@ -140,7 +161,7 @@ bool ClientBase::startup()
 	}
 
 	// Set default mappings
-	InputSystem *isys;
+	CInput *isys;
 	get_game_system( isys );
 	isys->add_mapping( IN_FORWARD, KeyboardButton::ascii_key( 'w' ) );
 	isys->add_mapping( IN_BACK, KeyboardButton::ascii_key( 's' ) );

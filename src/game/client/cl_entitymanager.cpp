@@ -3,9 +3,17 @@
 #include "c_baseentity.h"
 #include "netmessages.h"
 
+NotifyCategoryDeclNoExport( clents )
+NotifyCategoryDef( clents, "" )
+
+ClientEntitySystem *clents = nullptr;
+
+IMPLEMENT_CLASS( ClientEntitySystem )
+
 ClientEntitySystem::ClientEntitySystem() :
 	BaseEntitySystem()
 {
+	clents = this;
 	_local_player = nullptr;
 	_local_player_id;
 }
@@ -38,6 +46,22 @@ bool ClientEntitySystem::handle_datagram( int msgtype, DatagramIterator &dgi )
 			receive_snapshot( dgi );
 			return true;
 		}
+	case NETMSG_ENTITY_MSG:
+		{
+			// Received an entity message from the server.
+
+			entid_t entnum = dgi.get_uint32();
+			int entmsgtype = dgi.get_uint8();
+
+			int ient = edict.find( entnum );
+			if ( ient != -1 )
+			{
+				C_BaseEntity *ent = DCAST( C_BaseEntity, edict.get_data( ient ) );
+				ent->receive_entity_message( entmsgtype, dgi );
+			}
+
+			return true;
+		}
 	}
 
 	// This wasn't one of the messages we care about. Tell the ClientNetSystem
@@ -47,12 +71,20 @@ bool ClientEntitySystem::handle_datagram( int msgtype, DatagramIterator &dgi )
 
 void ClientEntitySystem::receive_snapshot( DatagramIterator &dgi )
 {
-	pvector<C_BaseEntity *> new_ents;
-	pvector<C_BaseEntity *> changed_ents;
+	
+	int tickcount = dgi.get_uint32();
+	int savetickcount = cl->get_tickcount();
+	// Be on the same tick as this snapshot.
+	cl->set_tickcount( tickcount );
 	int num_ents = dgi.get_uint32();
+	pvector<C_BaseEntity *> new_ents;
+	new_ents.reserve( num_ents );
+	pvector<C_BaseEntity *> changed_ents;
+	changed_ents.reserve( num_ents );
 	for ( int ient = 0; ient < num_ents; ient++ )
 	{
 		entid_t entnum = dgi.get_uint32();
+		//std::cout << "entnum " << entnum << std::endl;
 		std::string network_name = dgi.get_string();
 		int num_props = dgi.get_uint16();
 
@@ -65,7 +97,15 @@ void ClientEntitySystem::receive_snapshot( DatagramIterator &dgi )
 			new_ent = true;
 		}
 
-		nassertv( ent != nullptr );
+		if ( !ent )
+		{
+			clents_cat.error()
+				<< "No client definition for " << network_name << "\n";
+			break;
+		}
+
+		clents_cat.debug()
+			<< "Num props on " << network_name << ": " << num_props << std::endl;
 
 		for ( int iprop = 0; iprop < num_props; iprop++ )
 		{
@@ -82,6 +122,8 @@ void ClientEntitySystem::receive_snapshot( DatagramIterator &dgi )
 		if ( num_props > 0 )
 			changed_ents.push_back( ent );
 	}
+
+	cl->set_tickcount( savetickcount );
 
 	for ( C_BaseEntity *ent : new_ents )
 		ent->spawn();
@@ -113,4 +155,16 @@ C_BaseEntity *ClientEntitySystem::make_entity( const std::string &network_name, 
 	}
 
 	return ent;
+}
+
+void ClientEntitySystem::update( double frametime )
+{
+	C_BaseEntity::interpolate_entities();
+
+	size_t count = edict.size();
+	for ( size_t i = 0; i < count; i++ )
+	{
+		C_BaseEntity *ent = DCAST( C_BaseEntity, edict.get_data( i ) );
+		ent->run_thinks();
+	}
 }

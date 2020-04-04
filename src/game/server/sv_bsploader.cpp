@@ -1,5 +1,8 @@
 #include "sv_bsploader.h"
-#include "server.h"
+#include "sv_netinterface.h"
+#include "sv_entitymanager.h"
+#include "physicssystem.h"
+#include "serverbase.h"
 
 #include <texturePool.h>
 
@@ -27,7 +30,7 @@ void CSV_BSPLoader::cleanup_entities( bool is_transition )
 
 		if ( ( is_transition && !ent->_preserved ) || !is_transition )
 		{
-			g_server->remove_entity( ent.p() );
+			svents->remove_entity( ent->get_entnum() );
 			itr = _entities.erase( itr );
 			continue;
 		}
@@ -150,7 +153,7 @@ void CSV_BSPLoader::load_entities()
 		bool bexplicit_entnum = strncmp( "worldspawn", psz_classname, 10 ) == 0;
 		entid_t explicit_entnum = 0;
 
-		PT( CBaseEntity ) p_ent = g_server->make_entity_by_name( classname, false,
+		PT( CBaseEntity ) p_ent = svents->make_entity_by_name( classname, false,
 										bexplicit_entnum, explicit_entnum );
 		if ( !p_ent )
 			continue;
@@ -159,4 +162,43 @@ void CSV_BSPLoader::load_entities()
 
 	}
 
+}
+
+ServerBSPSystem *svbsp = nullptr;
+
+IMPLEMENT_CLASS( ServerBSPSystem )
+
+ServerBSPSystem::ServerBSPSystem() :
+	BaseBSPSystem()
+{
+	svbsp = this;
+}
+
+bool ServerBSPSystem::initialize()
+{
+	//if ( !BaseClass::initialize() )
+	//{
+	//	return false;
+	//}
+
+	PhysicsSystem *psys;
+	sv->get_game_system( psys );
+
+	_bsp_loader = new CSV_BSPLoader;
+	_bsp_loader->set_ai( true );
+	_bsp_loader->set_physics_world( psys->get_physics_world() );
+
+	return true;
+}
+
+void ServerBSPSystem::load_bsp_level( const Filename &path, bool is_transition )
+{
+	Datagram dg = BeginMessage( NETMSG_CHANGE_LEVEL );
+	dg.add_string( path.get_basename_wo_extension() );
+	dg.add_bool( is_transition );
+	svnet->broadcast_datagram( dg );
+
+	BaseBSPSystem::load_bsp_level( path, is_transition );
+	_bsp_level.reparent_to( sv->get_root() );
+	_bsp_loader->do_optimizations();
 }

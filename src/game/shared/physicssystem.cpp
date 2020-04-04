@@ -1,7 +1,9 @@
 #include "physicssystem.h"
 #include "masks.h"
 
+#include <bulletTriangleMesh.h>
 #include <bulletTriangleMeshShape.h>
+#include <collisionPolygon.h>
 
 IMPLEMENT_CLASS( PhysicsSystem )
 
@@ -19,6 +21,8 @@ bool PhysicsSystem::initialize()
 {
 	_physics_world = new BulletWorld;
 	_physics_world->set_gravity( 0.0f, 0.0f, panda_phys_gravity );
+
+	return true;
 }
 
 void PhysicsSystem::shutdown()
@@ -265,3 +269,35 @@ LVector3 PhysicsSystem::get_throw_vector( const LPoint3 &trace_origin, const LVe
 	return ( hit_pos - throw_origin ).normalized();
 }
 
+PT( BulletConvexHullShape ) PhysicsSystem::make_convex_hull_from_collision_solids( CollisionNode *cnode )
+{
+	PT( BulletConvexHullShape ) shape = new BulletConvexHullShape;
+	int num_solids = cnode->get_num_solids();
+	for ( int i = 0; i < num_solids; i++ )
+	{
+		const CollisionSolid *solid = cnode->get_solid( i );
+		if ( solid->is_of_type( CollisionPolygon::get_class_type() ) )
+		{
+			const CollisionPolygon *poly = DCAST( CollisionPolygon, solid );
+			int num_points = poly->get_num_points();
+			for ( int j = 0; j < num_points; j++ )
+			{
+				LPoint3 pt = poly->get_point( j );
+				shape->add_point( pt );
+			}
+		}
+	}
+	return shape;
+}
+
+LVector3 PhysicsSystem::extents_from_min_max( const LVector3 &min, const LVector3 &max )
+{
+	return LVector3( ( max[0] - min[0] ) / 2.0f,
+			 ( max[1] - min[1] ) / 2.0f,
+			 ( max[2] - min[2] ) / 2.0f );
+}
+
+LPoint3 PhysicsSystem::center_from_min_max( const LVector3 &min, const LVector3 &max )
+{
+	return ( min + max ) / 2.0f;
+}

@@ -2,6 +2,7 @@
 
 #include "config_serverdll.h"
 #include "baseentity.h"
+#include "bspsystem.h"
 
 #include <bsploader.h>
 #include <pvector.h>
@@ -41,3 +42,22 @@ protected:
 	pvector<WPT( CBaseEntity )> _entities;
 	NodePath _transition_source_landmark;
 };
+
+class EXPORT_SERVER_DLL ServerBSPSystem : public BaseBSPSystem
+{
+	DECLARE_CLASS( ServerBSPSystem, BaseBSPSystem )
+public:
+	ServerBSPSystem();
+
+	virtual const char *get_name() const;
+
+	virtual bool initialize();
+	virtual void load_bsp_level( const Filename &path, bool is_transition = false );
+};
+
+INLINE const char *ServerBSPSystem::get_name() const
+{
+	return "ServerBSPSystem";
+}
+
+extern EXPORT_SERVER_DLL ServerBSPSystem *svbsp;

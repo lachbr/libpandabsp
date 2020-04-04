@@ -6,7 +6,7 @@
 #include <pandabase.h>
 #include <aa_luse.h>
 #include <configVariableDouble.h>
-#include <clockObject.h>
+#include "clientbase.h"
 #include "config_clientdll.h"
 #include "mathlib.h"
 #include "lerp_functions.h"
@@ -689,8 +689,7 @@ inline bool CInterpolatedVarArrayBase<Type, IS_ARRAY>::NoteChanged(
 		NoteLastNetworkedValue();
 	}
 
-	ClockObject *clock = ClockObject::get_global_clock();
-	double now = clock->get_frame_time();
+	double now = cl->get_curtime();
 
 #if 0
 	// Since we don't clean out the old entries until Interpolate(), make sure that there
@@ -788,7 +787,7 @@ inline void CInterpolatedVarArrayBase<Type, IS_ARRAY>::Reset()
 
 	if ( m_pValue )
 	{
-		double now = ClockObject::get_global_clock()->get_frame_time();
+		double now = cl->get_curtime();
 		AddToHead( now, m_pValue, false );
 		AddToHead( now, m_pValue, false );
 		AddToHead( now, m_pValue, false );

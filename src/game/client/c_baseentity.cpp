@@ -10,10 +10,10 @@
  */
 
 #include "c_baseentity.h"
-#include "c_client.h"
 #include "clientbase.h"
-#include "clockdelta.h"
-#include "globalvars_client.h"
+#include "cl_entitymanager.h"
+#include "cl_rendersystem.h"
+#include "cl_netinterface.h"
 #include <configVariableBool.h>
 
 #include <modelRoot.h>
@@ -39,7 +39,6 @@ NotifyCategoryDef( c_baseentity, "" )
 //
 
 static ConfigVariableBool cl_interp_all( "cl_interp_all", true );
-static ConfigVariableDouble cl_interp( "cl_interp", 0.1 );
 
 static PStatCollector collect_interp_collector( "Entity:CollectInterpolateVars" );
 static PStatCollector interp_collector( "Entity:Interpolate" );
@@ -83,9 +82,9 @@ void C_BaseEntity::update_parent_entity( int entnum )
 		return;
 
 	if ( entnum != 0 )
-		_np.reparent_to( g_client->find_entity_by_id( entnum )->get_node_path() );
+		_np.reparent_to( clents->get_entity( entnum )->get_node_path() );
 	else
-		_np.reparent_to( cl->_render );
+		_np.reparent_to( clrender->get_render() );
 }
 
 void RecvProxy_ParentEntity( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
@@ -166,19 +165,17 @@ void C_BaseEntity::remove_from_interpolation_list()
 
 float C_BaseEntity::get_last_changed_time( int flags )
 {
-	CClockDelta *clock = CClockDelta::get_global_ptr();
-
 	if ( flags & LATCH_SIMULATION_VAR )
 	{
 		if ( _simulation_time == 0.0 )
 		{
-			return g_globals->curtime;
+			return cl->get_curtime();
 		}
 		return _simulation_time;
 	}
 
 	assert( 0 );
-	return g_globals->curtime;
+	return cl->get_curtime();
 }
 
 void C_BaseEntity::on_store_last_networked_value()
@@ -419,7 +416,8 @@ void C_BaseEntity::remove_var( void *data, bool bAssert )
 
 float C_BaseEntity::get_interpolate_amount( int flags )
 {
-	return cl_interp;
+	int server_tick_multiple = 0;
+	return cl->ticks_to_time( cl->time_to_ticks( get_client_interp_amount() ) + server_tick_multiple );
 }
 
 VarMapping_t *C_BaseEntity::get_var_mapping()
@@ -434,13 +432,10 @@ void C_BaseEntity::interpolate_entities()
 	c_baseentity_cat.debug()
 		<< "Interpolating " << g_interpolationlist.size() << " entities\n";
 
-	CClockDelta *clock = CClockDelta::get_global_ptr();
-	double now = clock->get_local_network_time();
-
 	for ( size_t i = 0; i < g_interpolationlist.size(); i++ )
 	{
 		C_BaseEntity *ent = g_interpolationlist[i];
-		ent->interpolate( now );
+		ent->interpolate( cl->get_curtime() );
 		ent->post_interpolate();
 	}
 }
@@ -466,6 +461,15 @@ bool C_BaseEntity::is_predictable()
 	return false;
 }
 
+void C_BaseEntity::send_entity_message( Datagram &dg )
+{
+	clnet->send_datagram( dg );
+}
+
+void C_BaseEntity::receive_entity_message( int msgtype, DatagramIterator &dgi )
+{
+}
+
 void RecvProxy_SimulationTime( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
 {
 	C_BaseEntity *ent = (C_BaseEntity *)object;
@@ -479,19 +483,19 @@ void RecvProxy_SimulationTime( RecvProp *prop, void *object, void *out, Datagram
 
 	// Note, this needs to be encoded relative to the packet timestamp, not raw client
 	// clock
-	tickbase = g_globals->get_network_base( g_globals->tickcount, ent->get_entnum() );
+	tickbase = cl->get_network_base( cl->get_tickcount(), ent->get_entnum() );
 
 	t = tickbase;
 	// and then go back to floating point time
 	t += addt; // Add in an additional up to 256 100ths from the server.
 
 	// center _simulation_time around current time.
-	while ( t < g_globals->tickcount - 127 )
+	while ( t < cl->get_tickcount() - 127 )
 		t += 256;
-	while ( t > g_globals->tickcount + 127 )
+	while ( t > cl->get_tickcount() + 127 )
 		t -= 256;
 
-	ent->_simulation_time = t * g_globals->interval_per_tick;
+	ent->_simulation_time = t * cl->get_interval_per_tick();
 
 	c_baseentity_cat.debug()
 		<< "Received simulation time. Server time: " << addt

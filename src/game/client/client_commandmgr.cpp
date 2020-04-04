@@ -1,8 +1,8 @@
 #include "client_commandmgr.h"
-#include "globalvars_client.h"
-#include "c_client.h"
-#include "c_basegame.h"
+#include "clientbase.h"
+#include "cl_netinterface.h"
 #include "netmessages.h"
+#include "cl_input.h"
 
 CClientCMDManager::CClientCMDManager( ClientNetInterface *cl ) :
 	_cl( cl ),
@@ -16,7 +16,7 @@ CClientCMDManager::CClientCMDManager( ClientNetInterface *cl ) :
 
 bool CClientCMDManager::should_send_command() const
 {
-	return g_globals->curtime >= _next_cmd_time && _cl->_connected;
+	return cl->get_curtime() >= _next_cmd_time && _cl->_connected;
 }
 
 void CClientCMDManager::send_cmd()
@@ -93,7 +93,7 @@ void CClientCMDManager::tick()
 {
 	int nextcommandnr = _lastoutgoingcommand + _chokedcommands + 1;
 	CUserCmd *cmd = &_commands[nextcommandnr % MAX_CLIENT_CMDS];
-	g_globals->game->get_input()->create_cmd( cmd, nextcommandnr, g_globals->frametime, true );
+	clinput->create_cmd( cmd, nextcommandnr, cl->get_frametime(), true );
 
 	bool send = should_send_command();
 
@@ -108,9 +108,9 @@ void CClientCMDManager::tick()
 
 		// Determine when to send next command
 		float cmd_ival = 1.0f / cl_cmdrate;
-		float max_delta = std::min( g_globals->interval_per_tick, cmd_ival );
-		float delta = clamp( (float)( g_globals->curtime - _next_cmd_time ), 0.0f, max_delta );
-		_next_cmd_time = g_globals->curtime + cmd_ival - delta;
+		float max_delta = std::min( (float)cl->get_interval_per_tick(), cmd_ival );
+		float delta = clamp( (float)( cl->get_curtime() - _next_cmd_time ), 0.0f, max_delta );
+		_next_cmd_time = cl->get_curtime() + cmd_ival - delta;
 	}
 	else
 	{

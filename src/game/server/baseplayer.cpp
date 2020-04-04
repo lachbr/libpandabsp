@@ -1,6 +1,8 @@
 #include "baseplayer.h"
-#include "basegame.h"
-#include "clockdelta.h"
+#include "serverbase.h"
+#include "sv_netinterface.h"
+#include "physicssystem.h"
+#include "masks.h"
 
 NotifyCategoryDef( baseplayer, "" )
 
@@ -13,7 +15,14 @@ CBasePlayer::CBasePlayer() :
 
 void CBasePlayer::setup_controller()
 {
-	CBasePlayerShared::setup_controller();
+	PhysicsSystem *phys;
+	sv->get_game_system_of_type( phys );
+
+	//CBasePlayerShared::setup_controller();
+	_controller = new PhysicsCharacterController( phys->get_physics_world(), sv->get_root(),
+						      sv->get_root(), 4.0f, 2.0f, 0.3f, 1.0f,
+						      phys->get_physics_world()->get_gravity()[0],
+						      wall_mask, floor_mask, event_mask );
 	_np.reparent_to( _controller->get_movement_parent() );
 	_np = _controller->get_movement_parent();
 }
@@ -122,18 +131,16 @@ void CBasePlayer::adjust_player_time_base( int simulation_ticks )
 	if ( simulation_ticks < 0 )
 		return;
 
-	ServerBase *bg = ServerBase::ptr();
-	CHostState *hs = bg->get_host_state();
-	if ( hs->maxclients == 1 )
+	if ( svnet->get_max_clients() == 1 )
 	{
 		// Set tickbase so that player simulation tick matches hs->tickcount
 		// after all commands have been executed.
-		_tickbase = hs->tickcount - simulation_ticks + hs->sim_ticks_this_frame;
+		_tickbase = sv->get_tickcount() - simulation_ticks + sv->get_sim_ticks_this_frame();
 	}
 	else
 	{
 		float correction_seconds = clamp( sv_clockcorrection_msecs / 1000.0f, 0.0f, 1.0f );
-		int correction_ticks = bg->time_to_ticks( correction_seconds );
+		int correction_ticks = sv->time_to_ticks( correction_seconds );
 
 		// Set the target tick correction_seconds (rounded to ticks) ahead in the
 		// future. This way the client can
@@ -144,7 +151,7 @@ void CBasePlayer::adjust_player_time_base( int simulation_ticks )
 		//  otherwise the simulation time drops out of the client side interpolated
 		//  var history window.
 
-		int ideal_final_tick = hs->tickcount + correction_ticks;
+		int ideal_final_tick = sv->get_tickcount() + correction_ticks;
 		int estimated_final_tick = _tickbase + simulation_ticks;
 
 		// If client gets ahead of this, we'll need to correct
@@ -156,7 +163,7 @@ void CBasePlayer::adjust_player_time_base( int simulation_ticks )
 		if ( estimated_final_tick > too_fast_limit ||
 		     estimated_final_tick < too_slow_limit )
 		{
-			int corrected_tick = ideal_final_tick - simulation_ticks + hs->sim_ticks_this_frame;
+			int corrected_tick = ideal_final_tick - simulation_ticks + sv->get_sim_ticks_this_frame();
 
 			_tickbase = corrected_tick;
 		}
@@ -165,14 +172,12 @@ void CBasePlayer::adjust_player_time_base( int simulation_ticks )
 
 void CBasePlayer::simulate()
 {
-	ServerBase *bg = ServerBase::ptr();
-	CHostState *hs = bg->get_host_state();
 
 	// Make sure not to simulate this guy twice per frame
-	if ( _simulation_tick == hs->tickcount )
+	if ( _simulation_tick == sv->get_tickcount() )
 		return;
 
-	_simulation_tick = hs->tickcount;
+	_simulation_tick = sv->get_tickcount();
 
 	baseplayer_cat.debug()
 		<< "Simulate tick " << _simulation_tick << std::endl;
@@ -186,8 +191,8 @@ void CBasePlayer::simulate()
 		adjust_player_time_base( simulation_ticks );
 
 	// Store off true server timestamps
-	double savetime = hs->curtime;
-	double saveframetime = hs->frametime;
+	double savetime = sv->get_curtime();
+	double saveframetime = sv->get_frametime();
 
 	int command_context_count = get_command_context_count();
 
@@ -251,11 +256,11 @@ void CBasePlayer::simulate()
 	// alternate ticks
 	int cmdlimit = sv_alternateticks ? 2 : 1;
 	int cmdstorun = (int)availcommands.size();
-	if ( hs->sim_ticks_this_frame >= cmdlimit &&
+	if ( sv->get_sim_ticks_this_frame() >= cmdlimit &&
 	     (int)availcommands.size() > cmdlimit )
 	{
 		int cmds_to_roll_over =
-			std::min( (int)availcommands.size(), hs->sim_ticks_this_frame - 1 );
+			std::min( (int)availcommands.size(), sv->get_sim_ticks_this_frame() - 1 );
 		cmdstorun = availcommands.size() - cmds_to_roll_over;
 		assert( cmdstorun >= 0 );
 
@@ -282,14 +287,14 @@ void CBasePlayer::simulate()
 	{
 		for ( int i = 0; i < cmdstorun; i++ )
 		{
-			player_run_command( &availcommands[i], hs->frametime );
+			player_run_command( &availcommands[i], sv->get_frametime() );
 		}
 		
 	}
 
 	// Restore the true server clock
-	hs->curtime = savetime;
-	hs->frameticks = saveframetime;
+	sv->set_curtime( savetime );
+	sv->set_frametime( saveframetime );
 }
 
 void CBasePlayer::player_run_command( CUserCmd *cmd, float frametime )

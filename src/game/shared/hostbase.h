@@ -41,6 +41,11 @@ public:
 	template <class Type>
 	bool get_game_system( PT( Type ) &system ) const;
 
+	template <class Type>
+	bool get_game_system_of_type( Type *&system ) const;
+	template <class Type>
+	bool get_game_system_of_type( PT( Type ) &system ) const;
+
 	IGameSystem *get_game_system( TypeHandle handle ) const;
 
 	void load_cfg_file( const Filename &cfgpath );
@@ -51,6 +56,8 @@ public:
 	virtual bool startup();
 	virtual void shutdown();
 
+	virtual void begin_tick();
+	virtual void end_tick();
 	virtual void do_frame();
 	void run();
 
@@ -58,10 +65,20 @@ public:
 
 	int get_network_base( int tick, int entity ) const;
 
+	void set_curtime( double curtime );
+	void set_frametime( double frametime );
+	void set_tickcount( int tickcount );
+
 	int get_tickcount() const;
+	int get_sim_ticks_this_frame() const;
 	double get_curtime() const;
 	double get_frametime() const;
+	double get_interval_per_tick() const;
+	int get_tickrate() const;
 	bool is_paused() const;
+
+	int time_to_ticks( double dt ) const;
+	double ticks_to_time( double dt ) const;
 
 	ClockObject *get_clock() const;
 
@@ -97,6 +114,7 @@ protected:
 
 		class Sorter
 		{
+		public:
 			constexpr bool operator()( const GameSystemEntry &left, const GameSystemEntry &right ) const
 			{
 				return left.sort < right.sort;
@@ -127,6 +145,21 @@ protected:
 	bool _paused;
 };
 
+INLINE int HostBase::get_sim_ticks_this_frame() const
+{
+	return _simticksthisframe;
+}
+
+INLINE double HostBase::ticks_to_time( double dt ) const
+{
+	return ( _intervalpertick * (float)( dt ) );
+}
+
+INLINE int HostBase::time_to_ticks( double dt ) const
+{
+	return ( (int)( 0.5f + (float)( dt ) / _intervalpertick ) );
+}
+
 INLINE void HostBase::remove_game_system( IGameSystem *sys )
 {
 	remove_game_system( sys->get_type() );
@@ -155,6 +188,38 @@ template <class Type>
 INLINE bool HostBase::get_game_system( PT( Type ) &system ) const
 {
 	system = (Type *)get_game_system( Type::get_class_type() );
+	return system != nullptr;
+}
+
+template<class Type>
+inline bool HostBase::get_game_system_of_type( Type *&system ) const
+{
+	size_t count = _game_systems_sorted.size();
+	for ( size_t i = 0; i < count; i++ )
+	{
+		GameSystemEntry entry = _game_systems_sorted[i];
+		if ( entry.system->is_of_type( Type::get_class_type() ) )
+		{
+			system = (Type *)entry.system.p();
+		}
+	}
+
+	return system != nullptr;
+}
+
+template<class Type>
+inline bool HostBase::get_game_system_of_type( PT( Type ) &system ) const
+{
+	size_t count = _game_systems_sorted.size();
+	for ( size_t i = 0; i < count; i++ )
+	{
+		GameSystemEntry &entry = _game_systems_sorted[i];
+		if ( entry.system->is_of_type( Type::get_class_type() ) )
+		{
+			system = (Type *)entry.system.p();
+		}
+	}
+
 	return system != nullptr;
 }
 
@@ -189,6 +254,16 @@ INLINE int HostBase::get_tickcount() const
 	return _tickcount;
 }
 
+INLINE double HostBase::get_interval_per_tick() const
+{
+	return _intervalpertick;
+}
+
+INLINE int HostBase::get_tickrate() const
+{
+	return _tickrate;
+}
+
 INLINE bool HostBase::is_paused() const
 {
 	return _paused;
@@ -200,12 +275,30 @@ INLINE void HostBase::set_tick_rate( int rate )
 	_intervalpertick = 1.0 / rate;
 }
 
+INLINE void HostBase::set_tickcount( int count )
+{
+	_tickcount = count;
+	_global_clock->set_frame_count( count );
+}
+
 INLINE int HostBase::get_network_base( int tick, int entity ) const
 {
 	int entity_mod = entity % _timestamp_randomize_window;
 	int base_tick = _timestamp_networking_base *
 		(int)( ( tick - entity_mod ) / _timestamp_networking_base );
 	return base_tick;
+}
+
+INLINE void HostBase::set_curtime( double curtime )
+{
+	_curtime = curtime;
+	_global_clock->set_frame_time( curtime );
+}
+
+INLINE void HostBase::set_frametime( double frametime )
+{
+	_frametime = frametime;
+	_global_clock->set_dt( frametime );
 }
 
 #endif // BASEGAME_H_

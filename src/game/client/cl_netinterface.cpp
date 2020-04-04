@@ -2,7 +2,6 @@
 #include "netmessages.h"
 #include "clientbase.h"
 #include "c_entregistry.h"
-#include "clockdelta.h"
 #include "usercmd.h"
 #include "cl_bsploader.h"
 #include "cl_entitymanager.h"
@@ -13,6 +12,10 @@
 #include <pStatCollector.h>
 
 NotifyCategoryDef( c_client, "" )
+
+ClientNetInterface *clnet = nullptr;
+
+IMPLEMENT_CLASS( ClientNetInterface )
 
 static ConfigVariableDouble cl_heartbeat_rate( "cl_heartbeat_rate", 1.0 );
 static ConfigVariableDouble cl_sync_rate( "cl_sync_rate", 30.0 );
@@ -30,8 +33,20 @@ ClientNetInterface::ClientNetInterface() :
 	_server_frametime( 0.0f ),
 	_cmd_mgr( this )
 {
+	clnet = this;
+	
+}
+
+bool ClientNetInterface::initialize()
+{
 	SteamNetworkingErrMsg msg;
 	GameNetworkingSockets_Init( nullptr, msg );
+
+	return true;
+}
+
+void ClientNetInterface::shutdown()
+{
 }
 
 void ClientNetInterface::OnSteamNetConnectionStatusChanged( SteamNetConnectionStatusChangedCallback_t *info )

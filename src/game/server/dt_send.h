@@ -41,8 +41,7 @@ public:
 		_bits( bits ),
 		_proxy( proxy ),
 		_flags( flags ),
-		_send_table( nullptr ),
-		_send_table_proxy( nullptr )
+		_send_table( nullptr )
 	{
 	}
 
@@ -76,30 +75,23 @@ public:
 		return _flags;
 	}
 
-	INLINE void set_send_table( SendTable *table )
+	INLINE void set_send_table( const char *table )
 	{
 		_send_table = table;
 	}
 
-	INLINE SendTable *get_send_table() const
+	INLINE const char *get_send_table() const
 	{
 		return _send_table;
 	}
 
-	INLINE void set_send_table_proxy( SendTableProxyFn proxy )
-	{
-		_send_table_proxy = proxy;
-	}
-
-	INLINE SendTableProxyFn get_send_table_proxy() const
-	{
-		return _send_table_proxy;
-	}
-
 private:
 	const char *_prop_name;
-	SendTable *_send_table;
-	SendTableProxyFn _send_table_proxy;
+
+	// Name of send table we wish to inherit from
+	// when dereferencing.
+	const char *_send_table;
+
 	size_t _offset;
 	size_t _varsize;
 	SendProxyFn _proxy;
@@ -269,7 +261,7 @@ EXPORT_SERVER_DLL SendProp SendPropUint( const char *varname, size_t offset, siz
 EXPORT_SERVER_DLL SendProp SendPropFloat( const char *varname, size_t offset, size_t varsize, int bits = 32, int flags = SENDFLAGS_NONE );
 EXPORT_SERVER_DLL SendProp SendPropString( const char *varname, size_t offset, size_t varsize, int flags = SENDFLAGS_NONE );
 EXPORT_SERVER_DLL SendProp SendPropCString( const char *varname, size_t offset, size_t varsize, int flags = SENDFLAGS_NONE );
-EXPORT_SERVER_DLL SendProp SendPropDataTable( const char *varname, SendTable *table );
+EXPORT_SERVER_DLL SendProp SendPropDataTable( const char *varname, const char *dtname );
 EXPORT_SERVER_DLL SendProp SendPropVec3( const char *varname, size_t offset, size_t varsize, int flags = SENDFLAGS_NONE );
 EXPORT_SERVER_DLL SendProp SendPropVec4( const char *varname, size_t offset, size_t varsize, int flags = SENDFLAGS_NONE );
 EXPORT_SERVER_DLL SendProp SendPropVec2( const char *varname, size_t offset, size_t varsize, int flags = SENDFLAGS_NONE );

@@ -1,5 +1,5 @@
 #include "brushentity.h"
-#include "basegame.h"
+#include "sv_bsploader.h"
 
 bool CBrushEntity::can_transition() const
 {
@@ -10,14 +10,14 @@ void CBrushEntity::spawn()
 {
 	BaseClass::spawn();
 
-	int modelnum = g_game->_bsp_loader->extract_modelnum( _bsp_entnum );
+	int modelnum = svbsp->get_bsp_loader()->extract_modelnum( _bsp_entnum );
 	if ( get_entnum() == 0 )
 	{
-		_np = g_game->_bsp_loader->get_model( modelnum );
+		_np = svbsp->get_bsp_loader()->get_model( modelnum );
 	}
 	else
 	{
-		g_game->_bsp_loader->get_model( modelnum ).reparent_to( _np );
+		svbsp->get_bsp_loader()->get_model( modelnum ).reparent_to( _np );
 	}
 }
 

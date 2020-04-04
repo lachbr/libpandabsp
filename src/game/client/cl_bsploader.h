@@ -21,6 +21,8 @@ class EXPORT_CLIENT_DLL ClientBSPSystem : public BaseBSPSystem, public IClientDa
 	DECLARE_CLASS( ClientBSPSystem, BaseBSPSystem )
 
 public:
+	ClientBSPSystem();
+
 	virtual bool handle_datagram( int msgtype, DatagramIterator &dgi );
 
 	virtual const char *get_name() const;
@@ -33,3 +35,5 @@ INLINE const char *ClientBSPSystem::get_name() const
 {
 	return "ClientBSPSystem";
 }
+
+extern ClientBSPSystem *clbsp;

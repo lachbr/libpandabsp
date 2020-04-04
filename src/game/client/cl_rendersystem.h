@@ -31,3 +31,5 @@ INLINE const char *ClientRenderSystem::get_name() const
 {
 	return "ClientRenderSystem";
 }
+
+extern EXPORT_CLIENT_DLL ClientRenderSystem *clrender;

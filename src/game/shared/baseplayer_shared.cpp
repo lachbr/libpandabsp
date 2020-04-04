@@ -1,5 +1,5 @@
 #include "baseplayer_shared.h"
-#include "basegame_shared.h"
+//#include "basegame_shared.h"
 #include "masks.h"
 
 #include "in_buttons.h"
@@ -11,10 +11,10 @@ CBasePlayerShared::CBasePlayerShared() :
 
 void CBasePlayerShared::setup_controller()
 {
-	_controller = new PhysicsCharacterController( g_game->_physics_world, g_game->_render,
-						      g_game->_render, 4.0f, 2.0f, 0.3f, 1.0f,
-						      g_game->_physics_world->get_gravity()[0],
-						      wall_mask, floor_mask, event_mask );
+	//_controller = new PhysicsCharacterController( g_game->_physics_world, g_game->_render,
+	//					      g_game->_render, 4.0f, 2.0f, 0.3f, 1.0f,
+	//					      g_game->_physics_world->get_gravity()[0],
+	//					      wall_mask, floor_mask, event_mask );
 }
 
 void CBasePlayerShared::player_move( CUserCmd *cmd, float frametime )

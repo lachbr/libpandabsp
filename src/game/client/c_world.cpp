@@ -1,11 +1,11 @@
 #include "c_world.h"
-#include "c_basegame.h"
+#include "cl_bsploader.h"
 
 void C_World::update_parent_entity( int entnum )
 {
 	if ( entnum == 0 )
 	{
-		_np.reparent_to( g_game->_bsp_level );
+		_np.reparent_to( clbsp->get_bsp_level() );
 	}
 	else
 	{
