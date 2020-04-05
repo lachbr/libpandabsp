@@ -63,10 +63,10 @@ void C_BaseAnimating::spawn()
 	make_think_func( "animblending", anim_blending_func, this );
 }
 
-IMPLEMENT_CLIENTCLASS_RT( C_BaseAnimating, DT_BaseAnimating, CBaseAnimating )
-	RecvPropString( RECVINFO( _model_path ), RecvProxy_ModelPath ),
-	RecvPropVec3( RECVINFO( _model_origin ), RecvProxy_ModelOrigin ),
-	RecvPropVec3( RECVINFO( _model_angles ), RecvProxy_ModelAngles ),
-	RecvPropVec3( RECVINFO( _model_scale ), RecvProxy_ModelScale ),
-	RecvPropString( RECVINFO( _animation ), RecvProxy_Animation )
+IMPLEMENT_CLIENTCLASS_RT( C_BaseAnimating, CBaseAnimating )
+	RecvPropString( PROPINFO( _model_path ), RecvProxy_ModelPath ),
+	RecvPropVec3( PROPINFO( _model_origin ), RecvProxy_ModelOrigin ),
+	RecvPropVec3( PROPINFO( _model_angles ), RecvProxy_ModelAngles ),
+	RecvPropVec3( PROPINFO( _model_scale ), RecvProxy_ModelScale ),
+	RecvPropString( PROPINFO( _animation ), RecvProxy_Animation )
 END_RECV_TABLE()

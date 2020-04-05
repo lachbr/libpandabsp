@@ -5,8 +5,7 @@
 
 class EXPORT_CLIENT_DLL C_BaseAnimating : public C_BaseEntity, public CBaseAnimatingShared
 {
-	DECLARE_CLASS( C_BaseAnimating, C_BaseEntity )
-	DECLARE_CLIENTCLASS()
+	DECLARE_CLIENTCLASS( C_BaseAnimating, C_BaseEntity )
 
 public:
 	C_BaseAnimating();

@@ -9,6 +9,8 @@
 #include <typedReferenceCount.h>
 #include <datagram.h>
 
+class NetworkClass;
+
 class EXPORT_GAME_SHARED CBaseEntityShared : public TypedReferenceCount
 {
 	DECLARE_CLASS( CBaseEntityShared, TypedReferenceCount )
@@ -58,6 +60,9 @@ protected:
 
 	CEntityThinkFunc *_main_think;
 	pvector<PT( CEntityThinkFunc )> _thinks;
+
+public:
+	virtual NetworkClass *get_network_class() = 0;
 };
 
 /**

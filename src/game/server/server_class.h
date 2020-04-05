@@ -11,89 +11,111 @@
 
 #pragma once
 
-#include "dt_send.h"
+#include "config_serverdll.h"
+#include "network_class.h"
+#include "sv_entitymanager.h"
 
-class EXPORT_SERVER_DLL ServerClass
+class SendProp;
+
+typedef void( *SendProxyFn )( SendProp *, void *, void *, Datagram & );
+
+class SendProp : public NetworkProp
 {
 public:
-	ServerClass() :
-		_class_id( 0 ),
-		_network_name( nullptr )
+	SendProp( const std::string &propname, size_t offset, size_t varsize,
+			   int bits = 0, SendProxyFn proxy = nullptr, int flags = 0 ) :
+		NetworkProp( propname, offset, varsize, flags )
 	{
+		_proxy = proxy;
+		_bits = bits;
 	}
 
-	ServerClass( const char *network_name ) :
-		_class_id( 0 ),
-		_network_name( network_name )
+	SendProxyFn get_proxy() const
 	{
+		return _proxy;
 	}
 
-	INLINE void set_send_table( const SendTable &table )
+	int get_bits() const
 	{
-		_send_table = table;
-	}
-
-	INLINE SendTable &get_send_table()
-	{
-		return _send_table;
-	}
-
-	INLINE const char *get_network_name() const
-	{
-		return _network_name;
-	}
-
-	INLINE void set_class_id( int id )
-	{
-		_class_id = id;
-	}
-
-	INLINE int get_class_id() const
-	{
-		return _class_id;
+		return _bits;
 	}
 
 private:
-	SendTable _send_table;
-	const char *_network_name;
-	int _class_id;
+	int _bits;
+	SendProxyFn _proxy;
 };
 
-// This can be used to give all datatables access to protected and private
-// members of the class.
-#define ALLOW_DATATABLES_PRIVATE_ACCESS() \
-	template <typename T>             \
-	friend int server_class_init( T* );
+enum
+{
+	SENDFLAGS_NONE,
+};
 
-#define DECLARE_SERVERCLASS_NOBASE ALLOW_DATATABLES_PRIVATE_ACCESS
+EXPORT_SERVER_DLL void SendProxy_Int8( SendProp *prop, void *object, void *value, Datagram &dg );
+EXPORT_SERVER_DLL void SendProxy_Int16( SendProp *prop, void *object, void *value, Datagram &dg );
+EXPORT_SERVER_DLL void SendProxy_Int32( SendProp *prop, void *object, void *value, Datagram &dg );
+EXPORT_SERVER_DLL void SendProxy_Int64( SendProp *prop, void *object, void *value, Datagram &dg );
 
-#define DECLARE_SERVERCLASS()			\
-private:					\
-	static ServerClass _server_class;	\
-public:						\
-	virtual ServerClass *get_server_class()	\
-	{					\
-		return &_server_class;		\
-	}					\
-	static ServerClass *get_server_class_s()	\
-	{					\
-		return &_server_class;		\
-	}					\
-	virtual PT(CBaseEntity) make_new() \
-	{ \
-		return new MyClass; \
-	} \
-	static void server_class_init(); \
-	DECLARE_SERVERCLASS_NOBASE()
+EXPORT_SERVER_DLL void SendProxy_Uint8( SendProp *prop, void *object, void *value, Datagram &dg );
+EXPORT_SERVER_DLL void SendProxy_Uint16( SendProp *prop, void *object, void *value, Datagram &dg );
+EXPORT_SERVER_DLL void SendProxy_Uint32( SendProp *prop, void *object, void *value, Datagram &dg );
+EXPORT_SERVER_DLL void SendProxy_Uint64( SendProp *prop, void *object, void *value, Datagram &dg );
 
-#define IMPLEMENT_SERVERCLASS(classname)	\
-IMPLEMENT_CLASS(classname)					\
-ServerClass classname::_server_class;
+EXPORT_SERVER_DLL void SendProxy_Float32( SendProp *prop, void *object, void *value, Datagram &dg );
+EXPORT_SERVER_DLL void SendProxy_Float64( SendProp *prop, void *object, void *value, Datagram &dg );
 
-#define IMPLEMENT_SERVERCLASS_ST(classname, tablename, hammername)		\
-IMPLEMENT_SERVERCLASS(classname)			\
-BEGIN_SEND_TABLE(classname, tablename, hammername)
+EXPORT_SERVER_DLL void SendProxy_String( SendProp *prop, void *object, void *data, Datagram &dg );
+EXPORT_SERVER_DLL void SendProxy_CString( SendProp *prop, void *object, void *data, Datagram &dg );
 
-#define IMPLEMENT_SERVERCLASS_ST_NOBASE(classname, tablename, hammername)	\
-IMPLEMENT_SERVERCLASS(classname) \
-BEGIN_SEND_TABLE_NOBASE(classname, tablename, hammername)
+EXPORT_SERVER_DLL SendProp *SendPropNull();
+EXPORT_SERVER_DLL SendProp *SendPropInt( const char *varname, size_t offset, size_t varsize, int bits = 32, int flags = SENDFLAGS_NONE );
+EXPORT_SERVER_DLL SendProp *SendPropUint( const char *varname, size_t offset, size_t varsize, int bits = 32, int flags = SENDFLAGS_NONE );
+EXPORT_SERVER_DLL SendProp *SendPropFloat( const char *varname, size_t offset, size_t varsize, int bits = 32, int flags = SENDFLAGS_NONE );
+EXPORT_SERVER_DLL SendProp *SendPropString( const char *varname, size_t offset, size_t varsize, int flags = SENDFLAGS_NONE );
+EXPORT_SERVER_DLL SendProp *SendPropCString( const char *varname, size_t offset, size_t varsize, int flags = SENDFLAGS_NONE );
+EXPORT_SERVER_DLL SendProp *SendPropVec3( const char *varname, size_t offset, size_t varsize, int flags = SENDFLAGS_NONE );
+EXPORT_SERVER_DLL SendProp *SendPropVec4( const char *varname, size_t offset, size_t varsize, int flags = SENDFLAGS_NONE );
+EXPORT_SERVER_DLL SendProp *SendPropVec2( const char *varname, size_t offset, size_t varsize, int flags = SENDFLAGS_NONE );
+
+#define SendPropEntnum SendPropUint
+
+// FIXME: SendPropNull() leaks
+#define OPEN_SEND_TABLE() \
+	pvector<SendProp *> send_props = { SendPropNull(),
+
+#define BEGIN_SEND_TABLE(classname) \
+BEGIN_PROP_TABLE(classname, classname) \
+OPEN_SEND_TABLE()
+
+#define BEGIN_SEND_TABLE_NOBASE(classname) \
+BEGIN_PROP_TABLE_NOBASE(classname, classname) \
+OPEN_SEND_TABLE()
+
+#define END_SEND_TABLE() \
+}; \
+for (size_t i = 0; i < send_props.size(); i++) \
+{ \
+	SendProp *prop = send_props[i]; \
+	if ( prop->get_name() == "__null__" ) continue; \
+	nclass->add_inherited_prop(prop); \
+} \
+return 1; \
+}
+
+#define DECLARE_SERVERCLASS(classname, basename)			\
+DECLARE_NETWORKCLASS(classname, basename)
+
+#define IMPLEMENT_SERVERCLASS_ST(classname)		\
+IMPLEMENT_NETWORKCLASS(classname, classname)			\
+BEGIN_SEND_TABLE(classname)
+
+#define IMPLEMENT_SERVERCLASS_ST_NOBASE(classname)	\
+IMPLEMENT_NETWORKCLASS(classname, classname) \
+BEGIN_SEND_TABLE_NOBASE(classname)
+
+#define LINK_ENTITY_TO_CLASS(classname, editorname) \
+static int __link_##classname##_to_##editorname() \
+{ \
+	ServerEntitySystem::ptr()->link_entity_to_class(#editorname, classname::ptr()); \
+	return 1; \
+} \
+static int __ret_##classname##_to_##editorname = __link_##classname##_to_##editorname();

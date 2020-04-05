@@ -1,7 +1,6 @@
 #include "serverbase.h"
 #include "sv_bsploader.h"
 #include "baseanimating.h"
-#include "entregistry.h"
 
 #include <randomizer.h>
 
@@ -14,8 +13,7 @@ std::string anims[] =
 
 class CTestEnt : public CBaseAnimating
 {
-	DECLARE_CLASS( CTestEnt, CBaseAnimating )
-	DECLARE_SERVERCLASS()
+	DECLARE_SERVERCLASS( CTestEnt, CBaseAnimating )
 
 public:
 	CTestEnt() :
@@ -83,15 +81,15 @@ void CTestEnt::think()
 	
 }
 
-IMPLEMENT_SERVERCLASS_ST( CTestEnt, DT_TestEnt, testent )
+IMPLEMENT_SERVERCLASS_ST( CTestEnt )
 END_SEND_TABLE()
+
+LINK_ENTITY_TO_CLASS( CTestEnt, test_ent )
 
 int main( int argc, char **argv )
 {
 	PT( ServerBase ) sv = new ServerBase;
 	sv->startup();
-
-	CTestEnt::server_class_init();
 
 	for ( int i = 0; i < argc; i++ )
 	{
@@ -111,7 +109,7 @@ int main( int argc, char **argv )
 		}
 	}
 
-	CreateEntityByName( "testent" );
+	CreateEntityByName( "test_ent" );
 
 	sv->run();
 	return 0;

@@ -293,14 +293,14 @@ void SendProxy_SimulationTime( SendProp *prop, void *object, void *data, Datagra
 	out.add_int32( addt );
 }
 
-IMPLEMENT_SERVERCLASS_ST_NOBASE( CBaseEntity, DT_BaseEntity, baseentity )
-	SendPropInt( SENDINFO( _bsp_entnum ) ),
-	SendProp( SENDINFO( _simulation_time ), 0, SendProxy_SimulationTime ),
-	SendPropEntnum( SENDINFO( _parent_entity ) ),
-	SendPropVec3( SENDINFO( _origin ) ),
-	SendPropVec3( SENDINFO( _angles ) ),
-	SendPropVec3( SENDINFO( _scale ) ),
-	SendPropInt( SENDINFO( _simulation_tick ) )
+IMPLEMENT_SERVERCLASS_ST_NOBASE( CBaseEntity )
+	SendPropInt( PROPINFO( _bsp_entnum ) ),
+	new SendProp( PROPINFO( _simulation_time ), 0, SendProxy_SimulationTime ),
+	SendPropEntnum( PROPINFO( _parent_entity ) ),
+	SendPropVec3( PROPINFO( _origin ) ),
+	SendPropVec3( PROPINFO( _angles ) ),
+	SendPropVec3( PROPINFO( _scale ) ),
+	SendPropInt( PROPINFO( _simulation_tick ) )
 END_SEND_TABLE()
 
 PT( CBaseEntity ) CreateEntityByName( const std::string &name )

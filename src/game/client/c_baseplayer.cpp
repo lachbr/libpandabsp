@@ -51,6 +51,6 @@ bool C_BasePlayer::is_local_player() const
 	return clents->get_local_player() == this;
 }
 
-IMPLEMENT_CLIENTCLASS_RT( C_BasePlayer, DT_BasePlayer, CBasePlayer )
-	RecvPropInt( RECVINFO( _tickbase ) )
+IMPLEMENT_CLIENTCLASS_RT( C_BasePlayer, CBasePlayer )
+	RecvPropInt( PROPINFO( _tickbase ) )
 END_RECV_TABLE()

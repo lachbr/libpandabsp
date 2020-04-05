@@ -89,7 +89,7 @@ void ClientBase::add_game_systems()
 	PT( IntervalSystem ) intervals = new IntervalSystem;
 	add_game_system( intervals, -30 );
 
-	PT( ClientEntitySystem ) entities = new ClientEntitySystem;
+	ClientEntitySystem *entities = ClientEntitySystem::ptr();
 	netsys->add_datagram_handler( entities );
 	add_game_system( entities, -20 );
 

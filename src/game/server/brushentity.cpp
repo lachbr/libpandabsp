@@ -21,5 +21,5 @@ void CBrushEntity::spawn()
 	}
 }
 
-IMPLEMENT_SERVERCLASS_ST( CBrushEntity, DT_BrushEntity, brushentity )
+IMPLEMENT_SERVERCLASS_ST( CBrushEntity )
 END_SEND_TABLE()

@@ -4,8 +4,7 @@
 
 class EXPORT_SERVER_DLL CBaseCombatCharacter : public CBaseAnimating
 {
-	DECLARE_CLASS( CBaseCombatCharacter, CBaseAnimating )
-	DECLARE_SERVERCLASS()
+	DECLARE_SERVERCLASS( CBaseCombatCharacter, CBaseAnimating )
 
 public:
 	CBaseCombatCharacter();

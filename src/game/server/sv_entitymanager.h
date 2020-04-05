@@ -1,12 +1,13 @@
 #pragma once
 
+#include "config_serverdll.h"
 #include "baseentitysystem.h"
 #include "uniqueIdAllocator.h"
 #include "iserverdatagramhandler.h"
 
 class CBaseEntity;
 
-class ServerEntitySystem : public BaseEntitySystem, public IServerDatagramHandler
+class EXPORT_SERVER_DLL ServerEntitySystem : public BaseEntitySystem, public IServerDatagramHandler
 {
 	DECLARE_CLASS( ServerEntitySystem, BaseEntitySystem )
 public:
@@ -28,9 +29,38 @@ public:
 
 	void run_entities( bool simulating );
 
+	CBaseEntity *get_entity_from_name( const std::string &editorname ) const;
+	void link_entity_to_class( const std::string &editorname, CBaseEntity *singleton );
+
+	static ServerEntitySystem *ptr();
+
 private:
 	UniqueIdAllocator _entnum_alloc;
+
+	SimpleHashMap<std::string, CBaseEntity *, string_hash> _entity_to_class;
 };
+
+INLINE CBaseEntity *ServerEntitySystem::get_entity_from_name( const std::string &editorname ) const
+{
+	int ient = _entity_to_class.find( editorname );
+	if ( ient != -1 )
+	{
+		return _entity_to_class.get_data( ient );
+	}
+
+	return nullptr;
+}
+
+INLINE void ServerEntitySystem::link_entity_to_class( const std::string &editorname, CBaseEntity *singleton )
+{
+	_entity_to_class[editorname] = singleton;
+}
+
+INLINE ServerEntitySystem *ServerEntitySystem::ptr()
+{
+	static PT( ServerEntitySystem ) global_ptr = new ServerEntitySystem;
+	return global_ptr;
+}
 
 INLINE const char *ServerEntitySystem::get_name() const
 {

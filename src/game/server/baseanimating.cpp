@@ -87,10 +87,10 @@ void CBaseAnimating::init( entid_t entum )
 	_model_scale = LVector3( 1 );
 }
 
-IMPLEMENT_SERVERCLASS_ST( CBaseAnimating, DT_BaseAnimating, baseanimating )
-	SendPropString( SENDINFO( _model_path ) ),
-	SendPropVec3( SENDINFO( _model_origin ) ),
-	SendPropVec3( SENDINFO( _model_angles ) ),
-	SendPropVec3( SENDINFO( _model_scale ) ),
-	SendPropString( SENDINFO( _animation ) )
+IMPLEMENT_SERVERCLASS_ST( CBaseAnimating )
+	SendPropString( PROPINFO( _model_path ) ),
+	SendPropVec3( PROPINFO( _model_origin ) ),
+	SendPropVec3( PROPINFO( _model_angles ) ),
+	SendPropVec3( PROPINFO( _model_scale ) ),
+	SendPropString( PROPINFO( _animation ) )
 END_SEND_TABLE()

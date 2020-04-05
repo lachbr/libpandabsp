@@ -7,8 +7,7 @@ NotifyCategoryDeclNoExport( baseanimating )
 
 class EXPORT_SERVER_DLL CBaseAnimating : public CBaseEntity, public CBaseAnimatingShared
 {
-	DECLARE_CLASS( CBaseAnimating, CBaseEntity )
-	DECLARE_SERVERCLASS()
+	DECLARE_SERVERCLASS( CBaseAnimating, CBaseEntity )
 
 public:
 	CBaseAnimating();

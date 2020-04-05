@@ -4,8 +4,7 @@
 
 class CToonCage : public CBaseAnimating
 {
-	DECLARE_CLASS( CToonCage, CBaseAnimating )
-	DECLARE_SERVERCLASS()
+	DECLARE_SERVERCLASS( CToonCage, CBaseAnimating )
 public:
 	virtual void spawn();
 };

@@ -1,7 +1,6 @@
 #include "cl_netinterface.h"
 #include "netmessages.h"
 #include "clientbase.h"
-#include "c_entregistry.h"
 #include "usercmd.h"
 #include "cl_bsploader.h"
 #include "cl_entitymanager.h"

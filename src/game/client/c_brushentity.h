@@ -4,8 +4,7 @@
 
 class EXPORT_CLIENT_DLL C_BrushEntity : public C_BaseEntity
 {
-	DECLARE_CLASS( C_BrushEntity, C_BaseEntity )
-	DECLARE_CLIENTCLASS()
+	DECLARE_CLIENTCLASS( C_BrushEntity, C_BaseEntity )
 
 public:
 	virtual void spawn();

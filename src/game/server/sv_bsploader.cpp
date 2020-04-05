@@ -144,21 +144,18 @@ void CSV_BSPLoader::load_entities()
 
 		string targetname = ValueForKey( ent, "targetname" );
 
-		CEntRegistry *reg = CEntRegistry::ptr();
-		auto itr = reg->_networkname_to_class.find( classname );
-		if ( itr == reg->_networkname_to_class.end() )
-			continue;
-
 		// Explicitly assign worldspawn to entid 0
 		bool bexplicit_entnum = strncmp( "worldspawn", psz_classname, 10 ) == 0;
 		entid_t explicit_entnum = 0;
 
 		PT( CBaseEntity ) p_ent = svents->make_entity_by_name( classname, false,
-										bexplicit_entnum, explicit_entnum );
+								       bexplicit_entnum, explicit_entnum );
 		if ( !p_ent )
 			continue;
 
 		p_ent->init_mapent( ent, entnum );
+
+		_entities.push_back( p_ent );
 
 	}
 

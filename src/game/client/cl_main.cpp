@@ -19,8 +19,7 @@
 
 class C_TestEnt : public C_BaseAnimating
 {
-        DECLARE_CLASS( C_TestEnt, C_BaseAnimating )
-        DECLARE_CLIENTCLASS()
+        DECLARE_CLIENTCLASS( C_TestEnt, C_BaseAnimating )
 
 public:
         virtual void spawn();
@@ -51,15 +50,13 @@ void C_TestEnt::receive_entity_message( int msgtype, DatagramIterator &dgi )
         }
 }
 
-IMPLEMENT_CLIENTCLASS_RT( C_TestEnt, DT_TestEnt, CTestEnt )
+IMPLEMENT_CLIENTCLASS_RT( C_TestEnt, CTestEnt )
 END_RECV_TABLE()
 
 int main( int argc, char **argv )
 {
         PT( ClientBase ) cl = new ClientBase;
         cl->startup();
-
-        C_TestEnt::client_class_init();
 
         NodePath cam = clrender->get_camera();
         cam.set_pos( 10, 70, 5 );

@@ -13,5 +13,5 @@ void C_World::update_parent_entity( int entnum )
 	}
 }
 
-IMPLEMENT_CLIENTCLASS_RT(C_World, DT_World, CWorld)
+IMPLEMENT_CLIENTCLASS_RT( C_World, CWorld )
 END_RECV_TABLE()

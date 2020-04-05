@@ -29,6 +29,8 @@ bool ClientAudioSystem::initialize()
 	{
 		return false;
 	}
+
+	return true;
 }
 
 void ClientAudioSystem::update( double frametime )

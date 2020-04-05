@@ -352,6 +352,8 @@ void CBasePlayer::process_usercmds( CUserCmd *cmds, int numcmds, int totalcmds, 
 	}
 }
 
-IMPLEMENT_SERVERCLASS_ST( CBasePlayer, DT_BasePlayer, baseplayer )
-	SendPropInt( SENDINFO( _tickbase ) )
+IMPLEMENT_SERVERCLASS_ST( CBasePlayer )
+	SendPropInt( PROPINFO( _tickbase ) )
 END_SEND_TABLE()
+
+LINK_ENTITY_TO_CLASS( CBasePlayer, baseplayer )

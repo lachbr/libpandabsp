@@ -4,8 +4,7 @@
 
 class EXPORT_SERVER_DLL CBrushEntity : public CBaseEntity
 {
-	DECLARE_CLASS( CBrushEntity, CBaseEntity );
-	DECLARE_SERVERCLASS();
+	DECLARE_SERVERCLASS( CBrushEntity, CBaseEntity )
 
 public:
 	virtual void spawn();

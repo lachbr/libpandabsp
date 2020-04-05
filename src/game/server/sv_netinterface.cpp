@@ -1,7 +1,6 @@
 #include "sv_netinterface.h"
 #include "netmessages.h"
 #include "serverbase.h"
-#include "entregistry.h"
 #include "baseplayer.h"
 #include "usercmd.h"
 #include "sv_entitymanager.h"

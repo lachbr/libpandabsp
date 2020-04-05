@@ -17,5 +17,5 @@ void C_BrushEntity::spawn()
 	
 }
 
-IMPLEMENT_CLIENTCLASS_RT(C_BrushEntity, DT_BrushEntity, CBrushEntity)
+IMPLEMENT_CLIENTCLASS_RT( C_BrushEntity, CBrushEntity )
 END_RECV_TABLE()

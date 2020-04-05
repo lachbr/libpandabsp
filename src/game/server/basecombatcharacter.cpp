@@ -12,7 +12,7 @@ void CBaseCombatCharacter::init( entid_t entnum )
 	_health = 100;
 }
 
-IMPLEMENT_SERVERCLASS_ST( CBaseCombatCharacter, DT_BaseCombatCharacter, basecombatcharacter )
-	SendPropInt( SENDINFO( _max_health ) ),
-	SendPropInt( SENDINFO( _health ) )
+IMPLEMENT_SERVERCLASS_ST( CBaseCombatCharacter )
+	SendPropInt( PROPINFO( _max_health ) ),
+	SendPropInt( PROPINFO( _health ) )
 END_SEND_TABLE()

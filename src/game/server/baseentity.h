@@ -32,8 +32,7 @@ typedef entity_s entity_t;
 
 class EXPORT_SERVER_DLL CBaseEntity : public CBaseEntityShared
 {
-	DECLARE_CLASS( CBaseEntity, CBaseEntityShared );
-	DECLARE_SERVERCLASS();
+	DECLARE_SERVERCLASS( CBaseEntity, CBaseEntityShared )
 public:
 	enum SolidType
 	{

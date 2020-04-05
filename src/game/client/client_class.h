@@ -12,93 +12,108 @@
 #pragma once
 
 #include "pandabase.h"
-#include "dt_recv.h"
 
-// -------------------------------------------
-// Client class
-// -------------------------------------------
+#include "config_clientdll.h"
+#include "network_class.h"
+#include "cl_entitymanager.h"
 
-class EXPORT_CLIENT_DLL ClientClass
+
+// ------------------------------------------------------------------
+// Recv Code
+// ------------------------------------------------------------------
+
+class RecvProp;
+
+typedef void( *RecvProxyFn )( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
+
+class RecvProp : public NetworkProp
 {
 public:
-	ClientClass() :
-		_class_id( 0 ),
-		_network_name( nullptr )
-	{
-	}
+        RecvProp( const std::string &propname, size_t offset, size_t varsize,
+                  RecvProxyFn proxy = nullptr, int flags = 0 ) :
+                NetworkProp( propname, offset, varsize, flags )
+        {
+                _proxy = proxy;
+        }
 
-	ClientClass( const char *network_name ) :
-		_class_id( 0 ),
-		_network_name( network_name )
-	{
-	}
-
-	INLINE void set_recv_table( const RecvTable &table )
-	{
-		_recv_table = table;
-	}
-
-	INLINE RecvTable &get_recv_table()
-	{
-		return _recv_table;
-	}
-
-	INLINE void set_class_id( int class_id )
-	{
-		_class_id = class_id;
-	}
-
-	INLINE int get_class_id() const
-	{
-		return _class_id;
-	}
-
-	INLINE const char *get_network_name() const
-	{
-		return _network_name;
-	}
+        RecvProxyFn get_proxy() const
+        {
+                return _proxy;
+        }
 
 private:
-	RecvTable _recv_table;
-	int _class_id;
-	const char *_network_name;
+        RecvProxyFn _proxy;
 };
 
-// This can be used to give all datatables access to protected and private
-// members of the class.
-#define ALLOW_DATATABLES_PRIVATE_ACCESS() \
-	template <typename T>             \
-	friend int client_class_init( T* );
+enum
+{
+        RECVFLAGS_NONE = 0,
+        RECVFLAGS_PRESPAWN = 1 << 0,
+        RECVFLAGS_POSTSPAWN = 1 << 1,
+};
 
-#define DECLARE_CLIENTCLASS_NOBASE ALLOW_DATATABLES_PRIVATE_ACCESS
+EXPORT_CLIENT_DLL void RecvProxy_Int8( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
+EXPORT_CLIENT_DLL void RecvProxy_Int16( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
+EXPORT_CLIENT_DLL void RecvProxy_Int32( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
+EXPORT_CLIENT_DLL void RecvProxy_Int64( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
 
-#define DECLARE_CLIENTCLASS()			\
-private:					\
-	static ClientClass _client_class;	\
-public:						\
-	static ClientClass *get_client_class_s()\
-	{					\
-		return &_client_class;		\
-	}					\
-	virtual ClientClass *get_client_class() \
-	{ \
-		return &_client_class; \
-	} \
-	virtual PT( C_BaseEntity ) make_new() \
-	{ \
-		return new MyClass; \
-	} \
-	static void client_class_init(); \
-	DECLARE_CLIENTCLASS_NOBASE()
+EXPORT_CLIENT_DLL void RecvProxy_Uint8( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
+EXPORT_CLIENT_DLL void RecvProxy_Uint16( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
+EXPORT_CLIENT_DLL void RecvProxy_Uint32( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
+EXPORT_CLIENT_DLL void RecvProxy_Uint64( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
 
-#define IMPLEMENT_CLIENTCLASS(classname, networkname)		\
-IMPLEMENT_CLASS(classname)					\
-ClientClass classname::_client_class;		\
+EXPORT_CLIENT_DLL void RecvProxy_Float32( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
+EXPORT_CLIENT_DLL void RecvProxy_Float64( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
 
-#define IMPLEMENT_CLIENTCLASS_RT(classname, tablename, networkname)	\
-IMPLEMENT_CLIENTCLASS(classname, networkname)				\
-BEGIN_RECV_TABLE(classname, tablename, networkname)
+EXPORT_CLIENT_DLL void RecvProxy_String( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
+EXPORT_CLIENT_DLL void RecvProxy_CString( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
 
-#define IMPLEMENT_CLIENTCLASS_RT_NOBASE(classname, tablename, networkname)	\
-IMPLEMENT_CLIENTCLASS(classname, networkname)	\
-BEGIN_RECV_TABLE_NOBASE(classname, tablename, networkname)
+template <class T>
+EXPORT_CLIENT_DLL void RecvProxy_Vec( RecvProp *prop, void *object, void *out, DatagramIterator &dgi );
+
+EXPORT_CLIENT_DLL RecvProp *RecvPropNull();
+EXPORT_CLIENT_DLL RecvProp *RecvPropInt( const char *varname, size_t offset, size_t varsize, RecvProxyFn proxy = nullptr, int bits = 32, int flags = RECVFLAGS_NONE );
+EXPORT_CLIENT_DLL RecvProp *RecvPropUint( const char *varname, size_t offset, size_t varsize, RecvProxyFn proxy = nullptr, int bits = 32, int flags = RECVFLAGS_NONE );
+EXPORT_CLIENT_DLL RecvProp *RecvPropFloat( const char *varname, size_t offset, size_t varsize, RecvProxyFn proxy = nullptr, int bits = 32, int flags = RECVFLAGS_NONE );
+EXPORT_CLIENT_DLL RecvProp *RecvPropString( const char *varname, size_t offset, size_t varsize, RecvProxyFn proxy = nullptr, int flags = RECVFLAGS_NONE );
+EXPORT_CLIENT_DLL RecvProp *RecvPropCString( const char *varname, size_t offset, size_t varsize, RecvProxyFn proxy = nullptr, int flags = RECVFLAGS_NONE );
+EXPORT_CLIENT_DLL RecvProp *RecvPropVec4( const char *varname, size_t offset, size_t varsize, RecvProxyFn proxy = nullptr, int flags = RECVFLAGS_NONE );
+EXPORT_CLIENT_DLL RecvProp *RecvPropVec3( const char *varname, size_t offset, size_t varsize, RecvProxyFn proxy = nullptr, int flags = RECVFLAGS_NONE );
+EXPORT_CLIENT_DLL RecvProp *RecvPropVec2( const char *varname, size_t offset, size_t varsize, RecvProxyFn proxy = nullptr, int flags = RECVFLAGS_NONE );
+
+#define RecvPropEntnum RecvPropUint
+
+// FIXME: RecvPropNull() leaks
+#define OPEN_RECV_TABLE() \
+	pvector<RecvProp *> recv_props = { RecvPropNull(),
+
+#define BEGIN_RECV_TABLE(classname, networkname) \
+BEGIN_PROP_TABLE(classname, networkname) \
+OPEN_RECV_TABLE()
+
+#define BEGIN_RECV_TABLE_NOBASE(classname, networkname) \
+BEGIN_PROP_TABLE_NOBASE(classname, networkname) \
+OPEN_RECV_TABLE()
+
+#define END_RECV_TABLE() \
+}; \
+for (size_t i = 0; i < recv_props.size(); i++) \
+{ \
+	RecvProp *prop = recv_props[i]; \
+	if ( prop->get_name() == "__null__" ) continue; \
+	nclass->add_inherited_prop(prop); \
+} \
+ ClientEntitySystem::ptr()->link_networkname_to_entity(__networkname, MyClass::ptr()); \
+ return 1; \
+} \
+
+#define DECLARE_CLIENTCLASS(classname, basename)			\
+DECLARE_NETWORKCLASS(classname, basename)
+
+#define IMPLEMENT_CLIENTCLASS_RT(classname, networkname)	\
+IMPLEMENT_NETWORKCLASS(classname, networkname)				\
+BEGIN_RECV_TABLE(classname, networkname)
+
+#define IMPLEMENT_CLIENTCLASS_RT_NOBASE(classname, networkname)	\
+IMPLEMENT_NETWORKCLASS(classname, networkname)	\
+BEGIN_RECV_TABLE_NOBASE(classname, networkname)

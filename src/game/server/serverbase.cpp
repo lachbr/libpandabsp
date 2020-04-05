@@ -49,7 +49,7 @@ void ServerBase::add_game_systems()
 	PT( ServerNetInterface ) net = new ServerNetInterface;
 	add_game_system( net );
 
-	PT( ServerEntitySystem ) ents = new ServerEntitySystem;
+	ServerEntitySystem *ents = ServerEntitySystem::ptr();
 	net->add_datagram_handler( ents );
 	add_game_system( ents );
 

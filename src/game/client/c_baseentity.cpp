@@ -502,12 +502,12 @@ void RecvProxy_SimulationTime( RecvProp *prop, void *object, void *out, Datagram
 		<< ", Simulation time: " << ent->_simulation_time << "\n";
 }
 
-IMPLEMENT_CLIENTCLASS_RT_NOBASE( C_BaseEntity, DT_BaseEntity, CBaseEntity )
-	RecvPropVec3( RECVINFO( _origin ), RecvProxy_Origin ),
-	RecvPropVec3( RECVINFO( _angles ), RecvProxy_Angles ),
-	RecvPropVec3( RECVINFO( _scale ), RecvProxy_Scale ),
-	RecvPropEntnum( RECVINFO( _parent_entity ), RecvProxy_ParentEntity ),
-	RecvPropInt( RECVINFO( _bsp_entnum ) ),
-	RecvPropInt( RECVINFO( _simulation_time ), RecvProxy_SimulationTime ),
-	RecvPropInt( RECVINFO( _simulation_tick ) )
+IMPLEMENT_CLIENTCLASS_RT_NOBASE( C_BaseEntity, CBaseEntity )
+	RecvPropVec3( PROPINFO( _origin ), RecvProxy_Origin ),
+	RecvPropVec3( PROPINFO( _angles ), RecvProxy_Angles ),
+	RecvPropVec3( PROPINFO( _scale ), RecvProxy_Scale ),
+	RecvPropEntnum( PROPINFO( _parent_entity ), RecvProxy_ParentEntity ),
+	RecvPropInt( PROPINFO( _bsp_entnum ) ),
+	RecvPropInt( PROPINFO( _simulation_time ), RecvProxy_SimulationTime ),
+	RecvPropInt( PROPINFO( _simulation_tick ) )
 END_RECV_TABLE()

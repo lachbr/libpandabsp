@@ -6,7 +6,7 @@ C_BaseCombatCharacter::C_BaseCombatCharacter() :
 {
 }
 
-IMPLEMENT_CLIENTCLASS_RT( C_BaseCombatCharacter, DT_BaseCombatCharacter, CBaseCombatCharacter )
-	RecvPropInt( RECVINFO( _health ) ),
-	RecvPropInt( RECVINFO( _max_health ) )
+IMPLEMENT_CLIENTCLASS_RT( C_BaseCombatCharacter, CBaseCombatCharacter )
+	RecvPropInt( PROPINFO( _health ) ),
+	RecvPropInt( PROPINFO( _max_health ) )
 END_RECV_TABLE()

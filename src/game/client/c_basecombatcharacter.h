@@ -4,8 +4,7 @@
 
 class EXPORT_CLIENT_DLL C_BaseCombatCharacter : public C_BaseAnimating
 {
-	DECLARE_CLASS( C_BaseCombatCharacter, C_BaseAnimating )
-	DECLARE_CLIENTCLASS()
+	DECLARE_CLIENTCLASS( C_BaseCombatCharacter, C_BaseAnimating )
 
 public:
 	C_BaseCombatCharacter();

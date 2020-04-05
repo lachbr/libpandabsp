@@ -1,4 +1,5 @@
 #include "baseentitysystem.h"
+#include "network_class.h"
 
 IMPLEMENT_CLASS( BaseEntitySystem )
 

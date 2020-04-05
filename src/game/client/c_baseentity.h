@@ -52,8 +52,7 @@ public:
 
 class EXPORT_CLIENT_DLL C_BaseEntity : public CBaseEntityShared
 {
-	DECLARE_CLASS( C_BaseEntity, CBaseEntityShared );
-	DECLARE_CLIENTCLASS();
+	DECLARE_CLIENTCLASS( C_BaseEntity, CBaseEntityShared )
 
 public:
 	C_BaseEntity();

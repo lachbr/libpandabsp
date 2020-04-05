@@ -1,5 +1,4 @@
 #include "cl_entitymanager.h"
-#include "c_entregistry.h"
 #include "c_baseentity.h"
 #include "netmessages.h"
 
@@ -24,9 +23,6 @@ bool ClientEntitySystem::initialize()
 	{
 		return false;
 	}
-
-	C_EntRegistry *reg = C_EntRegistry::ptr();
-	reg->init_client_classes();
 
 	return true;
 }
@@ -110,9 +106,9 @@ void ClientEntitySystem::receive_snapshot( DatagramIterator &dgi )
 		for ( int iprop = 0; iprop < num_props; iprop++ )
 		{
 			std::string prop_name = dgi.get_string();
-			RecvProp *prop = ent->get_client_class()->
-				get_recv_table().find_recv_prop( prop_name );
-			nassertv( prop != nullptr );
+			auto itr = ent->get_network_class()->find_inherited_prop( prop_name );
+			nassertv( itr != ent->get_network_class()->inherited_props_end() );
+			RecvProp *prop = (RecvProp *)( *itr );
 			void *out = (unsigned char *)ent.p() + prop->get_offset();
 			prop->get_proxy()( prop, ent, out, dgi );
 		}
@@ -133,26 +129,19 @@ void ClientEntitySystem::receive_snapshot( DatagramIterator &dgi )
 
 C_BaseEntity *ClientEntitySystem::make_entity( const std::string &network_name, entid_t entnum )
 {
-	PT( C_BaseEntity ) ent = nullptr;
+	PT( CBaseEntityShared ) ent_shared;
 
-	C_EntRegistry *reg = C_EntRegistry::ptr();
-
-	for ( auto itr = reg->_networkname_to_class.begin();
-	      itr != reg->_networkname_to_class.end(); ++itr )
+	C_BaseEntity *singleton = get_entity_from_networkname( network_name );
+	if ( !singleton )
 	{
-		std::string nname = itr->first;
-		C_BaseEntity *singleton = itr->second;
-
-		if ( nname == network_name )
-		{
-			//c_client_cat.debug() << "Making client entity " << network_name << std::endl;
-			ent = singleton->make_new();
-			ent->init( entnum );
-			ent->precache();
-			insert_entity( ent );
-			return ent;
-		}
+		return nullptr;
 	}
+
+	ent_shared = singleton->make_new();
+	C_BaseEntity *ent = (C_BaseEntity *)ent_shared.p();
+	ent->init( entnum );
+	ent->precache();
+	insert_entity( ent );
 
 	return ent;
 }

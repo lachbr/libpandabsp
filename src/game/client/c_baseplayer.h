@@ -21,8 +21,7 @@ public:
 
 class EXPORT_CLIENT_DLL C_BasePlayer : public C_BaseCombatCharacter, public CBasePlayerShared
 {
-	DECLARE_CLASS( C_BasePlayer, C_BaseCombatCharacter )
-	DECLARE_CLIENTCLASS()
+	DECLARE_CLIENTCLASS( C_BasePlayer, C_BaseCombatCharacter )
 
 public:
 	C_BasePlayer();

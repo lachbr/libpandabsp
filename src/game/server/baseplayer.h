@@ -90,8 +90,7 @@ public:
 
 class EXPORT_SERVER_DLL CBasePlayer : public CBaseCombatCharacter, public CBasePlayerShared
 {
-	DECLARE_CLASS( CBasePlayer, CBaseCombatCharacter )
-	DECLARE_SERVERCLASS()
+	DECLARE_SERVERCLASS( CBasePlayer, CBaseCombatCharacter )
 
 public:
 	CBasePlayer();

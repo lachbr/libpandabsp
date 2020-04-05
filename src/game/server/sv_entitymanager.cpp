@@ -1,10 +1,11 @@
 #include "sv_entitymanager.h"
 #include "baseentity.h"
-#include "entregistry.h"
 #include "netmessages.h"
 #include "serverbase.h"
 #include "sv_netinterface.h"
 #include "baseplayer.h"
+
+#define SPEW_NETWORK_CLASSES 0
 
 ServerEntitySystem *svents = nullptr;
 
@@ -21,8 +22,22 @@ bool ServerEntitySystem::initialize()
 	if ( !BaseClass::initialize() )
 		return false;
 
-	CEntRegistry *reg = CEntRegistry::ptr();
-	reg->init_server_classes();
+#if SPEW_NETWORK_CLASSES
+	std::cout << "Server network classes: " << std::endl;
+	size_t count = _entity_to_class.size();
+	for ( size_t i = 0; i < count; i++ )
+	{
+		CBaseEntity *singleton = _entity_to_class.get_data( i );
+		NetworkClass *nclass = singleton->get_network_class();
+		std::cout << "\t" << nclass->get_name() << std::endl;
+		size_t pcount = nclass->get_num_inherited_props();
+		for ( size_t j = 0; j < pcount; j++ )
+		{
+			NetworkProp *prop = nclass->get_inherited_prop( j );
+			std::cout << "\t\t- " << prop->get_name() << std::endl;
+		}
+	}
+#endif
 
 	return true;
 }
@@ -55,8 +70,15 @@ bool ServerEntitySystem::handle_datagram( Client *client, int msgtype, DatagramI
 CBaseEntity *ServerEntitySystem::make_entity_by_name( const std::string &name, bool spawn,
 						       bool bexplicit_entnum, entid_t explicit_entnum )
 {
-	CBaseEntity *singleton = CEntRegistry::ptr()->_networkname_to_class[name];
-	PT( CBaseEntity ) ent = singleton->make_new();
+	int isingle = _entity_to_class.find( name );
+	if ( isingle == -1 )
+	{
+		return nullptr;
+	}
+
+	CBaseEntity *singleton = _entity_to_class.get_data( isingle );
+	PT( CBaseEntityShared ) ent_shared = singleton->make_new();
+	CBaseEntity *ent = (CBaseEntity *)ent_shared.p();
 	if ( bexplicit_entnum )
 		ent->init( explicit_entnum );
 	else
@@ -80,12 +102,11 @@ void ServerEntitySystem::build_snapshot( Datagram &dg, bool full_snapshot )
 	for ( size_t i = 0; i < size; i++ )
 	{
 		CBaseEntity *ent = DCAST( CBaseEntity, edict.get_data( i ) );
-		ServerClass *cls = ent->get_server_class();
-		SendTable &st = cls->get_send_table();
+		NetworkClass *cls = ent->get_network_class();
 
 		int num_props;
 		if ( full_snapshot || ent->is_entity_fully_changed() )
-			num_props = st.get_num_props();
+			num_props = cls->get_num_inherited_props();
 		else
 			num_props = ent->get_num_changed_offsets();
 
@@ -93,23 +114,23 @@ void ServerEntitySystem::build_snapshot( Datagram &dg, bool full_snapshot )
 			continue;
 
 		snapshot_body.add_uint32( ent->get_entnum() );
-		snapshot_body.add_string( cls->get_network_name() );
+		snapshot_body.add_string( cls->get_name() );
 
 		snapshot_body.add_uint16( num_props );
 
 		int props_added = 0;
-		int total_props = st.get_num_props();
+		int total_props = cls->get_num_inherited_props();
 		for ( int j = 0; j < total_props; j++ )
 		{
 			
-			SendProp &prop = st.get_send_props()[j];
-			if ( full_snapshot || ent->is_entity_fully_changed() || ent->is_property_changed( &prop ) )
+			SendProp *prop = (SendProp *)cls->get_inherited_prop( j );
+			if ( full_snapshot || ent->is_entity_fully_changed() || ent->is_property_changed( prop ) )
 			{
 
-				snapshot_body.add_string( prop.get_prop_name() );
+				snapshot_body.add_string( prop->get_name() );
 				//std::cout << "propname: " << prop.get_prop_name() << std::endl;
-				void *data = (unsigned char *)ent + prop.get_offset();
-				prop.get_proxy()( &prop, ent, data, snapshot_body );
+				void *data = (unsigned char *)ent + prop->get_offset();
+				prop->get_proxy()( prop, ent, data, snapshot_body );
 				props_added++;
 			}
 		}
