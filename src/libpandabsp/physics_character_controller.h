@@ -22,6 +22,8 @@
 
 #include "config_bsp.h"
 
+class BSPLoader;
+
 BEGIN_PUBLISH
 enum MovementState
 {
@@ -72,9 +74,11 @@ struct CapsuleData
 class EXPCL_PANDABSP PhysicsCharacterController : public ReferenceCount
 {
 PUBLISHED:
-	PhysicsCharacterController( BulletWorld *world, const NodePath &render, const NodePath &parent, float walk_height,
+	PhysicsCharacterController( BSPLoader *loader, BulletWorld *world, const NodePath &render,
+				    const NodePath &parent, float walk_height,
 				    float crouch_height, float step_height, float radius,
-				    float gravity, const BitMask32 &wall_mask, const BitMask32 &floor_mask, const BitMask32 &event_mask );
+				    float gravity, const BitMask32 &wall_mask, const BitMask32 &floor_mask,
+				    const BitMask32 &event_mask );
 
 	void set_max_slope( float degs, bool affect_speed );
 
@@ -272,6 +276,8 @@ private:
 	std::string _current_material;
 	std::string _default_material;
 	bool _touching_water;
+
+	BSPLoader *_bsp_loader;
 
 #ifdef HAVE_PYTHON
 	PyObject *_stand_up_callback;

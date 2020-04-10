@@ -54,10 +54,10 @@ void CTestEnt::spawn()
 	BaseClass::spawn();
 	//set_model( "models/health_charger/health_charger.act" );
 	set_model( "phase_14/models/props/creampie.bam" );
-	set_mass( 5.0f );
+	set_mass( 1.0f );
 	set_solid( SOLID_MESH );
 	init_physics();
-	set_origin( LPoint3( 12, 100, 5 ) );
+	set_origin( LPoint3( 40 / 16.0f, 650 / 16.0f, 8 / 16.0f ) );
 	//set_animation( "idle" );
 }
 

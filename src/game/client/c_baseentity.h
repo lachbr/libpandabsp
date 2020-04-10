@@ -15,14 +15,13 @@
 #include <typedReferenceCount.h>
 
 #include "config_clientdll.h"
-#include "entityshared.h"
-#include "baseentity_shared.h"
-#include "client_class.h"
 #include "interpolatedvar.h"
 
 #include <aa_luse.h>
 #include <nodePath.h>
 #include <pvector.h>
+
+#include "client_class.h"
 
 NotifyCategoryDeclNoExport( c_baseentity )
 
@@ -56,6 +55,8 @@ class EXPORT_CLIENT_DLL C_BaseEntity : public CBaseEntityShared
 
 public:
 	C_BaseEntity();
+
+	entid_t get_owner() const;
 
 	void send_entity_message( Datagram &dg );
 
@@ -118,7 +119,7 @@ public:
 	unsigned short _teleport_list_entry;
 
 public:
-
+	entid_t _owner_entity;
 	int _bsp_entnum;
 	int _parent_entity;
 	float _simulation_time;
@@ -132,4 +133,9 @@ public:
 	int _simulation_tick;
 };
 
-#endif // BASEENTITY_H_
+INLINE entid_t C_BaseEntity::get_owner() const
+{
+	return _owner_entity;
+}
+
+#endif // C_BASEENTITY_H_

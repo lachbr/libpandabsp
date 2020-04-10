@@ -1,6 +1,7 @@
 #include "baseplayer.h"
 #include "serverbase.h"
 #include "sv_netinterface.h"
+#include "sv_bsploader.h"
 #include "physicssystem.h"
 #include "masks.h"
 
@@ -13,13 +14,20 @@ CBasePlayer::CBasePlayer() :
 {
 }
 
+void CBasePlayer::init( entid_t entnum )
+{
+	BaseClass::init( entnum );
+
+	_view_offset = LVector3f( 0, 0, 4 );
+}
+
 void CBasePlayer::setup_controller()
 {
 	PhysicsSystem *phys;
 	sv->get_game_system_of_type( phys );
 
 	//CBasePlayerShared::setup_controller();
-	_controller = new PhysicsCharacterController( phys->get_physics_world(), sv->get_root(),
+	_controller = new PhysicsCharacterController(svbsp->get_bsp_loader(), phys->get_physics_world(), sv->get_root(),
 						      sv->get_root(), 4.0f, 2.0f, 0.3f, 1.0f,
 						      phys->get_physics_world()->get_gravity()[0],
 						      wall_mask, floor_mask, event_mask );
@@ -31,6 +39,8 @@ void CBasePlayer::spawn()
 {
 	BaseClass::spawn();
 	setup_controller();
+
+	set_model( "phase_14/models/misc/toon_ref.bam" );
 }
 
 int CBasePlayer::get_command_context_count() const
@@ -190,6 +200,8 @@ void CBasePlayer::simulate()
 	if ( simulation_ticks > 0 )
 		adjust_player_time_base( simulation_ticks );
 
+	//std::cout << "CBasePlayer: _tickbase = " << _tickbase << std::endl;
+
 	// Store off true server timestamps
 	double savetime = sv->get_curtime();
 	double saveframetime = sv->get_frametime();
@@ -299,9 +311,14 @@ void CBasePlayer::simulate()
 
 void CBasePlayer::player_run_command( CUserCmd *cmd, float frametime )
 {
-	// Apply pitch view angle, player_move() will update yaw view angle
-	_view_angles[PITCH] = cmd->viewangles[PITCH];
+	// Apply view angles.
+	_view_angles = cmd->viewangles;
+	// Set our yaw to the view angle yaw.
+	set_angles( LVector3f( _view_angles[0], _angles.get()[1], _angles.get()[2] ) );
+
 	player_move( cmd, frametime );
+	baseplayer_cat.debug()
+		<< "Post player_move(), position " << _np.get_pos() << " angles " << _np.get_hpr() << std::endl;
 }
 
 void CBasePlayer::force_simulation()
@@ -353,7 +370,8 @@ void CBasePlayer::process_usercmds( CUserCmd *cmds, int numcmds, int totalcmds, 
 }
 
 IMPLEMENT_SERVERCLASS_ST( CBasePlayer )
-	SendPropInt( PROPINFO( _tickbase ) )
+	SendPropInt( PROPINFO( _tickbase ), 32, SENDFLAGS_OWNRECV ),
+	SendPropVec3( PROPINFO( _view_offset ), SENDFLAGS_OWNRECV )
 END_SEND_TABLE()
 
 LINK_ENTITY_TO_CLASS( CBasePlayer, baseplayer )

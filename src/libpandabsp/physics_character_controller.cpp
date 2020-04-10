@@ -17,11 +17,13 @@
 
 #include "bsploader.h"
 
-PhysicsCharacterController::PhysicsCharacterController( BulletWorld *world, const NodePath &render, const NodePath &parent, float walk_height,
+PhysicsCharacterController::PhysicsCharacterController( BSPLoader *loader, BulletWorld *world, const NodePath &render,
+							const NodePath &parent, float walk_height,
 							float crouch_height, float step_height, float radius,
 							float gravity, const BitMask32 &wall_mask, const BitMask32 &floor_mask,
 							const BitMask32 &event_mask )
 {
+	_bsp_loader = loader;
 	_world = world;
 	_render = render;
 	_parent = parent;
@@ -449,7 +451,7 @@ void PhysicsCharacterController::update_event_sphere()
 
 void PhysicsCharacterController::update_foot_contact()
 {
-	BSPLoader *loader = BSPLoader::get_global_ptr();
+	BSPLoader *loader = _bsp_loader;
 
 	if ( !_above_ground )
 	{

@@ -24,7 +24,7 @@ static ConfigVariableInt server_port( "server_port", 27015 );
 static ConfigVariableDouble sv_heartbeat_tolerance( "sv_heartbeat_tolerance", 20.0 );
 
 ServerNetInterface::ServerNetInterface() :
-	_client_id_alloc( 0, 0xFFFF ),
+	_client_id_alloc( 1, 0xFFFF ),
 	_listen_socket( k_HSteamListenSocket_Invalid ),
 	_poll_group( k_HSteamNetPollGroup_Invalid ),
 	_is_started( false )
@@ -121,6 +121,7 @@ void ServerNetInterface::handle_client_hello( SteamNetConnectionStatusChangedCal
 	PT( CBaseEntity ) plyr = make_player();
 	if ( plyr->is_of_type( CBasePlayer::get_class_type() ) )
 	{
+		plyr->set_owner_client( cl->get_client_id() );
 		cl->set_player( (CBasePlayer *)( plyr.p() ) );
 	}
 	else
@@ -336,7 +337,7 @@ void ServerNetInterface::send_full_snapshot_to_client( Client *cl )
 {
 	send_tick( cl );
 	Datagram dg;
-	svents->build_snapshot( dg, true );
+	svents->build_snapshot( dg, cl->get_client_id(), true );
 	send_datagram( dg, cl->get_connection() );
 }
 
@@ -345,11 +346,27 @@ void ServerNetInterface::snapshot()
 	Datagram tickdg = build_tick();
 	broadcast_datagram( tickdg, true );
 
-	Datagram dg;
-	svents->build_snapshot( dg, false );
+	// Build and send a snapshot of the world to each client.
+	//
+	// We build a separate snapshot for each client because each
+	// client may receive a different snapshot depending on if
+	// the client owns any entities and the SendProps have the
+	// ownrecv flag.
+	size_t client_count = _clients_by_id.size();
+	for ( size_t i = 0; i < client_count; i++ )
+	{
+		Client *cl = _clients_by_id.get_data( i );
+		if ( cl->get_client_state() != CLIENTSTATE_PLAYING )
+			continue;
 
-	// Send snapshot to all clients
-	broadcast_datagram( dg, true );
+		Datagram dg;
+		if ( svents->build_snapshot( dg, cl->get_client_id(), false ) )
+		{
+			send_datagram( dg, cl->get_connection() );
+		}
+	}
+
+	svents->reset_all_changed_props();
 }
 
 Datagram ServerNetInterface::build_tick()

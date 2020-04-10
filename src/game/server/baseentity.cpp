@@ -1,7 +1,6 @@
 #include "baseentity.h"
 #include "serverbase.h"
 #include "sv_entitymanager.h"
-#include "physicssystem.h"
 
 #include <modelRoot.h>
 #include <bulletBoxShape.h>
@@ -10,7 +9,6 @@ CBaseEntity::CBaseEntity() :
 	CBaseEntityShared(),
 	_map_entity( false ),
 	_preserved( false ),
-	_num_changed_offsets( MAX_CHANGED_OFFSETS ),
 	_kinematic( false ),
 	_mass( 0.0f ),
 	_solid( SOLID_NONE ),
@@ -18,7 +16,8 @@ CBaseEntity::CBaseEntity() :
 	_phys_mask( BitMask32::all_on() ),
 	_physics_setup( false ),
 	_state( 0 ),
-	_state_time( 0.0f )
+	_state_time( 0.0f ),
+	_owner_client( 0 )
 {
 }
 
@@ -28,9 +27,9 @@ void CBaseEntity::set_state( int state )
 	_state_time = _simulation_time;
 }
 
-PT( BulletRigidBodyNode ) CBaseEntity::get_phys_body()
+PT( CIBulletRigidBodyNode ) CBaseEntity::get_phys_body()
 {
-	PT( BulletRigidBodyNode ) bnode = new BulletRigidBodyNode( "entity-phys" );
+	PT( CIBulletRigidBodyNode ) bnode = new CIBulletRigidBodyNode( "entity-phys" );
 	bnode->set_mass( _mass );
 
 	bnode->set_ccd_motion_threshold( 1e-7 );
@@ -75,6 +74,7 @@ void CBaseEntity::init_physics()
 
 	bool underneath_self = !_kinematic;
 	_bodynode = get_phys_body();
+	_bodynode->set_user_data( this );
 	_bodynode->set_kinematic( false );
 
 	NodePath parent = _np.get_parent();
@@ -101,10 +101,7 @@ void CBaseEntity::init_physics()
 
 void CBaseEntity::transition_xform( const NodePath &landmark_np, const LMatrix4 &transform )
 {
-	_np.set_mat( landmark_np, transform );
-	_origin = _np.get_pos();
-	_angles = _np.get_hpr();
-	_scale = _np.get_scale();
+	
 }
 
 LVector3 CBaseEntity::get_entity_value_vector( const std::string &key ) const
@@ -141,61 +138,6 @@ bool CBaseEntity::can_transition() const
 	return true;
 }
 
-/**
- * Checks if the specified SendProp has been changed since
- * the last delta snapshot. Changed properties are stored
- * by their memory offset from the start of the class.
- */
-bool CBaseEntity::is_property_changed( SendProp *prop )
-{
-	// Assume the property has changed if the entity
-	// is marked fully changed.
-	if ( is_entity_fully_changed() )
-		return true;
-
-	// If the offset of this prop is in the changed array,
-	// it has been changed.
-	size_t offset = prop->get_offset();
-	for ( int i = 0; i < _num_changed_offsets; i++ )
-		if ( _changed_offsets[i] == offset )
-			return true;
-
-	return false;
-}
-
-/**
- * Mark the entity as being fully changed.
- * All properties will be sent in the next snapshot.
- */
-void CBaseEntity::network_state_changed()
-{
-	// Just say that we have the max number of changed offsets
-	// to force each property to be sent.
-	_num_changed_offsets = MAX_CHANGED_OFFSETS;
-}
-
-/**
- * Called when the value of a NetworkVar on this entity has changed.
- * We keep track of changed properties by the variable's memory offset
- * from the start of the class.
- */
-void CBaseEntity::network_state_changed( void *ptr )
-{
-	unsigned short offset = (char *)ptr - (char *)this;
-
-	// Already full? Don't store offset
-	if ( is_entity_fully_changed() )
-		return;
-
-	// Make sure we don't already have this offset
-	for ( int i = 0; i < _num_changed_offsets; i++ )
-		if ( _changed_offsets[i] == offset )
-			return;
-
-	// This property will be sent in the next delta snapshot.
-	_changed_offsets[_num_changed_offsets++] = offset;
-}
-
 void CBaseEntity::init( entid_t entnum )
 {
 	CBaseEntityShared::init( entnum );
@@ -207,6 +149,7 @@ void CBaseEntity::init( entid_t entnum )
 	_bsp_entnum = -1;
 	_simulation_tick = 0;
 	_simulation_time = 0.0f;
+	_owner_entity = 0;
 }
 
 void CBaseEntity::spawn()
@@ -276,31 +219,16 @@ void CBaseEntity::send_entity_message( Datagram &dg, const vector_uint32 &client
 	svnet->send_datagram_to_clients( dg, client_ids );
 }
 
-void SendProxy_SimulationTime( SendProp *prop, void *object, void *data, Datagram &out )
-{
-	CBaseEntity *ent = (CBaseEntity *)object;
 
-	int ticknumber = sv->time_to_ticks( ent->_simulation_time );
-	// tickbase is current tick rounded down to closest 100 ticks
-	int tickbase =
-		sv->get_network_base( sv->get_tickcount(), ent->get_entnum() );
-	int addt = 0;
-	if ( ticknumber >= tickbase )
-	{
-		addt = ( ticknumber - tickbase ) & 0xFF;
-	}
-
-	out.add_int32( addt );
-}
 
 IMPLEMENT_SERVERCLASS_ST_NOBASE( CBaseEntity )
 	SendPropInt( PROPINFO( _bsp_entnum ) ),
-	new SendProp( PROPINFO( _simulation_time ), 0, SendProxy_SimulationTime ),
 	SendPropEntnum( PROPINFO( _parent_entity ) ),
 	SendPropVec3( PROPINFO( _origin ) ),
 	SendPropVec3( PROPINFO( _angles ) ),
 	SendPropVec3( PROPINFO( _scale ) ),
-	SendPropInt( PROPINFO( _simulation_tick ) )
+	SendPropInt( PROPINFO( _simulation_tick ) ),
+	SendPropEntnum( PROPINFO( _owner_entity ) ) 
 END_SEND_TABLE()
 
 PT( CBaseEntity ) CreateEntityByName( const std::string &name )

@@ -11,16 +11,81 @@
 #include <animControlCollection.h>
 #include <configVariableBool.h>
 
-CBaseAnimatingShared::CBaseAnimatingShared() :
+#include "scenecomponent_shared.h"
+
+BaseAnimating::BaseAnimating() :
 	_playing_anim( nullptr ),
 	_hbundle( nullptr ),
 	_last_anim( nullptr ),
-	_doing_blend( false )
+	_doing_blend( false ),
+	_scene( nullptr )
 {
 }
 
-void CBaseAnimatingShared::set_model( const std::string &path )
+bool BaseAnimating::initialize()
 {
+	if ( !BaseClass::initialize() )
+	{
+		return false;
+	}
+
+	_entity->get_component( _scene );
+
+	animation = "";
+	model_path = "";
+	model_origin = LVector3f( 0 );
+	model_angles = LVector3f( 0 );
+	model_scale = LVector3f( 1 );
+
+	return true;
+}
+
+void BaseAnimating::reset()
+{
+	_anims.clear();
+	_last_anim = nullptr;
+	_playing_anim = nullptr;
+	_doing_blend = false;
+	_hbundle = nullptr;
+	if ( !_model_np.is_empty() )
+	{
+		_model_np.remove_node();
+	}
+}
+
+void BaseAnimating::update( double frametime )
+{
+	if ( _playing_anim && _hbundle )
+	{
+		update_blending();
+
+#if !defined( CLIENT_DLL )
+		// Advance the animation frame and joint positions if we have to.
+		_hbundle->get_bundle()->update();
+
+		int curr_frame = _playing_anim->anim_control->get_frame();
+		if ( curr_frame != _playing_anim->last_frame )
+		{
+			// Check if there is an anim event associated with this frame.
+			for ( AnimEvent_t ae : _playing_anim->anim_events )
+			{
+				if ( ae.event_frame == curr_frame )
+				{
+					handle_anim_event( &ae );
+				}
+			}
+			_playing_anim->last_frame = curr_frame;
+		}
+#endif
+	}
+}
+
+void BaseAnimating::set_model( const std::string &path )
+{
+	reset();
+
+	model_path = path;
+
 	VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
 	Loader *loader = Loader::get_global_ptr();
 
@@ -165,27 +230,33 @@ void CBaseAnimatingShared::set_model( const std::string &path )
 	{
 		_model_np = NodePath( "emptyModel" );
 	}
+
+	if ( _scene )
+		_model_np.reparent_to( _scene->np );
 }
 
-void CBaseAnimatingShared::set_model_origin( const LPoint3 &origin )
+void BaseAnimating::set_model_origin( const LPoint3 &origin )
 {
 	nassertv( !_model_np.is_empty() );
 	_model_np.set_pos( origin );
+	model_origin = origin;
 }
 
-void CBaseAnimatingShared::set_model_angles( const LVector3 &angles )
+void BaseAnimating::set_model_angles( const LVector3 &angles )
 {
 	nassertv( !_model_np.is_empty() );
 	_model_np.set_hpr( angles );
+	model_angles = angles;
 }
 
-void CBaseAnimatingShared::set_model_scale( const LVector3 &scale )
+void BaseAnimating::set_model_scale( const LVector3 &scale )
 {
 	nassertv( !_model_np.is_empty() );
 	_model_np.set_scale( scale );
+	model_scale = scale;
 }
 
-void CBaseAnimatingShared::reset_blends()
+void BaseAnimating::reset_blends()
 {
 	for ( auto itr : _anims )
 	{
@@ -193,7 +264,7 @@ void CBaseAnimatingShared::reset_blends()
 	}
 }
 
-void CBaseAnimatingShared::update_blending()
+void BaseAnimating::update_blending()
 {
 	if ( _doing_blend && _hbundle )
 	{
@@ -220,15 +291,17 @@ void CBaseAnimatingShared::update_blending()
 	}
 }
 
-void CBaseAnimatingShared::set_animation( const std::string &animation )
+void BaseAnimating::set_animation( const std::string &anim )
 {
+	animation = anim;
+
 	if ( _anims.size() == 0 )
 		return;
 
 	auto itr = _anims.find( animation );
 	if ( itr == _anims.end() )
 	{
-		nassert_raise( "Animation " + animation + " not found!" );
+		nassert_raise( "Animation " + animation.get() + " not found!" );
 		return;
 	}
 
@@ -259,3 +332,71 @@ void CBaseAnimatingShared::set_animation( const std::string &animation )
 	else
 		info.anim_control->play( info.start_frame, info.end_frame );
 }
+
+#if !defined( CLIENT_DLL )
+
+void CBaseAnimating::handle_anim_event( AnimEvent_t *ae )
+{
+}
+
+IMPLEMENT_SERVERCLASS_ST_NOBASE( CBaseAnimating )
+	SendPropString( PROPINFO( model_path ) ),
+	SendPropString( PROPINFO( animation ) ),
+	SendPropVec3( PROPINFO( model_origin ) ),
+	SendPropVec3( PROPINFO( model_angles ) ),
+	SendPropVec3( PROPINFO( model_scale ) ),
+END_SEND_TABLE()
+
+#else
+
+void RecvProxy_ModelPath( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
+{
+	RecvProxy_String( prop, object, out, dgi );
+
+	C_BaseAnimating *self = (C_BaseAnimating *)object;
+	self->set_model( self->model_path );
+	if ( self->_scene )
+		self->_model_np.reparent_to( self->_scene->np );
+}
+
+void RecvProxy_ModelOrigin( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
+{
+	RecvProxy_Vec<LVector3>( prop, object, out, dgi );
+
+	C_BaseAnimating *self = (C_BaseAnimating *)object;
+	self->set_model_origin( self->model_origin );
+}
+
+void RecvProxy_ModelAngles( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
+{
+	RecvProxy_Vec<LVector3>( prop, object, out, dgi );
+
+	C_BaseAnimating *self = (C_BaseAnimating *)object;
+	self->set_model_angles( self->model_angles );
+}
+
+void RecvProxy_ModelScale( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
+{
+	RecvProxy_Vec<LVector3>( prop, object, out, dgi );
+
+	C_BaseAnimating *self = (C_BaseAnimating *)object;
+	self->set_model_scale( self->model_scale );
+}
+
+void RecvProxy_Animation( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
+{
+	RecvProxy_String( prop, object, out, dgi );
+
+	C_BaseAnimating *self = (C_BaseAnimating *)object;
+	self->set_animation( self->animation );
+}
+
+IMPLEMENT_CLIENTCLASS_RT_NOBASE( C_BaseAnimating, CBaseAnimating )
+	RecvPropString( PROPINFO( model_path ), RecvProxy_ModelPath ),
+	RecvPropString( PROPINFO( animation ), RecvProxy_Animation ),
+	RecvPropVec3( PROPINFO( model_origin ), RecvProxy_ModelOrigin ),
+	RecvPropVec3( PROPINFO( model_angles ), RecvProxy_ModelAngles ),
+	RecvPropVec3( PROPINFO( model_scale ), RecvProxy_ModelScale ),
+END_RECV_TABLE()
+
+#endif

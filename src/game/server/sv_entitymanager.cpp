@@ -14,7 +14,6 @@ IMPLEMENT_CLASS( ServerEntitySystem )
 ServerEntitySystem::ServerEntitySystem() :
 	_entnum_alloc( ENTID_MIN + 1, ENTID_MAX )
 {
-	svents = this;
 }
 
 bool ServerEntitySystem::initialize()
@@ -28,7 +27,7 @@ bool ServerEntitySystem::initialize()
 	for ( size_t i = 0; i < count; i++ )
 	{
 		CBaseEntity *singleton = _entity_to_class.get_data( i );
-		NetworkClass *nclass = singleton->get_network_class();
+		DataTable *nclass = singleton->get_network_class();
 		std::cout << "\t" << nclass->get_name() << std::endl;
 		size_t pcount = nclass->get_num_inherited_props();
 		for ( size_t j = 0; j < pcount; j++ )
@@ -39,6 +38,7 @@ bool ServerEntitySystem::initialize()
 	}
 #endif
 
+	svents = this;
 	return true;
 }
 
@@ -93,7 +93,17 @@ CBaseEntity *ServerEntitySystem::make_entity_by_name( const std::string &name, b
 	return ent;
 }
 
-void ServerEntitySystem::build_snapshot( Datagram &dg, bool full_snapshot )
+void ServerEntitySystem::reset_all_changed_props()
+{
+	size_t count = edict.size();
+	for ( size_t i = 0; i < count; i++ )
+	{
+		CBaseEntity *ent = DCAST( CBaseEntity, edict.get_data( i ) );
+		ent->reset_changed_offsets();
+	}
+}
+
+bool ServerEntitySystem::build_snapshot( Datagram &dg, uint32_t client_id, bool full_snapshot )
 {
 	Datagram snapshot_body;
 
@@ -113,45 +123,52 @@ void ServerEntitySystem::build_snapshot( Datagram &dg, bool full_snapshot )
 		if ( num_props == 0 )
 			continue;
 
-		snapshot_body.add_uint32( ent->get_entnum() );
-		snapshot_body.add_string( cls->get_name() );
-
-		snapshot_body.add_uint16( num_props );
+		Datagram props_body;
 
 		int props_added = 0;
 		int total_props = cls->get_num_inherited_props();
 		for ( int j = 0; j < total_props; j++ )
 		{
-			
 			SendProp *prop = (SendProp *)cls->get_inherited_prop( j );
 			if ( full_snapshot || ent->is_entity_fully_changed() || ent->is_property_changed( prop ) )
 			{
+				if ( ( prop->get_flags() & SENDFLAGS_OWNRECV ) != 0 &&
+				     ent->get_owner_client() != client_id )
+				{
+					// Only the owner should get this prop.
+					continue;
+				}
 
-				snapshot_body.add_string( prop->get_name() );
+				props_body.add_string( prop->get_name() );
 				//std::cout << "propname: " << prop.get_prop_name() << std::endl;
 				void *data = (unsigned char *)ent + prop->get_offset();
-				prop->get_proxy()( prop, ent, data, snapshot_body );
+				prop->get_proxy()( prop, ent, data, props_body );
 				props_added++;
 			}
 		}
 
-		if ( num_props != props_added )
-		{
-			nassert_raise( "num_props != props_added!!!!" );
-			cout << "num_props = " << num_props << ", props_added = " << props_added << std::endl;
-		}
+		if ( props_added == 0 )
+			continue;
 
-		if ( !full_snapshot )
-			ent->reset_changed_offsets();
+		snapshot_body.add_uint32( ent->get_entnum() );
+		snapshot_body.add_string( cls->get_name() );
+		snapshot_body.add_uint16( props_added );
+		snapshot_body.append_data( props_body.get_data(), props_body.get_length() );
 
 		num_changed++;
 	}
 
+	// No need to send a snapshot.
+	if ( num_changed == 0 )
+		return false;
+
 	dg.add_uint16( NETMSG_SNAPSHOT );
 	dg.add_uint32( sv->get_tickcount() );
 	dg.add_uint32( num_changed );
-	// Add the actual entity snapshots
+	// Add the actual entity data
 	dg.append_data( snapshot_body.get_data(), snapshot_body.get_length() );
+
+	return true;
 }
 
 void ServerEntitySystem::remove_entity( entid_t entnum )
@@ -172,7 +189,7 @@ void ServerEntitySystem::run_entities( bool simulating )
 		for ( size_t i = 0; i < ents; i++ )
 		{
 			CBaseEntity *ent = DCAST( CBaseEntity, edict.get_data( i ) );
-			ent->run_thinks();
+			ent->simulate( sv->get_frametime() );
 		}
 	}
 	else
@@ -183,7 +200,7 @@ void ServerEntitySystem::run_entities( bool simulating )
 		{
 			Client *cl = itr.second;
 			if ( cl->get_player() )
-				cl->get_player()->run_thinks();
+				cl->get_player()->simulate( sv->get_frametime() );
 		}
 	}
 }

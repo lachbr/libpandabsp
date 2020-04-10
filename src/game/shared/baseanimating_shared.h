@@ -1,9 +1,20 @@
 #pragma once
 
 #include "config_game_shared.h"
+#include "shareddefs.h"
+
+#ifdef CLIENT_DLL
+#define SceneComponent C_SceneComponent
+#define BaseAnimating C_BaseAnimating
+#else
+#define SceneComponent CSceneComponent
+#define BaseAnimating CBaseAnimating
+#endif
+
+class SceneComponent;
 
 #include <nodePath.h>
-#include <aa_luse.h>
+#include <luse.h>
 #include <animControl.h>
 #include <pmap.h>
 #include <partBundleHandle.h>
@@ -34,10 +45,20 @@ public:
 	int last_frame;
 };
 
-class EXPORT_GAME_SHARED CBaseAnimatingShared
+class EXPORT_GAME_SHARED BaseAnimating : public CBaseComponent
 {
+	DECLARE_COMPONENT( BaseAnimating, CBaseComponent )
+
 public:
-	CBaseAnimatingShared();
+	BaseAnimating();
+
+#if !defined( CLIENT_DLLL )
+	virtual void handle_anim_event( AnimEvent_t *ae );
+#endif
+
+	virtual void reset();
+
+	virtual bool initialize();
 
 	virtual void set_model( const std::string &model_path );
 	virtual void set_model_origin( const LPoint3 &origin );
@@ -45,6 +66,8 @@ public:
 	virtual void set_model_scale( const LVector3 &scale );
 
 	virtual void set_animation( const std::string &animation );
+
+	virtual void update( double frametime );
 
 	void update_blending();
 	void reset_blends();
@@ -61,4 +84,20 @@ public:
 	bool _doing_blend;
 
 	PT( PartBundleHandle ) _hbundle;
+
+	SceneComponent *_scene;
+
+#if !defined( CLIENT_DLL )
+	NetworkString( model_path );
+	NetworkString( animation );
+	NetworkVec3( model_origin );
+	NetworkVec3( model_angles );
+	NetworkVec3( model_scale );
+#else
+	std::string model_path;
+	std::string animation;
+	LVector3f model_origin;
+	LVector3f model_angles;
+	LVector3f model_scale;
+#endif
 };

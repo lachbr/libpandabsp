@@ -22,7 +22,7 @@ public:
 	virtual void remove_entity( entid_t entnum );
 	virtual bool handle_datagram( Client *client, int msgtype, DatagramIterator &dgi );
 
-	void build_snapshot( Datagram &dg, bool full_snapshot );
+	bool build_snapshot( Datagram &dg, uint32_t client_id, bool full_snapshot );
 
 	CBaseEntity *make_entity_by_name( const std::string &name, bool spawn = true,
 					  bool bexplicit_entnum = false, entid_t explicit_entnum = 0 );
@@ -31,6 +31,8 @@ public:
 
 	CBaseEntity *get_entity_from_name( const std::string &editorname ) const;
 	void link_entity_to_class( const std::string &editorname, CBaseEntity *singleton );
+
+	void reset_all_changed_props();
 
 	static ServerEntitySystem *ptr();
 

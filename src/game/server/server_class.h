@@ -48,6 +48,7 @@ private:
 enum
 {
 	SENDFLAGS_NONE,
+	SENDFLAGS_OWNRECV,
 };
 
 EXPORT_SERVER_DLL void SendProxy_Int8( SendProp *prop, void *object, void *value, Datagram &dg );
@@ -98,6 +99,7 @@ for (size_t i = 0; i < send_props.size(); i++) \
 	if ( prop->get_name() == "__null__" ) continue; \
 	nclass->add_inherited_prop(prop); \
 } \
+ServerEntitySystem::ptr()->register_component(MyClass::ptr()); \
 return 1; \
 }
 

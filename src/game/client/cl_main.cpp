@@ -59,12 +59,14 @@ int main( int argc, char **argv )
         cl->startup();
 
         NodePath cam = clrender->get_camera();
-        cam.set_pos( 10, 70, 5 );
+        cam.set_pos( 77 / 16.0f, 776 / 16.0f, 8 / 16.0f );
+        cam.set_hpr( 0, 0, 0 );
+        cam.set_hpr( cam, LVector3f( 250 - 90, 10, 0 ) );
 
-        NodePath render = clrender->get_render();
-        render.set_attrib( BSPMaterialAttrib::make_override_shader( BSPMaterial::get_from_file( "phase_14/materials/unlit.mat" ) ) );
+        //NodePath render = clrender->get_render();
+        //render.set_attrib( BSPMaterialAttrib::make_override_shader( BSPMaterial::get_from_file( "phase_14/materials/unlit.mat" ) ) );
 
-        cl->run_cmd( "map facility" );
+        cl->run_cmd( "map facility_battle_v2" );
 
         cl->run();
 

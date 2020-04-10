@@ -95,6 +95,8 @@ class EXPORT_SERVER_DLL CBasePlayer : public CBaseCombatCharacter, public CBaseP
 public:
 	CBasePlayer();
 
+	virtual void init( entid_t entnum );
+
 	virtual void setup_controller();
 	virtual void spawn();
 
@@ -146,6 +148,8 @@ public:
 	virtual void process_usercmds( CUserCmd *cmds, int numcmds, int totalcmds, bool paused );
 
 private:
+	NetworkVec3( _view_offset );
+
 	LVector3 _view_angles;
 	CPlayerInfo _player_info;
 	Client *_client;

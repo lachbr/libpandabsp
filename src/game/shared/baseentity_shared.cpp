@@ -5,11 +5,19 @@ IMPLEMENT_CLASS( CBaseEntityShared )
 
 CBaseEntityShared::CBaseEntityShared() :
 	_spawned( false ),
-	_np( new ModelRoot( "entity" ) ),
 	_entnum( 0 ),
-	_main_think( nullptr ),
-	_think_sort( 0 )
+	_owner( nullptr )
 {
+}
+
+void CBaseEntityShared::add_component( BaseComponentShared *component, int sort )
+{
+	ComponentEntry entry;
+	entry.sort = sort;
+	entry.component = component;
+
+	_ordered_components.insert_nonunique( entry );
+	_components[component->get_type_id()] = entry;
 }
 
 void CBaseEntityShared::init( entid_t entnum )
@@ -19,12 +27,24 @@ void CBaseEntityShared::init( entid_t entnum )
 
 void CBaseEntityShared::precache()
 {
+	size_t count = _ordered_components.size();
+	for ( size_t i = 0; i < count; i++ )
+	{
+		_ordered_components[i].component->precache();
+	}
 }
 
 void CBaseEntityShared::spawn()
 {
-	make_think_func( "simulate", simulate_func, this );
-	make_think_func( "think", think_func, this );
+	size_t count = _ordered_components.size();
+	for ( size_t i = 0; i < count; i++ )
+	{
+		BaseComponentShared *comp = _ordered_components[i].component;
+		if ( !comp->initialize() )
+		{
+			std::cout << "Couldn't initialize component!" << std::endl;
+		}
+	}
 
 	_spawned = true;
 }
@@ -33,80 +53,23 @@ void CBaseEntityShared::despawn()
 {
 	_spawned = false;
 
-	_thinks.clear();
-}
-
-void CBaseEntityShared::simulate()
-{
-}
-
-void CBaseEntityShared::simulate_func( CEntityThinkFunc *func, void *data )
-{
-	CBaseEntityShared *self = (CBaseEntityShared *)data;
-	self->simulate();
-	
-	func->next_execute_time = ENTITY_THINK_ALWAYS;
-}
-
-void CBaseEntityShared::think()
-{
-}
-
-void CBaseEntityShared::think_func( CEntityThinkFunc *func, void *data )
-{
-	CBaseEntityShared *ent = (CBaseEntityShared *)data;
-	// Set next execute time before calling think() to allow user
-	// to change it in their think() function.
-	func->next_execute_time = ENTITY_THINK_ALWAYS;
-	ent->think();
-}
-
-PT( CEntityThinkFunc ) CBaseEntityShared::make_think_func( const std::string &name, entitythinkfunc_t func, void *data, int sort )
-{
-	std::ostringstream ss;
-	ss << name << "-entity-" << get_entnum();
-	PT( CEntityThinkFunc ) thinkfunc = new CEntityThinkFunc;
-	thinkfunc->data = data;
-	thinkfunc->func = func;
-	thinkfunc->next_execute_time = ENTITY_THINK_ALWAYS;
-	if ( sort >= 0 )
+	int count = (int)_ordered_components.size();
+	for ( int i = count - 1; i >= 0; i-- )
 	{
-		thinkfunc->sort = sort;
+		BaseComponentShared *comp = _ordered_components[i].component;
+		comp->shutdown();
 	}
-	else
-	{
-		thinkfunc->sort = _think_sort++;
-	}
-	_thinks.push_back( thinkfunc );
 
-	if ( _thinks.size() > 1 )
-	{
-		std::sort( _thinks.begin(), _thinks.end(), []( const CEntityThinkFunc *a, const CEntityThinkFunc *b )
-		{
-			return a->sort < b->sort;
-		} );
-	}
-	
-
-	return thinkfunc;
+	_ordered_components.clear();
+	_components.clear();
 }
 
-void CBaseEntityShared::run_thinks()
+void CBaseEntityShared::simulate( double frametime )
 {
-	ClockObject *clock = ClockObject::get_global_clock();
-	size_t num_thinks = _thinks.size();
-	for ( size_t i = 0; i < num_thinks; i++ )
+	size_t count = _ordered_components.size();
+	for ( size_t i = 0; i < count; i++ )
 	{
-		CEntityThinkFunc *thinkfunc = _thinks[i];
-		if ( thinkfunc->next_execute_time != ENTITY_THINK_NEVER )
-		{
-			if ( thinkfunc->next_execute_time == ENTITY_THINK_ALWAYS ||
-				( thinkfunc->next_execute_time <= clock->get_frame_time() &&
-				  thinkfunc->last_execute_time < thinkfunc->next_execute_time ) )
-			{
-				thinkfunc->func( thinkfunc, thinkfunc->data );
-				thinkfunc->last_execute_time = clock->get_frame_time();
-			}
-		}
+		BaseComponentShared *comp = _ordered_components[i].component;
+		comp->update( frametime );
 	}
 }

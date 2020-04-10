@@ -36,6 +36,9 @@ public:
 	C_CommandContext *get_command_context();
 
 protected:
+	LVector3f _view_offset;
+	CInterpolatedVar<LVector3f> _iv_view_offset;
+
 	C_CommandContext _cmd_ctx;
 	int _tickbase;
 };

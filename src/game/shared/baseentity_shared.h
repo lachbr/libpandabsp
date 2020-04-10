@@ -1,15 +1,12 @@
 #pragma once
 
 #include "config_game_shared.h"
+#include "basecomponent_shared.h"
 #include "entityshared.h"
-#include "entity_think.h"
-#include "netmessages.h"
+#include <ordered_vector.h>
 #include <simpleHashMap.h>
-#include <nodePath.h>
 #include <typedReferenceCount.h>
-#include <datagram.h>
-
-class NetworkClass;
+#include <weakPointerTo.h>
 
 class EXPORT_GAME_SHARED CBaseEntityShared : public TypedReferenceCount
 {
@@ -18,61 +15,92 @@ class EXPORT_GAME_SHARED CBaseEntityShared : public TypedReferenceCount
 public:
 	CBaseEntityShared();
 
-	INLINE NodePath get_node_path() const
-	{
-		return _np;
-	}
+	void set_owner( CBaseEntityShared *owner );
+	CBaseEntityShared *get_owner() const;
 
-	INLINE entid_t get_entnum() const
-	{
-		return _entnum;
-	}
+	entid_t get_entnum() const;
 
+	void add_component( BaseComponentShared *component, int sort = 0 );
+	BaseComponentShared *get_component( uint8_t n ) const;
+	uint8_t get_num_components() const;
+
+	template <class T>
+	bool get_component( T *&component ) const;
+
+	// Override this method to add your components!
 	virtual void init( entid_t entnum );
 	virtual void precache();
 	virtual void spawn();
+
+	virtual void simulate( double frametime );
+
 	virtual void despawn();
 
-	PT( CEntityThinkFunc ) make_think_func( const std::string &name, entitythinkfunc_t func, void *data, int sort = -1 );
-
-	virtual void think();
-
-	INLINE void set_next_think( double next )
-	{
-		_main_think->next_execute_time = next;
-	}
-
-	virtual void simulate();
-
-	void run_thinks();
-
-	void begin_entity_message( Datagram &dg, int msgtype );
-
-private:
-	static void think_func( CEntityThinkFunc *func, void *data );
-	static void simulate_func( CEntityThinkFunc *func, void *data );
-
 protected:
+	WPT( CBaseEntityShared ) _owner;
+
 	bool _spawned;
 	entid_t _entnum;
-	NodePath _np;
-	int _think_sort;
+	
+	class ComponentEntry
+	{
+	public:
+		int sort;
+		PT( BaseComponentShared ) component;
 
-	CEntityThinkFunc *_main_think;
-	pvector<PT( CEntityThinkFunc )> _thinks;
+		class Sorter
+		{
+		public:
+			constexpr bool operator()( const ComponentEntry &left, const ComponentEntry &right ) const
+			{
+				return left.sort < right.sort;
+			}
+		};
+	};
 
-public:
-	virtual NetworkClass *get_network_class() = 0;
+	ordered_vector<ComponentEntry, ComponentEntry::Sorter> _ordered_components;
+	SimpleHashMap<componentid_t, ComponentEntry, integer_hash<componentid_t>> _components;
 };
 
-/**
- * Builds the header of an entity message.
- * Entity messages can be sent from a client to the server,
- * or from the server to client(s).
- */
-INLINE void CBaseEntityShared::begin_entity_message( Datagram &dg, int msgtype )
+inline void CBaseEntityShared::set_owner( CBaseEntityShared *owner )
 {
-	dg.add_uint16( NETMSG_ENTITY_MSG );
-	dg.add_uint32( _entnum );
-	dg.add_uint8( msgtype );
+	_owner = owner;
+}
+
+inline CBaseEntityShared *CBaseEntityShared::get_owner() const
+{
+	if ( !_owner.is_valid_pointer() )
+	{
+		return nullptr;
+	}
+
+	return _owner.p();
+}
+
+template <class T>
+inline bool CBaseEntityShared::get_component( T *&component ) const
+{
+	component = nullptr;
+	int icomp = _components.find( T::get_network_class_s()->get_id() );
+	if ( icomp != -1 )
+	{
+		component = (T *)( _components.get_data( icomp ).component.p() );
+	}
+
+	return component != nullptr;
+}
+
+inline uint8_t CBaseEntityShared::get_num_components() const
+{
+	return (uint8_t)_ordered_components.size();
+}
+
+inline BaseComponentShared *CBaseEntityShared::get_component( uint8_t n ) const
+{
+	return _ordered_components[(size_t)n].component;
+}
+
+inline entid_t CBaseEntityShared::get_entnum() const
+{
+	return _entnum;
 }

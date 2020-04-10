@@ -6,6 +6,61 @@
 #include <bulletWorld.h>
 #include <bulletConvexHullShape.h>
 #include <collisionNode.h>
+#include <bulletRigidBodyNode.h>
+#include <bulletGhostNode.h>
+
+class EXPORT_GAME_SHARED CIBaseBulletNode
+{
+public:
+	CIBaseBulletNode();
+
+	void set_user_data( void *data );
+	void *get_user_data() const;
+
+protected:
+	void *_user_data;
+};
+
+INLINE CIBaseBulletNode::CIBaseBulletNode()
+{
+	_user_data = nullptr;
+}
+
+INLINE void CIBaseBulletNode::set_user_data( void *data )
+{
+	_user_data = data;
+}
+
+INLINE void *CIBaseBulletNode::get_user_data() const
+{
+	return _user_data;
+}
+
+class EXPORT_GAME_SHARED CIBulletRigidBodyNode : public BulletRigidBodyNode, public CIBaseBulletNode
+{
+	DECLARE_CLASS( CIBulletRigidBodyNode, BulletRigidBodyNode )
+public:
+	CIBulletRigidBodyNode( const char *name );
+};
+
+INLINE CIBulletRigidBodyNode::CIBulletRigidBodyNode( const char *name ) :
+	BulletRigidBodyNode( name ),
+	CIBaseBulletNode()
+{
+}
+
+class EXPORT_GAME_SHARED CIBulletGhostNode : public BulletGhostNode, public CIBaseBulletNode
+{
+	DECLARE_CLASS( CIBulletGhostNode, BulletGhostNode )
+public:
+	CIBulletGhostNode( const char *name );
+};
+
+INLINE CIBulletGhostNode::CIBulletGhostNode( const char *name ) :
+	BulletGhostNode( name ),
+	CIBaseBulletNode()
+{
+}
 
 class EXPORT_GAME_SHARED PhysicsSystem : public IGameSystem
 {

@@ -4,6 +4,8 @@
 #include <vector_string.h>
 #include <stl_compares.h>
 
+#include "basecomponent_shared.h"
+
 class NetworkProp
 {
 public:
@@ -13,6 +15,17 @@ public:
 		_offset = offset;
 		_varsize = varsize;
 		_flags = flags;
+		_id = 0u;
+	}
+
+	void set_id( uint8_t id )
+	{
+		_id = id;
+	}
+
+	uint8_t get_id() const
+	{
+		return _id;
 	}
 
 	size_t get_hash( size_t hash ) const
@@ -44,6 +57,7 @@ public:
 
 protected:
 	std::string _name;
+	uint8_t _id;
 	// Byte offset into the class
 	size_t _offset;
 	size_t _varsize;
@@ -58,6 +72,17 @@ public:
 	NetworkClass( const std::string &name )
 	{
 		_name = name;
+		_id = 0u;
+	}
+
+	void set_id( componentid_t id )
+	{
+		_id = id;
+	}
+
+	componentid_t get_id() const
+	{
+		return _id;
 	}
 
 	// Used to validate client/server classes.
@@ -66,12 +91,6 @@ public:
 		size_t hash = 0u;
 
 		hash = string_hash::add_hash( hash, _name );
-
-		size_t parent_count = get_num_parents();
-		for ( size_t i = 0; i < parent_count; i++ )
-		{
-			hash = string_hash::add_hash( hash, get_parent( i ) );
-		}
 
 		size_t prop_count = get_num_inherited_props();
 		for ( size_t i = 0; i < prop_count; i++ )
@@ -102,21 +121,6 @@ public:
 		return _name;
 	}
 
-	void add_parent( const std::string &parent_name )
-	{
-		_parent_classes.push_back( parent_name );
-	}
-
-	size_t get_num_parents() const
-	{
-		return _parent_classes.size();
-	}
-
-	const std::string &get_parent( size_t n ) const
-	{
-		return _parent_classes[n];
-	}
-
 	NetworkProps::const_iterator find_inherited_prop( const std::string &propname ) const
 	{
 		return std::find_if( _inherited_props.begin(), _inherited_props.end(),
@@ -133,12 +137,9 @@ public:
 
 protected:
 	std::string _name;
-
+	componentid_t _id;
 	// Props part of this class and inherited
 	NetworkProps _inherited_props;
-
-	// Names of immediate parent classes
-	vector_string _parent_classes;
 };
 
 #ifdef offsetof
@@ -156,13 +157,17 @@ public:						\
 	{					\
 		return get_network_class_s();		\
 	}					\
+	virtual componentid_t get_type_id() \
+	{ \
+		return get_network_class_s()->get_id(); \
+	} \
 	static NetworkClass *get_network_class_s();			\
 	static MyClass *ptr() \
 	{ \
 	 	static PT(MyClass) global_ptr = new MyClass; \
 		return global_ptr; \
 	} \
-	virtual PT(CBaseEntityShared) make_new() \
+	virtual PT(BaseComponentShared) make_new() \
 	{ \
 		return new MyClass; \
 	} \

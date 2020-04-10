@@ -4,6 +4,7 @@
 #include "entityshared.h"
 #include "simpleHashMap.h"
 #include "baseentity_shared.h"
+#include "basecomponent_shared.h"
 #include "igamesystem.h"
 
 class EXPORT_GAME_SHARED BaseEntitySystem : public IGameSystem
@@ -23,13 +24,28 @@ public:
 	size_t get_num_entities() const;
 	CBaseEntityShared *get_entity( entid_t entnum ) const;
 
+	void register_component( BaseComponentShared *singleton );
+	BaseComponentShared *get_component( componentid_t id ) const;
+
 public:
-	SimpleHashMap<entid_t, PT( CBaseEntityShared ), int_hash> edict;
+	SimpleHashMap<entid_t, PT( CBaseEntityShared ), integer_hash<entid_t>> edict;
+	SimpleHashMap<componentid_t, PT( BaseComponentShared ), integer_hash<componentid_t>> component_registry;
 };
 
 INLINE BaseEntitySystem::BaseEntitySystem() :
 	IGameSystem()
 {
+}
+
+INLINE BaseComponentShared *BaseEntitySystem::get_component( componentid_t id ) const
+{
+	int isingle = component_registry.find( id );
+	if ( isingle != -1 )
+	{
+		return component_registry.get_data( isingle );
+	}
+
+	return nullptr;
 }
 
 INLINE void BaseEntitySystem::insert_entity( CBaseEntityShared *ent )

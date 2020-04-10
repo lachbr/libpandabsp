@@ -47,13 +47,13 @@ static pvector<C_BaseEntity *> g_interpolationlist;
 static pvector<C_BaseEntity *> g_teleportlist;
 
 C_BaseEntity::C_BaseEntity() :
-	CBaseEntityShared(),
 	_bsp_entnum( -1 ),
 	_simulation_time( 0.0f ),
 	_simulation_tick( 0 ),
 	_old_simulation_time( 0.0f ),
 	_interpolation_list_entry( 0xFFFF ),
 	_teleport_list_entry( 0xFFFF ),
+	_owner_entity( 0 ),
 	_iv_origin( "C_BaseEntity_iv_origin" ),
 	_iv_angles( "C_BaseEntity_iv_angles" ),
 	_iv_scale( "C_BaseEntity_iv_scale" )
@@ -65,7 +65,7 @@ C_BaseEntity::C_BaseEntity() :
 
 void C_BaseEntity::init( entid_t entnum )
 {
-	CBaseEntityShared::init( entnum );
+	_entnum = entnum;
 
 	interp_setup_mappings( get_var_mapping() );
 }
@@ -76,48 +76,9 @@ void C_BaseEntity::spawn()
 	update_parent_entity( get_parent_entity() );
 }
 
-void C_BaseEntity::update_parent_entity( int entnum )
-{
-	if ( !_spawned )
-		return;
 
-	if ( entnum != 0 )
-		_np.reparent_to( clents->get_entity( entnum )->get_node_path() );
-	else
-		_np.reparent_to( clrender->get_render() );
-}
 
-void RecvProxy_ParentEntity( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
-{
-	RecvProxy_Int32( prop, object, out, dgi );
 
-	C_BaseEntity *ent = (C_BaseEntity *)object;
-	ent->update_parent_entity( ent->get_parent_entity() );
-}
-
-void RecvProxy_Origin( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
-{
-	RecvProxy_Vec<LVector3>( prop, object, out, dgi );
-
-	C_BaseEntity *ent = (C_BaseEntity *)object;
-	ent->get_node_path().set_pos( ent->_origin );
-}
-
-void RecvProxy_Angles( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
-{
-	RecvProxy_Vec<LVector3>( prop, object, out, dgi );
-
-	C_BaseEntity *ent = (C_BaseEntity *)object;
-	ent->get_node_path().set_hpr( ent->_angles );
-}
-
-void RecvProxy_Scale( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
-{
-	RecvProxy_Vec<LVector3>( prop, object, out, dgi );
-
-	C_BaseEntity *ent = (C_BaseEntity *)object;
-	ent->get_node_path().set_scale( ent->_scale );
-}
 
 //
 // Interpolation
@@ -306,7 +267,6 @@ bool C_BaseEntity::should_interpolate()
 	return true;
 }
 
-
 void C_BaseEntity::post_data_update()
 {
 	bool simulation_changed = _simulation_time != _old_simulation_time;
@@ -470,44 +430,8 @@ void C_BaseEntity::receive_entity_message( int msgtype, DatagramIterator &dgi )
 {
 }
 
-void RecvProxy_SimulationTime( RecvProp *prop, void *object, void *out, DatagramIterator &dgi )
-{
-	C_BaseEntity *ent = (C_BaseEntity *)object;
-
-	int t;
-	int tickbase;
-	int addt;
-
-	// Unpack the data.
-	addt = dgi.get_int32();
-
-	// Note, this needs to be encoded relative to the packet timestamp, not raw client
-	// clock
-	tickbase = cl->get_network_base( cl->get_tickcount(), ent->get_entnum() );
-
-	t = tickbase;
-	// and then go back to floating point time
-	t += addt; // Add in an additional up to 256 100ths from the server.
-
-	// center _simulation_time around current time.
-	while ( t < cl->get_tickcount() - 127 )
-		t += 256;
-	while ( t > cl->get_tickcount() + 127 )
-		t -= 256;
-
-	ent->_simulation_time = t * cl->get_interval_per_tick();
-
-	c_baseentity_cat.debug()
-		<< "Received simulation time. Server time: " << addt
-		<< ", Simulation time: " << ent->_simulation_time << "\n";
-}
-
 IMPLEMENT_CLIENTCLASS_RT_NOBASE( C_BaseEntity, CBaseEntity )
-	RecvPropVec3( PROPINFO( _origin ), RecvProxy_Origin ),
-	RecvPropVec3( PROPINFO( _angles ), RecvProxy_Angles ),
-	RecvPropVec3( PROPINFO( _scale ), RecvProxy_Scale ),
-	RecvPropEntnum( PROPINFO( _parent_entity ), RecvProxy_ParentEntity ),
 	RecvPropInt( PROPINFO( _bsp_entnum ) ),
-	RecvPropInt( PROPINFO( _simulation_time ), RecvProxy_SimulationTime ),
-	RecvPropInt( PROPINFO( _simulation_tick ) )
+	RecvPropInt( PROPINFO( _simulation_tick ) ),
+	RecvPropEntnum( PROPINFO( _owner_entity ) )
 END_RECV_TABLE()

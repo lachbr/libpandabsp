@@ -23,6 +23,7 @@ void CBasePlayerShared::player_move( CUserCmd *cmd, float frametime )
 
 	if ( cmd->buttons & IN_JUMP )
 	{
+		std::cout << "Start jump!!!" << std::endl;
 		_controller->start_jump();
 	}
 
@@ -37,7 +38,7 @@ void CBasePlayerShared::player_move( CUserCmd *cmd, float frametime )
 
 	LVector3f vel( cmd->sidemove, cmd->forwardmove, 0.0f );
 	_controller->set_linear_movement( vel );
-	_controller->set_angular_movement( cmd->mousedx );
+	_controller->set_angular_movement( 0.0f );
 
 	_controller->update( frametime );
 }

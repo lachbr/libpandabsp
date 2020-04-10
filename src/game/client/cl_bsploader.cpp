@@ -170,6 +170,8 @@ void ClientBSPSystem::load_bsp_level( const Filename &path, bool is_transition )
 
 	_bsp_level.reparent_to( rsys->get_render() );
 
+	rsys->get_render().ls();
+
 	nsys->set_client_state( CLIENTSTATE_PLAYING );
 }
 

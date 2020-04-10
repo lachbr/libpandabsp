@@ -3,6 +3,7 @@
 #include "config_clientdll.h"
 #include "inputsystem.h"
 #include <referenceCount.h>
+#include "player_controls.h"
 
 class CUserCmd;
 
@@ -13,14 +14,7 @@ class EXPORT_CLIENT_DLL CInput : public InputSystem
 public:
 	CInput();
 
-	virtual float get_walk_speed() const;
-	virtual float get_norm_speed() const;
-	virtual float get_run_speed() const;
-	virtual float get_duck_speed() const;
-
-	virtual void setup_mouse( CUserCmd *cmd );
-	virtual void setup_move( CUserCmd *cmd );
-	virtual void setup_view( CUserCmd *cmd );
+	virtual PT( PlayerControls ) install_player_controls();
 
 	virtual void create_cmd( CUserCmd *cmd, int commandnumber,
 				 float input_sample_frametime, bool active );
@@ -30,6 +24,7 @@ public:
 	bool is_enabled() const;
 
 protected:
+	PT( PlayerControls ) _controls;
 	bool _enabled;
 };
 
