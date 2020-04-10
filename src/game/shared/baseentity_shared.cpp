@@ -23,6 +23,16 @@ void CBaseEntityShared::add_component( BaseComponentShared *component, int sort 
 void CBaseEntityShared::init( entid_t entnum )
 {
 	_entnum = entnum;
+
+	size_t count = _ordered_components.size();
+	for ( size_t i = 0; i < count; i++ )
+	{
+		BaseComponentShared *comp = _ordered_components[i].component;
+		if ( !comp->initialize() )
+		{
+			std::cout << "Couldn't initialize component!" << std::endl;
+		}
+	}
 }
 
 void CBaseEntityShared::precache()
@@ -40,10 +50,7 @@ void CBaseEntityShared::spawn()
 	for ( size_t i = 0; i < count; i++ )
 	{
 		BaseComponentShared *comp = _ordered_components[i].component;
-		if ( !comp->initialize() )
-		{
-			std::cout << "Couldn't initialize component!" << std::endl;
-		}
+		comp->spawn();
 	}
 
 	_spawned = true;

@@ -78,6 +78,10 @@ public:
 		return true;
 	}
 
+        virtual void spawn()
+        {
+        }
+
 	virtual void update( double frametime )
 	{
 	}
