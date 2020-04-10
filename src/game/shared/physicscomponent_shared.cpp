@@ -129,3 +129,19 @@ void PhysicsComponent::shutdown()
 		physics_setup = false;
 	}
 }
+
+#if !defined( CLIENT_DLL )
+
+IMPLEMENT_SERVERCLASS_ST_NOBASE( CPhysicsComponent )
+	SendPropInt( PROPINFO( phys_mask ) ),
+	SendPropInt( PROPINFO( solid ) ),
+END_SEND_TABLE()
+
+#else
+
+IMPLEMENT_CLIENTCLASS_RT_NOBASE( C_PhysicsComponent, CPhysicsComponent )
+	RecvPropInt( PROPINFO( phys_mask ) ),
+	RecvPropInt( PROPINFO( solid ) ),
+END_RECV_TABLE()
+
+#endif
