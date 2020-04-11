@@ -13,45 +13,8 @@
 
 #include "clientbase.h"
 #include "cl_rendersystem.h"
-#include "c_baseanimating.h"
 
 #include "bsp_material.h"
-
-class C_TestEnt : public C_BaseAnimating
-{
-        DECLARE_CLIENTCLASS( C_TestEnt, C_BaseAnimating )
-
-public:
-        virtual void spawn();
-        virtual void receive_entity_message( int msgtype, DatagramIterator &dgi );
-};
-
-void C_TestEnt::spawn()
-{
-        C_BaseAnimating::spawn();
-
-        // Tell CTestEnt hello
-        Datagram dg;
-        begin_entity_message( dg, 0 );
-        dg.add_string( "HELLO FROM C_TestEnt!" );
-        send_entity_message( dg );
-}
-
-void C_TestEnt::receive_entity_message( int msgtype, DatagramIterator &dgi )
-{
-        switch ( msgtype )
-        {
-        case 1:
-                {
-                        std::string msg = dgi.get_string();
-                        std::cout << "C_TestEnt: Server responded! " << msg << std::endl;
-                        break;
-                }
-        }
-}
-
-IMPLEMENT_CLIENTCLASS_RT( C_TestEnt, CTestEnt )
-END_RECV_TABLE()
 
 int main( int argc, char **argv )
 {

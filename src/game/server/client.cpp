@@ -2,6 +2,7 @@
 #include "serverbase.h"
 #include "usercmd.h"
 #include "baseplayer.h"
+#include "playercomponent.h"
 #include <datagramIterator.h>
 
 NotifyCategoryDef( sv_client, "" )
@@ -61,5 +62,9 @@ void Client::handle_cmd( DatagramIterator &dgi )
 	}
 
 	// TODO: paused
-	_player->process_usercmds( cmds, new_commands, totalcmds, false );
+	CPlayerComponent *player_component;
+	if ( _player->get_component_of_type( player_component ) )
+	{
+		player_component->process_usercmds( cmds, new_commands, totalcmds, false );
+	}
 }

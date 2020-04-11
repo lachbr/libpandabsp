@@ -1,5 +1,5 @@
 #include "local_player.h"
-#include "c_baseplayer.h"
+//#include "c_baseplayer.h"
 
 LocalPlayer::LocalPlayer()
 {

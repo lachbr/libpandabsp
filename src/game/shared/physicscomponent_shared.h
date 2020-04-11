@@ -38,9 +38,11 @@ public:
 	NodePath bodynp;
 	bool physics_setup;
 
-#if !defined( CLIENT_DLL )
 	float mass;
 	bool kinematic;
+
+#if !defined( CLIENT_DLL )
+	
 	NetworkVar( BitMask32, phys_mask );
 	NetworkVar( SolidType, solid );
 #else

@@ -2,6 +2,29 @@
 
 #include "modelRoot.h"
 
+SceneComponent::SceneComponent() :
+	CBaseComponent()
+
+#ifdef CLIENT_DLL
+	,
+	iv_origin( "C_SceneComponent_iv_origin" ),
+	iv_angles( "C_SceneComponent_iv_angles" ),
+	iv_scale( "C_SceneComponent_iv_scale" )
+#endif
+{
+#ifdef CLIENT_DLL
+	add_var( &origin, &iv_origin, LATCH_SIMULATION_VAR );
+	add_var( &angles, &iv_angles, LATCH_SIMULATION_VAR );
+	add_var( &scale, &iv_scale, LATCH_SIMULATION_VAR );
+#endif
+}
+
+void SceneComponent::spawn()
+{
+	BaseClass::spawn();
+	update_parent_entity( parent_entity );
+}
+
 bool SceneComponent::initialize()
 {
 	if ( !BaseClass::initialize() )
@@ -10,7 +33,7 @@ bool SceneComponent::initialize()
 	}
 
 	np = NodePath( new ModelRoot( "entity" ) );
-	parent_entity = -1;
+	parent_entity = 0;
 	origin = LPoint3f( 0 );
 	angles = LVector3f( 0 );
 	scale = LVector3f( 1 );
@@ -28,7 +51,55 @@ void SceneComponent::shutdown()
 
 #if !defined( CLIENT_DLL )
 
-void SceneComponent::transition_xform( const NodePath &landmark_np, const LMatrix4 &transform )
+#include "baseentity.h"
+#include "sv_entitymanager.h"
+#include "serverbase.h"
+
+void CSceneComponent::update_parent_entity( int entnum )
+{
+	if ( entnum != 0 )
+	{
+		CBaseEntityShared *ent = svents->get_entity( entnum );
+		if ( ent )
+		{
+			CSceneComponent *parent_scene;
+			if ( !ent->get_component( parent_scene ) )
+			{
+				return;
+			}
+
+			np.reparent_to( parent_scene->np );
+		}
+
+	}
+	else
+	{
+		np.reparent_to( sv->get_root() );
+	}
+}
+
+void CSceneComponent::init_mapent()
+{
+	if ( _centity->has_entity_value( "origin" ) )
+	{
+		LVector3f org = _centity->get_entity_value_vector( "origin" );
+		set_origin( org / 16.0f );
+	}
+
+	if ( _centity->has_entity_value( "angles" ) )
+	{
+		LVector3f ang = _centity->get_entity_value_vector( "angles" );
+		set_angles( LVector3f( ang[1] - 90, ang[0], ang[2] ) );
+	}
+
+	if ( _centity->has_entity_value( "scale" ) )
+	{
+		LVector3f sc = _centity->get_entity_value_vector( "scale" );
+		set_scale( sc );
+	}
+}
+
+void CSceneComponent::transition_xform( const NodePath &landmark_np, const LMatrix4 &transform )
 {
 	np.set_mat( landmark_np, transform );
 	origin = np.get_pos();
@@ -48,18 +119,33 @@ END_SEND_TABLE()
 #include "cl_rendersystem.h"
 #include "cl_entitymanager.h"
 
+void C_SceneComponent::post_interpolate()
+{
+	// Apply interpolated transform to node
+	if ( !np.is_empty() )
+	{
+		np.set_pos( origin );
+		np.set_hpr( angles );
+		np.set_scale( scale );
+	}
+}
+
 void C_SceneComponent::update_parent_entity( int entnum )
 {
 	if ( entnum != 0 )
 	{
 		CBaseEntityShared *ent = clents->get_entity( entnum );
-		C_SceneComponent *parent_scene;
-		if ( !ent->get_component( parent_scene ) )
+		if ( ent )
 		{
-			return;
-		}
+			C_SceneComponent *parent_scene;
+			if ( !ent->get_component( parent_scene ) )
+			{
+				return;
+			}
 
-		np.reparent_to( parent_scene->np );
+			np.reparent_to( parent_scene->np );
+		}
+		
 	}
 	else
 	{

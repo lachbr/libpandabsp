@@ -1,6 +1,8 @@
 #include "serverbase.h"
 #include "sv_bsploader.h"
-#include "baseanimating.h"
+#include "baseanimating_shared.h"
+#include "physicscomponent_shared.h"
+#include "scenecomponent_shared.h"
 
 #include <randomizer.h>
 
@@ -11,9 +13,9 @@ std::string anims[] =
 	"emptyclick",
 };
 
-class CTestEnt : public CBaseAnimating
+class CTestEnt : public CBaseEntity
 {
-	DECLARE_SERVERCLASS( CTestEnt, CBaseAnimating )
+	DECLARE_ENTITY( CTestEnt, CBaseEntity )
 
 public:
 	CTestEnt() :
@@ -21,47 +23,47 @@ public:
 		_anim( 0 )
 	{
 	}
-	virtual void spawn();
-	virtual void think();
 
-	virtual void receive_entity_message( int msgtype, uint32_t client, DatagramIterator &dgi );
+	virtual void add_components()
+	{
+		BaseClass::add_components();
+
+		PT( CBaseAnimating ) anim = new CBaseAnimating;
+		add_component( anim );
+		animating = anim;
+
+		PT( CPhysicsComponent ) phys = new CPhysicsComponent;
+		add_component( phys );
+		physics = phys;
+	}
+	virtual void spawn();
+	virtual void simulate( double frametime );
 
 private:
 	float _last_change;
 	int _anim;
+
+	CBaseAnimating *animating;
+	CPhysicsComponent *physics;
 };
-
-void CTestEnt::receive_entity_message( int msgtype, uint32_t client, DatagramIterator &dgi )
-{
-	switch ( msgtype )
-	{
-	case 0:
-		{
-			std::string msg = dgi.get_string();
-			std::cout << "CTestEnt: Client said hello! " << msg << std::endl;
-
-			Datagram dg;
-			begin_entity_message( dg, 1 );
-			dg.add_string( "HELLO FROM SERVER CTestEnt!" );
-			send_entity_message( dg, { client } );
-			break;
-		}
-	}
-}
 
 void CTestEnt::spawn()
 {
+	physics->mass = 1.0f;
+	physics->solid = CPhysicsComponent::SOLID_MESH;
+	physics->kinematic = true;
+
+	animating->set_model( "phase_14/models/props/creampie.bam" );
+
 	BaseClass::spawn();
 	//set_model( "models/health_charger/health_charger.act" );
-	set_model( "phase_14/models/props/creampie.bam" );
-	set_mass( 1.0f );
-	set_solid( SOLID_MESH );
-	init_physics();
-	set_origin( LPoint3( 40 / 16.0f, 650 / 16.0f, 8 / 16.0f ) );
+	
+	
+	_scene->set_origin( LPoint3( 40 / 16.0f, 650 / 16.0f, 8 / 16.0f ) );
 	//set_animation( "idle" );
 }
 
-void CTestEnt::think()
+void CTestEnt::simulate( double frametime )
 {
 	if ( sv->get_curtime() - _last_change >= 5.0f )
 	{
@@ -71,20 +73,19 @@ void CTestEnt::think()
 		//	_anim = 0;
 		//set_animation( anims[_anim] );
 		_last_change = sv->get_curtime();
-		get_physics_node()->set_active( true, true );
-		get_physics_node()->set_linear_velocity( LVector3( 0, 0, 12.5 ) );
-		get_physics_node()->set_angular_velocity( LVector3( random.random_real( 2 ) - 1, random.random_real( 2 ) - 1, random.random_real( 2 ) - 1 ) * 5 );
+		physics->bodynode->set_active( true, true );
+		physics->bodynode->set_linear_velocity( LVector3( 0, 0, 12.5 ) );
+		physics->bodynode->set_angular_velocity( LVector3( random.random_real( 2 ) - 1, random.random_real( 2 ) - 1, random.random_real( 2 ) - 1 ) * 5 );
 		//get_physics_node()->apply_impulse( LVector3( 0, 0, 500 ), LVector3( 0, 0, 0 ) );
 	}
 
 	//set_origin( LPoint3( 12, 75, 5 + std::sin( sv->get_curtime() ) ) );
+
+	BaseClass::simulate( frametime );
 	
 }
 
-IMPLEMENT_SERVERCLASS_ST( CTestEnt )
-END_SEND_TABLE()
-
-LINK_ENTITY_TO_CLASS( CTestEnt, test_ent )
+IMPLEMENT_ENTITY( CTestEnt, test_ent )
 
 int main( int argc, char **argv )
 {
@@ -110,6 +111,8 @@ int main( int argc, char **argv )
 	}
 
 	CreateEntityByName( "test_ent" );
+
+	sv->get_root().ls();
 
 	sv->run();
 	return 0;

@@ -3,6 +3,7 @@
 #include "sv_entitymanager.h"
 #include "physicssystem.h"
 #include "serverbase.h"
+#include "scenecomponent_shared.h"
 
 #include <texturePool.h>
 
@@ -53,13 +54,19 @@ void CSV_BSPLoader::cleanup_entities( bool is_transition )
 	{
 		// We are in a transition to another level.
 		// Store all entity transforms relative to the source landmark.
+		CSceneComponent *scene;
+
 		for ( size_t i = 0; i < _entities.size(); i++ )
 		{
 			WPT( CBaseEntity ) ent = _entities[i];
 			if ( ent.was_deleted() )
 				continue;
 
-			ent->_landmark_relative_transform = ent->get_node_path().get_mat( _transition_source_landmark );
+			if ( ent->get_component( scene ) )
+			{
+				scene->landmark_relative_transform = scene->np.get_mat( _transition_source_landmark );
+			}
+			
 		}
 	}
 }
@@ -91,23 +98,33 @@ bool CSV_BSPLoader::read( const Filename &file, bool is_transition )
 
 		if ( dest_landmark )
 		{
-			NodePath dest_landmark_np( "destination_landmark" );
-			dest_landmark_np.set_pos( dest_landmark->_origin );
-			dest_landmark_np.set_hpr( dest_landmark->_angles );
-
-			for ( size_t i = 0; i < _entities.size(); i++ )
+			CSceneComponent *dest_scene;
+			if ( dest_landmark->get_component( dest_scene ) )
 			{
-				WPT( CBaseEntity ) ent = _entities[i];
-				if ( ent.was_deleted() )
-					continue;
+				NodePath dest_landmark_np( "destination_landmark" );
+				dest_landmark_np.set_pos( dest_scene->origin );
+				dest_landmark_np.set_hpr( dest_scene->angles );
 
-				if ( ent->_preserved )
+				for ( size_t i = 0; i < _entities.size(); i++ )
 				{
-					ent->transition_xform( dest_landmark_np, ent->_landmark_relative_transform );
-				}
-			}
+					WPT( CBaseEntity ) ent = _entities[i];
+					if ( ent.was_deleted() )
+						continue;
 
-			dest_landmark_np.remove_node();
+					if ( ent->_preserved )
+					{
+						CSceneComponent *ent_scene;
+						if ( ent->get_component( ent_scene ) )
+						{
+							ent_scene->transition_xform( dest_landmark_np,
+										     ent_scene->landmark_relative_transform );
+						}
+						
+					}
+				}
+
+				dest_landmark_np.remove_node();
+			}
 		}
 
 		clear_transition_landmark();

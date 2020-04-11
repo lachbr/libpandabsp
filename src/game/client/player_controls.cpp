@@ -161,7 +161,7 @@ void PlayerControls::do_controls( CUserCmd *cmd )
 		mod_forward = apply_friction( _goal_forward, _last_forward, sfriction );
 	}
 
-	std::cout << _goal_forward << " | " << _goal_side << std::endl;
+	//std::cout << _goal_forward << " | " << _goal_side << std::endl;
 	// This is the speed we will use
 	cmd->forwardmove = _goal_forward;
 	cmd->sidemove = _goal_side;

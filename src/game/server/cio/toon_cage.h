@@ -1,10 +1,11 @@
 #pragma once
 
-#include "baseanimating.h"
+#include "baseentity.h"
 
-class CToonCage : public CBaseAnimating
+class CToonCage : public CBaseEntity
 {
-	DECLARE_SERVERCLASS( CToonCage, CBaseAnimating )
+	DECLARE_ENTITY( CToonCage, CBaseEntity )
 public:
+	virtual void add_components();
 	virtual void spawn();
 };

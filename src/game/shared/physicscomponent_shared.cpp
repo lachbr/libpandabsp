@@ -28,11 +28,8 @@ bool PhysicsComponent::initialize()
 	physics_setup = false;
 	solid = SOLID_NONE;
 	phys_mask = BitMask32::all_on();
-
-#if !defined( CLIENT_DLL )
 	mass = 0.0f;
 	kinematic = false;
-#endif
 
 	return true;
 }

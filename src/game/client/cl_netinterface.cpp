@@ -4,6 +4,7 @@
 #include "usercmd.h"
 #include "cl_bsploader.h"
 #include "cl_entitymanager.h"
+#include "network_class.h"
 
 #include <datagramIterator.h>
 #include <clockObject.h>
@@ -90,7 +91,46 @@ void ClientNetInterface::connect( const NetAddress &addr )
 
 void ClientNetInterface::connect_success( DatagramIterator &dgi )
 {
+	uint16_t comp_count = dgi.get_uint16();
+
+	for ( size_t i = 0; i < comp_count; i++ )
+	{
+		std::string network_name = dgi.get_string();
+		uint16_t comp_id = dgi.get_uint16();
+
+		BaseComponentShared *comp = clents->get_component_from_networkname( network_name );
+		if ( !comp )
+		{
+			nassert_raise( "Component missing from client network tables!" );
+			return;
+		}
+
+		NetworkClass *nclass = comp->get_network_class();
+		nclass->set_id( comp_id );
+
+		uint8_t prop_count = dgi.get_uint8();
+		for ( size_t j = 0; j < prop_count; j++ )
+		{
+			std::string prop_name = dgi.get_string();
+			uint8_t prop_id = dgi.get_uint8();
+
+			auto itr = nclass->find_inherited_prop( prop_name );
+			if ( itr == nclass->inherited_props_end() )
+			{
+				nassert_raise( "Property missing from client component!" );
+				return;
+			}
+			NetworkProp *prop = *itr;
+			prop->set_id( prop_id );
+		}
+
+		c_client_cat.info()
+			<< nclass->get_name() << " has ID " << nclass->get_id() << std::endl;
+		clents->register_component( comp );
+	}
+
 	c_client_cat.info() << "Connected to " << _server_addr << std::endl;
+
 	cl->set_tick_rate( dgi.get_uint8() );
 	_my_client_id = dgi.get_uint16();
 

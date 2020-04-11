@@ -52,7 +52,7 @@ class EXPORT_GAME_SHARED BaseAnimating : public CBaseComponent
 public:
 	BaseAnimating();
 
-#if !defined( CLIENT_DLLL )
+#if !defined( CLIENT_DLL )
 	virtual void handle_anim_event( AnimEvent_t *ae );
 #endif
 

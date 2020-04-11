@@ -4,6 +4,7 @@
 #include "serverbase.h"
 #include "sv_netinterface.h"
 #include "baseplayer.h"
+#include "basecomponent.h"
 
 #define SPEW_NETWORK_CLASSES 0
 
@@ -103,6 +104,56 @@ void ServerEntitySystem::reset_all_changed_props()
 	}
 }
 
+inline static int serialize_component( Datagram &comp_dg, CBaseEntity *ent, uint32_t client_id,
+				       CBaseComponent *comp, bool full_snapshot )
+{
+	NetworkClass *cls = comp->get_network_class();
+
+	if ( cls->has_flags( SENDFLAGS_OWNRECV ) && client_id != ent->get_owner_client() )
+	{
+		// This component should only be seen by owners.
+		return 0;
+	}
+
+	int num_props;
+	if ( full_snapshot || comp->is_fully_changed() )
+		num_props = cls->get_num_inherited_props();
+	else
+		num_props = comp->get_num_changed_offsets();
+
+	// If component has no props, build nothing
+	if ( num_props == 0 )
+		return 0;
+
+	Datagram props_dg;
+
+	int props_added = 0;
+
+	int total_props = cls->get_num_inherited_props();
+	for ( int j = 0; j < total_props; j++ )
+	{
+		SendProp *prop = (SendProp *)cls->get_inherited_prop( j );
+		if ( full_snapshot || comp->is_fully_changed() || comp->is_property_changed( prop ) )
+		{
+			props_dg.add_uint8( prop->get_id() );
+			//std::cout << "propname: " << prop.get_prop_name() << std::endl;
+			void *data = (unsigned char *)comp + prop->get_offset();
+			prop->get_proxy()( prop, comp, data, props_dg );
+			props_added++;
+		}
+	}
+
+	// If nothing changed, build nothing
+	if ( props_added == 0 )
+		return 0;
+
+	comp_dg.add_uint16( comp->get_type_id() );
+	comp_dg.add_uint8( props_added );
+	comp_dg.append_data( props_dg.get_data(), props_dg.get_length() );
+
+	return props_added;
+}
+
 bool ServerEntitySystem::build_snapshot( Datagram &dg, uint32_t client_id, bool full_snapshot )
 {
 	Datagram snapshot_body;
@@ -112,50 +163,28 @@ bool ServerEntitySystem::build_snapshot( Datagram &dg, uint32_t client_id, bool 
 	for ( size_t i = 0; i < size; i++ )
 	{
 		CBaseEntity *ent = DCAST( CBaseEntity, edict.get_data( i ) );
-		NetworkClass *cls = ent->get_network_class();
 
-		int num_props;
-		if ( full_snapshot || ent->is_entity_fully_changed() )
-			num_props = cls->get_num_inherited_props();
-		else
-			num_props = ent->get_num_changed_offsets();
+		Datagram comp_body;
 
-		if ( num_props == 0 )
-			continue;
-
-		Datagram props_body;
-
-		int props_added = 0;
-		int total_props = cls->get_num_inherited_props();
-		for ( int j = 0; j < total_props; j++ )
+		uint8_t comps_changed = 0;
+		uint8_t comp_count = ent->get_num_components();
+		for ( uint8_t c = 0; c < comp_count; c++ )
 		{
-			SendProp *prop = (SendProp *)cls->get_inherited_prop( j );
-			if ( full_snapshot || ent->is_entity_fully_changed() || ent->is_property_changed( prop ) )
-			{
-				if ( ( prop->get_flags() & SENDFLAGS_OWNRECV ) != 0 &&
-				     ent->get_owner_client() != client_id )
-				{
-					// Only the owner should get this prop.
-					continue;
-				}
+			CBaseComponent *comp = DCAST( CBaseComponent, ent->get_component( c ) );
 
-				props_body.add_string( prop->get_name() );
-				//std::cout << "propname: " << prop.get_prop_name() << std::endl;
-				void *data = (unsigned char *)ent + prop->get_offset();
-				prop->get_proxy()( prop, ent, data, props_body );
-				props_added++;
+			if ( serialize_component( comp_body, ent, client_id, comp, full_snapshot ) > 0 )
+			{
+				comps_changed++;
 			}
 		}
 
-		if ( props_added == 0 )
-			continue;
-
-		snapshot_body.add_uint32( ent->get_entnum() );
-		snapshot_body.add_string( cls->get_name() );
-		snapshot_body.add_uint16( props_added );
-		snapshot_body.append_data( props_body.get_data(), props_body.get_length() );
-
-		num_changed++;
+		if ( comps_changed > 0 )
+		{
+			snapshot_body.add_uint16( ent->get_entnum() );
+			snapshot_body.add_uint8( comps_changed );
+			snapshot_body.append_data( comp_body.get_data(), comp_body.get_length() );
+			num_changed++;
+		}
 	}
 
 	// No need to send a snapshot.

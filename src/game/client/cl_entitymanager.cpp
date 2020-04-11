@@ -1,6 +1,8 @@
 #include "cl_entitymanager.h"
 #include "c_baseentity.h"
 #include "netmessages.h"
+#include "clientbase.h"
+#include "c_basecomponent.h"
 
 NotifyCategoryDeclNoExport( clents )
 NotifyCategoryDef( clents, "" )
@@ -79,43 +81,73 @@ void ClientEntitySystem::receive_snapshot( DatagramIterator &dgi )
 	changed_ents.reserve( num_ents );
 	for ( int ient = 0; ient < num_ents; ient++ )
 	{
-		entid_t entnum = dgi.get_uint32();
-		//std::cout << "entnum " << entnum << std::endl;
-		std::string network_name = dgi.get_string();
-		int num_props = dgi.get_uint16();
+		entid_t entnum = dgi.get_uint16();
 
 		// Make sure this entity exists, if not, create it.
 		bool new_ent = false;
 		PT( C_BaseEntity ) ent = DCAST( C_BaseEntity, get_entity( entnum ) );
 		if ( !ent )
 		{
-			ent = make_entity( network_name, entnum );
+			ent = new C_BaseEntity;
+			ent->init( entnum );
+			ent->precache();
+			insert_entity( ent );
 			new_ent = true;
 		}
 
-		if ( !ent )
-		{
-			clents_cat.error()
-				<< "No client definition for " << network_name << "\n";
-			break;
-		}
+		//if ( !ent )
+		//{
+		//	clents_cat.error()
+		//		<< "No client definition for " << network_name << "\n";
+		//	break;
+		//}
 
-		clents_cat.debug()
-			<< "Num props on " << network_name << ": " << num_props << std::endl;
+		int num_comps = dgi.get_uint8();
 
-		for ( int iprop = 0; iprop < num_props; iprop++ )
+		for ( int icomp = 0; icomp < num_comps; icomp++ )
 		{
-			std::string prop_name = dgi.get_string();
-			auto itr = ent->get_network_class()->find_inherited_prop( prop_name );
-			nassertv( itr != ent->get_network_class()->inherited_props_end() );
-			RecvProp *prop = (RecvProp *)( *itr );
-			void *out = (unsigned char *)ent.p() + prop->get_offset();
-			prop->get_proxy()( prop, ent, out, dgi );
+			componentid_t compid = dgi.get_uint16();
+
+			PT( C_BaseComponent ) comp = nullptr;
+			if ( new_ent )
+			{
+				C_BaseComponent *csingle = (C_BaseComponent *)get_component( compid );
+				if ( csingle )
+				{
+					comp = DCAST( C_BaseComponent, csingle->make_new() );
+					ent->add_component( comp );
+					comp->initialize();
+					comp->precache();
+				}
+			}
+			else
+			{
+				comp = DCAST( C_BaseComponent, ent->get_component_by_id( compid ) );
+			}
+
+			int num_props = dgi.get_uint8();
+
+			for ( int iprop = 0; iprop < num_props; iprop++ )
+			{
+				uint8_t prop_id = dgi.get_uint8();
+				RecvProp *prop = (RecvProp *)( comp->get_network_class()
+							       ->get_inherited_prop_by_id( prop_id ) );
+				void *out = (unsigned char *)comp.p() + prop->get_offset();
+				prop->get_proxy()( prop, comp, out, dgi );
+			}
 		}
+		//int num_props = dgi.get_uint16();
+
+		
+
+		//clents_cat.debug()
+		//	<< "Num props on " << network_name << ": " << num_props << std::endl;
+
+		
 
 		if ( new_ent )
 			new_ents.push_back( ent );
-		if ( num_props > 0 )
+		if ( num_comps > 0 )
 			changed_ents.push_back( ent );
 	}
 
@@ -127,33 +159,14 @@ void ClientEntitySystem::receive_snapshot( DatagramIterator &dgi )
 		ent->post_data_update();
 }
 
-C_BaseEntity *ClientEntitySystem::make_entity( const std::string &network_name, entid_t entnum )
-{
-	PT( CBaseEntityShared ) ent_shared;
-
-	C_BaseEntity *singleton = get_entity_from_networkname( network_name );
-	if ( !singleton )
-	{
-		return nullptr;
-	}
-
-	ent_shared = singleton->make_new();
-	C_BaseEntity *ent = (C_BaseEntity *)ent_shared.p();
-	ent->init( entnum );
-	ent->precache();
-	insert_entity( ent );
-
-	return ent;
-}
-
 void ClientEntitySystem::update( double frametime )
 {
-	C_BaseEntity::interpolate_entities();
+	C_BaseComponent::interpolate_components();
 
 	size_t count = edict.size();
 	for ( size_t i = 0; i < count; i++ )
 	{
 		C_BaseEntity *ent = DCAST( C_BaseEntity, edict.get_data( i ) );
-		ent->run_thinks();
+		ent->simulate( cl->get_frametime() );
 	}
 }

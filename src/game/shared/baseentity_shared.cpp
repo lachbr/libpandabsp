@@ -6,7 +6,8 @@ IMPLEMENT_CLASS( CBaseEntityShared )
 CBaseEntityShared::CBaseEntityShared() :
 	_spawned( false ),
 	_entnum( 0 ),
-	_owner( nullptr )
+	_owner( nullptr ),
+	_curr_sort( -1000 )
 {
 }
 
@@ -15,6 +16,7 @@ void CBaseEntityShared::add_component( BaseComponentShared *component, int sort 
 	ComponentEntry entry;
 	entry.sort = sort;
 	entry.component = component;
+	component->set_entity( this );
 
 	_ordered_components.insert_nonunique( entry );
 	_components[component->get_type_id()] = entry;

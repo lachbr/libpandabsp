@@ -301,7 +301,7 @@ void BaseAnimating::set_animation( const std::string &anim )
 	auto itr = _anims.find( animation );
 	if ( itr == _anims.end() )
 	{
-		nassert_raise( "Animation " + animation.get() + " not found!" );
+		//nassert_raise( "Animation " + animation.get() + " not found!" );
 		return;
 	}
 

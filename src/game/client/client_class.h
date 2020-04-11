@@ -103,7 +103,7 @@ for (size_t i = 0; i < recv_props.size(); i++) \
 	if ( prop->get_name() == "__null__" ) continue; \
 	nclass->add_inherited_prop(prop); \
 } \
- ClientEntitySystem::ptr()->link_networkname_to_entity(__networkname, MyClass::ptr()); \
+ ClientEntitySystem::ptr()->link_networkname_to_component(__networkname, MyClass::ptr()); \
  return 1; \
 } \
 

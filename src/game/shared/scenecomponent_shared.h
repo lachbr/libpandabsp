@@ -17,19 +17,25 @@ class SceneComponent : public CBaseComponent
 	DECLARE_COMPONENT( SceneComponent, CBaseComponent )
 
 public:
+	SceneComponent();
+
 	virtual bool initialize();
 	virtual void shutdown();
+	virtual void spawn();
+
+	void update_parent_entity( int parent );
 
 	void set_origin( const LPoint3f &origin );
 	void set_angles( const LVector3f &angles );
 	void set_scale( const LVector3f &scale );
 
 #if !defined( CLIENT_DLL )
+	virtual void init_mapent();
 	void transition_xform( const NodePath &landmark_np, const LMatrix4 &transform );
 #endif
 
 #ifdef CLIENT_DLL
-	void update_parent_entity( int parent );
+	virtual void post_interpolate();
 #endif
 
 public:
@@ -48,6 +54,7 @@ public:
 	NetworkVec3( origin );
 	NetworkVec3( angles );
 	NetworkVec3( scale );
+	LMatrix4f landmark_relative_transform;
 #endif
 };
 

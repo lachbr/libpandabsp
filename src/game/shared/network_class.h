@@ -69,10 +69,21 @@ typedef pvector<NetworkProp *> NetworkProps;
 class NetworkClass
 {
 public:
-	NetworkClass( const std::string &name )
+	NetworkClass( const std::string &name, int flags = 0 )
 	{
 		_name = name;
 		_id = 0u;
+		_flags = flags;
+	}
+
+	void set_flag( int flag )
+	{
+		_flags |= flag;
+	}
+
+	bool has_flags( int flag )
+	{
+		return ( _flags & flag ) != 0;
 	}
 
 	void set_id( componentid_t id )
@@ -111,6 +122,21 @@ public:
 		return _inherited_props[n];
 	}
 
+	NetworkProp *get_inherited_prop_by_id( uint8_t id ) const
+	{
+		size_t count = _inherited_props.size();
+		for ( size_t i = 0; i < count; i++ )
+		{
+			NetworkProp *prop = _inherited_props[i];
+			if ( prop->get_id() == id )
+			{
+				return prop;
+			}
+		}
+
+		return nullptr;
+	}
+
 	size_t get_num_inherited_props() const
 	{
 		return _inherited_props.size();
@@ -136,6 +162,7 @@ public:
 	}
 
 protected:
+	int _flags;
 	std::string _name;
 	componentid_t _id;
 	// Props part of this class and inherited
@@ -173,14 +200,17 @@ public:						\
 	} \
 	static int network_class_init();
 
-#define IMPLEMENT_NETWORKCLASS(classname, networkname) \
+#define IMPLEMENT_NETWORKCLASS_FLAGS(classname, networkname, flags) \
 IMPLEMENT_CLASS(classname) \
 NetworkClass *classname::get_network_class_s() \
 { \
-	static NetworkClass *global_ptr = new NetworkClass(#networkname); \
+	static NetworkClass *global_ptr = new NetworkClass(#networkname, flags); \
 	return global_ptr; \
 } \
 static int __implement_##classname##_ret = classname::network_class_init(); \
+
+#define IMPLEMENT_NETWORKCLASS(classname, networkname) \
+IMPLEMENT_NETWORKCLASS_FLAGS(classname, networkname, 0)
 
 #define INHERIT_PROP_TABLE(classname) \
 	NetworkClass *base_nclass = classname::BaseClass::get_network_class_s(); \

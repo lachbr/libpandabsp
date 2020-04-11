@@ -132,6 +132,30 @@ void ServerNetInterface::handle_client_hello( SteamNetConnectionStatusChangedCal
 	}
 
 	NetDatagram dg = BeginMessage( NETMSG_HELLO_RESP );
+
+	// Build a packet of all of our network tables and their IDs so the client can
+	// use the same IDs.
+
+	uint16_t comp_count = svents->component_registry.size();
+	dg.add_uint16( comp_count );
+	for ( size_t i = 0; i < comp_count; i++ )
+	{
+		BaseComponentShared *comp = svents->component_registry.get_data( i );
+		NetworkClass *nclass = comp->get_network_class();
+		dg.add_string( nclass->get_name() );
+		dg.add_uint16( nclass->get_id() );
+
+
+		uint8_t prop_count = nclass->get_num_inherited_props();
+		dg.add_uint8( prop_count );
+		for ( size_t j = 0; j < prop_count; j++ )
+		{
+			NetworkProp *prop = nclass->get_inherited_prop( j );
+			dg.add_string( prop->get_name() );
+			dg.add_uint8( prop->get_id() );
+		}
+	}
+
 	dg.add_uint8( sv_tickrate );
 	dg.add_uint16( cl->get_client_id() );
 	dg.add_uint32( plyr->get_entnum() );
@@ -151,7 +175,7 @@ void ServerNetInterface::send_tick()
 
 PT( CBaseEntity ) ServerNetInterface::make_player()
 {
-	return svents->make_entity_by_name( "baseplayer" );
+	return svents->make_entity_by_name( "ci_player" );
 }
 
 void ServerNetInterface::update_client_state( Client *cl, int state )

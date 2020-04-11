@@ -47,8 +47,8 @@ private:
 
 enum
 {
-	SENDFLAGS_NONE,
-	SENDFLAGS_OWNRECV,
+	SENDFLAGS_NONE		= 0,
+	SENDFLAGS_OWNRECV	= 1 << 0,
 };
 
 EXPORT_SERVER_DLL void SendProxy_Int8( SendProp *prop, void *object, void *value, Datagram &dg );
@@ -114,7 +114,29 @@ BEGIN_SEND_TABLE(classname)
 IMPLEMENT_NETWORKCLASS(classname, classname) \
 BEGIN_SEND_TABLE_NOBASE(classname)
 
-#define LINK_ENTITY_TO_CLASS(classname, editorname) \
+#define IMPLEMENT_SERVERCLASS_ST_OWNRECV(classname)		\
+IMPLEMENT_NETWORKCLASS_FLAGS(classname, classname, SENDFLAGS_OWNRECV)			\
+BEGIN_SEND_TABLE(classname)
+
+#define IMPLEMENT_SERVERCLASS_ST_NOBASE_OWNRECV(classname)	\
+IMPLEMENT_NETWORKCLASS_FLAGS(classname, classname, SENDFLAGS_OWNRECV) \
+BEGIN_SEND_TABLE_NOBASE(classname)
+
+#define DECLARE_ENTITY(classname, basename) \
+DECLARE_CLASS(classname, basename) \
+public: \
+	static MyClass *ptr() \
+	{ \
+		static PT(MyClass) global_ptr = new MyClass; \
+		return global_ptr; \
+	} \
+	virtual PT(CBaseEntity) make_new() \
+	{ \
+		return new MyClass;\
+	}
+
+#define IMPLEMENT_ENTITY(classname, editorname) \
+IMPLEMENT_CLASS(classname) \
 static int __link_##classname##_to_##editorname() \
 { \
 	ServerEntitySystem::ptr()->link_entity_to_class(#editorname, classname::ptr()); \

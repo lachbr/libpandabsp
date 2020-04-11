@@ -25,7 +25,8 @@
 
 #include <aa_luse.h>
 
-
+class CSceneComponent;
+class CSimulationComponent;
 
 struct entity_s;
 typedef entity_s entity_t;
@@ -36,12 +37,19 @@ class EXPORT_SERVER_DLL CBaseEntity : public CBaseEntityShared
 public:
 	CBaseEntity();
 
+	virtual void add_components();
+
 	virtual bool can_transition() const;
 
 	virtual void init( entid_t entnum );
 	virtual void spawn();
 
 	void init_mapent( entity_t *ent, int bsp_entnum );
+
+	INLINE bool has_entity_value( const std::string &key ) const
+	{
+		return _entity_keyvalues.find( key ) != -1;
+	}
 
 	INLINE std::string get_entity_value( const std::string &key ) const
 	{
@@ -77,11 +85,18 @@ public:
 	void set_owner_client( uint32_t client_id );
 	uint32_t get_owner_client() const;
 
+	void reset_changed_offsets();
+
+	virtual PT( CBaseEntity ) make_new() = 0;
+
 public:
 	int _bsp_entnum;
 
 	bool _map_entity;
 	bool _preserved;
+
+	CSceneComponent *_scene;
+	CSimulationComponent *_sim;
 
 	uint32_t _owner_client;
 

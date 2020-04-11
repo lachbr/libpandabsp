@@ -8,7 +8,6 @@ bool SimulationComponent::initialize()
 	}
 
 	simulation_time = 0.0f;
-	simulation_tick = 0;
 #ifdef CLIENT_DLL
 	old_simulation_time = 0.0f;
 #endif
@@ -45,7 +44,6 @@ void SendProxy_SimulationTime( SendProp *prop, void *object, void *data, Datagra
 
 IMPLEMENT_SERVERCLASS_ST_NOBASE( CSimulationComponent )
 	new SendProp( PROPINFO( simulation_time ), 0, SendProxy_SimulationTime ),
-	SendPropInt( PROPINFO( simulation_tick ) ),
 END_SEND_TABLE()
 
 #else
@@ -86,7 +84,6 @@ void RecvProxy_SimulationTime( RecvProp *prop, void *object, void *out, Datagram
 
 IMPLEMENT_CLIENTCLASS_RT_NOBASE( C_SimulationComponent, CSimulationComponent )
 	RecvPropInt( PROPINFO( simulation_time ), RecvProxy_SimulationTime ),
-	RecvPropInt( PROPINFO( simulation_tick ) ),
 END_RECV_TABLE()
 
 #endif
