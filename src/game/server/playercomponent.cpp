@@ -2,7 +2,7 @@
 #include "sv_netinterface.h"
 #include "serverbase.h"
 #include "simulationcomponent_shared.h"
-#include "playercontrolled.h"
+//#include "playercontrolled.h"
 
 bool CPlayerComponent::initialize()
 {
@@ -15,6 +15,7 @@ bool CPlayerComponent::initialize()
 	simulation_tick = 0;
 	_paused = false;
 	_last_cmd.clear();
+	view_offset = LVector3f( 0, 0, 4 );
 
 	return true;
 }
@@ -341,11 +342,12 @@ void CPlayerComponent::player_run_command( CUserCmd *cmd, float frametime )
 	_view_angles = cmd->viewangles;
 
 	// TODO: run player command on current player controlled entity
-	CPlayerControlled *pcontrolled;
-	if ( _entity->get_component_of_type( pcontrolled ) )
-	{
-		pcontrolled->player_run_command( cmd, frametime );
-	}
+	//CPlayerControlled *pcontrolled;
+	//if ( _entity->get_component_of_type( pcontrolled ) )
+	//{
+	//	pcontrolled->player_run_command( cmd, frametime );
+	//}
+	//player_run_command( cmd, frametime );
 
 	// Set our yaw to the view angle yaw.
 	//set_angles( LVector3f( _view_angles[0], _angles.get()[1], _angles.get()[2] ) );
@@ -358,4 +360,5 @@ void CPlayerComponent::player_run_command( CUserCmd *cmd, float frametime )
 IMPLEMENT_SERVERCLASS_ST_NOBASE_OWNRECV( CPlayerComponent )
 	SendPropInt( PROPINFO( tickbase ) ),
 	SendPropInt( PROPINFO( simulation_tick ) ),
+	SendPropVec3( PROPINFO( view_offset ) ),
 END_SEND_TABLE()

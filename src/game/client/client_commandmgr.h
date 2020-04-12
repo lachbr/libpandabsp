@@ -4,8 +4,6 @@
 
 #include <datagram.h>
 
-class ClientNetInterface;
-
 static constexpr int MAX_CLIENT_CMDS = 90;
 
 static constexpr int NUM_NEW_CMD_BITS = 4;
@@ -17,9 +15,10 @@ static constexpr int MAX_BACKUP_CMDS = ( ( 1 << NUM_BACKUP_CMD_BITS ) - 1 );
 class CClientCMDManager
 {
 public:
-	CClientCMDManager( ClientNetInterface *cl );
+	CClientCMDManager( );
 
-	void tick();
+	CUserCmd *get_next_command( int &command_number );
+	void consider_send();
 
 	CUserCmd *get_command( int n );
 
@@ -33,8 +32,6 @@ public:
 	int _lastoutgoingcommand;
 	int _chokedcommands;
 	float _next_cmd_time;
-
-	ClientNetInterface *_cl;
 
 	CUserCmd *_commands;
 };

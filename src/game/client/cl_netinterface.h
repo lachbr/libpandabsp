@@ -5,7 +5,6 @@
 #include <referenceCount.h>
 #include <steam/steamnetworkingsockets.h>
 
-#include "client_commandmgr.h"
 #include "iclientdatagramhandler.h"
 #include "igamesystem.h"
 
@@ -44,8 +43,6 @@ public:
 		return _server_tickrate;
 	}
 
-	void cmd_tick();
-
 	void send_tick();
 
 private:
@@ -76,8 +73,6 @@ public:
 
 	int _server_tick;
 	float _server_frametime;
-
-	CClientCMDManager _cmd_mgr;
 };
 
 INLINE const char *ClientNetInterface::get_name() const

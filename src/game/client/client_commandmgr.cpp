@@ -4,8 +4,7 @@
 #include "netmessages.h"
 #include "cl_input.h"
 
-CClientCMDManager::CClientCMDManager( ClientNetInterface *cl ) :
-	_cl( cl ),
+CClientCMDManager::CClientCMDManager() :
 	_lastoutgoingcommand( -1 ),
 	_commands_sent( 0 ),
 	_next_cmd_time( 0.0f ),
@@ -16,7 +15,7 @@ CClientCMDManager::CClientCMDManager( ClientNetInterface *cl ) :
 
 bool CClientCMDManager::should_send_command() const
 {
-	return cl->get_curtime() >= _next_cmd_time && _cl->_connected;
+	return cl->get_curtime() >= _next_cmd_time && clnet->_connected;
 }
 
 void CClientCMDManager::send_cmd()
@@ -53,7 +52,7 @@ void CClientCMDManager::send_cmd()
 
 	if ( ok )
 	{
-		_cl->send_datagram( dg );
+		clnet->send_datagram( dg );
 		_commands_sent++;
 	}
 }
@@ -89,19 +88,23 @@ bool CClientCMDManager::write_usercmd_delta( Datagram &dg, int from, int to, boo
 	return true;
 }
 
-void CClientCMDManager::tick()
+CUserCmd *CClientCMDManager::get_next_command( int &command_number )
 {
-	int nextcommandnr = _lastoutgoingcommand + _chokedcommands + 1;
-	CUserCmd *cmd = &_commands[nextcommandnr % MAX_CLIENT_CMDS];
-	clinput->create_cmd( cmd, nextcommandnr, cl->get_frametime(), true );
+	command_number = _lastoutgoingcommand + _chokedcommands + 1;
+	CUserCmd *cmd = &_commands[command_number % MAX_CLIENT_CMDS];
 
+	return cmd;
+}
+
+void CClientCMDManager::consider_send()
+{
 	bool send = should_send_command();
 
 	if ( send )
 	{
 		send_cmd();
 
-		_cl->send_tick();
+		clnet->send_tick();
 
 		_lastoutgoingcommand = _commands_sent - 1;
 		_chokedcommands = 0;

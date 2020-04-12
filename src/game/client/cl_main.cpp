@@ -31,6 +31,10 @@ int main( int argc, char **argv )
 
         cl->run_cmd( "map facility_battle_v2" );
 
+        //NetAddress addr;
+        //addr.set_host( "127.0.0.1", 27015 );
+        //clnet->connect( addr );
+
         cl->run();
 
         return 0;

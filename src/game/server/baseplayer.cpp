@@ -26,7 +26,7 @@ void CBasePlayer::add_components()
 {
 	BaseClass::add_components();
 
-	PT( CPlayerComponent ) player = new CPlayerComponent;
-	add_component( player );
-	_player_component = player;
+	//PT( CPlayerComponent ) player = new CPlayerComponent;
+	//add_component( player );
+	//_player_component = player;
 }

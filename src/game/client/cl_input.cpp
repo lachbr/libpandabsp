@@ -11,38 +11,16 @@ CInput *clinput = nullptr;
 IMPLEMENT_CLASS( CInput )
 
 CInput::CInput() :
-	InputSystem( cl ),
-	_enabled( false )
+	InputSystem( cl )
 {
 	clinput = this;
-
-	_controls = install_player_controls();
 }
 
-PT( PlayerControls ) CInput::install_player_controls()
+void CInput::get_mouse_delta_and_center( LVector2f &delta )
 {
-	return new PlayerControls;
-}
-
-void CInput::create_cmd( CUserCmd *cmd, int commandnumber, float input_sample_frametime, bool active )
-{
-	cmd->clear();
-
-	cmd->commandnumber = commandnumber;
-	cmd->tickcount = cl->get_tickcount();
-
-	size_t count = get_num_mappings();
-	for ( size_t i = 0; i < count; i++ )
-	{
-		const InputSystem::CKeyMapping &km = get_mapping( i );
-		if ( km.is_down() )
-			cmd->buttons |= km.button_type;
-	}
-
-	_controls->do_controls( cmd );
-}
-
-void CInput::set_enabled( bool enable )
-{
-	_enabled = enable;
+	GraphicsWindow *win = clrender->get_graphics_window();
+	LVector2i center( win->get_x_size() / 2, win->get_y_size() / 2 );
+	MouseData md = win->get_pointer( 0 );
+	delta.set( md.get_x() - center.get_x(), md.get_y() - center.get_y() );
+	win->move_pointer( 0, center.get_x(), center.get_y() );
 }

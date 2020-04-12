@@ -30,8 +30,7 @@ ClientNetInterface::ClientNetInterface() :
 	_oldtickcount( 0 ),
 	_tick_remainder( 0.0f ),
 	_server_tick( 0 ),
-	_server_frametime( 0.0f ),
-	_cmd_mgr( this )
+	_server_frametime( 0.0f )
 {
 	clnet = this;
 	
@@ -234,9 +233,4 @@ void ClientNetInterface::update( double frametime )
 		read_incoming_messages();
 	}
 	SteamNetworkingSockets()->RunCallbacks( this );
-}
-
-void ClientNetInterface::cmd_tick()
-{
-	_cmd_mgr.tick();
 }

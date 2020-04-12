@@ -6,7 +6,7 @@
 NotifyCategoryDeclNoExport( baseplayer )
 
 class Client;
-class CPlayerComponent;
+//class CPlayerComponent;
 
 class EXPORT_SERVER_DLL CBasePlayer : public CBaseEntity
 {
@@ -35,6 +35,6 @@ private:
 	//NetworkVec3( _view_offset );
 	Client *_client;
 
-	CPlayerComponent *_player_component;
+	//CPlayerComponent *_player_component;
 };
 

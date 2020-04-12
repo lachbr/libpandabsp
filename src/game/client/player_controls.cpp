@@ -2,16 +2,21 @@
 #include "usercmd.h"
 #include "in_buttons.h"
 #include "clientbase.h"
+#include "cl_input.h"
+#include "cl_rendersystem.h"
 
 INLINE static float apply_friction( float goal, float last, float factor )
 {
-	return goal * factor + last * ( 1 - factor );
+	return ( goal * factor + last * ( 1 - factor ) );
 }
 
 PlayerControls::PlayerControls()
 {
 	_slide_factor = 0.75f;
 	_diagonal_factor = sqrt( 2.0f ) / 2.0f;
+
+	_static_friction = 0.8f;
+	_dynamic_friction = 0.3f;
 
 	_goal_forward = 0.0f;
 	_goal_side = 0.0f;
@@ -161,12 +166,20 @@ void PlayerControls::do_controls( CUserCmd *cmd )
 		mod_forward = apply_friction( _goal_forward, _last_forward, sfriction );
 	}
 
-	//std::cout << _goal_forward << " | " << _goal_side << std::endl;
+	//std::cout << mod_forward << " | " << mod_side << std::endl;
 	// This is the speed we will use
-	cmd->forwardmove = _goal_forward;
-	cmd->sidemove = _goal_side;
+	cmd->forwardmove = mod_forward;
+	cmd->sidemove = mod_side;
 	_last_forward = mod_forward;
 	_last_side = mod_side;
 
-	cmd->viewangles.fill( 0 );
+	LVector2f mouse_delta;
+	clinput->get_mouse_delta_and_center( mouse_delta );
+	mouse_delta *= get_look_factor();
+
+	NodePath camera = clrender->get_camera();
+	camera.set_h( camera.get_h() - mouse_delta.get_x() );
+	camera.set_p( camera.get_p() - mouse_delta.get_y() );
+
+	cmd->viewangles = camera.get_hpr();
 }

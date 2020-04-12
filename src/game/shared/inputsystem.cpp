@@ -119,6 +119,8 @@ void InputSystem::attach_device( InputDevice *device, const char *prefix, bool w
 		return;
 	}
 
+	//device->map
+
 	PT( InputDeviceNode ) idn = new InputDeviceNode( device, device->get_name() );
 	NodePath idnp = _dataroot.attach_new_node( idn );
 

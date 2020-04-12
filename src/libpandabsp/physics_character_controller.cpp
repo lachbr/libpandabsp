@@ -134,7 +134,7 @@ void PhysicsCharacterController::add_elements()
 	_event_sphere->add_shape( event_sphere, TransformState::make_pos( LPoint3( 0, 0, _walk_capsule_data.radius * 1.5f ) ) );
 	_event_sphere->set_kinematic( true );
 	_event_sphere_np = _movement_parent.attach_new_node( _event_sphere );
-	_event_sphere_np.set_collide_mask( BitMask32::all_on() );
+	_event_sphere_np.set_collide_mask( BitMask32::all_off() );
 	_world->attach( _event_sphere );
 
 	// Init

@@ -82,6 +82,7 @@ public:
 
 	NetworkInt( simulation_tick );
 
+	NetworkVec3( view_offset );
 	pvector<CCommandContext> _command_contexts;
 	CUserCmd _last_cmd;
 

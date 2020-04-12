@@ -1,5 +1,5 @@
 #include "baseplayer.h"
-#include "playercontrolled.h"
+#include "playercomponent.h"
 #include "physics_character_controller.h"
 #include "baseanimating_shared.h"
 #include "masks.h"
@@ -10,12 +10,12 @@
 #include "in_buttons.h"
 #include "usercmd.h"
 
-class CCIPlayerControlled : public CPlayerControlled
+class CCIPlayerComponent : public CPlayerComponent
 {
-	DECLARE_SERVERCLASS( CCIPlayerControlled, CPlayerControlled )
+	DECLARE_SERVERCLASS( CCIPlayerComponent, CPlayerComponent )
 
 public:
-	CCIPlayerControlled();
+	CCIPlayerComponent();
 
 	virtual bool initialize();
 	virtual void shutdown();
@@ -26,14 +26,14 @@ public:
 	CSceneComponent *scene;
 };
 
-CCIPlayerControlled::CCIPlayerControlled() :
-	CPlayerControlled(),
+CCIPlayerComponent::CCIPlayerComponent() :
+	CPlayerComponent(),
 	_controller( nullptr ),
 	scene( nullptr )
 {
 }
 
-void CCIPlayerControlled::shutdown()
+void CCIPlayerComponent::shutdown()
 {
 	if ( _controller )
 	{
@@ -44,7 +44,7 @@ void CCIPlayerControlled::shutdown()
 	BaseClass::shutdown();
 }
 
-bool CCIPlayerControlled::initialize()
+bool CCIPlayerComponent::initialize()
 {
 	if ( !BaseClass::initialize() )
 	{
@@ -55,8 +55,10 @@ bool CCIPlayerControlled::initialize()
 	sv->get_game_system_of_type( phys );
 	_controller = new PhysicsCharacterController( svbsp->get_bsp_loader(), phys->get_physics_world(), sv->get_root(),
 						      sv->get_root(), 4.0f, 2.0f, 0.3f, 1.0f,
-						      phys->get_physics_world()->get_gravity()[0],
+						      phys->get_physics_world()->get_gravity()[2],
 						      wall_mask, floor_mask, event_mask );
+	_controller->set_max_slope( 75.0f, false );
+	_controller->set_collide_mask( character_mask );
 	_entity->get_component( scene );
 	scene->np.reparent_to( _controller->get_movement_parent() );
 	scene->np = _controller->get_movement_parent();
@@ -64,8 +66,10 @@ bool CCIPlayerControlled::initialize()
 	return true;
 }
 
-void CCIPlayerControlled::player_run_command( CUserCmd *cmd, float frametime )
+void CCIPlayerComponent::player_run_command( CUserCmd *cmd, float frametime )
 {
+	BaseClass::player_run_command( cmd, frametime );
+
 	nassertv( _controller != nullptr );
 
 	if ( cmd->buttons & IN_JUMP )
@@ -83,7 +87,13 @@ void CCIPlayerControlled::player_run_command( CUserCmd *cmd, float frametime )
 		_controller->stop_crouch();
 	}
 
+	scene->set_angles( LVector3f( _view_angles[0], scene->angles.get()[1], scene->angles.get()[2] ) );
+
 	LVector3f vel( cmd->sidemove, cmd->forwardmove, 0.0f );
+	LQuaternionf quat;
+	quat.set_hpr( scene->angles.get() );
+	vel = quat.xform( vel );
+
 	_controller->set_linear_movement( vel );
 	_controller->set_angular_movement( 0.0f );
 
@@ -93,7 +103,7 @@ void CCIPlayerControlled::player_run_command( CUserCmd *cmd, float frametime )
 	scene->angles = scene->np.get_hpr();
 }
 
-IMPLEMENT_SERVERCLASS_ST_NOBASE_OWNRECV( CCIPlayerControlled )
+IMPLEMENT_SERVERCLASS_ST_OWNRECV( CCIPlayerComponent )
 END_SEND_TABLE()
 
 //-------------------------------------------------------------------------
@@ -122,10 +132,10 @@ void CCIPlayer::add_components()
 {
 	BaseClass::add_components();
 
+	PT( CCIPlayerComponent ) controls = new CCIPlayerComponent;
+	add_component( controls );
+
 	PT( CBaseAnimating ) anim = new CBaseAnimating;
 	add_component( anim );
 	animating = anim;
-
-	PT( CCIPlayerControlled ) controls = new CCIPlayerControlled;
-	add_component( controls );
 }

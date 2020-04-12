@@ -46,7 +46,7 @@ public:
 
 	InputDeviceManager *get_mgr() const;
 
-private:
+protected:
 	pvector<CKeyMapping> _mappings;
 
 	DataGraphTraverser _dgtrav;
