@@ -29,6 +29,7 @@ public:
         virtual const char *get_name() const;
 
         virtual bool initialize();
+	virtual void init_render();
 	bool init_rendering();
 	bool init_scene();
 	bool init_camera();

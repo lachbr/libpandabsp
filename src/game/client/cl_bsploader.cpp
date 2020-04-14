@@ -124,6 +124,7 @@ ClientBSPSystem::ClientBSPSystem() :
 	BaseBSPSystem()
 {
 	clbsp = this;
+	_bsp_loader = new CL_BSPLoader;
 }
 
 bool ClientBSPSystem::initialize()
@@ -133,7 +134,6 @@ bool ClientBSPSystem::initialize()
 	PhysicsSystem *psys;
 	cl->get_game_system( psys );
 
-	_bsp_loader = new CL_BSPLoader;
 	_bsp_loader->set_gamma( 2.2f );
 	_bsp_loader->set_render( rsys->get_render() );
 	_bsp_loader->set_want_visibility( true );

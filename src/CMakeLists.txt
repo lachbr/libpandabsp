@@ -4,8 +4,6 @@ project(libpandabsp)
 
 # Setup paths to dependencies
 
-#BLAH
-
 set(PANDA C:/Users/brian/OneDrive/Documents/Projects/cio-panda3d/built_x64 CACHE PATH "Path to root Panda3D SDK directory.")
 string(REGEX REPLACE "/" "\\\\" PANDA_BACK ${PANDA})
 set(LIBPANDA ${PANDA}/lib)

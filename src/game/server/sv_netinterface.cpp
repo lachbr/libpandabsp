@@ -323,7 +323,7 @@ void ServerNetInterface::send_datagram( Datagram &dg, HSteamNetConnection conn )
 {
 	SteamNetworkingSockets()->SendMessageToConnection( conn, dg.get_data(),
 							   dg.get_length(),
-							   k_nSteamNetworkingSend_Reliable, nullptr );
+							   k_nSteamNetworkingSend_Unreliable, nullptr );
 }
 
 void ServerNetInterface::send_datagram_to_clients( Datagram &dg, const vector_uint32 &client_ids )

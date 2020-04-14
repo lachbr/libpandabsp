@@ -154,7 +154,7 @@ void ClientNetInterface::set_client_state( int state )
 void ClientNetInterface::send_datagram( Datagram &dg )
 {
 	SteamNetworkingSockets()->SendMessageToConnection( _connection, dg.get_data(), dg.get_length(),
-							   k_nSteamNetworkingSend_Reliable, nullptr );
+							   k_nSteamNetworkingSend_Unreliable, nullptr );
 }
 
 void ClientNetInterface::handle_datagram( const Datagram &dg )

@@ -24,13 +24,13 @@ void C_PlayerComponent::update( double frametime )
 	cmd->commandnumber = command_number;
 	cmd->tickcount = cl->get_tickcount();
 
-	size_t count = clinput->get_num_mappings();
-	for ( size_t i = 0; i < count; i++ )
-	{
-		const InputSystem::CKeyMapping &km = clinput->get_mapping( i );
-		if ( km.is_down() )
-			cmd->buttons |= km.button_type;
-	}
+	//size_t count = clinput->get_num_mappings();
+	//for ( size_t i = 0; i < count; i++ )
+	//{
+	//	const InputSystem::CKeyMapping &km = clinput->get_mapping( i );
+	//	if ( km.is_down() )
+	//		cmd->buttons |= km.button_type;
+	//}
 
 	create_cmd( cmd );
 	setup_view( cmd );

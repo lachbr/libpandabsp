@@ -14,6 +14,7 @@ class EXPORT_CLIENT_DLL CInput : public InputSystem
 public:
 	CInput();
 
+	virtual void init_device_mappings( InputDeviceContext *ctx );
 	void get_mouse_delta_and_center( LVector2f &delta );
 };
 

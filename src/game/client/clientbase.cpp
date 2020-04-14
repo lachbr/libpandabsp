@@ -161,6 +161,7 @@ bool ClientBase::startup()
 	}
 
 	// Set default mappings
+#if 0
 	CInput *isys;
 	get_game_system( isys );
 	isys->add_mapping( IN_FORWARD, KeyboardButton::ascii_key( 'w' ) );
@@ -174,6 +175,7 @@ bool ClientBase::startup()
 	isys->add_mapping( IN_RELOAD, KeyboardButton::ascii_key( 'r' ) );
 	isys->add_mapping( IN_ATTACK, MouseButton::one() );
 	isys->add_mapping( IN_ATTACK2, MouseButton::three() );
+#endif
 
 	TextNode::set_default_font( new DynamicTextFont( "models/fonts/cour.ttf" ) );
 

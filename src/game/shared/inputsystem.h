@@ -16,17 +16,37 @@ class EXPORT_GAME_SHARED InputSystem : public IGameSystem
 {
 	DECLARE_CLASS( InputSystem, IGameSystem )
 public:
-	class CKeyMapping
+	enum
+	{
+		// The different ways we can accept input
+		INPUTMAPPING_UNKNOWN,
+		INPUTMAPPING_BUTTON,
+		INPUTMAPPING_AXIS,
+	};
+
+	class CInputMapping
 	{
 	public:
-		CKeyMapping();
-		CKeyMapping( int button_type, const ButtonHandle &btn );
+		CInputMapping() = default;
 
-		int button_type;
-		ButtonHandle button;
-		InputSystem *sys;
+		int mapping_type;
 
-		bool is_down() const;
+		union
+		{
+			ButtonHandle button;
+			InputDevice::Axis axis;
+		};
+
+		bool get_button_value() const;
+		float get_axis_value() const;
+	};
+
+	// Represents the key mappings for a particular input device.
+	class InputDeviceContext
+	{
+	public:
+		InputDevice *device;
+		SimpleHashMap<int, CInputMapping, int_hash> mappings;
 	};
 
 	InputSystem( HostBase *host );
@@ -37,17 +57,25 @@ public:
 	virtual void shutdown();
 	virtual void update( double frametime );
 
+	// Override this to bind buttons on this device to your game-specific
+	// buttons.
+	virtual void init_device_mappings( InputDeviceContext *context )
+	{
+	}
+
 	void attach_device( InputDevice *device, const char *prefix = nullptr, bool watch = false );
 	void detach_device( InputDevice *device );
 
-	void add_mapping( int button_type, const ButtonHandle &btn );
-	size_t get_num_mappings() const;
-	CKeyMapping &get_mapping( int button_type );
+	// Returns the maximum button value for all devices
+	// that have a mapping to the specified button_type.
+	bool get_button_value( int button_type ) const;
+	float get_axis_value( int axis_type ) const;
 
 	InputDeviceManager *get_mgr() const;
 
 protected:
-	pvector<CKeyMapping> _mappings;
+	pvector<InputDeviceContext> _device_contexts;
+	//pvector<CKeyMapping> _mappings;
 
 	DataGraphTraverser _dgtrav;
 	NodePath _dataroot;
@@ -61,16 +89,6 @@ protected:
 	InputDeviceManager *_mgr;
 };
 
-INLINE size_t InputSystem::get_num_mappings() const
-{
-	return _mappings.size();
-}
-
-INLINE InputSystem::CKeyMapping &InputSystem::get_mapping( int button_type )
-{
-	return _mappings[button_type];
-}
-
 INLINE const char *InputSystem::get_name() const
 {
 	return "InputSystem";
@@ -79,16 +97,4 @@ INLINE const char *InputSystem::get_name() const
 INLINE InputDeviceManager *InputSystem::get_mgr() const
 {
 	return _mgr;
-}
-
-INLINE InputSystem::CKeyMapping::CKeyMapping() :
-	button_type( 0 ),
-	button( 0 )
-{
-}
-
-INLINE InputSystem::CKeyMapping::CKeyMapping( int type, const ButtonHandle &btn ) :
-	button_type( type ),
-	button( btn )
-{
 }

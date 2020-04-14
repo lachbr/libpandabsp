@@ -122,6 +122,7 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsOutput *output, GraphicsStateGua
 
                 // Setup the buffer that this split shadow map will be rendered into.
                 FrameBufferProperties fbp;
+                fbp.clear();
                 fbp.set_depth_bits( shadow_depth_bits );
                 fbp.set_back_buffers( 0 );
                 fbp.set_force_hardware( true );
@@ -144,9 +145,7 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsOutput *output, GraphicsStateGua
                         _gsg->get_pipe(), "pssmShadowBuffer", -10000, fbp, props,
                         flags, _gsg, _gsg->get_engine()->get_window( 0 )
                 );
-                _pssm_layered_buffer->set_clear_color_active( false );
-                _pssm_layered_buffer->set_clear_stencil_active( false );
-                _pssm_layered_buffer->set_clear_depth_active( true );
+                _pssm_layered_buffer->disable_clears();
 
                 // Using a geometry shader on the first PSSM split camera (the one that sees everything),
                 // render to the individual textures in the array in a single render pass using geometry
@@ -187,8 +186,7 @@ BSPShaderGenerator::BSPShaderGenerator( GraphicsOutput *output, GraphicsStateGua
                 }
 
                 PT( DisplayRegion ) dr = _pssm_layered_buffer->make_display_region();
-                dr->set_clear_color_active( false );
-                dr->set_clear_stencil_active( false );
+                dr->disable_clears();
                 dr->set_clear_depth_active( true );
                 dr->set_camera( _pssm_rig->get_camera( 0 ) );
                 dr->set_sort( -10000 );

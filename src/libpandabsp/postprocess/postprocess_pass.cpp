@@ -37,7 +37,7 @@ FrameBufferProperties PostProcessPass::get_default_fbprops()
 		_default_fbprops->set_aux_hrgba( 0 );
 		_default_fbprops->set_coverage_samples( 0 );
 		_default_fbprops->set_rgb_color( true );
-		_default_fbprops->set_rgba_bits( 16, 16, 16, 8 );
+		_default_fbprops->set_rgba_bits( 8, 8, 8, 8 );
 	}
 
 	return *_default_fbprops;
@@ -226,8 +226,8 @@ void PostProcessPass::setup_region()
 	dr->set_scissor_enabled( false );
 	_region = dr;
 
-	_buffer->set_clear_color( LColor( 0, 0, 0, 1 ) );
-	_buffer->set_clear_color_active( true );
+	//_buffer->set_clear_color( LColor( 0, 0, 0, 1 ) );
+	//_buffer->set_clear_color_active( true );
 }
 
 void PostProcessPass::setup()

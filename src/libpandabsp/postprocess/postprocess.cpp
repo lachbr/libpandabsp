@@ -34,6 +34,7 @@ void PostProcess::startup( GraphicsOutput *output )
 	// Create the region that displays our final output image
 	_output_display_region = _output->make_display_region();
 	_output_display_region->set_sort( 0 );
+	_output_display_region->disable_clears();
 
 	_buffer_sort = _output->get_sort() - 1000;
 

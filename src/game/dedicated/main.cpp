@@ -111,6 +111,7 @@ int main( int argc, char **argv )
 	}
 
 	CreateEntityByName( "test_ent" );
+	CreateEntityByName( "test_toon" );
 
 	sv->get_root().ls();
 

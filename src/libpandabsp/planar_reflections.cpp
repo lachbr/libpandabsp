@@ -23,6 +23,7 @@ PlanarReflections::PlanarReflections( BSPShaderGenerator *shgen ) :
 {
 
 	FrameBufferProperties fbp;
+	fbp.clear();
 	fbp.set_depth_bits( 8 );
 	fbp.set_force_hardware( true );
 	fbp.set_rgba_bits( 8, 8, 8, 8 );
@@ -44,9 +45,7 @@ PlanarReflections::PlanarReflections( BSPShaderGenerator *shgen ) :
 	_reflection_texture->set_wrap_v( SamplerState::WM_clamp );
 	_reflection_texture->set_wrap_u( SamplerState::WM_clamp );
 	_reflection_buffer->set_sort( -100000 );
-	_reflection_buffer->set_clear_color_active( false );
-	_reflection_buffer->set_clear_stencil_active( false );
-	_reflection_buffer->set_clear_depth_active( true );
+	_reflection_buffer->disable_clears();
 
 	Camera* cam = DCAST( Camera, _shgen->get_camera().get_child( 0 ).node() );
 	_camera = new Camera( "planar-reflection-camera", cam->get_lens() );
@@ -54,6 +53,8 @@ PlanarReflections::PlanarReflections( BSPShaderGenerator *shgen ) :
 	_camera_np = NodePath( _camera );
 
 	PT( DisplayRegion ) dr = _reflection_buffer->make_display_region();
+	dr->disable_clears();
+	dr->set_clear_depth_active( true );
 	dr->set_camera( _camera_np );
 	dr->set_active( true );
 }

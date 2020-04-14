@@ -107,9 +107,8 @@ bool RenderSystem::init_rendering()
 
 	_graphics_engine->open_windows();
 
-	_graphics_window->set_clear_color_active( false );
-	_graphics_window->set_clear_stencil_active( false );
-	_graphics_window->set_clear_depth_active( true );
+	// Leave clearing up to the individual display regions.
+	_graphics_window->disable_clears();
 
 	_gsg = _graphics_window->get_gsg();
 	nassertr( _gsg != nullptr, false );
@@ -130,15 +129,21 @@ bool RenderSystem::init_rendering()
 	return true;
 }
 
+void RenderSystem::init_render()
+{
+	_render = NodePath( "render" );
+	_render.set_attrib( RescaleNormalAttrib::make_default() );
+	_render.set_two_sided( false );
+}
+
 bool RenderSystem::init_scene()
 {
 	//
 	// Scene roots
 	//
 
-	_render = NodePath( "render" );
-	_render.set_attrib( RescaleNormalAttrib::make_default() );
-	_render.set_two_sided( false );
+
+	init_render();
 
 	_hidden = NodePath( "hidden" );
 
@@ -227,6 +232,10 @@ bool RenderSystem::init_camera()
 	DCAST( ModelRoot, _camera.node() )->set_preserve_transform( ModelRoot::PT_local );
 	_camera.reparent_to( _render );
 	PT( DisplayRegion ) region = _graphics_window->make_display_region();
+	// Only clear depth in the 3D scene. We don't expect any voids in the 3D
+	// scene so we can save some frame time by not clearing color.
+	region->disable_clears();
+	region->set_clear_depth_active( true );
 	PT( PerspectiveLens ) lens = new PerspectiveLens;
 	lens->set_aspect_ratio( get_aspect_ratio() );
 	PT( Camera ) camera = new Camera( "MainCamera", lens );
@@ -245,6 +254,11 @@ bool RenderSystem::init_camera()
 
 	PT( DisplayRegion ) dr2d = _graphics_window->make_display_region();
 	dr2d->set_sort( 10 );
+	// We don't need to clear anything when rendering 2D elements.
+	// Color doesn't have to be cleared because we expect to be drawing
+	// 2D elements on top of the 3D scene. Depth doesn't have to be
+	// cleared because 2D is all the same depth.
+	dr2d->disable_clears();
 	PT( Camera ) camera2d = new Camera( "camera2d" );
 	NodePath camera2dnp = _render2d.attach_new_node( camera2d );
 	PT( Lens ) lens2d = new OrthographicLens;

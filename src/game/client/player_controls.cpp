@@ -5,6 +5,9 @@
 #include "cl_input.h"
 #include "cl_rendersystem.h"
 
+#define DEADZONE 0.1f
+#define CONTROLLER_LOOK_FACTOR 100.0f
+
 INLINE static float apply_friction( float goal, float last, float factor )
 {
 	return ( goal * factor + last * ( 1 - factor ) );
@@ -55,90 +58,56 @@ void PlayerControls::do_controls( CUserCmd *cmd )
 
 	// Determine goal speeds
 
-	_goal_forward = 0.0f;
-	_goal_side = 0.0f;
+	bool speed = clinput->get_button_value( IN_SPEED );
+	bool walk = clinput->get_button_value( IN_WALK );
+	bool duck = clinput->get_button_value( IN_DUCK );
 
-	// TODO: make this work with gamepads
+	float forward_factor = 0.0f;
+	forward_factor += clinput->get_button_value( IN_FORWARD ) ? 1.0f : 0.0f;
+	forward_factor -= clinput->get_button_value( IN_BACK ) ? 1.0f : 0.0f;
 
-	if ( cmd->buttons & IN_FORWARD )
+	float axis_forward = clinput->get_axis_value( AXIS_Y );
+	if ( fabsf( axis_forward ) <= DEADZONE )
 	{
-		if ( cmd->buttons & IN_DUCK )
-		{
-			_goal_forward += get_duck_speed();
-		}
-		else if ( cmd->buttons & IN_SPEED )
-		{
-			_goal_forward += get_run_speed();
-		}
-		else if ( cmd->buttons & IN_WALK )
-		{
-			_goal_forward += get_walk_speed();
-		}
-		else
-		{
-			_goal_forward += get_norm_speed();
-		}
+		axis_forward = 0.0f;
+	}
+	forward_factor += axis_forward;
+	//std::cout << "Y Axis: " << clinput->get_axis_value( AXIS_Y ) << std::endl;
+
+	float side_factor = 0.0f;
+	side_factor += clinput->get_button_value( IN_MOVERIGHT ) ? 1.0f : 0.0f;
+	side_factor -= clinput->get_button_value( IN_MOVELEFT ) ? 1.0f : 0.0f;
+	float axis_side = clinput->get_axis_value( AXIS_X );
+	if ( fabsf( axis_side ) <= DEADZONE )
+	{
+		axis_side = 0.0f;
+	}
+	side_factor += axis_side;
+	//std::cout << "X Axis: " << clinput->get_axis_value( AXIS_X ) << std::endl;
+
+	if ( speed )
+	{
+		_goal_forward = get_run_speed();
+		_goal_side = get_run_speed();
+	}
+	else if ( walk )
+	{
+		_goal_forward = get_walk_speed();
+		_goal_side = get_walk_speed();
+	}
+	else if ( duck )
+	{
+		_goal_forward = get_duck_speed();
+		_goal_side = get_duck_speed();
+	}
+	else
+	{
+		_goal_forward = get_norm_speed();
+		_goal_side = get_norm_speed();
 	}
 
-	if ( cmd->buttons & IN_BACK )
-	{
-		if ( cmd->buttons & IN_DUCK )
-		{
-			_goal_forward -= get_duck_speed();
-		}
-		else if ( cmd->buttons & IN_SPEED )
-		{
-			_goal_forward -= get_run_speed();
-		}
-		else if ( cmd->buttons & IN_WALK )
-		{
-			_goal_forward -= get_walk_speed();
-		}
-		else
-		{
-			_goal_forward -= get_norm_speed();
-		}
-	}
-
-	if ( cmd->buttons & IN_MOVERIGHT )
-	{
-		if ( cmd->buttons & IN_DUCK )
-		{
-			_goal_side += get_duck_speed();
-		}
-		else if ( cmd->buttons & IN_SPEED )
-		{
-			_goal_side += get_run_speed();
-		}
-		else if ( cmd->buttons & IN_WALK )
-		{
-			_goal_side += get_walk_speed();
-		}
-		else
-		{
-			_goal_side += get_norm_speed();
-		}
-	}
-
-	if ( cmd->buttons & IN_MOVELEFT )
-	{
-		if ( cmd->buttons & IN_DUCK )
-		{
-			_goal_side -= get_duck_speed();
-		}
-		else if ( cmd->buttons & IN_SPEED )
-		{
-			_goal_side -= get_run_speed();
-		}
-		else if ( cmd->buttons & IN_WALK )
-		{
-			_goal_side -= get_walk_speed();
-		}
-		else
-		{
-			_goal_side -= get_norm_speed();
-		}
-	}
+	_goal_forward *= forward_factor;
+	_goal_side *= side_factor;
 
 	// Apply smoothed out movement (friction)
 
@@ -174,12 +143,32 @@ void PlayerControls::do_controls( CUserCmd *cmd )
 	_last_side = mod_side;
 
 	LVector2f mouse_delta;
-	clinput->get_mouse_delta_and_center( mouse_delta );
-	mouse_delta *= get_look_factor();
+	//clinput->get_mouse_delta_and_center( mouse_delta );
+//	mouse_delta *= get_look_factor();
+
+	float lookx = 0.0f;//mouse_delta[0];
+	float looky = 0.0f;//mouse_delta[1];
+
+	float axis_lookx = clinput->get_axis_value( AXIS_LOOK_X );
+	if ( fabsf( axis_lookx ) <= DEADZONE )
+	{
+		axis_lookx = 0.0f;
+	}
+	lookx += (axis_lookx * CONTROLLER_LOOK_FACTOR) * frametime;
+	
+	float axis_looky = clinput->get_axis_value( AXIS_LOOK_Y );
+	if ( fabsf( axis_looky ) <= DEADZONE )
+	{
+		axis_looky = 0.0f;
+	}
+	looky -= (axis_looky * CONTROLLER_LOOK_FACTOR) * frametime;
+
+	//std::cout << "Look X Axis: " << clinput->get_axis_value( AXIS_LOOK_X ) << std::endl;
+	//std::cout << "Look Y Axis: " << clinput->get_axis_value( AXIS_LOOK_Y ) << std::endl;
 
 	NodePath camera = clrender->get_camera();
-	camera.set_h( camera.get_h() - mouse_delta.get_x() );
-	camera.set_p( camera.get_p() - mouse_delta.get_y() );
+	camera.set_h( camera.get_h() - lookx );
+	camera.set_p( camera.get_p() - looky );
 
 	cmd->viewangles = camera.get_hpr();
 }

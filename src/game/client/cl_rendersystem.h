@@ -14,6 +14,7 @@ public:
 	virtual bool initialize();
 	virtual void shutdown();
 	virtual void update( double frametime );
+	virtual void init_render();
 
 	virtual void window_event();
 

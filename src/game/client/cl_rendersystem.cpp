@@ -1,4 +1,6 @@
 #include "cl_rendersystem.h"
+#include "bsp_render.h"
+#include "cl_bsploader.h"
 
 #include <lightRampAttrib.h>
 
@@ -15,6 +17,13 @@ ClientRenderSystem::ClientRenderSystem() :
 {
 	clrender = this;
 	_post_process = nullptr;
+}
+
+void ClientRenderSystem::init_render()
+{
+	_render = NodePath( new BSPRender( "render", clbsp->get_bsp_loader() ) );
+	_render.set_attrib( RescaleNormalAttrib::make_default() );
+	_render.set_two_sided( false );
 }
 
 bool ClientRenderSystem::initialize()

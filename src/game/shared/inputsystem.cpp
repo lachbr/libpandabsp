@@ -32,6 +32,10 @@ bool InputSystem::initialize()
 
 	_mgr = InputDeviceManager::get_global_ptr();
 
+	rsys->get_graphics_engine()->render_frame();
+
+	_mgr->update();
+
 	//
 	// Data graph
 	//
@@ -40,6 +44,7 @@ bool InputSystem::initialize()
 
 	GraphicsWindow *wind = rsys->get_graphics_window();
 
+	// Setup the mouse and keyboard sets for getting user input into the window.
 	for ( int i = 0; i < wind->get_num_input_devices(); i++ )
 	{
 		NodePath mak = _dataroot.attach_new_node( new MouseAndKeyboard( wind, i, wind->get_input_device_name( i ) ) );
@@ -82,11 +87,34 @@ bool InputSystem::initialize()
 		bt->set_modifier_buttons( mods );
 		NodePath btnp = mak.attach_new_node( bt );
 		_kb_button_thrower.add_path( btnp );
+
+		inputsystem_cat.info()
+			<< "Detected game input device " << wind->get_input_device_name( i ) << "\n";
+		InputDeviceContext ctx;
+		ctx.device = wind->get_input_device( i );
+		init_device_mappings( &ctx );
+		_device_contexts.push_back( ctx );
 	}
 
 	if ( _mouse_watcher.get_num_paths() > 0 )
 	{
 		rsys->set_gui_mouse_watcher( DCAST( MouseWatcher, _mouse_watcher[0].node() ) );
+	}
+
+	// Now determine which input devices are connected for game input.
+	// User code is responsible for mapping axes and buttons to
+	// game-specific button identifiers.
+	InputDeviceSet devices = _mgr->get_devices();
+	size_t device_count = devices.size();
+	for ( size_t i = 0; i < device_count; i++ )
+	{
+		InputDevice *device = devices[i];
+		inputsystem_cat.info()
+			<< "Detected game input device " << device->get_name() << "\n";
+		InputDeviceContext ctx;
+		ctx.device = device;
+		init_device_mappings( &ctx );
+		_device_contexts.push_back( ctx );
 	}
 
 	return true;
@@ -102,12 +130,17 @@ void InputSystem::shutdown()
 
 	_dataroot.remove_node();
 
-	_mappings.clear();
+	_device_contexts.clear();
 }
 
 void InputSystem::update( double frametime )
 {
 	_mgr->update();
+	size_t device_count = _device_contexts.size();
+	for ( size_t i = 0; i < device_count; i++ )
+	{
+		_device_contexts[i].device->poll();
+	}
 	_dgtrav.traverse( _dataroot.node() );
 }
 
@@ -167,15 +200,54 @@ void InputSystem::detach_device( InputDevice *device )
 	_input_devices.remove( device );
 }
 
-void InputSystem::add_mapping( int button_type, const ButtonHandle &btn )
+bool InputSystem::get_button_value( int button_type ) const
 {
-	CKeyMapping mapping( button_type, btn );
-	mapping.sys = this;
-	_mappings.push_back( mapping );
+	size_t count = _device_contexts.size();
+	for ( size_t i = 0; i < count; i++ )
+	{
+		const InputDeviceContext &ctx = _device_contexts[i];
+		int ibutton = ctx.mappings.find( button_type );
+		if ( ibutton != -1 )
+		{
+			const CInputMapping &mapping = ctx.mappings.get_data( ibutton );
+			if ( mapping.mapping_type != INPUTMAPPING_BUTTON )
+			{
+				continue;
+			}
+			InputDevice::ButtonState state = ctx.device->find_button( mapping.button );
+			if ( state.is_known() && state.is_pressed() )
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
-bool InputSystem::CKeyMapping::is_down() const
+float InputSystem::get_axis_value( int axis_type ) const
 {
-	MouseWatcher *mw = DCAST( MouseWatcher, sys->_mouse_watcher[0].node() );
-	return mw->is_button_down( button );
+	float value = 0.0f;
+
+	size_t count = _device_contexts.size();
+	for ( size_t i = 0; i < count; i++ )
+	{
+		const InputDeviceContext &ctx = _device_contexts[i];
+		int ibutton = ctx.mappings.find( axis_type );
+		if ( ibutton != -1 )
+		{
+			const CInputMapping &mapping = ctx.mappings.get_data( ibutton );
+			if ( mapping.mapping_type != INPUTMAPPING_AXIS )
+			{
+				continue;
+			}
+			InputDevice::AxisState state = ctx.device->find_axis( mapping.axis );
+			if ( state.known && state.value != 0.0 )
+			{
+				value += (float)state.value;
+			}
+		}
+	}
+
+	return clamp( value, -1.0f, 1.0f );
 }

@@ -26,3 +26,8 @@
 #define IN_GRENADE1		(1 << 23)	// grenade 1
 #define IN_GRENADE2		(1 << 24)	// grenade 2
 #define	IN_ATTACK3		(1 << 25)
+
+#define AXIS_X			(1 << 26)
+#define AXIS_Y			(1 << 27)
+#define AXIS_LOOK_X		(1 << 28)
+#define AXIS_LOOK_Y		(1 << 29)
