@@ -39,7 +39,7 @@
 #include "bsp_trace.h"
 #include "aux_data_attrib.h"
 
-IMPLEMENT_CLASS( nodeshaderinput_t );
+IMPLEMENT_CLASS( CNodeShaderInput );
 
 static PStatCollector updatenode_collector              ( "AmbientProbes:UpdateNodes" );
 static PStatCollector finddata_collector                ( "AmbientProbes:UpdateNodes:FindNodeData" );
@@ -76,41 +76,6 @@ using std::sin;
 //#define VISUALIZE_AMBPROBES
 
 static light_t *dummy_light = new light_t;
-
-struct nodecallbackdata_t
-{
-        PandaNode *node;
-        WeakReferenceList *list;
-        AmbientProbeManager *mgr;
-};
-
-class NodeWeakCallback : public WeakPointerCallback
-{
-PUBLISHED:
-        virtual void wp_callback( void *pointer );
-};
-
-void NodeWeakCallback::wp_callback( void *pointer )
-{
-        nodecallbackdata_t *data = (nodecallbackdata_t *)pointer;
-
-        MutexHolder holder( data->mgr->_cache_mutex );
-
-        int itr = data->mgr->_node_data.find( data->node );
-        if ( itr != -1 )
-        {
-                data->mgr->_node_data.remove_element( itr );
-        }
-
-        itr = data->mgr->_pos_cache.find( data->node );
-        if ( itr != -1 )
-        {
-                data->mgr->_pos_cache.remove_element( itr );
-        }
-
-        delete data;
-        delete this;
-}
 
 AmbientProbeManager::AmbientProbeManager() :
         _loader( nullptr ),
@@ -468,7 +433,7 @@ INLINE LMatrix4 pack_lightdata2( const light_t *light )
         return LMatrix4( light->falloff2, light->falloff3, 0, 0 );
 }
 
-INLINE void apply_lightdatas( int n, const light_t *light, nodeshaderinput_t *input, const LMatrix4 &data, bool active )
+INLINE void apply_lightdatas( int n, const light_t *light, CNodeShaderInput *input, const LMatrix4 &data, bool active )
 {
         input->light_ids[n] = light->id;
         input->light_type[n] = light->type;
@@ -506,42 +471,17 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
         finddata_collector.start();
         bool new_instance = false;
 
-        int itr = _node_data.find( node );
-        if ( itr == -1 )
+        PT( CNodeShaderInput ) input = DCAST( CNodeShaderInput, node->get_user_data() );
+        if ( !input )
         {
-                // This is a new node we have encountered.
+                input = new CNodeShaderInput;
+                input->state_with_input = RenderState::make( AuxDataAttrib::make( input ) );
+                input->last_transform = curr_trans;
+                node->set_user_data( input );
                 new_instance = true;
         }
 
-        PT( nodeshaderinput_t ) input = nullptr;
-        if ( new_instance )
-        {
-                input = new nodeshaderinput_t;
-                input->node_sequence = _node_sequence++;
-                input->state_with_input = RenderState::make( AuxDataAttrib::make( input ) );
-                _node_data[node] = input;
-                _pos_cache[node] = curr_trans;
-
-                // Add a callback to remove this node from our cache when the reference count
-                // reaches zero.
-                WeakReferenceList *ref = node->weak_ref();
-                nodecallbackdata_t *ncd = new nodecallbackdata_t;
-                ncd->mgr = this;
-                ncd->node = node;
-                ncd->list = ref;
-                ref->add_callback( new NodeWeakCallback, ncd );
-        }
-        else
-        {
-                input = _node_data.get_data( itr );
-        }
-
         finddata_collector.stop();
-
-        if ( input == nullptr )
-        {
-                return nullptr;
-        }
 
 	if ( !should_update && !new_instance )
 	{
@@ -552,7 +492,7 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
         input->cubemap_changed = false;
 
         // Is it even necessary to update anything?
-        CPT( TransformState ) prev_trans = _pos_cache[node];
+        CPT( TransformState ) prev_trans = input->last_transform;
         LVector3 pos_delta( 0 );
         if ( prev_trans != nullptr )
         {
@@ -560,7 +500,7 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
         }
         else
         {
-                _pos_cache[node] = curr_trans;
+                input->last_transform = curr_trans;
         }
 
         bool pos_changed = pos_delta.length_squared() >= EQUAL_EPSILON || new_instance;
@@ -637,7 +577,7 @@ const RenderState *AmbientProbeManager::update_node( PandaNode *node,
                 }
 
                 // Cache the last position.
-                _pos_cache[node] = curr_trans;
+                input->last_transform = curr_trans;
         }
 
         bool ambientcube_changed = false;
@@ -955,8 +895,6 @@ void AmbientProbeManager::cleanup()
         //_probe_kdtree = nullptr;
         //_light_kdtree = nullptr;
         _envmap_kdtree = nullptr;
-        _pos_cache.clear();
-        _node_data.clear();
         _probe_kdtrees.clear();
         _probes.clear();
         _all_probes.clear();

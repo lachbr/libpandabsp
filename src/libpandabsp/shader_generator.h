@@ -39,7 +39,7 @@ extern ConfigVariableDouble ambient_light_scale;
 
 NotifyCategoryDeclNoExport(bspShaderGenerator);
 
-class nodeshaderinput_t;
+class CNodeShaderInput;
 
 BEGIN_PUBLISH
 enum ShaderQuality

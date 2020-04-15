@@ -24,7 +24,7 @@
 #include "shader_generator.h"
 
 class BSPLoader;
-class nodeshaderinput_t;
+class CNodeShaderInput;
 
 class EXPCL_PANDABSP BSPCullTraverser : public CullTraverser
 {

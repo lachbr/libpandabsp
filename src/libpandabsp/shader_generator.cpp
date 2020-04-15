@@ -268,9 +268,9 @@ CPT( RenderAttrib ) apply_node_inputs( const RenderState *rs, CPT( RenderAttrib 
         rs->get_attrib_def( ada );
         if ( ada->has_data() )
         {
-                if ( ada->get_data()->is_exact_type( nodeshaderinput_t::get_class_type() ) )
+                if ( ada->get_data()->is_exact_type( CNodeShaderInput::get_class_type() ) )
                 {
-                        nodeshaderinput_t *bsp_node_input = DCAST( nodeshaderinput_t, ada->get_data() );
+                        CNodeShaderInput *bsp_node_input = DCAST( CNodeShaderInput, ada->get_data() );
                         shattr = DCAST( ShaderAttrib, shattr )->set_shader_inputs(
                                 {
                                         ShaderInput( "lightCount", bsp_node_input->light_count ),

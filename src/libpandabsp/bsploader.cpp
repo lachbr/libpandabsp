@@ -14,7 +14,6 @@
 #include "bsp_render.h"
 #include "bspfile.h"
 #include "mathlib.h"
-#include "viftokenizer.h"
 #include "bsp_material.h"
 #include "cubemaps.h"
 #include "shader_generator.h"

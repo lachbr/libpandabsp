@@ -76,9 +76,9 @@ struct light_t : public ReferenceCount
 #define LIGHTING_UNINITIALIZED -1
 
 #ifndef CPPPARSER
-class nodeshaderinput_t : public TypedReferenceCount
+class CNodeShaderInput : public TypedReferenceCount
 {
-        DECLARE_CLASS( nodeshaderinput_t, TypedReferenceCount );
+        DECLARE_CLASS( CNodeShaderInput, TypedReferenceCount );
 
 public:
         // This is the ambient cube actually used by the shader
@@ -109,10 +109,11 @@ public:
         std::bitset<0xFFF> occluded_lights;
 
         CPT( RenderState ) state_with_input;
+        CPT( TransformState ) last_transform;
 
         int active_lights;
 
-        INLINE void copy_needed( const nodeshaderinput_t *other )
+        INLINE void copy_needed( const CNodeShaderInput *other )
         {
                 light_count.set_data( other->light_count.get_data() );
                 light_ids.set_data( other->light_ids.get_data() );
@@ -121,13 +122,13 @@ public:
                 active_lights = other->active_lights;
         }
 
-        INLINE nodeshaderinput_t( const nodeshaderinput_t *other ) :
+        INLINE CNodeShaderInput( const CNodeShaderInput *other ) :
                 TypedReferenceCount()
         {
                 copy_needed( other );
         }
 
-        nodeshaderinput_t() :
+        CNodeShaderInput() :
                 TypedReferenceCount()
         {
                 ambient_cube = PTA_LVecBase3::empty_array( 6 );
@@ -140,6 +141,7 @@ public:
                 amb_probe = nullptr;
                 cubemap = nullptr;
                 state_with_input = nullptr;
+                last_transform = nullptr;
                 cubemap_tex = new Texture( "cubemap_image" );
 		cubemap_tex->setup_cube_map( 32, Texture::T_unsigned_byte, Texture::F_rgb8 );
                 cubemap_tex->clear_image();
@@ -152,7 +154,7 @@ public:
                 lighting_time = LIGHTING_UNINITIALIZED;
         }
 
-        nodeshaderinput_t( const nodeshaderinput_t &other ) :
+        CNodeShaderInput( const CNodeShaderInput &other ) :
                 TypedReferenceCount(),
                 lighting_time( other.lighting_time ),
                 node_sequence( other.node_sequence ),
@@ -162,7 +164,8 @@ public:
                 active_lights( other.active_lights ),
                 occluded_lights( other.occluded_lights ),
                 cubemap_tex( other.cubemap_tex ),
-                state_with_input( other.state_with_input )
+                state_with_input( other.state_with_input ),
+                last_transform( other.last_transform )
         {
                 //ambient_cube = PTA_LVecBase3::empty_array( 6 );
                 //light_count = PTA_int::empty_array( 1 );
@@ -180,7 +183,7 @@ public:
         }
 };
 #else
-class nodeshaderinput_t;
+class CNodeShaderInput;
 #endif
 
 class EXPCL_PANDABSP AmbientProbeManager
@@ -242,8 +245,6 @@ private:
         BSPLoader *_loader;
 
         // NodePaths to be influenced by the ambient probes.
-        SimpleHashMap<PandaNode *, CPT( TransformState ), pointer_hash> _pos_cache;
-        SimpleHashMap<PandaNode *, PT( nodeshaderinput_t ), pointer_hash> _node_data;
         SimpleHashMap<int, pvector<PT( ambientprobe_t )>, int_hash> _probes;
         SimpleHashMap<int, PT( KDTree ), int_hash> _probe_kdtrees;
         pvector<ambientprobe_t *> _all_probes;
