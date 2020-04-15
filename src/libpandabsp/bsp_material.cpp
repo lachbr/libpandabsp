@@ -106,8 +106,7 @@ TextureStage *TextureStages::get_glowmap()
 //====================================================================//
 //====================================================================//
 
-#include "viftokenizer.h"
-#include "vifparser.h"
+#include "keyvalues.h"
 #include <virtualFileSystem.h>
 
 NotifyCategoryDef( bspmaterial, "" );
@@ -141,16 +140,20 @@ const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
         PT( BSPMaterial ) mat = new BSPMaterial;
         mat->_file = file;
 
-        string mat_data = vfs->read_file( file, true );
-        TokenVec toks = tokenizer( mat_data );
-        Parser p( toks );
-
-        Object obj = p._base_objects[0];
-	if ( obj.name == "patch" )
+        PT( CKeyValues ) kv = CKeyValues::load( file );
+        if ( !kv )
+        {
+                bspmaterial_cat.error()
+                        << "Problem loading " << file.get_fullpath() << "\n";
+                return nullptr;
+        }
+        CKeyValues *mat_kv = kv->get_child( 0 );
+	if ( mat_kv->get_name() == "patch" )
 	{
-		if ( Parser::has_property( obj, "$include" ) )
+                int iinclude = mat_kv->find_key( "$include" );
+		if ( iinclude != -1 )
 		{
-			string include_file = Parser::get_property_value( obj, "$include" );
+                        std::string include_file = mat_kv->get_value( iinclude );
 			const BSPMaterial *include_mat = get_from_file( include_file );
 			if ( !include_mat )
 			{
@@ -180,13 +183,12 @@ const BSPMaterial *BSPMaterial::get_from_file( const Filename &file )
 	}
 	else
 	{
-		mat->set_shader( obj.name ); // ->VertexLitGeneric<- {...}
+		mat->set_shader( mat_kv->get_name() ); // ->VertexLitGeneric<- {...}
 	}
-        pvector<Property> props = p.get_properties( obj );
-        for ( size_t i = 0; i < props.size(); i++ )
+
+        for ( size_t i = 0; i < mat_kv->get_num_keys(); i++ )
         {
-                const Property &prop = props[i];
-                mat->set_keyvalue( prop.name, prop.value ); // "$basetexture"   "phase_3/maps/desat_shirt_1.jpg"
+                mat->set_keyvalue( mat_kv->get_key( i ), mat_kv->get_value( i ) ); // "$basetexture"   "phase_3/maps/desat_shirt_1.jpg"
         }
 
         // Figure out these values and store

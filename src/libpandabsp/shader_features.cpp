@@ -11,7 +11,7 @@
 
 #include "shader_features.h"
 #include "bsp_material.h"
-#include "vifparser.h"
+#include "keyvalues.h"
 #include "shader_spec.h"
 
 #include <texturePool.h>
@@ -199,7 +199,7 @@ SHADERFEATURE_PARSE_FUNC( EnvmapFeature )
 
                 if ( mat->has_keyvalue( "$envmaptint" ) )
                 {
-                        envmap_tint = Parser::to_3f( mat->get_keyvalue( "$envmaptint" ) );
+                        envmap_tint = CKeyValues::to_3f( mat->get_keyvalue( "$envmaptint" ) );
                 }
         }
         
@@ -241,7 +241,7 @@ SHADERFEATURE_PARSE_FUNC( DetailFeature )
                 }
                 if ( mat->has_keyvalue( "$detailtint" ) )
                 {
-                        detail_tint = Parser::to_3f
+                        detail_tint = CKeyValues::to_3f
                         ( mat->get_keyvalue( "$detailtint" ) );
                 }
         }  
@@ -343,7 +343,7 @@ SHADERFEATURE_PARSE_FUNC( SelfIllumFeature )
 
                 if ( mat->has_keyvalue( "$selfillumtint" ) )
                 {
-                        selfillumtint = Parser::to_3f( mat->get_keyvalue( "$selfillumtint" ) );
+                        selfillumtint = CKeyValues::to_3f( mat->get_keyvalue( "$selfillumtint" ) );
                 }
         }
 }

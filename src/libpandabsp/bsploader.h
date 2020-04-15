@@ -32,7 +32,6 @@
 
 #include "lightmap_palettes.h"
 #include "ambient_probes.h"
-#include "vifparser.h"
 #include "cubemaps.h"
 #include "decals.h"
 #include "raytrace.h"
