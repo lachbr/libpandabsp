@@ -1,15 +1,11 @@
 set(KV_HEADERS
-	vifparser.h
-	viftokenizer.h
+	keyvalues.h
 	config_vifparser.h
 )
 
 set(KV_SOURCES
-	vifparser.cpp
-	viftokenizer.cpp
+	keyvalues.cpp
 )
-file (GLOB SRCS "src/*.cpp")
-file (GLOB HEADERS "include/*.h")
 
 source_group("Header Files" FILES ${KV_HEADERS})
 source_group("Source Files" FILES ${KV_SOURCES})
