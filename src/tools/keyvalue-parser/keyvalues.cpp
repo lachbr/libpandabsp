@@ -171,7 +171,7 @@ std::string CKeyValuesTokenizer::get_string()
 		{
 			escape = true;
 		}
-		else
+		else if ( c != '\n' && c != '\r' )
 		{
 			result += c;
 		}
@@ -205,7 +205,7 @@ void CKeyValuesTokenizer::ignore_whitespace()
 			_line++;
 		}
 
-		if ( c != ' ' && c != '\n' && c != '\t' )
+		if ( c != ' ' && c != '\n' && c != '\t' && c != '\r' )
 		{
 			break;
 		}
@@ -305,8 +305,8 @@ void CKeyValues::parse( CKeyValuesTokenizer *tokenizer )
 		KeyValueToken_t token = tokenizer->next_token();
 		if ( token.invalid() )
 		{
-			keyvalues_cat.error()
-				<< "Unexpected end of file\n";
+			//keyvalues_cat.error()
+			//	<< "Unexpected end of file\n";
 			break;
 		}
 
@@ -363,27 +363,8 @@ PT( CKeyValues ) CKeyValues::load( const Filename &filename )
 
 	CKeyValuesTokenizer tokenizer( buffer );
 
-	KeyValueToken_t token = tokenizer.next_token();
-
-	if ( token.invalid() || token.type != KVTOKEN_STRING )
-	{
-		keyvalues_cat.error()
-			<< "Invalid token in root of file `" << filename << "`\n";
-		return nullptr;
-	}
-
 	PT( CKeyValues ) kv = new CKeyValues( "__root" );
-	kv->_name = token.data;
 	kv->_filename = filename;
-
-	token = tokenizer.next_token();
-	if ( token.invalid() || token.type != KVTOKEN_BLOCK_BEGIN )
-	{
-		keyvalues_cat.error()
-			<< "Invalid token in root of file `" << filename << "`\n";
-		return nullptr;
-	}
-
 	kv->parse( &tokenizer );
 
 	// We should have nothing left.

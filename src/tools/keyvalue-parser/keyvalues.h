@@ -87,7 +87,7 @@ private:
 	pvector<PT( CKeyValues )> _children;
 };
 
-CKeyValues::CKeyValues( const std::string &name, CKeyValues *parent )
+inline CKeyValues::CKeyValues( const std::string &name, CKeyValues *parent )
 {
 	_name = name;
 	_parent = parent;
