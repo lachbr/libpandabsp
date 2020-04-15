@@ -19,6 +19,8 @@ class SceneComponent;
 #include <pmap.h>
 #include <partBundleHandle.h>
 
+#include "actor.h"
+
 class AnimEvent_t
 {
 public:
@@ -86,6 +88,8 @@ public:
 	PT( PartBundleHandle ) _hbundle;
 
 	SceneComponent *_scene;
+
+	pvector<PT( CActor )> _actors;
 
 #if !defined( CLIENT_DLL )
 	NetworkString( model_path );

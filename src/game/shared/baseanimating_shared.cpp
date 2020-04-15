@@ -2,7 +2,7 @@
 #include <virtualFileSystem.h>
 #include <loader.h>
 
-#include "vifparser.h"
+#include "keyvalues.h"
 
 #include <filename.h>
 #include <auto_bind.h>
@@ -90,6 +90,7 @@ void BaseAnimating::set_model( const std::string &path )
 	Loader *loader = Loader::get_global_ptr();
 
 	Filename modelfile( path );
+#if 0
 	if ( modelfile.get_extension() == "act" )
 	{
 		// This is an actor definition file, which maps a model to a list of
@@ -220,7 +221,8 @@ void BaseAnimating::set_model( const std::string &path )
 		}
 
 	}
-	else if ( !modelfile.empty() )
+#endif
+	/*else*/ if ( !modelfile.empty() )
 	{
 		// Non-animated model
 		_model_np = NodePath( loader->load_sync( path ) );
@@ -388,7 +390,7 @@ void RecvProxy_Animation( RecvProp *prop, void *object, void *out, DatagramItera
 	RecvProxy_String( prop, object, out, dgi );
 
 	C_BaseAnimating *self = (C_BaseAnimating *)object;
-	self->set_animation( self->animation );
+	self->set_animation( self->animation ); 
 }
 
 IMPLEMENT_CLIENTCLASS_RT_NOBASE( C_BaseAnimating, CBaseAnimating )
