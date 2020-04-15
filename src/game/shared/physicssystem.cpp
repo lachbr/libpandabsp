@@ -5,9 +5,6 @@
 #include <bulletTriangleMeshShape.h>
 #include <collisionPolygon.h>
 
-IMPLEMENT_CLASS( CIBulletRigidBodyNode )
-IMPLEMENT_CLASS( CIBulletGhostNode )
-
 IMPLEMENT_CLASS( PhysicsSystem )
 
 static constexpr float meters_to_feet = 3.2808399f;

@@ -34,7 +34,7 @@ public:
 
 	SceneComponent *scene;
 
-	PT( CIBulletRigidBodyNode ) bodynode;
+	PT( BulletRigidBodyNode ) bodynode;
 	NodePath bodynp;
 	bool physics_setup;
 
@@ -51,5 +51,5 @@ public:
 #endif
 
 private:
-	PT( CIBulletRigidBodyNode ) get_phys_body();
+	PT( BulletRigidBodyNode ) get_phys_body();
 };

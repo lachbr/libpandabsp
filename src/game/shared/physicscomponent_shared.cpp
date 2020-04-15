@@ -34,9 +34,9 @@ bool PhysicsComponent::initialize()
 	return true;
 }
 
-PT( CIBulletRigidBodyNode ) PhysicsComponent::get_phys_body()
+PT( BulletRigidBodyNode ) PhysicsComponent::get_phys_body()
 {
-	PT( CIBulletRigidBodyNode ) bnode = new CIBulletRigidBodyNode( "entity-phys" );
+	PT( BulletRigidBodyNode ) bnode = new BulletRigidBodyNode( "entity-phys" );
 	bnode->set_mass( mass );
 
 	bnode->set_ccd_motion_threshold( 1e-7 );
