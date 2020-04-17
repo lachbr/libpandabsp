@@ -212,13 +212,16 @@ void BSPShaderGenerator::add_shader( PT( ShaderSpec ) shader )
 
 void BSPShaderGenerator::set_sun_light( const NodePath &np )
 {
-        _sunlight = np;
         if ( np.is_empty() )
         {
+                if ( !_sunlight.is_empty() )
+                        _sunlight.clear();
                 _has_shadow_sunlight = false;
                 _pssm_rig->reparent_to( NodePath() );
                 return;
         }
+
+        _sunlight = np;
 
         DirectionalLight *dlight = DCAST( DirectionalLight, _sunlight.node() );
         _sun_vector = -dlight->get_direction();
@@ -234,15 +237,14 @@ void BSPShaderGenerator::update()
 
         if ( want_pssm )
         {
-                if ( _sunlight.is_empty() || !_has_shadow_sunlight )
+                if ( _sunlight.is_empty() & _has_shadow_sunlight )
                 {
-                        //self->_sunlight = NodePath();
-                        //self->_has_shadow_sunlight = false;
-                        //self->_pssm_rig->reparent_to( NodePath() );
-                        return;
+                        _has_shadow_sunlight = false;
+                        _pssm_rig->reparent_to( NodePath() );
                 }
 
-		_pssm_rig->update( _camera.get_child( 0 ), _sun_vector );
+                if ( _has_shadow_sunlight )
+                        _pssm_rig->update( _camera.get_child( 0 ), _sun_vector );
         }
 
 	if ( _fog )
