@@ -1,7 +1,7 @@
 #include "qrad.h"
 
 #include <bsp_material.h>
-#include <vifparser.h>
+#include <keyvalues.h>
 
 #ifdef WORDS_BIGENDIAN
 #error "HLRAD_TEXTURE doesn't support WORDS_BIGENDIAN, because I have no big endian machine to test it"
@@ -72,7 +72,7 @@ void LoadTextures()
                         if ( mat->has_keyvalue( "$reflectivity" ) )
                         {
                                 b_explicit_reflectivity = true;
-                                explicit_reflectivity = Parser::to_3f( mat->get_keyvalue( "$reflectivity" ) );
+                                explicit_reflectivity = CKeyValues::to_3f( mat->get_keyvalue( "$reflectivity" ) );
                         }
 
                         PNMImage *img = new PNMImage;
