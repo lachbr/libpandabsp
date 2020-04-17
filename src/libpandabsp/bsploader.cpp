@@ -1884,7 +1884,13 @@ void BSPLoader::do_optimizations()
                 if ( modelnum == -1 )
                         continue;
 
-                std::cout << "Making non-static collisions for model " << modelnum << " entity " << entnum << std::endl;
+                if ( get_model( modelnum ).is_empty() )
+                {
+                        // Model was removed.
+                        continue;
+                }
+
+                std::cout << "Making non-static collisions for model " << modelnum << " entity " << entnum << " classname " << classname << std::endl;
                 // Make collisions for a non-static brush model.
                 make_brush_model_collisions( modelnum );
         }
