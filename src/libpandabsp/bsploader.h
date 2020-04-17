@@ -425,8 +425,6 @@ protected:
 
 	void init_dface_lightmap_info( dface_lightmap_info_t *info, int facenum );
 
-        static AsyncTask::DoneStatus update_task( GenericAsyncTask *task, void *data );
-
 protected:
         bspdata_t *_bspdata;
         BSPShaderGenerator *_shgen;
@@ -477,7 +475,6 @@ protected:
         DecalManager _decal_mgr;
         pvector<cubemap_t> _cubemaps;
 	
-        PT( GenericAsyncTask ) _update_task;
         UpdateSeq _generated_shader_seq;
 
 	typedef unordered_map<int, brush_collision_data_t> TriangleIndex2BSPCollisionData_t;

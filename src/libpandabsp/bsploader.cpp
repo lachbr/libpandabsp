@@ -1531,19 +1531,6 @@ void BSPLoader::update_visibility( const LPoint3 &pos )
         }
 }
 
-AsyncTask::DoneStatus BSPLoader::update_task( GenericAsyncTask *task, void *data )
-{
-        BSPLoader *self = (BSPLoader *)data;
-
-	// We update visibility on the Cull thread now.
-        //if ( self->_want_visibility )
-        //{
-        //        self->update_visibility();
-        //}
-
-        return AsyncTask::DS_cont;
-}
-
 void BSPLoader::read_materials_file()
 {
         VirtualFileSystem *vfs = VirtualFileSystem::get_global_ptr();
@@ -1724,9 +1711,6 @@ bool BSPLoader::read( const Filename &file, bool is_transition )
 			// No cascaded shadows
 			_shgen->set_sun_light( NodePath() );
 		}
-
-                _update_task = new GenericAsyncTask( file.get_basename_wo_extension() + "-updateTask", update_task, this );
-                AsyncTaskManager::get_global_ptr()->add( _update_task );
         }
 
         _colldata = SetupCollisionBSPData( _bspdata );
@@ -2147,12 +2131,6 @@ void BSPLoader::cleanup( bool is_transition )
         _leaf_bboxs.clear();
         _visible_leaf_bboxs.clear();
         _leaf_aabb_lock.release();
-
-        if ( _update_task != nullptr )
-        {
-                _update_task->remove();
-                _update_task = nullptr;
-        }
 
         _has_pvs_data = false;
 
