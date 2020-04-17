@@ -10,6 +10,11 @@
  */
 
 #include "config_bsp.h"
+
+#ifdef _PYTHON_VERSION
+#include "entity.h"
+#endif
+
 #include "bsploader.h"
 #include "bsp_render.h"
 #include "shader_generator.h"
@@ -64,6 +69,13 @@ void init_libpandabsp()
         if ( initialized )
                 return;
         initialized = true;
+
+#ifdef _PYTHON_VERSION
+        CBaseEntity::init_type();
+        CPointEntity::init_type();
+        CBoundsEntity::init_type();
+        CBrushEntity::init_type();
+#endif
 
 	BSPFaceAttrib::init_type();
         BSPRender::init_type();
