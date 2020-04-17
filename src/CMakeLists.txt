@@ -1,11 +1,15 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.12.2)
 
 project(libpandabsp)
 
 option(PYTHON_VERSION "Builds the libraries for use in Python. Set this is you're compiling for CIO." ON)
 option(SET_NDEBUG "Defines NDEBUG in all projects. Set this for Panda3D optimize 4 builds." OFF)
 
-set(IS_GAME_BUILD (EXISTS "./game"))
+if (PYTHON_VERSION)
+	set(IS_GAME_BUILD 0)
+else()
+	set(IS_GAME_BUILD (IS_DIRECTORY "./game"))
+endif()
 
 # Setup paths to dependencies
 
@@ -72,19 +76,19 @@ macro(bsp_setup_target_ext targetname outext)
 endmacro()
 
 macro(bsp_setup_target_dll targetname)
-	bsp_setup_target_ext(targetname dll)
+	bsp_setup_target_ext(${targetname} dll)
 endmacro()
 
 macro(bsp_setup_target_dllpyd targetname)
 	if (PYTHON_VERSION)
-		bsp_setup_target_ext(targetname pyd)
+		bsp_setup_target_ext(${targetname} pyd)
 	else()
-		bsp_setup_target_ext(targetname dll)
+		bsp_setup_target_ext(${targetname} dll)
 	endif()
 endmacro()
 
 macro(bsp_setup_target_exe targetname)
-	bsp_setup_target_ext(targetname exe)
+	bsp_setup_target_ext(${targetname} exe)
 endmacro()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275")
@@ -99,7 +103,7 @@ if (PYTHON_VERSION)
 	add_subdirectory(networksystem)
 endif()
 
-if (EXISTS "./game")
+if (IS_GAME_BUILD)
 	add_subdirectory(game/server)
 	add_subdirectory(game/client)
 	add_subdirectory(game/dedicated)

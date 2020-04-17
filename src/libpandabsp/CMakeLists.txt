@@ -87,5 +87,9 @@ target_link_libraries(libpandabsp libpanda.lib
                             bsp_common
 							vifparser
 							libpandabullet.lib)
+							
+if (PYTHON_VERSION)
+	target_link_libraries(libpandabsp libp3interrogatedb.lib)
+endif()
                             
 add_dependencies(libpandabsp vifparser bsp_common)
