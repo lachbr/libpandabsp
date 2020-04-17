@@ -24,7 +24,8 @@
 class Py_BSPLoader : public BSPLoader
 {
 PUBLISHED:
-	
+	PyObject *find_all_entities( const string &classname );
+
 	int get_num_entities() const; //
 	PyObject *get_entity( int n ) const; //
 
@@ -74,8 +75,6 @@ PUBLISHED:
 
 	void set_server_entity_dispatcher( PyObject *dispatcher );
 	void link_server_entity_to_class( const string &name, PyTypeObject *type );
-
-	PyObject *find_all_entities( const string &classname );
 
 	INLINE void set_transition_landmark( const std::string &name,
 					     const LVector3 &origin,

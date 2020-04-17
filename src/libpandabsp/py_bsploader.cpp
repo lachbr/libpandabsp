@@ -28,6 +28,26 @@ CBaseEntity *Py_BSPLoader::get_c_entity( const int entnum ) const
 	return nullptr;
 }
 
+PyObject *Py_BSPLoader::find_all_entities( const string &classname )
+{
+	PyObject *list = PyList_New( 0 );
+
+	for ( size_t i = 0; i < _entities.size(); i++ )
+	{
+		const entitydef_t &def = _entities[i];
+		if ( !def.c_entity )
+			continue;
+		std::string cls = def.c_entity->get_entity_value( "classname" );
+		if ( classname == cls )
+		{
+			PyList_Append( list, def.py_entity );
+		}
+	}
+
+	Py_INCREF( list );
+	return list;
+}
+
 void Py_BSPLoader::get_entity_keyvalues( PyObject *list, const int entnum )
 {
 	entity_t *ent = _bspdata->entities + entnum;
@@ -376,26 +396,6 @@ void Py_AI_BSPLoader::set_server_entity_dispatcher( PyObject *dispatch )
 void Py_AI_BSPLoader::link_server_entity_to_class( const string &name, PyTypeObject *type )
 {
 	_svent_to_class[name] = type;
-}
-
-PyObject *Py_AI_BSPLoader::find_all_entities( const string &classname )
-{
-	PyObject *list = PyList_New( 0 );
-
-	for ( size_t i = 0; i < _entities.size(); i++ )
-	{
-		const entitydef_t &def = _entities[i];
-		if ( !def.c_entity )
-			continue;
-		std::string cls = def.c_entity->get_entity_value( "classname" );
-		if ( classname == cls )
-		{
-			PyList_Append( list, def.py_entity );
-		}
-	}
-
-	Py_INCREF( list );
-	return list;
 }
 
 void Py_AI_BSPLoader::load_entities()
