@@ -2,6 +2,11 @@ cmake_minimum_required (VERSION 2.6)
 
 project(libpandabsp)
 
+option(PYTHON_VERSION "Builds the libraries for use in Python. Set this is you're compiling for CIO." ON)
+option(SET_NDEBUG "Defines NDEBUG in all projects. Set this for Panda3D optimize 4 builds." OFF)
+
+set(IS_GAME_BUILD (EXISTS "./game"))
+
 # Setup paths to dependencies
 
 set(PANDA C:/Users/brian/OneDrive/Documents/Projects/cio-panda3d/built_x64 CACHE PATH "Path to root Panda3D SDK directory.")
@@ -23,9 +28,15 @@ set(LIBBULLET ${BULLET}/lib)
 set(INCGNS C:/Users/brian/OneDrive/Documents/Projects/libpandabsp/src/dependencies/GameNetworkingSockets/include CACHE PATH "Path to GameNetworkingSockets include directory.")
 set(LIBGNS C:/Users/brian/OneDrive/Documents/Projects/libpandabsp/src/dependencies/GameNetworkingSockets/src/RelWithDebInfo/GameNetworkingSockets CACHE FILEPATH "Path to GameNetworkingSockets library.")
 
-set(INCFREETYPE C:/Users/brian/OneDrive/Documents/Projects/cio-panda3d/thirdparty/win-libs-vc14-x64/freetype/include/freetype2 CACHE PATH "Path to thirdparty FreeType include directory.")
+if (IS_GAME_BUILD)
+	set(INCFREETYPE C:/Users/brian/OneDrive/Documents/Projects/cio-panda3d/thirdparty/win-libs-vc14-x64/freetype/include/freetype2 CACHE PATH "Path to thirdparty FreeType include directory.")
+endif()
 
 add_compile_definitions(WITHIN_PANDA)
+
+if (PYTHON_VERSION)
+    add_compile_definitions(_PYTHON_VERSION)
+endif()
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     # 64 bits
@@ -44,47 +55,55 @@ else ()
     set(LIB_TYPE SHARED)
 endif ()
 
-set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type.")
-
-macro(bsp_setup_target targetname)
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG")
-	string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
-	string(REPLACE "/DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+macro(bsp_setup_target_ext targetname outext)
+	if (NOT SET_NDEBUG)
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG")
+		string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+		string(REPLACE "/DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+	endif()
 
 	if (DEFINED LINK_ALL_STATIC)
 		add_custom_command(TARGET ${targetname} POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${targetname}.lib ${LIBPANDA_BACK}\\${targetname}.lib)
 	else()
-		add_custom_command(TARGET ${targetname} POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${targetname}.dll ${BINPANDA_BACK}\\${targetname}.dll)
+		add_custom_command(TARGET ${targetname} POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${targetname}.${outext} ${BINPANDA_BACK}\\${targetname}.${outext})
 		add_custom_command(TARGET ${targetname} POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${targetname}.pdb ${BINPANDA_BACK}\\${targetname}.pdb)
+	endif()
+endmacro()
+
+macro(bsp_setup_target_dll targetname)
+	bsp_setup_target_ext(targetname dll)
+endmacro()
+
+macro(bsp_setup_target_dllpyd targetname)
+	if (PYTHON_VERSION)
+		bsp_setup_target_ext(targetname pyd)
+	else()
+		bsp_setup_target_ext(targetname dll)
 	endif()
 endmacro()
 
 macro(bsp_setup_target_exe targetname)
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG")
-	string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
-	string(REPLACE "/DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-
-	if (DEFINED LINK_ALL_STATIC)
-		add_custom_command(TARGET ${targetname} POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${targetname}.exe ${LIBPANDA_BACK}\\${targetname}.exe)
-	else()
-		add_custom_command(TARGET ${targetname} POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${targetname}.exe ${BINPANDA_BACK}\\${targetname}.exe)
-		add_custom_command(TARGET ${targetname} POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${targetname}.pdb ${BINPANDA_BACK}\\${targetname}.pdb)
-	endif()
+	bsp_setup_target_ext(targetname exe)
 endmacro()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275")
 
+##################################################################################################
 
 add_subdirectory(tools/keyvalue-parser)
 add_subdirectory(tools/common)
 add_subdirectory(libpandabsp)
-add_subdirectory(networksystem)
 
-add_subdirectory(game/server)
-add_subdirectory(game/client)
-add_subdirectory(game/dedicated)
+if (PYTHON_VERSION)
+	add_subdirectory(networksystem)
+endif()
+
+if (EXISTS "./game")
+	add_subdirectory(game/server)
+	add_subdirectory(game/client)
+	add_subdirectory(game/dedicated)
+endif()
 
 #add_subdirectory(tools/p3csg)
 #add_subdirectory(tools/p3bsp)

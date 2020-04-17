@@ -17,7 +17,7 @@ target_compile_definitions(vifparser PRIVATE BUILDING_VIFPARSER)
 target_include_directories(vifparser PRIVATE ./ ${INCPANDA})
 target_link_directories(vifparser PRIVATE ${LIBPANDA})
 
-bsp_setup_target(vifparser)
+bsp_setup_target_dll(vifparser)
 
 target_link_libraries(vifparser
 					  libpanda.lib

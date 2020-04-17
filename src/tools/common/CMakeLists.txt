@@ -82,7 +82,7 @@ add_library(bsp_common ${LIB_TYPE}
 	${CL_HEADERS}
 )
 
-bsp_setup_target(bsp_common)
+bsp_setup_target_dll(bsp_common)
 
 target_compile_definitions(bsp_common PRIVATE BUILDING_BSPCOMMON NOMINMAX STDC_HEADERS)
 
