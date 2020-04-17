@@ -77,23 +77,23 @@ else()
 	install(TARGETS libpandabsp LIBRARY DESTINATION bin)
 endif()
 
-target_link_libraries(libpandabsp libpanda.lib
-                            libpandaexpress.lib
-					        libp3dtool.lib
-					        libp3dtoolconfig.lib
-					        libp3direct.lib
-						    libp3framework.lib
-                            libpandaegg.lib
-                            embree3.lib
-                            tbb.lib
-                            tbbmalloc.lib
-							libpandagl.lib
-                            bsp_common
-							vifparser
-							libpandabullet.lib)
+target_link_libraries(libpandabsp LINK_PRIVATE libpanda.lib
+                            LINK_PRIVATE libpandaexpress.lib
+					        LINK_PRIVATE libp3dtool.lib
+					        LINK_PRIVATE libp3dtoolconfig.lib
+					        LINK_PRIVATE libp3direct.lib
+						    LINK_PRIVATE libp3framework.lib
+                            LINK_PRIVATE libpandaegg.lib
+                            LINK_PRIVATE embree3.lib
+                            LINK_PRIVATE tbb.lib
+                            LINK_PRIVATE tbbmalloc.lib
+							LINK_PRIVATE libpandagl.lib
+                            LINK_PRIVATE bsp_common
+							LINK_PRIVATE vifparser
+							LINK_PRIVATE libpandabullet.lib)
 							
 if (PYTHON_VERSION)
-	target_link_libraries(libpandabsp libp3interrogatedb.lib python27.lib)
+	target_link_libraries(libpandabsp LINK_PRIVATE libp3interrogatedb.lib LINK_PRIVATE python27.lib)
 endif()
                             
 add_dependencies(libpandabsp vifparser bsp_common)

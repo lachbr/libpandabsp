@@ -96,10 +96,10 @@ target_link_directories(bsp_common PRIVATE
 )
 
 target_link_libraries(bsp_common
-	libpanda.lib
-	libpandaexpress.lib
-	libp3dtool.lib
-	libp3dtoolconfig.lib
+	LINK_PRIVATE libpanda.lib
+	LINK_PRIVATE libpandaexpress.lib
+	LINK_PRIVATE libp3dtool.lib
+	LINK_PRIVATE libp3dtoolconfig.lib
 )
 
 
