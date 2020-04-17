@@ -52,6 +52,9 @@ typedef dface_s dface_t;
 typedef dedge_s dedge_t;
 typedef entity_s entity_t;
 struct bspdata_t;
+#ifdef CPPPARSER
+struct dmodel_t;
+#endif
 
 class EggVertex;
 class EggVertexPool;

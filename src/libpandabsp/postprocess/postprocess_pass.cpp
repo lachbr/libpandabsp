@@ -249,7 +249,8 @@ void PostProcessPass::window_event( GraphicsOutput *output )
 	{
 		LVector2i size = output->get_size();
 		get_corrected_size( size );
-		_buffer->set_size( size[0], size[1] );
+		if ( size != _buffer->get_size() )
+			_buffer->set_size( size[0], size[1] );
 	}
 }
 

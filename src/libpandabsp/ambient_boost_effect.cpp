@@ -13,7 +13,7 @@
 
 TypeHandle AmbientBoostEffect::m_sTypeHandle;
 
-CPT( RenderEffect ) AmbientBoostEffect::Make()
+CPT( RenderEffect ) AmbientBoostEffect::make()
 {
         AmbientBoostEffect *effect = new AmbientBoostEffect;
         return return_new( effect );
@@ -29,7 +29,7 @@ int AmbientBoostEffect::compare_to_impl( const RenderEffect *other ) const
         return 0;
 }
 
-void AmbientBoostEffect::RegisterWithReadFactory()
+void AmbientBoostEffect::register_with_read_factory()
 {
         BamReader::get_factory()->register_factory( get_class_type(), MakeFromBam );
 }

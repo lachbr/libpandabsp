@@ -46,6 +46,8 @@ protected:
 class Py_CL_BSPLoader : public Py_BSPLoader
 {
 PUBLISHED:
+	Py_CL_BSPLoader();
+
 	void link_entity_to_class( const string &entname, PyTypeObject *type );
 	PyObject *make_pyent( PyObject *pyent, const string &classname );
 
@@ -64,6 +66,8 @@ private:
 class Py_AI_BSPLoader : public Py_BSPLoader
 {
 PUBLISHED:
+	Py_AI_BSPLoader();
+
 	void add_dynamic_entity( PyObject *pyent );
 	void remove_dynamic_entity( PyObject *pyent );
 	void mark_entity_preserved( int n, bool preserved = true );
@@ -111,6 +115,16 @@ private:
 INLINE int Py_BSPLoader::get_num_entities() const
 {
 	return _entities.size();
+}
+
+INLINE Py_CL_BSPLoader::Py_CL_BSPLoader() :
+	Py_BSPLoader()
+{
+}
+
+INLINE Py_AI_BSPLoader::Py_AI_BSPLoader() :
+	Py_BSPLoader()
+{
 }
 
 #endif

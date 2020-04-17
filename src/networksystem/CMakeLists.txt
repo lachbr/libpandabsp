@@ -10,9 +10,11 @@ target_include_directories(networksystem PRIVATE
 	./
 	${INCPANDA}
 	${INCGNS}
+	${INCPANDA_PY}
 )
 target_link_directories(networksystem PRIVATE
 	${LIBPANDA}
+	${LIBPANDA_PY}
 )
 
 target_compile_definitions(networksystem PRIVATE BUILDING_NETWORKSYSTEM)
@@ -34,10 +36,9 @@ endif()
 add_custom_command(TARGET networksystem PRE_BUILD COMMAND interrogate.bat)
 
 if (DEFINED LINK_ALL_STATIC)
-    add_custom_command(TARGET networksystem POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\networksystem${OUT_EXT} ${LIBPANDA_BACK}\\networksystem${OUT_EXT})
+	install(TARGETS networksystem LIBRARY DESTINATION lib)
 else()
-    add_custom_command(TARGET networksystem POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\networksystem${OUT_EXT} ${PANDA_BACK}\\panda3d\\networksystem${OUT_EXT})
-    add_custom_command(TARGET networksystem POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\networksystem.pdb ${PANDA_BACK}\\panda3d\\networksystem.pdb)
+	install(TARGETS networksystem LIBRARY DESTINATION bin)
 endif()
 
 target_link_libraries(networksystem 
@@ -46,4 +47,6 @@ target_link_libraries(networksystem
 					        libp3dtool.lib
 					        libp3dtoolconfig.lib
                             libpandaegg.lib
+							libp3interrogatedb.lib
+							python27.lib
 							${LIBGNS})

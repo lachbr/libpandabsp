@@ -87,7 +87,7 @@ void init_libpandabsp()
 	GlowNode::init_type();
 
         AmbientBoostEffect::init_type();
-        AmbientBoostEffect::RegisterWithReadFactory();
+        AmbientBoostEffect::register_with_read_factory();
 
         BSPMaterial::init_type();
         BSPMaterialAttrib::init_type();

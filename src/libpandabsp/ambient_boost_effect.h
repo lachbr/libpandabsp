@@ -25,14 +25,14 @@ private:
         }
 
 PUBLISHED:
-        static CPT( RenderEffect ) Make();
+        static CPT( RenderEffect ) make();
 
 protected:
         virtual bool safe_to_combine() const;
         virtual int compare_to_impl( const RenderEffect *other ) const;
 
 public:
-        static void RegisterWithReadFactory();
+        static void register_with_read_factory();
         virtual void write_datagram( BamWriter *manager, Datagram &dg );
 
 protected:

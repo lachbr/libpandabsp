@@ -26,6 +26,15 @@ target_include_directories(libpandabsp PRIVATE
 	${INCBULLET}
 	${INCEMBREE}
 )
+if (PYTHON_VERSION)
+	target_include_directories(libpandabsp PRIVATE
+		${INCPANDA_PY}
+	)
+	target_link_directories(libpandabsp PRIVATE
+		${LIBPANDA_PY}
+	)
+endif()
+
 target_link_directories(libpandabsp PRIVATE
 	${LIBPANDA}
 	${LIBEMBREE}
@@ -63,14 +72,9 @@ if (PYTHON_VERSION)
 endif()
 
 if (DEFINED LINK_ALL_STATIC)
-    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${LIBPANDA_BACK}\\${bsp_out}${bsp_suff})
+	install(TARGETS libpandabsp LIBRARY DESTINATION lib)
 else()
-    if (PYTHON_VERSION)
-        add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${PANDA_BACK}\\panda3d\\${bsp_out}${bsp_suff})
-        add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}.pdb ${PANDA_BACK}\\panda3d\\${bsp_out}.pdb)
-    endif()
-    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}${bsp_suff} ${PANDA_BACK}\\bin\\${bsp_out}${bsp_suff})
-    add_custom_command(TARGET libpandabsp POST_BUILD COMMAND copy /Y ${CMAKE_BUILD_TYPE}\\${bsp_out}.pdb ${PANDA_BACK}\\bin\\${bsp_out}.pdb)
+	install(TARGETS libpandabsp LIBRARY DESTINATION bin)
 endif()
 
 target_link_libraries(libpandabsp libpanda.lib
@@ -89,7 +93,7 @@ target_link_libraries(libpandabsp libpanda.lib
 							libpandabullet.lib)
 							
 if (PYTHON_VERSION)
-	target_link_libraries(libpandabsp libp3interrogatedb.lib)
+	target_link_libraries(libpandabsp libp3interrogatedb.lib python27.lib)
 endif()
                             
 add_dependencies(libpandabsp vifparser bsp_common)

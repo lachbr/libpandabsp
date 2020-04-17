@@ -518,6 +518,8 @@ bool Py_AI_BSPLoader::read( const Filename &filename, bool is_transition )
 
 		clear_transition_landmark();
 	}
+
+	return true;
 }
 
 void Py_AI_BSPLoader::load_geometry()

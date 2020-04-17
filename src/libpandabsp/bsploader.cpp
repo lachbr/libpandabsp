@@ -2164,7 +2164,6 @@ void BSPLoader::cleanup_entities( bool is_transition )
 }
 
 BSPLoader::BSPLoader() :
-	_update_task( nullptr ),
 	_win( nullptr ),
 	_has_pvs_data( false ),
 	_want_visibility( true ),
