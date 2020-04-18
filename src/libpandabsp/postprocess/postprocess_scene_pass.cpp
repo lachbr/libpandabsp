@@ -20,11 +20,10 @@
 // PostProcessScenePass
 
 PostProcessScenePass::PostProcessScenePass( PostProcess *pp, int output_texture_bits, int auxbits ) :
-	PostProcessPass( pp, "scene_pass", output_texture_bits, FrameBufferProperties::get_default() ),
+	PostProcessPass( pp, "scene_pass", output_texture_bits ),
 	_aux_bits( auxbits ),
 	_cam_state( nullptr )
 {
-	_fbprops.set_srgb_color( false );
 }
 
 bool PostProcessScenePass::setup_buffer()

@@ -101,7 +101,7 @@ PUBLISHED:
 	static FrameBufferProperties get_default_fbprops();
 
 protected:
-	PT( Texture ) make_texture( const std::string &name );
+	PT( Texture ) make_texture( const std::string &name, Texture::Format format = Texture::F_rgb );
 
 protected:
 	PostProcess *_pp;

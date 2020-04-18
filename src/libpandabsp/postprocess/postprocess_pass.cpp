@@ -27,8 +27,9 @@ FrameBufferProperties PostProcessPass::get_default_fbprops()
 {
 	if ( !_default_fbprops )
 	{
-		_default_fbprops = new FrameBufferProperties( FrameBufferProperties::get_default() );
-		_default_fbprops->set_srgb_color( false );
+		_default_fbprops = new FrameBufferProperties;
+		_default_fbprops->clear();
+		_default_fbprops->set_srgb_color( true );
 		_default_fbprops->set_back_buffers( 0 );
 		_default_fbprops->set_multisamples( 0 );
 		_default_fbprops->set_accum_bits( 0 );
@@ -37,7 +38,7 @@ FrameBufferProperties PostProcessPass::get_default_fbprops()
 		_default_fbprops->set_aux_hrgba( 0 );
 		_default_fbprops->set_coverage_samples( 0 );
 		_default_fbprops->set_rgb_color( true );
-		_default_fbprops->set_rgba_bits( 8, 8, 8, 8 );
+		_default_fbprops->set_rgba_bits( 8, 8, 8, 0 );
 	}
 
 	return *_default_fbprops;
@@ -175,10 +176,10 @@ bool PostProcessPass::setup_buffer()
 void PostProcessPass::setup_textures()
 {
 	if ( has_texture_bits( bits_PASSTEXTURE_COLOR ) )
-		_color_texture = make_texture( get_name() + "-color" );
+		_color_texture = make_texture( get_name() + "-color", Texture::F_srgb );
 
 	if ( has_texture_bits( bits_PASSTEXTURE_DEPTH ) )
-		_depth_texture = make_texture( get_name() + "-depth" );
+		_depth_texture = make_texture( get_name() + "-depth", Texture::F_depth_component );
 
 	if ( has_texture_bits( bits_PASSTEXTURE_AUX0 ) )
 		_aux0_texture = make_texture( get_name() + "-aux0" );
@@ -254,9 +255,10 @@ void PostProcessPass::window_event( GraphicsOutput *output )
 	}
 }
 
-PT( Texture ) PostProcessPass::make_texture( const std::string &name )
+PT( Texture ) PostProcessPass::make_texture( const std::string &name, Texture::Format format )
 {
 	PT( Texture ) tex = new Texture( name );
+	tex->set_format( format );
 	tex->set_wrap_u( SamplerState::WM_clamp );
 	tex->set_wrap_v( SamplerState::WM_clamp );
 	return tex;
