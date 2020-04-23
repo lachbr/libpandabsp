@@ -580,6 +580,14 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_CInterpolationContext = &Dtoo
 static void Dtool_PyModuleClassInit_CInterpolationContext(PyObject *module);
 
 /**
+ * Forward declarations for top-level class IInterpolatedVar
+ */
+typedef IInterpolatedVar IInterpolatedVar_localtype;
+Define_Module_Class(libpandabsp, IInterpolatedVar, IInterpolatedVar_localtype, IInterpolatedVar);
+static struct Dtool_PyTypedObject *const Dtool_Ptr_IInterpolatedVar = &Dtool_IInterpolatedVar;
+static void Dtool_PyModuleClassInit_IInterpolatedVar(PyObject *module);
+
+/**
  * Forward declarations for top-level class CInterpolatedVar_LVector2f
  */
 typedef CInterpolatedVar< LVector2f > CInterpolatedVar_LVector2f_localtype;
@@ -708,6 +716,7 @@ static const Dtool_TypeDef exports[] = {
   {"Py_CL_BSPLoader", &Dtool_Py_CL_BSPLoader},
   {"Py_AI_BSPLoader", &Dtool_Py_AI_BSPLoader},
   {"CInterpolationContext", &Dtool_CInterpolationContext},
+  {"IInterpolatedVar", &Dtool_IInterpolatedVar},
   {"CInterpolatedVar< LVector2f >", &Dtool_CInterpolatedVar_LVector2f},
   {"CInterpolatedVarArrayBase< LVector2f, false >", &Dtool_CInterpolatedVarArrayBase_LVector2f_false},
   {"CInterpolatedVar< LVector3f >", &Dtool_CInterpolatedVar_LVector3f},
@@ -732,38 +741,38 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_TypedObject (imports[2].type)
   {"Namable", nullptr},
 #define Dtool_Ptr_Namable (imports[3].type)
-  {"ReferenceCount", nullptr},
-#define Dtool_Ptr_ReferenceCount (imports[4].type)
   {"TypedReferenceCount", nullptr},
-#define Dtool_Ptr_TypedReferenceCount (imports[5].type)
-  {"TypedWritable", nullptr},
-#define Dtool_Ptr_TypedWritable (imports[6].type)
+#define Dtool_Ptr_TypedReferenceCount (imports[4].type)
+  {"ReferenceCount", nullptr},
+#define Dtool_Ptr_ReferenceCount (imports[5].type)
   {"TypedWritableReferenceCount", nullptr},
-#define Dtool_Ptr_TypedWritableReferenceCount (imports[7].type)
+#define Dtool_Ptr_TypedWritableReferenceCount (imports[6].type)
+  {"TypedWritable", nullptr},
+#define Dtool_Ptr_TypedWritable (imports[7].type)
   {"BitMask< uint32_t, 32 >", nullptr},
 #define Dtool_Ptr_BitMask_uint32_t_32 (imports[8].type)
   {"RenderAttrib", nullptr},
 #define Dtool_Ptr_RenderAttrib (imports[9].type)
-  {"LVector2i", nullptr},
-#define Dtool_Ptr_LVector2i (imports[10].type)
-  {"LVector3f", nullptr},
-#define Dtool_Ptr_LVector3f (imports[11].type)
-  {"LVector2f", nullptr},
-#define Dtool_Ptr_LVector2f (imports[12].type)
   {"LPoint3f", nullptr},
-#define Dtool_Ptr_LPoint3f (imports[13].type)
-  {"LPoint2f", nullptr},
-#define Dtool_Ptr_LPoint2f (imports[14].type)
-  {"LVecBase4f", nullptr},
-#define Dtool_Ptr_LVecBase4f (imports[15].type)
+#define Dtool_Ptr_LPoint3f (imports[10].type)
   {"LVector4f", nullptr},
-#define Dtool_Ptr_LVector4f (imports[16].type)
+#define Dtool_Ptr_LVector4f (imports[11].type)
+  {"LVecBase4f", nullptr},
+#define Dtool_Ptr_LVecBase4f (imports[12].type)
+  {"LVector2i", nullptr},
+#define Dtool_Ptr_LVector2i (imports[13].type)
+  {"LVector2f", nullptr},
+#define Dtool_Ptr_LVector2f (imports[14].type)
+  {"LPoint2f", nullptr},
+#define Dtool_Ptr_LPoint2f (imports[15].type)
+  {"LVector3f", nullptr},
+#define Dtool_Ptr_LVector3f (imports[16].type)
   {"BoundingVolume", nullptr},
 #define Dtool_Ptr_BoundingVolume (imports[17].type)
-  {"FiniteBoundingVolume", nullptr},
-#define Dtool_Ptr_FiniteBoundingVolume (imports[18].type)
   {"GeometricBoundingVolume", nullptr},
-#define Dtool_Ptr_GeometricBoundingVolume (imports[19].type)
+#define Dtool_Ptr_GeometricBoundingVolume (imports[18].type)
+  {"FiniteBoundingVolume", nullptr},
+#define Dtool_Ptr_FiniteBoundingVolume (imports[19].type)
   {"LPlanef", nullptr},
 #define Dtool_Ptr_LPlanef (imports[20].type)
   {"Texture", nullptr},
@@ -772,12 +781,12 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_PointerToArray_float (imports[22].type)
   {"PointerToArray< UnalignedLVecBase4f >", nullptr},
 #define Dtool_Ptr_PointerToArray_UnalignedLVecBase4f (imports[23].type)
-  {"Shader", nullptr},
-#define Dtool_Ptr_Shader (imports[24].type)
+  {"ShaderInput", nullptr},
+#define Dtool_Ptr_ShaderInput (imports[24].type)
   {"TextureStage", nullptr},
 #define Dtool_Ptr_TextureStage (imports[25].type)
-  {"ShaderInput", nullptr},
-#define Dtool_Ptr_ShaderInput (imports[26].type)
+  {"Shader", nullptr},
+#define Dtool_Ptr_Shader (imports[26].type)
   {"Geom", nullptr},
 #define Dtool_Ptr_Geom (imports[27].type)
   {"TransformState", nullptr},
@@ -792,22 +801,22 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_NodePath (imports[32].type)
   {"FrameBufferProperties", nullptr},
 #define Dtool_Ptr_FrameBufferProperties (imports[33].type)
-  {"GeomNode", nullptr},
-#define Dtool_Ptr_GeomNode (imports[34].type)
   {"DrawableRegion", nullptr},
-#define Dtool_Ptr_DrawableRegion (imports[35].type)
-  {"CullTraverser", nullptr},
-#define Dtool_Ptr_CullTraverser (imports[36].type)
+#define Dtool_Ptr_DrawableRegion (imports[34].type)
+  {"GeomNode", nullptr},
+#define Dtool_Ptr_GeomNode (imports[35].type)
   {"Fog", nullptr},
-#define Dtool_Ptr_Fog (imports[37].type)
+#define Dtool_Ptr_Fog (imports[36].type)
+  {"CullTraverser", nullptr},
+#define Dtool_Ptr_CullTraverser (imports[37].type)
   {"DisplayRegion", nullptr},
 #define Dtool_Ptr_DisplayRegion (imports[38].type)
-  {"ShaderGenerator", nullptr},
-#define Dtool_Ptr_ShaderGenerator (imports[39].type)
-  {"GraphicsStateGuardian", nullptr},
-#define Dtool_Ptr_GraphicsStateGuardian (imports[40].type)
   {"GraphicsOutput", nullptr},
-#define Dtool_Ptr_GraphicsOutput (imports[41].type)
+#define Dtool_Ptr_GraphicsOutput (imports[39].type)
+  {"ShaderGenerator", nullptr},
+#define Dtool_Ptr_ShaderGenerator (imports[40].type)
+  {"GraphicsStateGuardian", nullptr},
+#define Dtool_Ptr_GraphicsStateGuardian (imports[41].type)
   {"GraphicsWindow", nullptr},
 #define Dtool_Ptr_GraphicsWindow (imports[42].type)
   {"BulletRigidBodyNode", nullptr},
@@ -818,10 +827,10 @@ static Dtool_TypeDef imports[] = {
 #define Dtool_Ptr_ModelNode (imports[45].type)
   {"ModelRoot", nullptr},
 #define Dtool_Ptr_ModelRoot (imports[46].type)
-  {"AudioSound", nullptr},
-#define Dtool_Ptr_AudioSound (imports[47].type)
   {"AudioManager", nullptr},
-#define Dtool_Ptr_AudioManager (imports[48].type)
+#define Dtool_Ptr_AudioManager (imports[47].type)
+  {"AudioSound", nullptr},
+#define Dtool_Ptr_AudioSound (imports[48].type)
   {nullptr, nullptr},
 };
 #endif
@@ -862,29 +871,29 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedObject = &Dtool_TypedObj
 extern struct Dtool_PyTypedObject Dtool_Namable;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Namable = &Dtool_Namable;
 #endif
-// ReferenceCount
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
-#endif
 // TypedReferenceCount
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_TypedReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedReferenceCount = &Dtool_TypedReferenceCount;
 #endif
-// TypedWritable
+// ReferenceCount
 #ifndef LINK_ALL_STATIC
 #else
-extern struct Dtool_PyTypedObject Dtool_TypedWritable;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedWritable;
+extern struct Dtool_PyTypedObject Dtool_ReferenceCount;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ReferenceCount = &Dtool_ReferenceCount;
 #endif
 // TypedWritableReferenceCount
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_TypedWritableReferenceCount;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritableReferenceCount = &Dtool_TypedWritableReferenceCount;
+#endif
+// TypedWritable
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TypedWritable;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TypedWritable = &Dtool_TypedWritable;
 #endif
 // BitMask< uint32_t, 32 >
 #ifndef LINK_ALL_STATIC
@@ -904,42 +913,6 @@ extern BitMask< uint32_t, 32 > *Dtool_Coerce_BitMask_uint32_t_32(PyObject *args,
 extern struct Dtool_PyTypedObject Dtool_RenderAttrib;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_RenderAttrib = &Dtool_RenderAttrib;
 #endif
-// LVector2i
-#ifndef LINK_ALL_STATIC
-inline static LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced) {
-  nassertr(Dtool_Ptr_LVector2i != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVector2i->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVector2i *(*)(PyObject *, LVector2i &))Dtool_Ptr_LVector2i->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVector2i;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2i = &Dtool_LVector2i;
-extern LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced);
-#endif
-// LVector3f
-#ifndef LINK_ALL_STATIC
-inline static LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced) {
-  nassertr(Dtool_Ptr_LVector3f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVector3f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVector3f *(*)(PyObject *, LVector3f &))Dtool_Ptr_LVector3f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVector3f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
-extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
-#endif
-// LVector2f
-#ifndef LINK_ALL_STATIC
-inline static LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced) {
-  nassertr(Dtool_Ptr_LVector2f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVector2f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVector2f *(*)(PyObject *, LVector2f &))Dtool_Ptr_LVector2f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVector2f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2f = &Dtool_LVector2f;
-extern LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced);
-#endif
 // LPoint3f
 #ifndef LINK_ALL_STATIC
 inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced) {
@@ -951,30 +924,6 @@ inline static LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced)
 extern struct Dtool_PyTypedObject Dtool_LPoint3f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint3f = &Dtool_LPoint3f;
 extern LPoint3f *Dtool_Coerce_LPoint3f(PyObject *args, LPoint3f &coerced);
-#endif
-// LPoint2f
-#ifndef LINK_ALL_STATIC
-inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced) {
-  nassertr(Dtool_Ptr_LPoint2f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LPoint2f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LPoint2f *(*)(PyObject *, LPoint2f &))Dtool_Ptr_LPoint2f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LPoint2f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint2f = &Dtool_LPoint2f;
-extern LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced);
-#endif
-// LVecBase4f
-#ifndef LINK_ALL_STATIC
-inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
-  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
-  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
-  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
-}
-#else
-extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
-extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
 #endif
 // LVector4f
 #ifndef LINK_ALL_STATIC
@@ -988,23 +937,83 @@ extern struct Dtool_PyTypedObject Dtool_LVector4f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector4f = &Dtool_LVector4f;
 extern LVector4f *Dtool_Coerce_LVector4f(PyObject *args, LVector4f &coerced);
 #endif
+// LVecBase4f
+#ifndef LINK_ALL_STATIC
+inline static LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced) {
+  nassertr(Dtool_Ptr_LVecBase4f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVecBase4f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVecBase4f *(*)(PyObject *, LVecBase4f &))Dtool_Ptr_LVecBase4f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVecBase4f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVecBase4f = &Dtool_LVecBase4f;
+extern LVecBase4f *Dtool_Coerce_LVecBase4f(PyObject *args, LVecBase4f &coerced);
+#endif
+// LVector2i
+#ifndef LINK_ALL_STATIC
+inline static LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced) {
+  nassertr(Dtool_Ptr_LVector2i != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVector2i->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVector2i *(*)(PyObject *, LVector2i &))Dtool_Ptr_LVector2i->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVector2i;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2i = &Dtool_LVector2i;
+extern LVector2i *Dtool_Coerce_LVector2i(PyObject *args, LVector2i &coerced);
+#endif
+// LVector2f
+#ifndef LINK_ALL_STATIC
+inline static LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced) {
+  nassertr(Dtool_Ptr_LVector2f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVector2f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVector2f *(*)(PyObject *, LVector2f &))Dtool_Ptr_LVector2f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVector2f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector2f = &Dtool_LVector2f;
+extern LVector2f *Dtool_Coerce_LVector2f(PyObject *args, LVector2f &coerced);
+#endif
+// LPoint2f
+#ifndef LINK_ALL_STATIC
+inline static LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced) {
+  nassertr(Dtool_Ptr_LPoint2f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LPoint2f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LPoint2f *(*)(PyObject *, LPoint2f &))Dtool_Ptr_LPoint2f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LPoint2f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LPoint2f = &Dtool_LPoint2f;
+extern LPoint2f *Dtool_Coerce_LPoint2f(PyObject *args, LPoint2f &coerced);
+#endif
+// LVector3f
+#ifndef LINK_ALL_STATIC
+inline static LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced) {
+  nassertr(Dtool_Ptr_LVector3f != nullptr, nullptr);
+  nassertr(Dtool_Ptr_LVector3f->_Dtool_Coerce != nullptr, nullptr);
+  return ((LVector3f *(*)(PyObject *, LVector3f &))Dtool_Ptr_LVector3f->_Dtool_Coerce)(args, coerced);
+}
+#else
+extern struct Dtool_PyTypedObject Dtool_LVector3f;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_LVector3f = &Dtool_LVector3f;
+extern LVector3f *Dtool_Coerce_LVector3f(PyObject *args, LVector3f &coerced);
+#endif
 // BoundingVolume
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_BoundingVolume;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_BoundingVolume = &Dtool_BoundingVolume;
 #endif
-// FiniteBoundingVolume
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_FiniteBoundingVolume;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_FiniteBoundingVolume = &Dtool_FiniteBoundingVolume;
-#endif
 // GeometricBoundingVolume
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_GeometricBoundingVolume;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_GeometricBoundingVolume = &Dtool_GeometricBoundingVolume;
+#endif
+// FiniteBoundingVolume
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_FiniteBoundingVolume;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_FiniteBoundingVolume = &Dtool_FiniteBoundingVolume;
 #endif
 // LPlanef
 #ifndef LINK_ALL_STATIC
@@ -1048,6 +1057,18 @@ extern struct Dtool_PyTypedObject Dtool_PointerToArray_UnalignedLVecBase4f;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_PointerToArray_UnalignedLVecBase4f = &Dtool_PointerToArray_UnalignedLVecBase4f;
 extern PointerToArray< UnalignedLVecBase4f > *Dtool_Coerce_PointerToArray_UnalignedLVecBase4f(PyObject *args, PointerToArray< UnalignedLVecBase4f > &coerced);
 #endif
+// ShaderInput
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_ShaderInput;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderInput = &Dtool_ShaderInput;
+#endif
+// TextureStage
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_TextureStage;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_TextureStage = &Dtool_TextureStage;
+#endif
 // Shader
 #ifndef LINK_ALL_STATIC
 inline static bool Dtool_ConstCoerce_Shader(PyObject *args, CPT(Shader) &coerced) {
@@ -1065,18 +1086,6 @@ extern struct Dtool_PyTypedObject Dtool_Shader;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Shader = &Dtool_Shader;
 extern bool Dtool_ConstCoerce_Shader(PyObject *args, CPT(Shader) &coerced);
 extern bool Dtool_Coerce_Shader(PyObject *args, PT(Shader) &coerced);
-#endif
-// TextureStage
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_TextureStage;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_TextureStage = &Dtool_TextureStage;
-#endif
-// ShaderInput
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_ShaderInput;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_ShaderInput = &Dtool_ShaderInput;
 #endif
 // Geom
 #ifndef LINK_ALL_STATIC
@@ -1126,23 +1135,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_NodePath = &Dtool_NodePath;
 extern struct Dtool_PyTypedObject Dtool_FrameBufferProperties;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_FrameBufferProperties = &Dtool_FrameBufferProperties;
 #endif
-// GeomNode
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_GeomNode;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GeomNode = &Dtool_GeomNode;
-#endif
 // DrawableRegion
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_DrawableRegion;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_DrawableRegion = &Dtool_DrawableRegion;
 #endif
-// CullTraverser
+// GeomNode
 #ifndef LINK_ALL_STATIC
 #else
-extern struct Dtool_PyTypedObject Dtool_CullTraverser;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_CullTraverser = &Dtool_CullTraverser;
+extern struct Dtool_PyTypedObject Dtool_GeomNode;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GeomNode = &Dtool_GeomNode;
 #endif
 // Fog
 #ifndef LINK_ALL_STATIC
@@ -1150,11 +1153,23 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_CullTraverser = &Dtool_CullTr
 extern struct Dtool_PyTypedObject Dtool_Fog;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_Fog = &Dtool_Fog;
 #endif
+// CullTraverser
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_CullTraverser;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_CullTraverser = &Dtool_CullTraverser;
+#endif
 // DisplayRegion
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_DisplayRegion;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_DisplayRegion = &Dtool_DisplayRegion;
+#endif
+// GraphicsOutput
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_GraphicsOutput;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsOutput = &Dtool_GraphicsOutput;
 #endif
 // ShaderGenerator
 #ifndef LINK_ALL_STATIC
@@ -1179,12 +1194,6 @@ extern bool Dtool_Coerce_ShaderGenerator(PyObject *args, PT(ShaderGenerator) &co
 #else
 extern struct Dtool_PyTypedObject Dtool_GraphicsStateGuardian;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsStateGuardian = &Dtool_GraphicsStateGuardian;
-#endif
-// GraphicsOutput
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_GraphicsOutput;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_GraphicsOutput = &Dtool_GraphicsOutput;
 #endif
 // GraphicsWindow
 #ifndef LINK_ALL_STATIC
@@ -1216,17 +1225,17 @@ static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelNode = &Dtool_ModelNode;
 extern struct Dtool_PyTypedObject Dtool_ModelRoot;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_ModelRoot = &Dtool_ModelRoot;
 #endif
-// AudioSound
-#ifndef LINK_ALL_STATIC
-#else
-extern struct Dtool_PyTypedObject Dtool_AudioSound;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioSound = &Dtool_AudioSound;
-#endif
 // AudioManager
 #ifndef LINK_ALL_STATIC
 #else
 extern struct Dtool_PyTypedObject Dtool_AudioManager;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioManager = &Dtool_AudioManager;
+#endif
+// AudioSound
+#ifndef LINK_ALL_STATIC
+#else
+extern struct Dtool_PyTypedObject Dtool_AudioSound;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_AudioSound = &Dtool_AudioSound;
 #endif
 
 /**
@@ -19139,6 +19148,313 @@ static void *Dtool_DowncastInterface_CInterpolationContext(void *from_this, Dtoo
 }
 
 /**
+ * Python wrappers for functions of class IInterpolatedVar
+ */
+/**
+ * Python function wrapper for:
+ * virtual void IInterpolatedVar::SetInterpolationAmount(float seconds) = 0
+ */
+static PyObject *Dtool_IInterpolatedVar_SetInterpolationAmount_531(PyObject *self, PyObject *arg) {
+  IInterpolatedVar *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_IInterpolatedVar, (void **)&local_this, "IInterpolatedVar.SetInterpolationAmount")) {
+    return nullptr;
+  }
+  // 1-virtual void IInterpolatedVar::SetInterpolationAmount(float seconds) = 0
+  if (PyNumber_Check(arg)) {
+    ((*local_this).SetInterpolationAmount)((float)PyFloat_AsDouble(arg));
+    return Dtool_Return_None();
+  }
+  if (!_PyErr_OCCURRED()) {
+    return Dtool_Raise_BadArgumentsError(
+      "SetInterpolationAmount(const IInterpolatedVar self, float seconds)\n");
+  }
+  return nullptr;
+}
+
+#ifndef NDEBUG
+static const char *Dtool_IInterpolatedVar_SetInterpolationAmount_531_comment =
+  "C++ Interface:\n"
+  "SetInterpolationAmount(const IInterpolatedVar self, float seconds)\n";
+#else
+static const char *Dtool_IInterpolatedVar_SetInterpolationAmount_531_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
+ * virtual void IInterpolatedVar::NoteLastNetworkedValue(void) = 0
+ */
+static PyObject *Dtool_IInterpolatedVar_NoteLastNetworkedValue_532(PyObject *self, PyObject *) {
+  IInterpolatedVar *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_IInterpolatedVar, (void **)&local_this, "IInterpolatedVar.NoteLastNetworkedValue")) {
+    return nullptr;
+  }
+  // 1-virtual void IInterpolatedVar::NoteLastNetworkedValue(void) = 0
+  ((*local_this).NoteLastNetworkedValue)();
+  return Dtool_Return_None();
+}
+
+#ifndef NDEBUG
+static const char *Dtool_IInterpolatedVar_NoteLastNetworkedValue_532_comment =
+  "C++ Interface:\n"
+  "NoteLastNetworkedValue(const IInterpolatedVar self)\n"
+  "\n"
+  "// Returns true if the new value is different from the prior most recent\n"
+  "// value.";
+#else
+static const char *Dtool_IInterpolatedVar_NoteLastNetworkedValue_532_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
+ * virtual bool IInterpolatedVar::NoteChanged(float changetime, bool bUpdateLastNetworkedValue) = 0
+ */
+static PyObject *Dtool_IInterpolatedVar_NoteChanged_533(PyObject *self, PyObject *args, PyObject *kwds) {
+  IInterpolatedVar *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_IInterpolatedVar, (void **)&local_this, "IInterpolatedVar.NoteChanged")) {
+    return nullptr;
+  }
+  // 1-virtual bool IInterpolatedVar::NoteChanged(float changetime, bool bUpdateLastNetworkedValue) = 0
+  float param1;
+  PyObject *param2;
+  static const char *keyword_list[] = {"changetime", "bUpdateLastNetworkedValue", nullptr};
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "fO:NoteChanged", (char **)keyword_list, &param1, &param2)) {
+    bool return_value = ((*local_this).NoteChanged)((float)param1, (PyObject_IsTrue(param2) != 0));
+    return Dtool_Return_Bool(return_value);
+  }
+  if (!_PyErr_OCCURRED()) {
+    return Dtool_Raise_BadArgumentsError(
+      "NoteChanged(const IInterpolatedVar self, float changetime, bool bUpdateLastNetworkedValue)\n");
+  }
+  return nullptr;
+}
+
+#ifndef NDEBUG
+static const char *Dtool_IInterpolatedVar_NoteChanged_533_comment =
+  "C++ Interface:\n"
+  "NoteChanged(const IInterpolatedVar self, float changetime, bool bUpdateLastNetworkedValue)\n";
+#else
+static const char *Dtool_IInterpolatedVar_NoteChanged_533_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
+ * virtual void IInterpolatedVar::Reset(void) = 0
+ */
+static PyObject *Dtool_IInterpolatedVar_Reset_534(PyObject *self, PyObject *) {
+  IInterpolatedVar *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_IInterpolatedVar, (void **)&local_this, "IInterpolatedVar.Reset")) {
+    return nullptr;
+  }
+  // 1-virtual void IInterpolatedVar::Reset(void) = 0
+  ((*local_this).Reset)();
+  return Dtool_Return_None();
+}
+
+#ifndef NDEBUG
+static const char *Dtool_IInterpolatedVar_Reset_534_comment =
+  "C++ Interface:\n"
+  "Reset(const IInterpolatedVar self)\n";
+#else
+static const char *Dtool_IInterpolatedVar_Reset_534_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
+ * virtual int IInterpolatedVar::Interpolate(float currentTime) = 0
+ */
+static PyObject *Dtool_IInterpolatedVar_Interpolate_535(PyObject *self, PyObject *arg) {
+  IInterpolatedVar *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_IInterpolatedVar, (void **)&local_this, "IInterpolatedVar.Interpolate")) {
+    return nullptr;
+  }
+  // 1-virtual int IInterpolatedVar::Interpolate(float currentTime) = 0
+  if (PyNumber_Check(arg)) {
+    int return_value = ((*local_this).Interpolate)((float)PyFloat_AsDouble(arg));
+    if (Dtool_CheckErrorOccurred()) {
+      return nullptr;
+    }
+    return Dtool_WrapValue(return_value);
+  }
+  if (!_PyErr_OCCURRED()) {
+    return Dtool_Raise_BadArgumentsError(
+      "Interpolate(const IInterpolatedVar self, float currentTime)\n");
+  }
+  return nullptr;
+}
+
+#ifndef NDEBUG
+static const char *Dtool_IInterpolatedVar_Interpolate_535_comment =
+  "C++ Interface:\n"
+  "Interpolate(const IInterpolatedVar self, float currentTime)\n"
+  "\n"
+  "// Returns 1 if the value will always be the same if currentTime is always\n"
+  "// increasing.";
+#else
+static const char *Dtool_IInterpolatedVar_Interpolate_535_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
+ * virtual int IInterpolatedVar::GetType(void) const = 0
+ */
+static PyObject *Dtool_IInterpolatedVar_GetType_536(PyObject *self, PyObject *) {
+  IInterpolatedVar *local_this = nullptr;
+  if (!DtoolInstance_GetPointer(self, local_this, Dtool_IInterpolatedVar)) {
+    return nullptr;
+  }
+  // 1-virtual int IInterpolatedVar::GetType(void) const = 0
+  int return_value = ((*(const IInterpolatedVar*)local_this).GetType)();
+  if (Dtool_CheckErrorOccurred()) {
+    return nullptr;
+  }
+  return Dtool_WrapValue(return_value);
+}
+
+#ifndef NDEBUG
+static const char *Dtool_IInterpolatedVar_GetType_536_comment =
+  "C++ Interface:\n"
+  "GetType(IInterpolatedVar self)\n";
+#else
+static const char *Dtool_IInterpolatedVar_GetType_536_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
+ * virtual void IInterpolatedVar::RestoreToLastNetworked(void) = 0
+ */
+static PyObject *Dtool_IInterpolatedVar_RestoreToLastNetworked_537(PyObject *self, PyObject *) {
+  IInterpolatedVar *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_IInterpolatedVar, (void **)&local_this, "IInterpolatedVar.RestoreToLastNetworked")) {
+    return nullptr;
+  }
+  // 1-virtual void IInterpolatedVar::RestoreToLastNetworked(void) = 0
+  ((*local_this).RestoreToLastNetworked)();
+  return Dtool_Return_None();
+}
+
+#ifndef NDEBUG
+static const char *Dtool_IInterpolatedVar_RestoreToLastNetworked_537_comment =
+  "C++ Interface:\n"
+  "RestoreToLastNetworked(const IInterpolatedVar self)\n";
+#else
+static const char *Dtool_IInterpolatedVar_RestoreToLastNetworked_537_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
+ * virtual void IInterpolatedVar::Copy(IInterpolatedVar *pSrc) = 0
+ */
+static PyObject *Dtool_IInterpolatedVar_Copy_538(PyObject *self, PyObject *arg) {
+  IInterpolatedVar *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_IInterpolatedVar, (void **)&local_this, "IInterpolatedVar.Copy")) {
+    return nullptr;
+  }
+  // 1-virtual void IInterpolatedVar::Copy(IInterpolatedVar *pSrc) = 0
+  IInterpolatedVar *arg_this = (IInterpolatedVar *)DTOOL_Call_GetPointerThisClass(arg, Dtool_Ptr_IInterpolatedVar, 1, "IInterpolatedVar.Copy", false, true);
+  if (arg_this != nullptr) {
+    ((*local_this).Copy)(arg_this);
+    return Dtool_Return_None();
+  }
+  if (!_PyErr_OCCURRED()) {
+    return Dtool_Raise_BadArgumentsError(
+      "Copy(const IInterpolatedVar self, IInterpolatedVar pSrc)\n");
+  }
+  return nullptr;
+}
+
+#ifndef NDEBUG
+static const char *Dtool_IInterpolatedVar_Copy_538_comment =
+  "C++ Interface:\n"
+  "Copy(const IInterpolatedVar self, IInterpolatedVar pSrc)\n";
+#else
+static const char *Dtool_IInterpolatedVar_Copy_538_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
+ * virtual char const *IInterpolatedVar::GetDebugName(void) = 0
+ */
+static PyObject *Dtool_IInterpolatedVar_GetDebugName_539(PyObject *self, PyObject *) {
+  IInterpolatedVar *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_IInterpolatedVar, (void **)&local_this, "IInterpolatedVar.GetDebugName")) {
+    return nullptr;
+  }
+  // 1-virtual char const *IInterpolatedVar::GetDebugName(void) = 0
+  char const *return_value = ((*local_this).GetDebugName)();
+  if (Dtool_CheckErrorOccurred()) {
+    return nullptr;
+  }
+  return Dtool_WrapValue(return_value);
+}
+
+#ifndef NDEBUG
+static const char *Dtool_IInterpolatedVar_GetDebugName_539_comment =
+  "C++ Interface:\n"
+  "GetDebugName(const IInterpolatedVar self)\n";
+#else
+static const char *Dtool_IInterpolatedVar_GetDebugName_539_comment = nullptr;
+#endif
+
+/**
+ * Python function wrapper for:
+ * virtual void IInterpolatedVar::SetDebugName(char const *pName) = 0
+ */
+static PyObject *Dtool_IInterpolatedVar_SetDebugName_540(PyObject *self, PyObject *arg) {
+  IInterpolatedVar *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_IInterpolatedVar, (void **)&local_this, "IInterpolatedVar.SetDebugName")) {
+    return nullptr;
+  }
+  // 1-virtual void IInterpolatedVar::SetDebugName(char const *pName) = 0
+  char const *param1;
+  if (PyArg_Parse(arg, "z:SetDebugName", &param1)) {
+    ((*local_this).SetDebugName)((char const *)param1);
+    return Dtool_Return_None();
+  }
+  if (!_PyErr_OCCURRED()) {
+    return Dtool_Raise_BadArgumentsError(
+      "SetDebugName(const IInterpolatedVar self, str pName)\n");
+  }
+  return nullptr;
+}
+
+#ifndef NDEBUG
+static const char *Dtool_IInterpolatedVar_SetDebugName_540_comment =
+  "C++ Interface:\n"
+  "SetDebugName(const IInterpolatedVar self, str pName)\n";
+#else
+static const char *Dtool_IInterpolatedVar_SetDebugName_540_comment = nullptr;
+#endif
+
+static int Dtool_Init_IInterpolatedVar(PyObject *self, PyObject *args, PyObject *kwds) {
+  Dtool_Raise_TypeError("cannot init abstract class");
+  return -1;
+}
+
+static void *Dtool_UpcastInterface_IInterpolatedVar(PyObject *self, Dtool_PyTypedObject *requested_type) {
+  Dtool_PyTypedObject *type = DtoolInstance_TYPE(self);
+  if (type != &Dtool_IInterpolatedVar) {
+    printf("IInterpolatedVar ** Bad Source Type-- Requesting Conversion from %s to %s\n", Py_TYPE(self)->tp_name, requested_type->_PyType.tp_name); fflush(nullptr);
+    return nullptr;
+  }
+
+  IInterpolatedVar *local_this = (IInterpolatedVar *)DtoolInstance_VOID_PTR(self);
+  if (requested_type == &Dtool_IInterpolatedVar) {
+    return local_this;
+  }
+  return nullptr;
+}
+
+static void *Dtool_DowncastInterface_IInterpolatedVar(void *from_this, Dtool_PyTypedObject *from_type) {
+  if (from_this == nullptr || from_type == nullptr) {
+    return nullptr;
+  }
+  if (from_type == Dtool_Ptr_IInterpolatedVar) {
+    return from_this;
+  }
+  return nullptr;
+}
+
+/**
  * Python wrappers for functions of class CInterpolatedVar< LVector2f >
  */
 /**
@@ -19210,6 +19526,9 @@ static void *Dtool_UpcastInterface_CInterpolatedVar_LVector2f(PyObject *self, Dt
   if (requested_type == Dtool_Ptr_CInterpolatedVarArrayBase_LVector2f_false) {
     return (CInterpolatedVarArrayBase< LVector2f, false > *) local_this;
   }
+  if (requested_type == Dtool_Ptr_IInterpolatedVar) {
+    return (IInterpolatedVar *)(CInterpolatedVarArrayBase< LVector2f, false > *) local_this;
+  }
   return nullptr;
 }
 
@@ -19224,6 +19543,10 @@ static void *Dtool_DowncastInterface_CInterpolatedVar_LVector2f(void *from_this,
     CInterpolatedVarArrayBase< LVector2f, false >* other_this = (CInterpolatedVarArrayBase< LVector2f, false >*)from_this;
     return (CInterpolatedVar< LVector2f >*)other_this;
   }
+  if (from_type == Dtool_Ptr_IInterpolatedVar) {
+    IInterpolatedVar* other_this = (IInterpolatedVar*)from_this;
+    return (CInterpolatedVar< LVector2f >*)other_this;
+  }
   return nullptr;
 }
 
@@ -19234,7 +19557,7 @@ static void *Dtool_DowncastInterface_CInterpolatedVar_LVector2f(void *from_this,
  * Python function wrapper for:
  * virtual void CInterpolatedVarArrayBase< LVector2f, false >::Setup(LVector2f *pValue, int type)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_533(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_544(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.Setup")) {
     return nullptr;
@@ -19260,299 +19583,89 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_533(PyObj
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_533_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_544_comment =
   "C++ Interface:\n"
   "Setup(const CInterpolatedVarArrayBase self, LVector2f pValue, int type)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_533_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_544_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector2f, false >::SetInterpolationAmount(float seconds)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetInterpolationAmount_534(PyObject *self, PyObject *arg) {
-  CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.SetInterpolationAmount")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector2f, false >::SetInterpolationAmount(float seconds)
-  if (PyNumber_Check(arg)) {
-    ((*local_this).SetInterpolationAmount)((float)PyFloat_AsDouble(arg));
-    return Dtool_Return_None();
-  }
-  if (!_PyErr_OCCURRED()) {
-    return Dtool_Raise_BadArgumentsError(
-      "SetInterpolationAmount(const CInterpolatedVarArrayBase self, float seconds)\n");
-  }
-  return nullptr;
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetInterpolationAmount_534_comment =
-  "C++ Interface:\n"
-  "SetInterpolationAmount(const CInterpolatedVarArrayBase self, float seconds)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetInterpolationAmount_534_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector2f, false >::NoteLastNetworkedValue(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteLastNetworkedValue_535(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.NoteLastNetworkedValue")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector2f, false >::NoteLastNetworkedValue(void)
-  ((*local_this).NoteLastNetworkedValue)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteLastNetworkedValue_535_comment =
-  "C++ Interface:\n"
-  "NoteLastNetworkedValue(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteLastNetworkedValue_535_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual bool CInterpolatedVarArrayBase< LVector2f, false >::NoteChanged(float changetime, bool bUpdateLastNetworkedValue)
  * bool CInterpolatedVarArrayBase< LVector2f, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteChanged_536(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteChanged_545(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.NoteChanged")) {
     return nullptr;
   }
-  int parameter_count = (int)PyTuple_Size(args);
-  if (kwds != nullptr) {
-    parameter_count += (int)PyDict_Size(kwds);
-  }
-  switch (parameter_count) {
-  case 2:
-    {
-      // 1-virtual bool CInterpolatedVarArrayBase< LVector2f, false >::NoteChanged(float changetime, bool bUpdateLastNetworkedValue)
-      float param1;
-      PyObject *param2;
-      static const char *keyword_list[] = {"changetime", "bUpdateLastNetworkedValue", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "fO:NoteChanged", (char **)keyword_list, &param1, &param2)) {
-        bool return_value = ((*local_this).NoteChanged)((float)param1, (PyObject_IsTrue(param2) != 0));
-        return Dtool_Return_Bool(return_value);
-      }
-    }
-    break;
-  case 3:
-    {
-      // 1-bool CInterpolatedVarArrayBase< LVector2f, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
-      float param1;
-      float param2;
-      PyObject *param3;
-      static const char *keyword_list[] = {"changetime", "interpolation_amount", "bUpdateLastNetworkedValue", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "ffO:NoteChanged", (char **)keyword_list, &param1, &param2, &param3)) {
-        bool return_value = ((*local_this).NoteChanged)((float)param1, (float)param2, (PyObject_IsTrue(param3) != 0));
-        return Dtool_Return_Bool(return_value);
-      }
-    }
-    break;
-#ifndef NDEBUG
-  default:
-    return PyErr_Format(PyExc_TypeError,
-                        "NoteChanged() takes 3 or 4 arguments (%d given)",
-                        parameter_count + 1);
-#endif
+  // 1-bool CInterpolatedVarArrayBase< LVector2f, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
+  float param1;
+  float param2;
+  PyObject *param3;
+  static const char *keyword_list[] = {"changetime", "interpolation_amount", "bUpdateLastNetworkedValue", nullptr};
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "ffO:NoteChanged", (char **)keyword_list, &param1, &param2, &param3)) {
+    bool return_value = ((*local_this).NoteChanged)((float)param1, (float)param2, (PyObject_IsTrue(param3) != 0));
+    return Dtool_Return_Bool(return_value);
   }
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
-      "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, bool bUpdateLastNetworkedValue)\n"
       "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)\n");
   }
   return nullptr;
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteChanged_536_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteChanged_545_comment =
   "C++ Interface:\n"
-  "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, bool bUpdateLastNetworkedValue)\n"
   "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)\n"
   "\n"
   "// Just like the IInterpolatedVar functions, but you can specify an\n"
   "// interpolation amount.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteChanged_536_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteChanged_545_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector2f, false >::Reset(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Reset_537(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.Reset")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector2f, false >::Reset(void)
-  ((*local_this).Reset)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Reset_537_comment =
-  "C++ Interface:\n"
-  "Reset(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Reset_537_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual int CInterpolatedVarArrayBase< LVector2f, false >::Interpolate(float currentTime)
  * int CInterpolatedVarArrayBase< LVector2f, false >::Interpolate(float currentTime, float interpolation_amount)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Interpolate_538(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Interpolate_546(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.Interpolate")) {
     return nullptr;
   }
-  int parameter_count = (int)PyTuple_Size(args);
-  if (kwds != nullptr) {
-    parameter_count += (int)PyDict_Size(kwds);
-  }
-  switch (parameter_count) {
-  case 1:
-    {
-      PyObject *arg;
-      if (Dtool_ExtractArg(&arg, args, kwds, "currentTime")) {
-        // 1-virtual int CInterpolatedVarArrayBase< LVector2f, false >::Interpolate(float currentTime)
-        if (PyNumber_Check(arg)) {
-          int return_value = ((*local_this).Interpolate)((float)PyFloat_AsDouble(arg));
-          if (Dtool_CheckErrorOccurred()) {
-            return nullptr;
-          }
-          return Dtool_WrapValue(return_value);
-        }
-      }
+  // 1-int CInterpolatedVarArrayBase< LVector2f, false >::Interpolate(float currentTime, float interpolation_amount)
+  float param1;
+  float param2;
+  static const char *keyword_list[] = {"currentTime", "interpolation_amount", nullptr};
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "ff:Interpolate", (char **)keyword_list, &param1, &param2)) {
+    int return_value = ((*local_this).Interpolate)((float)param1, (float)param2);
+    if (Dtool_CheckErrorOccurred()) {
+      return nullptr;
     }
-    break;
-  case 2:
-    {
-      // 1-int CInterpolatedVarArrayBase< LVector2f, false >::Interpolate(float currentTime, float interpolation_amount)
-      float param1;
-      float param2;
-      static const char *keyword_list[] = {"currentTime", "interpolation_amount", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "ff:Interpolate", (char **)keyword_list, &param1, &param2)) {
-        int return_value = ((*local_this).Interpolate)((float)param1, (float)param2);
-        if (Dtool_CheckErrorOccurred()) {
-          return nullptr;
-        }
-        return Dtool_WrapValue(return_value);
-      }
-    }
-    break;
-#ifndef NDEBUG
-  default:
-    return PyErr_Format(PyExc_TypeError,
-                        "Interpolate() takes 2 or 3 arguments (%d given)",
-                        parameter_count + 1);
-#endif
+    return Dtool_WrapValue(return_value);
   }
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
-      "Interpolate(const CInterpolatedVarArrayBase self, float currentTime)\n"
       "Interpolate(const CInterpolatedVarArrayBase self, float currentTime, float interpolation_amount)\n");
   }
   return nullptr;
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Interpolate_538_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Interpolate_546_comment =
   "C++ Interface:\n"
-  "Interpolate(const CInterpolatedVarArrayBase self, float currentTime)\n"
   "Interpolate(const CInterpolatedVarArrayBase self, float currentTime, float interpolation_amount)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Interpolate_538_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual int CInterpolatedVarArrayBase< LVector2f, false >::GetType(void) const
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetType_539(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
-  if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector2f_false)) {
-    return nullptr;
-  }
-  // 1-virtual int CInterpolatedVarArrayBase< LVector2f, false >::GetType(void) const
-  int return_value = ((*(const CInterpolatedVarArrayBase< LVector2f, false >*)local_this).GetType)();
-  if (Dtool_CheckErrorOccurred()) {
-    return nullptr;
-  }
-  return Dtool_WrapValue(return_value);
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetType_539_comment =
-  "C++ Interface:\n"
-  "GetType(CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetType_539_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector2f, false >::RestoreToLastNetworked(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_RestoreToLastNetworked_540(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.RestoreToLastNetworked")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector2f, false >::RestoreToLastNetworked(void)
-  ((*local_this).RestoreToLastNetworked)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_RestoreToLastNetworked_540_comment =
-  "C++ Interface:\n"
-  "RestoreToLastNetworked(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_RestoreToLastNetworked_540_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual char const *CInterpolatedVarArrayBase< LVector2f, false >::GetDebugName(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDebugName_542(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.GetDebugName")) {
-    return nullptr;
-  }
-  // 1-virtual char const *CInterpolatedVarArrayBase< LVector2f, false >::GetDebugName(void)
-  char const *return_value = ((*local_this).GetDebugName)();
-  if (Dtool_CheckErrorOccurred()) {
-    return nullptr;
-  }
-  return Dtool_WrapValue(return_value);
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDebugName_542_comment =
-  "C++ Interface:\n"
-  "GetDebugName(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDebugName_542_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_Interpolate_546_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector2f, false >::DebugInterpolate(LVector2f *pOut, float currentTime)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolate_543(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolate_547(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.DebugInterpolate")) {
     return nullptr;
@@ -19578,18 +19691,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolat
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolate_543_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolate_547_comment =
   "C++ Interface:\n"
   "DebugInterpolate(const CInterpolatedVarArrayBase self, LVector2f pOut, float currentTime)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolate_543_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolate_547_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector2f, false >::GetDerivative(LVector2f *pOut, float currentTime)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_544(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_548(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.GetDerivative")) {
     return nullptr;
@@ -19615,18 +19728,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_5
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_544_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_548_comment =
   "C++ Interface:\n"
   "GetDerivative(const CInterpolatedVarArrayBase self, LVector2f pOut, float currentTime)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_544_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_548_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector2f, false >::GetDerivative_SmoothVelocity(LVector2f *pOut, float currentTime)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_545(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_549(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.GetDerivative_SmoothVelocity")) {
     return nullptr;
@@ -19652,18 +19765,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_S
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_545_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_549_comment =
   "C++ Interface:\n"
   "GetDerivative_SmoothVelocity(const CInterpolatedVarArrayBase self, LVector2f pOut, float currentTime)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_545_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_549_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector2f, false >::ClearHistory(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_546(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_550(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.ClearHistory")) {
     return nullptr;
@@ -19674,18 +19787,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_54
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_546_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_550_comment =
   "C++ Interface:\n"
   "ClearHistory(const CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_546_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_550_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector2f, false >::AddToHead(float changeTime, LVector2f const *values, bool bFlushNewer)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_547(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_551(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.AddToHead")) {
     return nullptr;
@@ -19712,18 +19825,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_547(P
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_547_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_551_comment =
   "C++ Interface:\n"
   "AddToHead(const CInterpolatedVarArrayBase self, float changeTime, const LVector2f values, bool bFlushNewer)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_547_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_551_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * LVector2f const &CInterpolatedVarArrayBase< LVector2f, false >::GetPrev(int iArrayIndex = 0) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_548(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_552(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector2f_false)) {
     return nullptr;
@@ -19746,18 +19859,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_548(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_548_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_552_comment =
   "C++ Interface:\n"
   "GetPrev(CInterpolatedVarArrayBase self, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_548_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_552_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * LVector2f const &CInterpolatedVarArrayBase< LVector2f, false >::GetCurrent(int iArrayIndex = 0) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_549(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_553(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector2f_false)) {
     return nullptr;
@@ -19780,18 +19893,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_549(
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_549_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_553_comment =
   "C++ Interface:\n"
   "GetCurrent(CInterpolatedVarArrayBase self, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_549_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_553_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float CInterpolatedVarArrayBase< LVector2f, false >::GetInterval(void) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_550(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_554(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector2f_false)) {
     return nullptr;
@@ -19805,21 +19918,21 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_550
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_550_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_554_comment =
   "C++ Interface:\n"
   "GetInterval(CInterpolatedVarArrayBase self)\n"
   "\n"
   "// Returns the time difference betweem the most recent sample and its previous\n"
   "// sample.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_550_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_554_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool CInterpolatedVarArrayBase< LVector2f, false >::IsValidIndex(int i)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_551(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_555(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.IsValidIndex")) {
     return nullptr;
@@ -19845,18 +19958,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_55
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_551_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_555_comment =
   "C++ Interface:\n"
   "IsValidIndex(const CInterpolatedVarArrayBase self, int i)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_551_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_555_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< LVector2f, false >::GetHead(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_553(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_557(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.GetHead")) {
     return nullptr;
@@ -19870,18 +19983,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_553(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_553_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_557_comment =
   "C++ Interface:\n"
   "GetHead(const CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_553_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_557_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< LVector2f, false >::GetNext(int i)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_554(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_558(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.GetNext")) {
     return nullptr;
@@ -19910,18 +20023,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_554(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_554_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_558_comment =
   "C++ Interface:\n"
   "GetNext(const CInterpolatedVarArrayBase self, int i)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_554_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_558_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector2f, false >::SetHistoryValuesForItem(int item, LVector2f &value)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValuesForItem_555(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValuesForItem_559(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.SetHistoryValuesForItem")) {
     return nullptr;
@@ -19947,18 +20060,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValue
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValuesForItem_555_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValuesForItem_559_comment =
   "C++ Interface:\n"
   "SetHistoryValuesForItem(const CInterpolatedVarArrayBase self, int item, LVector2f value)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValuesForItem_555_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValuesForItem_559_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector2f, false >::SetLooping(bool looping, int iArrayIndex = 0)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_556(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_560(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.SetLooping")) {
     return nullptr;
@@ -19979,18 +20092,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_556(
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_556_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_560_comment =
   "C++ Interface:\n"
   "SetLooping(const CInterpolatedVarArrayBase self, bool looping, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_556_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_560_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector2f, false >::SetMaxCount(int newmax)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_557(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_561(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.SetMaxCount")) {
     return nullptr;
@@ -20016,18 +20129,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_557
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_557_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_561_comment =
   "C++ Interface:\n"
   "SetMaxCount(const CInterpolatedVarArrayBase self, int newmax)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_557_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_561_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< LVector2f, false >::GetMaxCount(void) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_558(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_562(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector2f_false)) {
     return nullptr;
@@ -20041,18 +20154,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_558
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_558_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_562_comment =
   "C++ Interface:\n"
   "GetMaxCount(CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_558_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_562_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float CInterpolatedVarArrayBase< LVector2f, false >::GetOldestEntry(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_559(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_563(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.GetOldestEntry")) {
     return nullptr;
@@ -20066,45 +20179,13 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_559_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_563_comment =
   "C++ Interface:\n"
   "GetOldestEntry(const CInterpolatedVarArrayBase self)\n"
   "\n"
   "// Get the time of the oldest entry.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_559_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector2f, false >::SetDebugName(char const *pName)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetDebugName_560(PyObject *self, PyObject *arg) {
-  CInterpolatedVarArrayBase< LVector2f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector2f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector2f_false.SetDebugName")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector2f, false >::SetDebugName(char const *pName)
-  char const *param1;
-  if (PyArg_Parse(arg, "z:SetDebugName", &param1)) {
-    ((*local_this).SetDebugName)((char const *)param1);
-    return Dtool_Return_None();
-  }
-  if (!_PyErr_OCCURRED()) {
-    return Dtool_Raise_BadArgumentsError(
-      "SetDebugName(const CInterpolatedVarArrayBase self, str pName)\n");
-  }
-  return nullptr;
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetDebugName_560_comment =
-  "C++ Interface:\n"
-  "SetDebugName(const CInterpolatedVarArrayBase self, str pName)\n"
-  "\n"
-  "// set a debug name (if not provided by constructor)";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetDebugName_560_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_563_comment = nullptr;
 #endif
 
 /**
@@ -20173,6 +20254,9 @@ static void *Dtool_UpcastInterface_CInterpolatedVarArrayBase_LVector2f_false(PyO
   if (requested_type == &Dtool_CInterpolatedVarArrayBase_LVector2f_false) {
     return local_this;
   }
+  if (requested_type == Dtool_Ptr_IInterpolatedVar) {
+    return (IInterpolatedVar *) local_this;
+  }
   return nullptr;
 }
 
@@ -20182,6 +20266,10 @@ static void *Dtool_DowncastInterface_CInterpolatedVarArrayBase_LVector2f_false(v
   }
   if (from_type == Dtool_Ptr_CInterpolatedVarArrayBase_LVector2f_false) {
     return from_this;
+  }
+  if (from_type == Dtool_Ptr_IInterpolatedVar) {
+    IInterpolatedVar* other_this = (IInterpolatedVar*)from_this;
+    return (CInterpolatedVarArrayBase< LVector2f, false >*)other_this;
   }
   return nullptr;
 }
@@ -20258,6 +20346,9 @@ static void *Dtool_UpcastInterface_CInterpolatedVar_LVector3f(PyObject *self, Dt
   if (requested_type == Dtool_Ptr_CInterpolatedVarArrayBase_LVector3f_false) {
     return (CInterpolatedVarArrayBase< LVector3f, false > *) local_this;
   }
+  if (requested_type == Dtool_Ptr_IInterpolatedVar) {
+    return (IInterpolatedVar *)(CInterpolatedVarArrayBase< LVector3f, false > *) local_this;
+  }
   return nullptr;
 }
 
@@ -20272,6 +20363,10 @@ static void *Dtool_DowncastInterface_CInterpolatedVar_LVector3f(void *from_this,
     CInterpolatedVarArrayBase< LVector3f, false >* other_this = (CInterpolatedVarArrayBase< LVector3f, false >*)from_this;
     return (CInterpolatedVar< LVector3f >*)other_this;
   }
+  if (from_type == Dtool_Ptr_IInterpolatedVar) {
+    IInterpolatedVar* other_this = (IInterpolatedVar*)from_this;
+    return (CInterpolatedVar< LVector3f >*)other_this;
+  }
   return nullptr;
 }
 
@@ -20282,7 +20377,7 @@ static void *Dtool_DowncastInterface_CInterpolatedVar_LVector3f(void *from_this,
  * Python function wrapper for:
  * virtual void CInterpolatedVarArrayBase< LVector3f, false >::Setup(LVector3f *pValue, int type)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_568(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_571(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.Setup")) {
     return nullptr;
@@ -20308,156 +20403,51 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_568(PyObj
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_568_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_571_comment =
   "C++ Interface:\n"
   "Setup(const CInterpolatedVarArrayBase self, LVector3f pValue, int type)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_568_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_571_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector3f, false >::SetInterpolationAmount(float seconds)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetInterpolationAmount_569(PyObject *self, PyObject *arg) {
-  CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.SetInterpolationAmount")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector3f, false >::SetInterpolationAmount(float seconds)
-  if (PyNumber_Check(arg)) {
-    ((*local_this).SetInterpolationAmount)((float)PyFloat_AsDouble(arg));
-    return Dtool_Return_None();
-  }
-  if (!_PyErr_OCCURRED()) {
-    return Dtool_Raise_BadArgumentsError(
-      "SetInterpolationAmount(const CInterpolatedVarArrayBase self, float seconds)\n");
-  }
-  return nullptr;
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetInterpolationAmount_569_comment =
-  "C++ Interface:\n"
-  "SetInterpolationAmount(const CInterpolatedVarArrayBase self, float seconds)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetInterpolationAmount_569_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector3f, false >::NoteLastNetworkedValue(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteLastNetworkedValue_570(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.NoteLastNetworkedValue")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector3f, false >::NoteLastNetworkedValue(void)
-  ((*local_this).NoteLastNetworkedValue)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteLastNetworkedValue_570_comment =
-  "C++ Interface:\n"
-  "NoteLastNetworkedValue(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteLastNetworkedValue_570_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual bool CInterpolatedVarArrayBase< LVector3f, false >::NoteChanged(float changetime, bool bUpdateLastNetworkedValue)
  * bool CInterpolatedVarArrayBase< LVector3f, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteChanged_571(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteChanged_572(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.NoteChanged")) {
     return nullptr;
   }
-  int parameter_count = (int)PyTuple_Size(args);
-  if (kwds != nullptr) {
-    parameter_count += (int)PyDict_Size(kwds);
-  }
-  switch (parameter_count) {
-  case 2:
-    {
-      // 1-virtual bool CInterpolatedVarArrayBase< LVector3f, false >::NoteChanged(float changetime, bool bUpdateLastNetworkedValue)
-      float param1;
-      PyObject *param2;
-      static const char *keyword_list[] = {"changetime", "bUpdateLastNetworkedValue", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "fO:NoteChanged", (char **)keyword_list, &param1, &param2)) {
-        bool return_value = ((*local_this).NoteChanged)((float)param1, (PyObject_IsTrue(param2) != 0));
-        return Dtool_Return_Bool(return_value);
-      }
-    }
-    break;
-  case 3:
-    {
-      // 1-bool CInterpolatedVarArrayBase< LVector3f, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
-      float param1;
-      float param2;
-      PyObject *param3;
-      static const char *keyword_list[] = {"changetime", "interpolation_amount", "bUpdateLastNetworkedValue", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "ffO:NoteChanged", (char **)keyword_list, &param1, &param2, &param3)) {
-        bool return_value = ((*local_this).NoteChanged)((float)param1, (float)param2, (PyObject_IsTrue(param3) != 0));
-        return Dtool_Return_Bool(return_value);
-      }
-    }
-    break;
-#ifndef NDEBUG
-  default:
-    return PyErr_Format(PyExc_TypeError,
-                        "NoteChanged() takes 3 or 4 arguments (%d given)",
-                        parameter_count + 1);
-#endif
+  // 1-bool CInterpolatedVarArrayBase< LVector3f, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
+  float param1;
+  float param2;
+  PyObject *param3;
+  static const char *keyword_list[] = {"changetime", "interpolation_amount", "bUpdateLastNetworkedValue", nullptr};
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "ffO:NoteChanged", (char **)keyword_list, &param1, &param2, &param3)) {
+    bool return_value = ((*local_this).NoteChanged)((float)param1, (float)param2, (PyObject_IsTrue(param3) != 0));
+    return Dtool_Return_Bool(return_value);
   }
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
-      "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, bool bUpdateLastNetworkedValue)\n"
       "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)\n");
   }
   return nullptr;
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteChanged_571_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteChanged_572_comment =
   "C++ Interface:\n"
-  "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, bool bUpdateLastNetworkedValue)\n"
   "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)\n"
   "\n"
   "// Just like the IInterpolatedVar functions, but you can specify an\n"
   "// interpolation amount.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteChanged_571_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteChanged_572_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector3f, false >::Reset(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Reset_572(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.Reset")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector3f, false >::Reset(void)
-  ((*local_this).Reset)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Reset_572_comment =
-  "C++ Interface:\n"
-  "Reset(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Reset_572_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual int CInterpolatedVarArrayBase< LVector3f, false >::Interpolate(float currentTime)
  * int CInterpolatedVarArrayBase< LVector3f, false >::Interpolate(float currentTime, float interpolation_amount)
  */
 static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Interpolate_573(PyObject *self, PyObject *args, PyObject *kwds) {
@@ -20465,51 +20455,19 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Interpolate_573
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.Interpolate")) {
     return nullptr;
   }
-  int parameter_count = (int)PyTuple_Size(args);
-  if (kwds != nullptr) {
-    parameter_count += (int)PyDict_Size(kwds);
-  }
-  switch (parameter_count) {
-  case 1:
-    {
-      PyObject *arg;
-      if (Dtool_ExtractArg(&arg, args, kwds, "currentTime")) {
-        // 1-virtual int CInterpolatedVarArrayBase< LVector3f, false >::Interpolate(float currentTime)
-        if (PyNumber_Check(arg)) {
-          int return_value = ((*local_this).Interpolate)((float)PyFloat_AsDouble(arg));
-          if (Dtool_CheckErrorOccurred()) {
-            return nullptr;
-          }
-          return Dtool_WrapValue(return_value);
-        }
-      }
+  // 1-int CInterpolatedVarArrayBase< LVector3f, false >::Interpolate(float currentTime, float interpolation_amount)
+  float param1;
+  float param2;
+  static const char *keyword_list[] = {"currentTime", "interpolation_amount", nullptr};
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "ff:Interpolate", (char **)keyword_list, &param1, &param2)) {
+    int return_value = ((*local_this).Interpolate)((float)param1, (float)param2);
+    if (Dtool_CheckErrorOccurred()) {
+      return nullptr;
     }
-    break;
-  case 2:
-    {
-      // 1-int CInterpolatedVarArrayBase< LVector3f, false >::Interpolate(float currentTime, float interpolation_amount)
-      float param1;
-      float param2;
-      static const char *keyword_list[] = {"currentTime", "interpolation_amount", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "ff:Interpolate", (char **)keyword_list, &param1, &param2)) {
-        int return_value = ((*local_this).Interpolate)((float)param1, (float)param2);
-        if (Dtool_CheckErrorOccurred()) {
-          return nullptr;
-        }
-        return Dtool_WrapValue(return_value);
-      }
-    }
-    break;
-#ifndef NDEBUG
-  default:
-    return PyErr_Format(PyExc_TypeError,
-                        "Interpolate() takes 2 or 3 arguments (%d given)",
-                        parameter_count + 1);
-#endif
+    return Dtool_WrapValue(return_value);
   }
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
-      "Interpolate(const CInterpolatedVarArrayBase self, float currentTime)\n"
       "Interpolate(const CInterpolatedVarArrayBase self, float currentTime, float interpolation_amount)\n");
   }
   return nullptr;
@@ -20518,7 +20476,6 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Interpolate_573
 #ifndef NDEBUG
 static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Interpolate_573_comment =
   "C++ Interface:\n"
-  "Interpolate(const CInterpolatedVarArrayBase self, float currentTime)\n"
   "Interpolate(const CInterpolatedVarArrayBase self, float currentTime, float interpolation_amount)\n";
 #else
 static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Interpolate_573_comment = nullptr;
@@ -20526,81 +20483,9 @@ static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_Interpolate_5
 
 /**
  * Python function wrapper for:
- * virtual int CInterpolatedVarArrayBase< LVector3f, false >::GetType(void) const
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetType_574(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
-  if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector3f_false)) {
-    return nullptr;
-  }
-  // 1-virtual int CInterpolatedVarArrayBase< LVector3f, false >::GetType(void) const
-  int return_value = ((*(const CInterpolatedVarArrayBase< LVector3f, false >*)local_this).GetType)();
-  if (Dtool_CheckErrorOccurred()) {
-    return nullptr;
-  }
-  return Dtool_WrapValue(return_value);
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetType_574_comment =
-  "C++ Interface:\n"
-  "GetType(CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetType_574_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector3f, false >::RestoreToLastNetworked(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_RestoreToLastNetworked_575(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.RestoreToLastNetworked")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector3f, false >::RestoreToLastNetworked(void)
-  ((*local_this).RestoreToLastNetworked)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_RestoreToLastNetworked_575_comment =
-  "C++ Interface:\n"
-  "RestoreToLastNetworked(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_RestoreToLastNetworked_575_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual char const *CInterpolatedVarArrayBase< LVector3f, false >::GetDebugName(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDebugName_577(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.GetDebugName")) {
-    return nullptr;
-  }
-  // 1-virtual char const *CInterpolatedVarArrayBase< LVector3f, false >::GetDebugName(void)
-  char const *return_value = ((*local_this).GetDebugName)();
-  if (Dtool_CheckErrorOccurred()) {
-    return nullptr;
-  }
-  return Dtool_WrapValue(return_value);
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDebugName_577_comment =
-  "C++ Interface:\n"
-  "GetDebugName(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDebugName_577_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector3f, false >::DebugInterpolate(LVector3f *pOut, float currentTime)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolate_578(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolate_574(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.DebugInterpolate")) {
     return nullptr;
@@ -20626,18 +20511,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolat
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolate_578_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolate_574_comment =
   "C++ Interface:\n"
   "DebugInterpolate(const CInterpolatedVarArrayBase self, LVector3f pOut, float currentTime)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolate_578_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolate_574_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector3f, false >::GetDerivative(LVector3f *pOut, float currentTime)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_579(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_575(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.GetDerivative")) {
     return nullptr;
@@ -20663,18 +20548,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_5
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_579_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_575_comment =
   "C++ Interface:\n"
   "GetDerivative(const CInterpolatedVarArrayBase self, LVector3f pOut, float currentTime)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_579_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_575_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector3f, false >::GetDerivative_SmoothVelocity(LVector3f *pOut, float currentTime)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_580(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_576(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.GetDerivative_SmoothVelocity")) {
     return nullptr;
@@ -20700,18 +20585,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_S
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_580_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_576_comment =
   "C++ Interface:\n"
   "GetDerivative_SmoothVelocity(const CInterpolatedVarArrayBase self, LVector3f pOut, float currentTime)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_580_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_576_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector3f, false >::ClearHistory(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_581(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_577(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.ClearHistory")) {
     return nullptr;
@@ -20722,18 +20607,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_58
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_581_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_577_comment =
   "C++ Interface:\n"
   "ClearHistory(const CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_581_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_577_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector3f, false >::AddToHead(float changeTime, LVector3f const *values, bool bFlushNewer)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_582(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_578(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.AddToHead")) {
     return nullptr;
@@ -20760,18 +20645,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_582(P
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_582_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_578_comment =
   "C++ Interface:\n"
   "AddToHead(const CInterpolatedVarArrayBase self, float changeTime, const LVector3f values, bool bFlushNewer)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_582_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_578_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * LVector3f const &CInterpolatedVarArrayBase< LVector3f, false >::GetPrev(int iArrayIndex = 0) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_583(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_579(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector3f_false)) {
     return nullptr;
@@ -20794,18 +20679,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_583(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_583_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_579_comment =
   "C++ Interface:\n"
   "GetPrev(CInterpolatedVarArrayBase self, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_583_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_579_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * LVector3f const &CInterpolatedVarArrayBase< LVector3f, false >::GetCurrent(int iArrayIndex = 0) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_584(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_580(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector3f_false)) {
     return nullptr;
@@ -20828,18 +20713,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_584(
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_584_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_580_comment =
   "C++ Interface:\n"
   "GetCurrent(CInterpolatedVarArrayBase self, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_584_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_580_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float CInterpolatedVarArrayBase< LVector3f, false >::GetInterval(void) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_585(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_581(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector3f_false)) {
     return nullptr;
@@ -20853,21 +20738,21 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_585
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_585_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_581_comment =
   "C++ Interface:\n"
   "GetInterval(CInterpolatedVarArrayBase self)\n"
   "\n"
   "// Returns the time difference betweem the most recent sample and its previous\n"
   "// sample.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_585_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_581_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool CInterpolatedVarArrayBase< LVector3f, false >::IsValidIndex(int i)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_586(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_582(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.IsValidIndex")) {
     return nullptr;
@@ -20893,18 +20778,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_58
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_586_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_582_comment =
   "C++ Interface:\n"
   "IsValidIndex(const CInterpolatedVarArrayBase self, int i)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_586_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_582_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< LVector3f, false >::GetHead(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_588(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_584(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.GetHead")) {
     return nullptr;
@@ -20918,18 +20803,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_588(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_588_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_584_comment =
   "C++ Interface:\n"
   "GetHead(const CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_588_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_584_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< LVector3f, false >::GetNext(int i)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_589(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_585(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.GetNext")) {
     return nullptr;
@@ -20958,18 +20843,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_589(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_589_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_585_comment =
   "C++ Interface:\n"
   "GetNext(const CInterpolatedVarArrayBase self, int i)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_589_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_585_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector3f, false >::SetHistoryValuesForItem(int item, LVector3f &value)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValuesForItem_590(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValuesForItem_586(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.SetHistoryValuesForItem")) {
     return nullptr;
@@ -20995,18 +20880,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValue
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValuesForItem_590_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValuesForItem_586_comment =
   "C++ Interface:\n"
   "SetHistoryValuesForItem(const CInterpolatedVarArrayBase self, int item, LVector3f value)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValuesForItem_590_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValuesForItem_586_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector3f, false >::SetLooping(bool looping, int iArrayIndex = 0)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_591(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_587(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.SetLooping")) {
     return nullptr;
@@ -21027,18 +20912,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_591(
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_591_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_587_comment =
   "C++ Interface:\n"
   "SetLooping(const CInterpolatedVarArrayBase self, bool looping, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_591_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_587_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector3f, false >::SetMaxCount(int newmax)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_592(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_588(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.SetMaxCount")) {
     return nullptr;
@@ -21064,18 +20949,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_592
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_592_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_588_comment =
   "C++ Interface:\n"
   "SetMaxCount(const CInterpolatedVarArrayBase self, int newmax)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_592_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_588_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< LVector3f, false >::GetMaxCount(void) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_593(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_589(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector3f_false)) {
     return nullptr;
@@ -21089,18 +20974,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_593
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_593_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_589_comment =
   "C++ Interface:\n"
   "GetMaxCount(CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_593_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_589_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float CInterpolatedVarArrayBase< LVector3f, false >::GetOldestEntry(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_594(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_590(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.GetOldestEntry")) {
     return nullptr;
@@ -21114,45 +20999,13 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_594_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_590_comment =
   "C++ Interface:\n"
   "GetOldestEntry(const CInterpolatedVarArrayBase self)\n"
   "\n"
   "// Get the time of the oldest entry.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_594_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector3f, false >::SetDebugName(char const *pName)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetDebugName_595(PyObject *self, PyObject *arg) {
-  CInterpolatedVarArrayBase< LVector3f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector3f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector3f_false.SetDebugName")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector3f, false >::SetDebugName(char const *pName)
-  char const *param1;
-  if (PyArg_Parse(arg, "z:SetDebugName", &param1)) {
-    ((*local_this).SetDebugName)((char const *)param1);
-    return Dtool_Return_None();
-  }
-  if (!_PyErr_OCCURRED()) {
-    return Dtool_Raise_BadArgumentsError(
-      "SetDebugName(const CInterpolatedVarArrayBase self, str pName)\n");
-  }
-  return nullptr;
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetDebugName_595_comment =
-  "C++ Interface:\n"
-  "SetDebugName(const CInterpolatedVarArrayBase self, str pName)\n"
-  "\n"
-  "// set a debug name (if not provided by constructor)";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetDebugName_595_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_590_comment = nullptr;
 #endif
 
 /**
@@ -21221,6 +21074,9 @@ static void *Dtool_UpcastInterface_CInterpolatedVarArrayBase_LVector3f_false(PyO
   if (requested_type == &Dtool_CInterpolatedVarArrayBase_LVector3f_false) {
     return local_this;
   }
+  if (requested_type == Dtool_Ptr_IInterpolatedVar) {
+    return (IInterpolatedVar *) local_this;
+  }
   return nullptr;
 }
 
@@ -21230,6 +21086,10 @@ static void *Dtool_DowncastInterface_CInterpolatedVarArrayBase_LVector3f_false(v
   }
   if (from_type == Dtool_Ptr_CInterpolatedVarArrayBase_LVector3f_false) {
     return from_this;
+  }
+  if (from_type == Dtool_Ptr_IInterpolatedVar) {
+    IInterpolatedVar* other_this = (IInterpolatedVar*)from_this;
+    return (CInterpolatedVarArrayBase< LVector3f, false >*)other_this;
   }
   return nullptr;
 }
@@ -21306,6 +21166,9 @@ static void *Dtool_UpcastInterface_CInterpolatedVar_LVector4f(PyObject *self, Dt
   if (requested_type == Dtool_Ptr_CInterpolatedVarArrayBase_LVector4f_false) {
     return (CInterpolatedVarArrayBase< LVector4f, false > *) local_this;
   }
+  if (requested_type == Dtool_Ptr_IInterpolatedVar) {
+    return (IInterpolatedVar *)(CInterpolatedVarArrayBase< LVector4f, false > *) local_this;
+  }
   return nullptr;
 }
 
@@ -21320,6 +21183,10 @@ static void *Dtool_DowncastInterface_CInterpolatedVar_LVector4f(void *from_this,
     CInterpolatedVarArrayBase< LVector4f, false >* other_this = (CInterpolatedVarArrayBase< LVector4f, false >*)from_this;
     return (CInterpolatedVar< LVector4f >*)other_this;
   }
+  if (from_type == Dtool_Ptr_IInterpolatedVar) {
+    IInterpolatedVar* other_this = (IInterpolatedVar*)from_this;
+    return (CInterpolatedVar< LVector4f >*)other_this;
+  }
   return nullptr;
 }
 
@@ -21330,7 +21197,7 @@ static void *Dtool_DowncastInterface_CInterpolatedVar_LVector4f(void *from_this,
  * Python function wrapper for:
  * virtual void CInterpolatedVarArrayBase< LVector4f, false >::Setup(LVector4f *pValue, int type)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_603(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_598(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.Setup")) {
     return nullptr;
@@ -21356,299 +21223,89 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_603(PyObj
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_603_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_598_comment =
   "C++ Interface:\n"
   "Setup(const CInterpolatedVarArrayBase self, LVector4f pValue, int type)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_603_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_598_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector4f, false >::SetInterpolationAmount(float seconds)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetInterpolationAmount_604(PyObject *self, PyObject *arg) {
-  CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.SetInterpolationAmount")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector4f, false >::SetInterpolationAmount(float seconds)
-  if (PyNumber_Check(arg)) {
-    ((*local_this).SetInterpolationAmount)((float)PyFloat_AsDouble(arg));
-    return Dtool_Return_None();
-  }
-  if (!_PyErr_OCCURRED()) {
-    return Dtool_Raise_BadArgumentsError(
-      "SetInterpolationAmount(const CInterpolatedVarArrayBase self, float seconds)\n");
-  }
-  return nullptr;
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetInterpolationAmount_604_comment =
-  "C++ Interface:\n"
-  "SetInterpolationAmount(const CInterpolatedVarArrayBase self, float seconds)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetInterpolationAmount_604_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector4f, false >::NoteLastNetworkedValue(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteLastNetworkedValue_605(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.NoteLastNetworkedValue")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector4f, false >::NoteLastNetworkedValue(void)
-  ((*local_this).NoteLastNetworkedValue)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteLastNetworkedValue_605_comment =
-  "C++ Interface:\n"
-  "NoteLastNetworkedValue(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteLastNetworkedValue_605_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual bool CInterpolatedVarArrayBase< LVector4f, false >::NoteChanged(float changetime, bool bUpdateLastNetworkedValue)
  * bool CInterpolatedVarArrayBase< LVector4f, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteChanged_606(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteChanged_599(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.NoteChanged")) {
     return nullptr;
   }
-  int parameter_count = (int)PyTuple_Size(args);
-  if (kwds != nullptr) {
-    parameter_count += (int)PyDict_Size(kwds);
-  }
-  switch (parameter_count) {
-  case 2:
-    {
-      // 1-virtual bool CInterpolatedVarArrayBase< LVector4f, false >::NoteChanged(float changetime, bool bUpdateLastNetworkedValue)
-      float param1;
-      PyObject *param2;
-      static const char *keyword_list[] = {"changetime", "bUpdateLastNetworkedValue", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "fO:NoteChanged", (char **)keyword_list, &param1, &param2)) {
-        bool return_value = ((*local_this).NoteChanged)((float)param1, (PyObject_IsTrue(param2) != 0));
-        return Dtool_Return_Bool(return_value);
-      }
-    }
-    break;
-  case 3:
-    {
-      // 1-bool CInterpolatedVarArrayBase< LVector4f, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
-      float param1;
-      float param2;
-      PyObject *param3;
-      static const char *keyword_list[] = {"changetime", "interpolation_amount", "bUpdateLastNetworkedValue", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "ffO:NoteChanged", (char **)keyword_list, &param1, &param2, &param3)) {
-        bool return_value = ((*local_this).NoteChanged)((float)param1, (float)param2, (PyObject_IsTrue(param3) != 0));
-        return Dtool_Return_Bool(return_value);
-      }
-    }
-    break;
-#ifndef NDEBUG
-  default:
-    return PyErr_Format(PyExc_TypeError,
-                        "NoteChanged() takes 3 or 4 arguments (%d given)",
-                        parameter_count + 1);
-#endif
+  // 1-bool CInterpolatedVarArrayBase< LVector4f, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
+  float param1;
+  float param2;
+  PyObject *param3;
+  static const char *keyword_list[] = {"changetime", "interpolation_amount", "bUpdateLastNetworkedValue", nullptr};
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "ffO:NoteChanged", (char **)keyword_list, &param1, &param2, &param3)) {
+    bool return_value = ((*local_this).NoteChanged)((float)param1, (float)param2, (PyObject_IsTrue(param3) != 0));
+    return Dtool_Return_Bool(return_value);
   }
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
-      "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, bool bUpdateLastNetworkedValue)\n"
       "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)\n");
   }
   return nullptr;
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteChanged_606_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteChanged_599_comment =
   "C++ Interface:\n"
-  "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, bool bUpdateLastNetworkedValue)\n"
   "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)\n"
   "\n"
   "// Just like the IInterpolatedVar functions, but you can specify an\n"
   "// interpolation amount.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteChanged_606_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteChanged_599_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector4f, false >::Reset(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Reset_607(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.Reset")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector4f, false >::Reset(void)
-  ((*local_this).Reset)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Reset_607_comment =
-  "C++ Interface:\n"
-  "Reset(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Reset_607_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual int CInterpolatedVarArrayBase< LVector4f, false >::Interpolate(float currentTime)
  * int CInterpolatedVarArrayBase< LVector4f, false >::Interpolate(float currentTime, float interpolation_amount)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Interpolate_608(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Interpolate_600(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.Interpolate")) {
     return nullptr;
   }
-  int parameter_count = (int)PyTuple_Size(args);
-  if (kwds != nullptr) {
-    parameter_count += (int)PyDict_Size(kwds);
-  }
-  switch (parameter_count) {
-  case 1:
-    {
-      PyObject *arg;
-      if (Dtool_ExtractArg(&arg, args, kwds, "currentTime")) {
-        // 1-virtual int CInterpolatedVarArrayBase< LVector4f, false >::Interpolate(float currentTime)
-        if (PyNumber_Check(arg)) {
-          int return_value = ((*local_this).Interpolate)((float)PyFloat_AsDouble(arg));
-          if (Dtool_CheckErrorOccurred()) {
-            return nullptr;
-          }
-          return Dtool_WrapValue(return_value);
-        }
-      }
+  // 1-int CInterpolatedVarArrayBase< LVector4f, false >::Interpolate(float currentTime, float interpolation_amount)
+  float param1;
+  float param2;
+  static const char *keyword_list[] = {"currentTime", "interpolation_amount", nullptr};
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "ff:Interpolate", (char **)keyword_list, &param1, &param2)) {
+    int return_value = ((*local_this).Interpolate)((float)param1, (float)param2);
+    if (Dtool_CheckErrorOccurred()) {
+      return nullptr;
     }
-    break;
-  case 2:
-    {
-      // 1-int CInterpolatedVarArrayBase< LVector4f, false >::Interpolate(float currentTime, float interpolation_amount)
-      float param1;
-      float param2;
-      static const char *keyword_list[] = {"currentTime", "interpolation_amount", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "ff:Interpolate", (char **)keyword_list, &param1, &param2)) {
-        int return_value = ((*local_this).Interpolate)((float)param1, (float)param2);
-        if (Dtool_CheckErrorOccurred()) {
-          return nullptr;
-        }
-        return Dtool_WrapValue(return_value);
-      }
-    }
-    break;
-#ifndef NDEBUG
-  default:
-    return PyErr_Format(PyExc_TypeError,
-                        "Interpolate() takes 2 or 3 arguments (%d given)",
-                        parameter_count + 1);
-#endif
+    return Dtool_WrapValue(return_value);
   }
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
-      "Interpolate(const CInterpolatedVarArrayBase self, float currentTime)\n"
       "Interpolate(const CInterpolatedVarArrayBase self, float currentTime, float interpolation_amount)\n");
   }
   return nullptr;
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Interpolate_608_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Interpolate_600_comment =
   "C++ Interface:\n"
-  "Interpolate(const CInterpolatedVarArrayBase self, float currentTime)\n"
   "Interpolate(const CInterpolatedVarArrayBase self, float currentTime, float interpolation_amount)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Interpolate_608_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual int CInterpolatedVarArrayBase< LVector4f, false >::GetType(void) const
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetType_609(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
-  if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector4f_false)) {
-    return nullptr;
-  }
-  // 1-virtual int CInterpolatedVarArrayBase< LVector4f, false >::GetType(void) const
-  int return_value = ((*(const CInterpolatedVarArrayBase< LVector4f, false >*)local_this).GetType)();
-  if (Dtool_CheckErrorOccurred()) {
-    return nullptr;
-  }
-  return Dtool_WrapValue(return_value);
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetType_609_comment =
-  "C++ Interface:\n"
-  "GetType(CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetType_609_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector4f, false >::RestoreToLastNetworked(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_RestoreToLastNetworked_610(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.RestoreToLastNetworked")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector4f, false >::RestoreToLastNetworked(void)
-  ((*local_this).RestoreToLastNetworked)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_RestoreToLastNetworked_610_comment =
-  "C++ Interface:\n"
-  "RestoreToLastNetworked(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_RestoreToLastNetworked_610_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual char const *CInterpolatedVarArrayBase< LVector4f, false >::GetDebugName(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDebugName_612(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.GetDebugName")) {
-    return nullptr;
-  }
-  // 1-virtual char const *CInterpolatedVarArrayBase< LVector4f, false >::GetDebugName(void)
-  char const *return_value = ((*local_this).GetDebugName)();
-  if (Dtool_CheckErrorOccurred()) {
-    return nullptr;
-  }
-  return Dtool_WrapValue(return_value);
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDebugName_612_comment =
-  "C++ Interface:\n"
-  "GetDebugName(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDebugName_612_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_Interpolate_600_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector4f, false >::DebugInterpolate(LVector4f *pOut, float currentTime)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolate_613(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolate_601(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.DebugInterpolate")) {
     return nullptr;
@@ -21674,18 +21331,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolat
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolate_613_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolate_601_comment =
   "C++ Interface:\n"
   "DebugInterpolate(const CInterpolatedVarArrayBase self, LVector4f pOut, float currentTime)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolate_613_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolate_601_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector4f, false >::GetDerivative(LVector4f *pOut, float currentTime)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_614(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_602(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.GetDerivative")) {
     return nullptr;
@@ -21711,18 +21368,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_6
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_614_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_602_comment =
   "C++ Interface:\n"
   "GetDerivative(const CInterpolatedVarArrayBase self, LVector4f pOut, float currentTime)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_614_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_602_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector4f, false >::GetDerivative_SmoothVelocity(LVector4f *pOut, float currentTime)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_615(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_603(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.GetDerivative_SmoothVelocity")) {
     return nullptr;
@@ -21748,18 +21405,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_S
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_615_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_603_comment =
   "C++ Interface:\n"
   "GetDerivative_SmoothVelocity(const CInterpolatedVarArrayBase self, LVector4f pOut, float currentTime)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_615_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_603_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector4f, false >::ClearHistory(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_616(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_604(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.ClearHistory")) {
     return nullptr;
@@ -21770,18 +21427,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_61
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_616_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_604_comment =
   "C++ Interface:\n"
   "ClearHistory(const CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_616_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_604_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector4f, false >::AddToHead(float changeTime, LVector4f const *values, bool bFlushNewer)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_617(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_605(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.AddToHead")) {
     return nullptr;
@@ -21808,18 +21465,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_617(P
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_617_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_605_comment =
   "C++ Interface:\n"
   "AddToHead(const CInterpolatedVarArrayBase self, float changeTime, const LVector4f values, bool bFlushNewer)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_617_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_605_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * LVector4f const &CInterpolatedVarArrayBase< LVector4f, false >::GetPrev(int iArrayIndex = 0) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_618(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_606(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector4f_false)) {
     return nullptr;
@@ -21842,18 +21499,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_618(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_618_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_606_comment =
   "C++ Interface:\n"
   "GetPrev(CInterpolatedVarArrayBase self, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_618_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_606_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * LVector4f const &CInterpolatedVarArrayBase< LVector4f, false >::GetCurrent(int iArrayIndex = 0) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_619(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_607(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector4f_false)) {
     return nullptr;
@@ -21876,18 +21533,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_619(
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_619_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_607_comment =
   "C++ Interface:\n"
   "GetCurrent(CInterpolatedVarArrayBase self, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_619_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_607_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float CInterpolatedVarArrayBase< LVector4f, false >::GetInterval(void) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_620(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_608(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector4f_false)) {
     return nullptr;
@@ -21901,21 +21558,21 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_620
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_620_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_608_comment =
   "C++ Interface:\n"
   "GetInterval(CInterpolatedVarArrayBase self)\n"
   "\n"
   "// Returns the time difference betweem the most recent sample and its previous\n"
   "// sample.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_620_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_608_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool CInterpolatedVarArrayBase< LVector4f, false >::IsValidIndex(int i)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_621(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_609(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.IsValidIndex")) {
     return nullptr;
@@ -21941,18 +21598,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_62
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_621_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_609_comment =
   "C++ Interface:\n"
   "IsValidIndex(const CInterpolatedVarArrayBase self, int i)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_621_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_609_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< LVector4f, false >::GetHead(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_623(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_611(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.GetHead")) {
     return nullptr;
@@ -21966,18 +21623,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_623(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_623_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_611_comment =
   "C++ Interface:\n"
   "GetHead(const CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_623_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_611_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< LVector4f, false >::GetNext(int i)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_624(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_612(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.GetNext")) {
     return nullptr;
@@ -22006,18 +21663,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_624(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_624_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_612_comment =
   "C++ Interface:\n"
   "GetNext(const CInterpolatedVarArrayBase self, int i)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_624_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_612_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector4f, false >::SetHistoryValuesForItem(int item, LVector4f &value)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValuesForItem_625(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValuesForItem_613(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.SetHistoryValuesForItem")) {
     return nullptr;
@@ -22043,18 +21700,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValue
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValuesForItem_625_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValuesForItem_613_comment =
   "C++ Interface:\n"
   "SetHistoryValuesForItem(const CInterpolatedVarArrayBase self, int item, LVector4f value)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValuesForItem_625_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValuesForItem_613_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector4f, false >::SetLooping(bool looping, int iArrayIndex = 0)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_626(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_614(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.SetLooping")) {
     return nullptr;
@@ -22075,18 +21732,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_626(
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_626_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_614_comment =
   "C++ Interface:\n"
   "SetLooping(const CInterpolatedVarArrayBase self, bool looping, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_626_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_614_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< LVector4f, false >::SetMaxCount(int newmax)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_627(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_615(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.SetMaxCount")) {
     return nullptr;
@@ -22112,18 +21769,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_627
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_627_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_615_comment =
   "C++ Interface:\n"
   "SetMaxCount(const CInterpolatedVarArrayBase self, int newmax)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_627_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_615_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< LVector4f, false >::GetMaxCount(void) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_628(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_616(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_LVector4f_false)) {
     return nullptr;
@@ -22137,18 +21794,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_628
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_628_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_616_comment =
   "C++ Interface:\n"
   "GetMaxCount(CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_628_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_616_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float CInterpolatedVarArrayBase< LVector4f, false >::GetOldestEntry(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_629(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_617(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.GetOldestEntry")) {
     return nullptr;
@@ -22162,45 +21819,13 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_629_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_617_comment =
   "C++ Interface:\n"
   "GetOldestEntry(const CInterpolatedVarArrayBase self)\n"
   "\n"
   "// Get the time of the oldest entry.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_629_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< LVector4f, false >::SetDebugName(char const *pName)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetDebugName_630(PyObject *self, PyObject *arg) {
-  CInterpolatedVarArrayBase< LVector4f, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_LVector4f_false, (void **)&local_this, "CInterpolatedVarArrayBase_LVector4f_false.SetDebugName")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< LVector4f, false >::SetDebugName(char const *pName)
-  char const *param1;
-  if (PyArg_Parse(arg, "z:SetDebugName", &param1)) {
-    ((*local_this).SetDebugName)((char const *)param1);
-    return Dtool_Return_None();
-  }
-  if (!_PyErr_OCCURRED()) {
-    return Dtool_Raise_BadArgumentsError(
-      "SetDebugName(const CInterpolatedVarArrayBase self, str pName)\n");
-  }
-  return nullptr;
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetDebugName_630_comment =
-  "C++ Interface:\n"
-  "SetDebugName(const CInterpolatedVarArrayBase self, str pName)\n"
-  "\n"
-  "// set a debug name (if not provided by constructor)";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetDebugName_630_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_617_comment = nullptr;
 #endif
 
 /**
@@ -22269,6 +21894,9 @@ static void *Dtool_UpcastInterface_CInterpolatedVarArrayBase_LVector4f_false(PyO
   if (requested_type == &Dtool_CInterpolatedVarArrayBase_LVector4f_false) {
     return local_this;
   }
+  if (requested_type == Dtool_Ptr_IInterpolatedVar) {
+    return (IInterpolatedVar *) local_this;
+  }
   return nullptr;
 }
 
@@ -22278,6 +21906,10 @@ static void *Dtool_DowncastInterface_CInterpolatedVarArrayBase_LVector4f_false(v
   }
   if (from_type == Dtool_Ptr_CInterpolatedVarArrayBase_LVector4f_false) {
     return from_this;
+  }
+  if (from_type == Dtool_Ptr_IInterpolatedVar) {
+    IInterpolatedVar* other_this = (IInterpolatedVar*)from_this;
+    return (CInterpolatedVarArrayBase< LVector4f, false >*)other_this;
   }
   return nullptr;
 }
@@ -22354,6 +21986,9 @@ static void *Dtool_UpcastInterface_CInterpolatedVar_float(PyObject *self, Dtool_
   if (requested_type == Dtool_Ptr_CInterpolatedVarArrayBase_float_false) {
     return (CInterpolatedVarArrayBase< float, false > *) local_this;
   }
+  if (requested_type == Dtool_Ptr_IInterpolatedVar) {
+    return (IInterpolatedVar *)(CInterpolatedVarArrayBase< float, false > *) local_this;
+  }
   return nullptr;
 }
 
@@ -22368,6 +22003,10 @@ static void *Dtool_DowncastInterface_CInterpolatedVar_float(void *from_this, Dto
     CInterpolatedVarArrayBase< float, false >* other_this = (CInterpolatedVarArrayBase< float, false >*)from_this;
     return (CInterpolatedVar< float >*)other_this;
   }
+  if (from_type == Dtool_Ptr_IInterpolatedVar) {
+    IInterpolatedVar* other_this = (IInterpolatedVar*)from_this;
+    return (CInterpolatedVar< float >*)other_this;
+  }
   return nullptr;
 }
 
@@ -22376,290 +22015,80 @@ static void *Dtool_DowncastInterface_CInterpolatedVar_float(void *from_this, Dto
  */
 /**
  * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< float, false >::SetInterpolationAmount(float seconds)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_SetInterpolationAmount_639(PyObject *self, PyObject *arg) {
-  CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.SetInterpolationAmount")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< float, false >::SetInterpolationAmount(float seconds)
-  if (PyNumber_Check(arg)) {
-    ((*local_this).SetInterpolationAmount)((float)PyFloat_AsDouble(arg));
-    return Dtool_Return_None();
-  }
-  if (!_PyErr_OCCURRED()) {
-    return Dtool_Raise_BadArgumentsError(
-      "SetInterpolationAmount(const CInterpolatedVarArrayBase self, float seconds)\n");
-  }
-  return nullptr;
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetInterpolationAmount_639_comment =
-  "C++ Interface:\n"
-  "SetInterpolationAmount(const CInterpolatedVarArrayBase self, float seconds)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetInterpolationAmount_639_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< float, false >::NoteLastNetworkedValue(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_NoteLastNetworkedValue_640(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.NoteLastNetworkedValue")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< float, false >::NoteLastNetworkedValue(void)
-  ((*local_this).NoteLastNetworkedValue)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_NoteLastNetworkedValue_640_comment =
-  "C++ Interface:\n"
-  "NoteLastNetworkedValue(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_NoteLastNetworkedValue_640_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual bool CInterpolatedVarArrayBase< float, false >::NoteChanged(float changetime, bool bUpdateLastNetworkedValue)
  * bool CInterpolatedVarArrayBase< float, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_NoteChanged_641(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_NoteChanged_626(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.NoteChanged")) {
     return nullptr;
   }
-  int parameter_count = (int)PyTuple_Size(args);
-  if (kwds != nullptr) {
-    parameter_count += (int)PyDict_Size(kwds);
-  }
-  switch (parameter_count) {
-  case 2:
-    {
-      // 1-virtual bool CInterpolatedVarArrayBase< float, false >::NoteChanged(float changetime, bool bUpdateLastNetworkedValue)
-      float param1;
-      PyObject *param2;
-      static const char *keyword_list[] = {"changetime", "bUpdateLastNetworkedValue", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "fO:NoteChanged", (char **)keyword_list, &param1, &param2)) {
-        bool return_value = ((*local_this).NoteChanged)((float)param1, (PyObject_IsTrue(param2) != 0));
-        return Dtool_Return_Bool(return_value);
-      }
-    }
-    break;
-  case 3:
-    {
-      // 1-bool CInterpolatedVarArrayBase< float, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
-      float param1;
-      float param2;
-      PyObject *param3;
-      static const char *keyword_list[] = {"changetime", "interpolation_amount", "bUpdateLastNetworkedValue", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "ffO:NoteChanged", (char **)keyword_list, &param1, &param2, &param3)) {
-        bool return_value = ((*local_this).NoteChanged)((float)param1, (float)param2, (PyObject_IsTrue(param3) != 0));
-        return Dtool_Return_Bool(return_value);
-      }
-    }
-    break;
-#ifndef NDEBUG
-  default:
-    return PyErr_Format(PyExc_TypeError,
-                        "NoteChanged() takes 3 or 4 arguments (%d given)",
-                        parameter_count + 1);
-#endif
+  // 1-bool CInterpolatedVarArrayBase< float, false >::NoteChanged(float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)
+  float param1;
+  float param2;
+  PyObject *param3;
+  static const char *keyword_list[] = {"changetime", "interpolation_amount", "bUpdateLastNetworkedValue", nullptr};
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "ffO:NoteChanged", (char **)keyword_list, &param1, &param2, &param3)) {
+    bool return_value = ((*local_this).NoteChanged)((float)param1, (float)param2, (PyObject_IsTrue(param3) != 0));
+    return Dtool_Return_Bool(return_value);
   }
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
-      "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, bool bUpdateLastNetworkedValue)\n"
       "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)\n");
   }
   return nullptr;
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_NoteChanged_641_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_NoteChanged_626_comment =
   "C++ Interface:\n"
-  "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, bool bUpdateLastNetworkedValue)\n"
   "NoteChanged(const CInterpolatedVarArrayBase self, float changetime, float interpolation_amount, bool bUpdateLastNetworkedValue)\n"
   "\n"
   "// Just like the IInterpolatedVar functions, but you can specify an\n"
   "// interpolation amount.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_NoteChanged_641_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_NoteChanged_626_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< float, false >::Reset(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_Reset_642(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.Reset")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< float, false >::Reset(void)
-  ((*local_this).Reset)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_Reset_642_comment =
-  "C++ Interface:\n"
-  "Reset(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_Reset_642_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual int CInterpolatedVarArrayBase< float, false >::Interpolate(float currentTime)
  * int CInterpolatedVarArrayBase< float, false >::Interpolate(float currentTime, float interpolation_amount)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_Interpolate_643(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_Interpolate_627(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.Interpolate")) {
     return nullptr;
   }
-  int parameter_count = (int)PyTuple_Size(args);
-  if (kwds != nullptr) {
-    parameter_count += (int)PyDict_Size(kwds);
-  }
-  switch (parameter_count) {
-  case 1:
-    {
-      PyObject *arg;
-      if (Dtool_ExtractArg(&arg, args, kwds, "currentTime")) {
-        // 1-virtual int CInterpolatedVarArrayBase< float, false >::Interpolate(float currentTime)
-        if (PyNumber_Check(arg)) {
-          int return_value = ((*local_this).Interpolate)((float)PyFloat_AsDouble(arg));
-          if (Dtool_CheckErrorOccurred()) {
-            return nullptr;
-          }
-          return Dtool_WrapValue(return_value);
-        }
-      }
+  // 1-int CInterpolatedVarArrayBase< float, false >::Interpolate(float currentTime, float interpolation_amount)
+  float param1;
+  float param2;
+  static const char *keyword_list[] = {"currentTime", "interpolation_amount", nullptr};
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "ff:Interpolate", (char **)keyword_list, &param1, &param2)) {
+    int return_value = ((*local_this).Interpolate)((float)param1, (float)param2);
+    if (Dtool_CheckErrorOccurred()) {
+      return nullptr;
     }
-    break;
-  case 2:
-    {
-      // 1-int CInterpolatedVarArrayBase< float, false >::Interpolate(float currentTime, float interpolation_amount)
-      float param1;
-      float param2;
-      static const char *keyword_list[] = {"currentTime", "interpolation_amount", nullptr};
-      if (PyArg_ParseTupleAndKeywords(args, kwds, "ff:Interpolate", (char **)keyword_list, &param1, &param2)) {
-        int return_value = ((*local_this).Interpolate)((float)param1, (float)param2);
-        if (Dtool_CheckErrorOccurred()) {
-          return nullptr;
-        }
-        return Dtool_WrapValue(return_value);
-      }
-    }
-    break;
-#ifndef NDEBUG
-  default:
-    return PyErr_Format(PyExc_TypeError,
-                        "Interpolate() takes 2 or 3 arguments (%d given)",
-                        parameter_count + 1);
-#endif
+    return Dtool_WrapValue(return_value);
   }
   if (!_PyErr_OCCURRED()) {
     return Dtool_Raise_BadArgumentsError(
-      "Interpolate(const CInterpolatedVarArrayBase self, float currentTime)\n"
       "Interpolate(const CInterpolatedVarArrayBase self, float currentTime, float interpolation_amount)\n");
   }
   return nullptr;
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_Interpolate_643_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_Interpolate_627_comment =
   "C++ Interface:\n"
-  "Interpolate(const CInterpolatedVarArrayBase self, float currentTime)\n"
   "Interpolate(const CInterpolatedVarArrayBase self, float currentTime, float interpolation_amount)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_Interpolate_643_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual int CInterpolatedVarArrayBase< float, false >::GetType(void) const
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetType_644(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
-  if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_float_false)) {
-    return nullptr;
-  }
-  // 1-virtual int CInterpolatedVarArrayBase< float, false >::GetType(void) const
-  int return_value = ((*(const CInterpolatedVarArrayBase< float, false >*)local_this).GetType)();
-  if (Dtool_CheckErrorOccurred()) {
-    return nullptr;
-  }
-  return Dtool_WrapValue(return_value);
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetType_644_comment =
-  "C++ Interface:\n"
-  "GetType(CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetType_644_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< float, false >::RestoreToLastNetworked(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_RestoreToLastNetworked_645(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.RestoreToLastNetworked")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< float, false >::RestoreToLastNetworked(void)
-  ((*local_this).RestoreToLastNetworked)();
-  return Dtool_Return_None();
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_RestoreToLastNetworked_645_comment =
-  "C++ Interface:\n"
-  "RestoreToLastNetworked(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_RestoreToLastNetworked_645_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual char const *CInterpolatedVarArrayBase< float, false >::GetDebugName(void)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetDebugName_647(PyObject *self, PyObject *) {
-  CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.GetDebugName")) {
-    return nullptr;
-  }
-  // 1-virtual char const *CInterpolatedVarArrayBase< float, false >::GetDebugName(void)
-  char const *return_value = ((*local_this).GetDebugName)();
-  if (Dtool_CheckErrorOccurred()) {
-    return nullptr;
-  }
-  return Dtool_WrapValue(return_value);
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetDebugName_647_comment =
-  "C++ Interface:\n"
-  "GetDebugName(const CInterpolatedVarArrayBase self)\n";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetDebugName_647_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_Interpolate_627_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< float, false >::ClearHistory(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_651(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_631(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.ClearHistory")) {
     return nullptr;
@@ -22670,18 +22099,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_651(Py
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_651_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_631_comment =
   "C++ Interface:\n"
   "ClearHistory(const CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_651_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_631_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float const &CInterpolatedVarArrayBase< float, false >::GetPrev(int iArrayIndex = 0) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_653(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_633(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_float_false)) {
     return nullptr;
@@ -22704,18 +22133,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_653(PyObjec
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_653_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_633_comment =
   "C++ Interface:\n"
   "GetPrev(CInterpolatedVarArrayBase self, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_653_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_633_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float const &CInterpolatedVarArrayBase< float, false >::GetCurrent(int iArrayIndex = 0) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_654(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_634(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_float_false)) {
     return nullptr;
@@ -22738,18 +22167,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_654(PyOb
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_654_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_634_comment =
   "C++ Interface:\n"
   "GetCurrent(CInterpolatedVarArrayBase self, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_654_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_634_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float CInterpolatedVarArrayBase< float, false >::GetInterval(void) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_655(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_635(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_float_false)) {
     return nullptr;
@@ -22763,21 +22192,21 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_655(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_655_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_635_comment =
   "C++ Interface:\n"
   "GetInterval(CInterpolatedVarArrayBase self)\n"
   "\n"
   "// Returns the time difference betweem the most recent sample and its previous\n"
   "// sample.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_655_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_635_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool CInterpolatedVarArrayBase< float, false >::IsValidIndex(int i)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_656(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_636(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.IsValidIndex")) {
     return nullptr;
@@ -22803,18 +22232,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_656(Py
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_656_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_636_comment =
   "C++ Interface:\n"
   "IsValidIndex(const CInterpolatedVarArrayBase self, int i)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_656_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_636_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< float, false >::GetHead(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetHead_658(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetHead_638(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.GetHead")) {
     return nullptr;
@@ -22828,18 +22257,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetHead_658(PyObjec
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetHead_658_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetHead_638_comment =
   "C++ Interface:\n"
   "GetHead(const CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetHead_658_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetHead_638_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< float, false >::GetNext(int i)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetNext_659(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetNext_639(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.GetNext")) {
     return nullptr;
@@ -22868,18 +22297,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetNext_659(PyObjec
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetNext_659_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetNext_639_comment =
   "C++ Interface:\n"
   "GetNext(const CInterpolatedVarArrayBase self, int i)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetNext_659_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetNext_639_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< float, false >::SetLooping(bool looping, int iArrayIndex = 0)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_661(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_641(PyObject *self, PyObject *args, PyObject *kwds) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.SetLooping")) {
     return nullptr;
@@ -22900,18 +22329,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_661(PyOb
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_661_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_641_comment =
   "C++ Interface:\n"
   "SetLooping(const CInterpolatedVarArrayBase self, bool looping, int iArrayIndex)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_661_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_641_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void CInterpolatedVarArrayBase< float, false >::SetMaxCount(int newmax)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_662(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_642(PyObject *self, PyObject *arg) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.SetMaxCount")) {
     return nullptr;
@@ -22937,18 +22366,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_662(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_662_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_642_comment =
   "C++ Interface:\n"
   "SetMaxCount(const CInterpolatedVarArrayBase self, int newmax)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_662_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_642_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * int CInterpolatedVarArrayBase< float, false >::GetMaxCount(void) const
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_663(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_643(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!DtoolInstance_GetPointer(self, local_this, Dtool_CInterpolatedVarArrayBase_float_false)) {
     return nullptr;
@@ -22962,18 +22391,18 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_663(PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_663_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_643_comment =
   "C++ Interface:\n"
   "GetMaxCount(CInterpolatedVarArrayBase self)\n";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_663_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_643_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * float CInterpolatedVarArrayBase< float, false >::GetOldestEntry(void)
  */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_664(PyObject *self, PyObject *) {
+static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_644(PyObject *self, PyObject *) {
   CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.GetOldestEntry")) {
     return nullptr;
@@ -22987,45 +22416,13 @@ static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_664(
 }
 
 #ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_664_comment =
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_644_comment =
   "C++ Interface:\n"
   "GetOldestEntry(const CInterpolatedVarArrayBase self)\n"
   "\n"
   "// Get the time of the oldest entry.";
 #else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_664_comment = nullptr;
-#endif
-
-/**
- * Python function wrapper for:
- * virtual void CInterpolatedVarArrayBase< float, false >::SetDebugName(char const *pName)
- */
-static PyObject *Dtool_CInterpolatedVarArrayBase_float_false_SetDebugName_665(PyObject *self, PyObject *arg) {
-  CInterpolatedVarArrayBase< float, false > *local_this = nullptr;
-  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_CInterpolatedVarArrayBase_float_false, (void **)&local_this, "CInterpolatedVarArrayBase_float_false.SetDebugName")) {
-    return nullptr;
-  }
-  // 1-virtual void CInterpolatedVarArrayBase< float, false >::SetDebugName(char const *pName)
-  char const *param1;
-  if (PyArg_Parse(arg, "z:SetDebugName", &param1)) {
-    ((*local_this).SetDebugName)((char const *)param1);
-    return Dtool_Return_None();
-  }
-  if (!_PyErr_OCCURRED()) {
-    return Dtool_Raise_BadArgumentsError(
-      "SetDebugName(const CInterpolatedVarArrayBase self, str pName)\n");
-  }
-  return nullptr;
-}
-
-#ifndef NDEBUG
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetDebugName_665_comment =
-  "C++ Interface:\n"
-  "SetDebugName(const CInterpolatedVarArrayBase self, str pName)\n"
-  "\n"
-  "// set a debug name (if not provided by constructor)";
-#else
-static const char *Dtool_CInterpolatedVarArrayBase_float_false_SetDebugName_665_comment = nullptr;
+static const char *Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_644_comment = nullptr;
 #endif
 
 /**
@@ -23094,6 +22491,9 @@ static void *Dtool_UpcastInterface_CInterpolatedVarArrayBase_float_false(PyObjec
   if (requested_type == &Dtool_CInterpolatedVarArrayBase_float_false) {
     return local_this;
   }
+  if (requested_type == Dtool_Ptr_IInterpolatedVar) {
+    return (IInterpolatedVar *) local_this;
+  }
   return nullptr;
 }
 
@@ -23103,6 +22503,10 @@ static void *Dtool_DowncastInterface_CInterpolatedVarArrayBase_float_false(void 
   }
   if (from_type == Dtool_Ptr_CInterpolatedVarArrayBase_float_false) {
     return from_this;
+  }
+  if (from_type == Dtool_Ptr_IInterpolatedVar) {
+    IInterpolatedVar* other_this = (IInterpolatedVar*)from_this;
+    return (CInterpolatedVarArrayBase< float, false >*)other_this;
   }
   return nullptr;
 }
@@ -34185,6 +33589,173 @@ static void Dtool_PyModuleClassInit_CInterpolationContext(PyObject *module) {
 }
 
 /**
+ * Python method tables for IInterpolatedVar (IInterpolatedVar)
+ */
+static PyMethodDef Dtool_Methods_IInterpolatedVar[] = {
+  {"SetInterpolationAmount", &Dtool_IInterpolatedVar_SetInterpolationAmount_531, METH_O, (const char *)Dtool_IInterpolatedVar_SetInterpolationAmount_531_comment},
+  {"NoteLastNetworkedValue", &Dtool_IInterpolatedVar_NoteLastNetworkedValue_532, METH_NOARGS, (const char *)Dtool_IInterpolatedVar_NoteLastNetworkedValue_532_comment},
+  {"NoteChanged", (PyCFunction) &Dtool_IInterpolatedVar_NoteChanged_533, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_IInterpolatedVar_NoteChanged_533_comment},
+  {"Reset", &Dtool_IInterpolatedVar_Reset_534, METH_NOARGS, (const char *)Dtool_IInterpolatedVar_Reset_534_comment},
+  {"Interpolate", &Dtool_IInterpolatedVar_Interpolate_535, METH_O, (const char *)Dtool_IInterpolatedVar_Interpolate_535_comment},
+  {"GetType", &Dtool_IInterpolatedVar_GetType_536, METH_NOARGS, (const char *)Dtool_IInterpolatedVar_GetType_536_comment},
+  {"RestoreToLastNetworked", &Dtool_IInterpolatedVar_RestoreToLastNetworked_537, METH_NOARGS, (const char *)Dtool_IInterpolatedVar_RestoreToLastNetworked_537_comment},
+  {"Copy", &Dtool_IInterpolatedVar_Copy_538, METH_O, (const char *)Dtool_IInterpolatedVar_Copy_538_comment},
+  {"GetDebugName", &Dtool_IInterpolatedVar_GetDebugName_539, METH_NOARGS, (const char *)Dtool_IInterpolatedVar_GetDebugName_539_comment},
+  {"SetDebugName", &Dtool_IInterpolatedVar_SetDebugName_540, METH_O, (const char *)Dtool_IInterpolatedVar_SetDebugName_540_comment},
+  {nullptr, nullptr, 0, nullptr}
+};
+
+static PyNumberMethods Dtool_NumberMethods_IInterpolatedVar = {
+  nullptr,
+  nullptr,
+  nullptr,
+#if PY_MAJOR_VERSION < 3
+  nullptr,
+#endif
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+#if PY_MAJOR_VERSION < 3
+  nullptr,
+#endif
+  nullptr,
+  nullptr, // nb_long
+  nullptr,
+#if PY_MAJOR_VERSION < 3
+  nullptr,
+  nullptr,
+#endif
+  nullptr,
+  nullptr,
+  nullptr,
+#if PY_MAJOR_VERSION < 3
+  nullptr,
+#endif
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+#if PY_VERSION_HEX >= 0x02050000
+  nullptr,
+#endif
+#if PY_VERSION_HEX >= 0x03050000
+  nullptr,
+  nullptr,
+#endif
+};
+
+struct Dtool_PyTypedObject Dtool_IInterpolatedVar = {
+  {
+    PyVarObject_HEAD_INIT(nullptr, 0)
+    "libpandabsp.IInterpolatedVar",
+    0, // tp_basicsize
+    0, // tp_itemsize
+    &Dtool_FreeInstance_IInterpolatedVar,
+#if PY_VERSION_HEX >= 0x03080000
+    0, // tp_vectorcall_offset
+#else
+    nullptr,
+#endif
+    nullptr,
+    nullptr,
+#if PY_VERSION_HEX >= 0x03050000
+    nullptr, // tp_as_async
+#elif PY_MAJOR_VERSION >= 3
+    nullptr, // tp_reserved
+#else
+    nullptr, // tp_compare
+#endif
+    nullptr,
+    &Dtool_NumberMethods_IInterpolatedVar,
+    nullptr, // tp_as_sequence
+    nullptr, // tp_as_mapping
+    nullptr, // tp_hash
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr, // tp_as_buffer
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_CHECKTYPES,
+    nullptr, // tp_doc
+    nullptr, // tp_traverse
+    nullptr, // tp_clear
+    nullptr, // tp_richcompare
+    0, // tp_weaklistoffset
+    nullptr,
+    nullptr,
+    Dtool_Methods_IInterpolatedVar,
+    nullptr, // tp_members
+    nullptr, // tp_getset
+    nullptr, // tp_base
+    nullptr, // tp_dict
+    nullptr,
+    nullptr,
+    0, // tp_dictoffset
+    Dtool_Init_IInterpolatedVar,
+    PyType_GenericAlloc,
+    Dtool_new_IInterpolatedVar,
+    PyObject_Del,
+    nullptr, // tp_is_gc
+    nullptr, // tp_bases
+    nullptr, // tp_mro
+    nullptr, // tp_cache
+    nullptr, // tp_subclasses
+    nullptr, // tp_weaklist
+    nullptr, // tp_del
+#if PY_VERSION_HEX >= 0x02060000
+    0, // tp_version_tag
+#endif
+#if PY_VERSION_HEX >= 0x03040000
+    nullptr, // tp_finalize
+#endif
+#if PY_VERSION_HEX >= 0x03080000
+    nullptr, // tp_vectorcall
+#endif
+  },
+  TypeHandle::none(),
+  Dtool_PyModuleClassInit_IInterpolatedVar,
+  Dtool_UpcastInterface_IInterpolatedVar,
+  Dtool_DowncastInterface_IInterpolatedVar,
+  nullptr,
+  nullptr,
+};
+
+static void Dtool_PyModuleClassInit_IInterpolatedVar(PyObject *module) {
+  (void) module; // Unused
+  static bool initdone = false;
+  if (!initdone) {
+    initdone = true;
+    // Dependent objects
+    Dtool_IInterpolatedVar._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
+    PyObject *dict = PyDict_New();
+    Dtool_IInterpolatedVar._PyType.tp_dict = dict;
+    PyDict_SetItemString(dict, "DtoolClassDict", dict);
+    if (PyType_Ready((PyTypeObject *)&Dtool_IInterpolatedVar) < 0) {
+      Dtool_Raise_TypeError("PyType_Ready(IInterpolatedVar)");
+      return;
+    }
+    Py_INCREF((PyTypeObject *)&Dtool_IInterpolatedVar);
+  }
+}
+
+/**
  * Python method tables for CInterpolatedVar_LVector2f (CInterpolatedVar_LVector2f)
  */
 static PyMethodDef Dtool_Methods_CInterpolatedVar_LVector2f[] = {
@@ -34387,33 +33958,26 @@ static void Dtool_PyModuleClassInit_CInterpolatedVar_LVector2f(PyObject *module)
  * Python method tables for CInterpolatedVarArrayBase_LVector2f_false (CInterpolatedVarArrayBase_LVector2f_false)
  */
 static PyMethodDef Dtool_Methods_CInterpolatedVarArrayBase_LVector2f_false[] = {
-  {"Setup", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_533, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_533_comment},
-  {"SetInterpolationAmount", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetInterpolationAmount_534, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetInterpolationAmount_534_comment},
-  {"NoteLastNetworkedValue", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteLastNetworkedValue_535, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteLastNetworkedValue_535_comment},
-  {"NoteChanged", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteChanged_536, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteChanged_536_comment},
-  {"Reset", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_Reset_537, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_Reset_537_comment},
-  {"Interpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_Interpolate_538, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_Interpolate_538_comment},
-  {"GetType", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetType_539, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetType_539_comment},
-  {"RestoreToLastNetworked", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_RestoreToLastNetworked_540, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_RestoreToLastNetworked_540_comment},
-  {"GetDebugName", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDebugName_542, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDebugName_542_comment},
-  {"DebugInterpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolate_543, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolate_543_comment},
-  {"GetDerivative", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_544, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_544_comment},
-  {"GetDerivative_SmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_545, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_545_comment},
-  {"GetDerivativeSmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_545, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_545_comment},
-  {"ClearHistory", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_546, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_546_comment},
-  {"AddToHead", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_547, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_547_comment},
-  {"GetPrev", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_548, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_548_comment},
-  {"GetCurrent", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_549, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_549_comment},
-  {"GetInterval", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_550, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_550_comment},
-  {"IsValidIndex", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_551, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_551_comment},
-  {"GetHead", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_553, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_553_comment},
-  {"GetNext", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_554, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_554_comment},
-  {"SetHistoryValuesForItem", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValuesForItem_555, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValuesForItem_555_comment},
-  {"SetLooping", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_556, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_556_comment},
-  {"SetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_557, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_557_comment},
-  {"GetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_558, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_558_comment},
-  {"GetOldestEntry", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_559, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_559_comment},
-  {"SetDebugName", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetDebugName_560, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetDebugName_560_comment},
+  {"Setup", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_544, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_Setup_544_comment},
+  {"NoteChanged", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteChanged_545, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_NoteChanged_545_comment},
+  {"Interpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_Interpolate_546, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_Interpolate_546_comment},
+  {"DebugInterpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolate_547, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_DebugInterpolate_547_comment},
+  {"GetDerivative", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_548, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_548_comment},
+  {"GetDerivative_SmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_549, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_549_comment},
+  {"GetDerivativeSmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_549, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetDerivative_SmoothVelocity_549_comment},
+  {"ClearHistory", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_550, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_ClearHistory_550_comment},
+  {"AddToHead", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_551, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_AddToHead_551_comment},
+  {"GetPrev", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_552, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetPrev_552_comment},
+  {"GetCurrent", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_553, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetCurrent_553_comment},
+  {"GetInterval", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_554, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetInterval_554_comment},
+  {"IsValidIndex", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_555, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_IsValidIndex_555_comment},
+  {"GetHead", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_557, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetHead_557_comment},
+  {"GetNext", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_558, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetNext_558_comment},
+  {"SetHistoryValuesForItem", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValuesForItem_559, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetHistoryValuesForItem_559_comment},
+  {"SetLooping", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_560, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetLooping_560_comment},
+  {"SetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_561, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_SetMaxCount_561_comment},
+  {"GetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_562, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetMaxCount_562_comment},
+  {"GetOldestEntry", &Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_563, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector2f_false_GetOldestEntry_563_comment},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -34595,6 +34159,8 @@ static void Dtool_PyModuleClassInit_CInterpolatedVarArrayBase_LVector2f_false(Py
   if (!initdone) {
     initdone = true;
     // Dependent objects
+    Dtool_PyModuleClassInit_IInterpolatedVar(nullptr);
+    Dtool_CInterpolatedVarArrayBase_LVector2f_false._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_IInterpolatedVar);
     Dtool_CInterpolatedVarArrayBase_LVector2f_false._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_CInterpolatedVarArrayBase_LVector2f_false._PyType.tp_dict = dict;
@@ -34810,33 +34376,26 @@ static void Dtool_PyModuleClassInit_CInterpolatedVar_LVector3f(PyObject *module)
  * Python method tables for CInterpolatedVarArrayBase_LVector3f_false (CInterpolatedVarArrayBase_LVector3f_false)
  */
 static PyMethodDef Dtool_Methods_CInterpolatedVarArrayBase_LVector3f_false[] = {
-  {"Setup", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_568, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_568_comment},
-  {"SetInterpolationAmount", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetInterpolationAmount_569, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetInterpolationAmount_569_comment},
-  {"NoteLastNetworkedValue", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteLastNetworkedValue_570, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteLastNetworkedValue_570_comment},
-  {"NoteChanged", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteChanged_571, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteChanged_571_comment},
-  {"Reset", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_Reset_572, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_Reset_572_comment},
+  {"Setup", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_571, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_Setup_571_comment},
+  {"NoteChanged", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteChanged_572, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_NoteChanged_572_comment},
   {"Interpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_Interpolate_573, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_Interpolate_573_comment},
-  {"GetType", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetType_574, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetType_574_comment},
-  {"RestoreToLastNetworked", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_RestoreToLastNetworked_575, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_RestoreToLastNetworked_575_comment},
-  {"GetDebugName", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDebugName_577, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDebugName_577_comment},
-  {"DebugInterpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolate_578, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolate_578_comment},
-  {"GetDerivative", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_579, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_579_comment},
-  {"GetDerivative_SmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_580, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_580_comment},
-  {"GetDerivativeSmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_580, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_580_comment},
-  {"ClearHistory", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_581, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_581_comment},
-  {"AddToHead", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_582, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_582_comment},
-  {"GetPrev", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_583, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_583_comment},
-  {"GetCurrent", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_584, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_584_comment},
-  {"GetInterval", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_585, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_585_comment},
-  {"IsValidIndex", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_586, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_586_comment},
-  {"GetHead", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_588, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_588_comment},
-  {"GetNext", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_589, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_589_comment},
-  {"SetHistoryValuesForItem", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValuesForItem_590, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValuesForItem_590_comment},
-  {"SetLooping", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_591, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_591_comment},
-  {"SetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_592, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_592_comment},
-  {"GetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_593, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_593_comment},
-  {"GetOldestEntry", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_594, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_594_comment},
-  {"SetDebugName", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetDebugName_595, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetDebugName_595_comment},
+  {"DebugInterpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolate_574, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_DebugInterpolate_574_comment},
+  {"GetDerivative", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_575, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_575_comment},
+  {"GetDerivative_SmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_576, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_576_comment},
+  {"GetDerivativeSmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_576, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetDerivative_SmoothVelocity_576_comment},
+  {"ClearHistory", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_577, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_ClearHistory_577_comment},
+  {"AddToHead", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_578, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_AddToHead_578_comment},
+  {"GetPrev", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_579, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetPrev_579_comment},
+  {"GetCurrent", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_580, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetCurrent_580_comment},
+  {"GetInterval", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_581, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetInterval_581_comment},
+  {"IsValidIndex", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_582, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_IsValidIndex_582_comment},
+  {"GetHead", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_584, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetHead_584_comment},
+  {"GetNext", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_585, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetNext_585_comment},
+  {"SetHistoryValuesForItem", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValuesForItem_586, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetHistoryValuesForItem_586_comment},
+  {"SetLooping", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_587, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetLooping_587_comment},
+  {"SetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_588, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_SetMaxCount_588_comment},
+  {"GetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_589, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetMaxCount_589_comment},
+  {"GetOldestEntry", &Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_590, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector3f_false_GetOldestEntry_590_comment},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -35018,6 +34577,8 @@ static void Dtool_PyModuleClassInit_CInterpolatedVarArrayBase_LVector3f_false(Py
   if (!initdone) {
     initdone = true;
     // Dependent objects
+    Dtool_PyModuleClassInit_IInterpolatedVar(nullptr);
+    Dtool_CInterpolatedVarArrayBase_LVector3f_false._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_IInterpolatedVar);
     Dtool_CInterpolatedVarArrayBase_LVector3f_false._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_CInterpolatedVarArrayBase_LVector3f_false._PyType.tp_dict = dict;
@@ -35233,33 +34794,26 @@ static void Dtool_PyModuleClassInit_CInterpolatedVar_LVector4f(PyObject *module)
  * Python method tables for CInterpolatedVarArrayBase_LVector4f_false (CInterpolatedVarArrayBase_LVector4f_false)
  */
 static PyMethodDef Dtool_Methods_CInterpolatedVarArrayBase_LVector4f_false[] = {
-  {"Setup", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_603, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_603_comment},
-  {"SetInterpolationAmount", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetInterpolationAmount_604, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetInterpolationAmount_604_comment},
-  {"NoteLastNetworkedValue", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteLastNetworkedValue_605, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteLastNetworkedValue_605_comment},
-  {"NoteChanged", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteChanged_606, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteChanged_606_comment},
-  {"Reset", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_Reset_607, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_Reset_607_comment},
-  {"Interpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_Interpolate_608, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_Interpolate_608_comment},
-  {"GetType", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetType_609, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetType_609_comment},
-  {"RestoreToLastNetworked", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_RestoreToLastNetworked_610, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_RestoreToLastNetworked_610_comment},
-  {"GetDebugName", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDebugName_612, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDebugName_612_comment},
-  {"DebugInterpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolate_613, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolate_613_comment},
-  {"GetDerivative", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_614, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_614_comment},
-  {"GetDerivative_SmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_615, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_615_comment},
-  {"GetDerivativeSmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_615, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_615_comment},
-  {"ClearHistory", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_616, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_616_comment},
-  {"AddToHead", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_617, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_617_comment},
-  {"GetPrev", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_618, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_618_comment},
-  {"GetCurrent", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_619, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_619_comment},
-  {"GetInterval", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_620, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_620_comment},
-  {"IsValidIndex", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_621, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_621_comment},
-  {"GetHead", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_623, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_623_comment},
-  {"GetNext", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_624, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_624_comment},
-  {"SetHistoryValuesForItem", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValuesForItem_625, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValuesForItem_625_comment},
-  {"SetLooping", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_626, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_626_comment},
-  {"SetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_627, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_627_comment},
-  {"GetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_628, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_628_comment},
-  {"GetOldestEntry", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_629, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_629_comment},
-  {"SetDebugName", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetDebugName_630, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetDebugName_630_comment},
+  {"Setup", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_598, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_Setup_598_comment},
+  {"NoteChanged", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteChanged_599, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_NoteChanged_599_comment},
+  {"Interpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_Interpolate_600, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_Interpolate_600_comment},
+  {"DebugInterpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolate_601, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_DebugInterpolate_601_comment},
+  {"GetDerivative", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_602, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_602_comment},
+  {"GetDerivative_SmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_603, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_603_comment},
+  {"GetDerivativeSmoothVelocity", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_603, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetDerivative_SmoothVelocity_603_comment},
+  {"ClearHistory", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_604, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_ClearHistory_604_comment},
+  {"AddToHead", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_605, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_AddToHead_605_comment},
+  {"GetPrev", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_606, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetPrev_606_comment},
+  {"GetCurrent", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_607, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetCurrent_607_comment},
+  {"GetInterval", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_608, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetInterval_608_comment},
+  {"IsValidIndex", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_609, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_IsValidIndex_609_comment},
+  {"GetHead", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_611, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetHead_611_comment},
+  {"GetNext", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_612, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetNext_612_comment},
+  {"SetHistoryValuesForItem", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValuesForItem_613, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetHistoryValuesForItem_613_comment},
+  {"SetLooping", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_614, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetLooping_614_comment},
+  {"SetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_615, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_SetMaxCount_615_comment},
+  {"GetMaxCount", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_616, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetMaxCount_616_comment},
+  {"GetOldestEntry", &Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_617, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_LVector4f_false_GetOldestEntry_617_comment},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -35441,6 +34995,8 @@ static void Dtool_PyModuleClassInit_CInterpolatedVarArrayBase_LVector4f_false(Py
   if (!initdone) {
     initdone = true;
     // Dependent objects
+    Dtool_PyModuleClassInit_IInterpolatedVar(nullptr);
+    Dtool_CInterpolatedVarArrayBase_LVector4f_false._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_IInterpolatedVar);
     Dtool_CInterpolatedVarArrayBase_LVector4f_false._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_CInterpolatedVarArrayBase_LVector4f_false._PyType.tp_dict = dict;
@@ -35656,26 +35212,19 @@ static void Dtool_PyModuleClassInit_CInterpolatedVar_float(PyObject *module) {
  * Python method tables for CInterpolatedVarArrayBase_float_false (CInterpolatedVarArrayBase_float_false)
  */
 static PyMethodDef Dtool_Methods_CInterpolatedVarArrayBase_float_false[] = {
-  {"SetInterpolationAmount", &Dtool_CInterpolatedVarArrayBase_float_false_SetInterpolationAmount_639, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_SetInterpolationAmount_639_comment},
-  {"NoteLastNetworkedValue", &Dtool_CInterpolatedVarArrayBase_float_false_NoteLastNetworkedValue_640, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_NoteLastNetworkedValue_640_comment},
-  {"NoteChanged", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_float_false_NoteChanged_641, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_NoteChanged_641_comment},
-  {"Reset", &Dtool_CInterpolatedVarArrayBase_float_false_Reset_642, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_Reset_642_comment},
-  {"Interpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_float_false_Interpolate_643, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_Interpolate_643_comment},
-  {"GetType", &Dtool_CInterpolatedVarArrayBase_float_false_GetType_644, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetType_644_comment},
-  {"RestoreToLastNetworked", &Dtool_CInterpolatedVarArrayBase_float_false_RestoreToLastNetworked_645, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_RestoreToLastNetworked_645_comment},
-  {"GetDebugName", &Dtool_CInterpolatedVarArrayBase_float_false_GetDebugName_647, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetDebugName_647_comment},
-  {"ClearHistory", &Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_651, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_651_comment},
-  {"GetPrev", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_653, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_653_comment},
-  {"GetCurrent", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_654, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_654_comment},
-  {"GetInterval", &Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_655, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_655_comment},
-  {"IsValidIndex", &Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_656, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_656_comment},
-  {"GetHead", &Dtool_CInterpolatedVarArrayBase_float_false_GetHead_658, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetHead_658_comment},
-  {"GetNext", &Dtool_CInterpolatedVarArrayBase_float_false_GetNext_659, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetNext_659_comment},
-  {"SetLooping", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_661, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_661_comment},
-  {"SetMaxCount", &Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_662, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_662_comment},
-  {"GetMaxCount", &Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_663, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_663_comment},
-  {"GetOldestEntry", &Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_664, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_664_comment},
-  {"SetDebugName", &Dtool_CInterpolatedVarArrayBase_float_false_SetDebugName_665, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_SetDebugName_665_comment},
+  {"NoteChanged", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_float_false_NoteChanged_626, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_NoteChanged_626_comment},
+  {"Interpolate", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_float_false_Interpolate_627, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_Interpolate_627_comment},
+  {"ClearHistory", &Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_631, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_ClearHistory_631_comment},
+  {"GetPrev", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_633, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetPrev_633_comment},
+  {"GetCurrent", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_634, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetCurrent_634_comment},
+  {"GetInterval", &Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_635, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetInterval_635_comment},
+  {"IsValidIndex", &Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_636, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_IsValidIndex_636_comment},
+  {"GetHead", &Dtool_CInterpolatedVarArrayBase_float_false_GetHead_638, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetHead_638_comment},
+  {"GetNext", &Dtool_CInterpolatedVarArrayBase_float_false_GetNext_639, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetNext_639_comment},
+  {"SetLooping", (PyCFunction) &Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_641, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_SetLooping_641_comment},
+  {"SetMaxCount", &Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_642, METH_O, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_SetMaxCount_642_comment},
+  {"GetMaxCount", &Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_643, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetMaxCount_643_comment},
+  {"GetOldestEntry", &Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_644, METH_NOARGS, (const char *)Dtool_CInterpolatedVarArrayBase_float_false_GetOldestEntry_644_comment},
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -35857,6 +35406,8 @@ static void Dtool_PyModuleClassInit_CInterpolatedVarArrayBase_float_false(PyObje
   if (!initdone) {
     initdone = true;
     // Dependent objects
+    Dtool_PyModuleClassInit_IInterpolatedVar(nullptr);
+    Dtool_CInterpolatedVarArrayBase_float_false._PyType.tp_bases = PyTuple_Pack(1, (PyTypeObject *)&Dtool_IInterpolatedVar);
     Dtool_CInterpolatedVarArrayBase_float_false._PyType.tp_base = (PyTypeObject *)Dtool_GetSuperBase();
     PyObject *dict = PyDict_New();
     Dtool_CInterpolatedVarArrayBase_float_false._PyType.tp_dict = dict;
@@ -36263,6 +35814,9 @@ void Dtool_libpandabsp_BuildInstants(PyObject *module) {
   // CInterpolationContext
   Dtool_PyModuleClassInit_CInterpolationContext(module);
   PyModule_AddObject(module, "CInterpolationContext", (PyObject *)&Dtool_CInterpolationContext);
+  // IInterpolatedVar
+  Dtool_PyModuleClassInit_IInterpolatedVar(module);
+  PyModule_AddObject(module, "IInterpolatedVar", (PyObject *)&Dtool_IInterpolatedVar);
   // CInterpolatedVar< LVector2f >
   Dtool_PyModuleClassInit_CInterpolatedVar_LVector2f(module);
   PyModule_AddObject(module, "CInterpolatedVar_LVector2f", (PyObject *)&Dtool_CInterpolatedVar_LVector2f);
@@ -36333,7 +35887,7 @@ extern const struct LibraryDef libpandabsp_moddef = {python_simple_funcs, export
 extern const struct LibraryDef libpandabsp_moddef = {python_simple_funcs, exports, imports};
 #endif
 static InterrogateModuleDef _in_module_def = {
-  1587681646,  /* file_identifier */
+  1587682265,  /* file_identifier */
   "libpandabsp",  /* library_name */
   "7Oyg",  /* library_hash_name */
   "libpandabsp",  /* module_name */
@@ -36343,7 +35897,7 @@ static InterrogateModuleDef _in_module_def = {
   nullptr,  /* fptrs */
   0,  /* num_fptrs */
   1,  /* first_index */
-  1486  /* next_index */
+  1437  /* next_index */
 };
 
 Configure(_in_configure_libpandabsp);

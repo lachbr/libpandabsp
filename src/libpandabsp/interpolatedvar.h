@@ -150,7 +150,7 @@ INLINE float ExtrapolateInterpolatedVarType( const float &oldVal,
 
 class EXPCL_PANDABSP IInterpolatedVar
 {
-public:
+PUBLISHED:
 	virtual ~IInterpolatedVar()
 	{
 	}
