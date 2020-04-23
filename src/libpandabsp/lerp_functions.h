@@ -83,7 +83,15 @@ inline void Lerp_Clamp( float val )
 {
 }
 
-inline void Lerp_Clamp( const LVector3& val )
+inline void Lerp_Clamp( const LVector3f& val )
+{
+}
+
+inline void Lerp_Clamp( const LVector4f &val )
+{
+}
+
+inline void Lerp_Clamp( const LVector2f &val )
 {
 }
 
