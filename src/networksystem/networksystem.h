@@ -29,8 +29,10 @@
 
 #ifndef CPPPARSER
 #include <steam/steamnetworkingsockets.h>
+#include <steam/steamnetworkingtypes.h>
 #else
 class ISteamNetworkingSocketsCallbacks;
+class ISteamNetworkingSockets;
 #endif
 
 typedef uint32_t NetworkListenSocketHandle;
@@ -47,7 +49,6 @@ PUBLISHED:
 	DatagramIterator &get_datagram_iterator();
 	NetworkConnectionHandle get_connection();
 
-public:
 	Datagram dg;
 	DatagramIterator dgi;
 	NetworkConnectionHandle hConn;
@@ -99,6 +100,9 @@ PUBLISHED:
 	};
 
 PUBLISHED:
+	NetworkSystem();
+	~NetworkSystem();
+
 	NetworkConnectionHandle connect_by_IP_address( const NetAddress &addr );
 	bool get_connection_info( NetworkConnectionHandle hConn, NetworkConnectionInfo *pInfo );
 	void send_datagram( NetworkConnectionHandle hConn, const Datagram &dg,
@@ -116,6 +120,7 @@ PUBLISHED:
 	static NetworkSystem *get_global_ptr();
 
 private:
+	ISteamNetworkingSockets *m_pInterface;
 	static NetworkSystem *s_pGlobalPtr;
 };
 

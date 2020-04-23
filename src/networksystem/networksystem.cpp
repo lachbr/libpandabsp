@@ -13,6 +13,27 @@
 
 NetworkSystem *NetworkSystem::s_pGlobalPtr = nullptr;
 
+NetworkSystem::NetworkSystem()
+{
+	SteamNetworkingErrMsg errMsg;
+	m_pInterface = GameNetworkingSockets_CreateInstance( nullptr, errMsg );
+	if ( !m_pInterface )
+	{
+		networksystem_cat.error()
+			<< "Unable to initialize SteamNetworkingSockets! (" << std::string( errMsg ) << ")\n";
+		return;
+	}
+}
+
+NetworkSystem::~NetworkSystem()
+{
+	if ( m_pInterface )
+	{
+		GameNetworkingSockets_KillInstance( m_pInterface );
+		m_pInterface = nullptr;
+	}
+}
+
 void NetworkCallbacks::OnSteamNetConnectionStatusChanged( SteamNetConnectionStatusChangedCallback_t *pCallback )
 {
 #ifdef HAVE_PYTHON
@@ -36,28 +57,28 @@ void NetworkCallbacks::on_connection_status_changed( NetworkConnectionHandle hCo
 
 void NetworkSystem::close_connection( NetworkConnectionHandle hConn )
 {
-	SteamNetworkingSockets()->CloseConnection( hConn, 0, nullptr, false );
+	m_pInterface->CloseConnection( hConn, 0, nullptr, false );
 }
 
 void NetworkSystem::run_callbacks( NetworkCallbacks *pCallbacks )
 {
-	SteamNetworkingSockets()->RunCallbacks( pCallbacks );
+	m_pInterface->RunCallbacks( pCallbacks );
 }
 
 bool NetworkSystem::accept_connection( NetworkConnectionHandle hConn )
 {
-	return SteamNetworkingSockets()->AcceptConnection( hConn ) == k_EResultOK;
+	return m_pInterface->AcceptConnection( hConn ) == k_EResultOK;
 }
 
 bool NetworkSystem::set_connection_poll_group( NetworkConnectionHandle hConn, NetworkPollGroupHandle hPollGroup )
 {
-	return SteamNetworkingSockets()->SetConnectionPollGroup( hConn, hPollGroup );
+	return m_pInterface->SetConnectionPollGroup( hConn, hPollGroup );
 }
 
 bool NetworkSystem::receive_message_on_connection( NetworkConnectionHandle hConn, NetworkMessage &msg )
 {
 	ISteamNetworkingMessage *pMsg = nullptr;
-	int nMsgCount = SteamNetworkingSockets()->ReceiveMessagesOnConnection( hConn, &pMsg, 1 );
+	int nMsgCount = m_pInterface->ReceiveMessagesOnConnection( hConn, &pMsg, 1 );
 	if ( !pMsg || nMsgCount != 1 )
 	{
 		return false;
@@ -73,7 +94,7 @@ bool NetworkSystem::receive_message_on_connection( NetworkConnectionHandle hConn
 bool NetworkSystem::get_connection_info( NetworkConnectionHandle hConn, NetworkConnectionInfo *pInfo )
 {
 	SteamNetConnectionInfo_t sInfo;
-	if ( !SteamNetworkingSockets()->GetConnectionInfo( hConn, &sInfo ) )
+	if ( !m_pInterface->GetConnectionInfo( hConn, &sInfo ) )
 	{
 		return false;
 	}
@@ -96,7 +117,7 @@ bool NetworkSystem::get_connection_info( NetworkConnectionHandle hConn, NetworkC
 void NetworkSystem::send_datagram( NetworkConnectionHandle hConn, const Datagram &dg,
 				   NetworkSystem::NetworkSendFlags flags )
 {
-	SteamNetworkingSockets()->SendMessageToConnection(
+	m_pInterface->SendMessageToConnection(
 		hConn, dg.get_data(),
 		dg.get_length(), flags, nullptr );
 }
@@ -106,7 +127,7 @@ NetworkConnectionHandle NetworkSystem::connect_by_IP_address( const NetAddress &
 	SteamNetworkingIPAddr steamAddr;
 	steamAddr.Clear();
 	steamAddr.ParseString( addr.get_addr().get_ip_port().c_str() );
-	NetworkConnectionHandle handle = SteamNetworkingSockets()->ConnectByIPAddress( steamAddr, 0, nullptr );
+	NetworkConnectionHandle handle = m_pInterface->ConnectByIPAddress( steamAddr, 0, nullptr );
 	
 	return handle;
 }
@@ -114,7 +135,7 @@ NetworkConnectionHandle NetworkSystem::connect_by_IP_address( const NetAddress &
 bool NetworkSystem::receive_message_on_poll_group( NetworkPollGroupHandle hPollGroup, NetworkMessage &msg )
 {
 	ISteamNetworkingMessage *pMsg = nullptr;
-	int nMsgCount = SteamNetworkingSockets()->ReceiveMessagesOnPollGroup( hPollGroup, &pMsg, 1 );
+	int nMsgCount = m_pInterface->ReceiveMessagesOnPollGroup( hPollGroup, &pMsg, 1 );
 	if ( !pMsg || nMsgCount != 1 )
 	{
 		return false;
@@ -129,7 +150,7 @@ bool NetworkSystem::receive_message_on_poll_group( NetworkPollGroupHandle hPollG
 
 NetworkPollGroupHandle NetworkSystem::create_poll_group()
 {
-	return SteamNetworkingSockets()->CreatePollGroup();
+	return m_pInterface->CreatePollGroup();
 }
 
 NetworkListenSocketHandle NetworkSystem::create_listen_socket( int port )
@@ -138,5 +159,5 @@ NetworkListenSocketHandle NetworkSystem::create_listen_socket( int port )
 	steamAddr.Clear();
 	steamAddr.m_port = port;
 
-	return SteamNetworkingSockets()->CreateListenSocketIP( steamAddr, 0, nullptr );
+	return m_pInterface->CreateListenSocketIP( steamAddr, 0, nullptr );
 }

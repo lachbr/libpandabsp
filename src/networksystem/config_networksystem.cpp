@@ -18,12 +18,12 @@ void init_libnetworksystem()
 		return;
 
 	// Initialize the network library
-	SteamNetworkingErrMsg err;
-	if ( !GameNetworkingSockets_Init( nullptr, err ) )
-	{
-		networksystem_cat.fatal()
-			<< "Unable to initialize GameNetworkingSockets!\n";
-	}
+	//SteamNetworkingErrMsg err;
+	//if ( !GameNetworkingSockets_Init( nullptr, err ) )
+	//{
+	//	networksystem_cat.fatal()
+	//		<< "Unable to initialize GameNetworkingSockets!\n";
+	//}
 
 	initialized = true;
 }

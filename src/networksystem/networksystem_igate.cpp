@@ -81,27 +81,27 @@ static const Dtool_TypeDef exports[] = {
  */
 #ifndef LINK_ALL_STATIC
 static Dtool_TypeDef imports[] = {
-  {"Datagram", nullptr},
-#define Dtool_Ptr_Datagram (imports[0].type)
+  {"DatagramIterator", nullptr},
+#define Dtool_Ptr_DatagramIterator (imports[0].type)
   {"NetAddress", nullptr},
 #define Dtool_Ptr_NetAddress (imports[1].type)
-  {"DatagramIterator", nullptr},
-#define Dtool_Ptr_DatagramIterator (imports[2].type)
+  {"Datagram", nullptr},
+#define Dtool_Ptr_Datagram (imports[2].type)
   {nullptr, nullptr},
 };
 #endif
 
-// Datagram
+// DatagramIterator
 #ifndef LINK_ALL_STATIC
-inline static Datagram *Dtool_Coerce_Datagram(PyObject *args, Datagram &coerced) {
-  nassertr(Dtool_Ptr_Datagram != nullptr, nullptr);
-  nassertr(Dtool_Ptr_Datagram->_Dtool_Coerce != nullptr, nullptr);
-  return ((Datagram *(*)(PyObject *, Datagram &))Dtool_Ptr_Datagram->_Dtool_Coerce)(args, coerced);
+inline static DatagramIterator *Dtool_Coerce_DatagramIterator(PyObject *args, DatagramIterator &coerced) {
+  nassertr(Dtool_Ptr_DatagramIterator != nullptr, nullptr);
+  nassertr(Dtool_Ptr_DatagramIterator->_Dtool_Coerce != nullptr, nullptr);
+  return ((DatagramIterator *(*)(PyObject *, DatagramIterator &))Dtool_Ptr_DatagramIterator->_Dtool_Coerce)(args, coerced);
 }
 #else
-extern struct Dtool_PyTypedObject Dtool_Datagram;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_Datagram = &Dtool_Datagram;
-extern Datagram *Dtool_Coerce_Datagram(PyObject *args, Datagram &coerced);
+extern struct Dtool_PyTypedObject Dtool_DatagramIterator;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_DatagramIterator = &Dtool_DatagramIterator;
+extern DatagramIterator *Dtool_Coerce_DatagramIterator(PyObject *args, DatagramIterator &coerced);
 #endif
 // NetAddress
 #ifndef LINK_ALL_STATIC
@@ -115,17 +115,17 @@ extern struct Dtool_PyTypedObject Dtool_NetAddress;
 static struct Dtool_PyTypedObject *const Dtool_Ptr_NetAddress = &Dtool_NetAddress;
 extern NetAddress *Dtool_Coerce_NetAddress(PyObject *args, NetAddress &coerced);
 #endif
-// DatagramIterator
+// Datagram
 #ifndef LINK_ALL_STATIC
-inline static DatagramIterator *Dtool_Coerce_DatagramIterator(PyObject *args, DatagramIterator &coerced) {
-  nassertr(Dtool_Ptr_DatagramIterator != nullptr, nullptr);
-  nassertr(Dtool_Ptr_DatagramIterator->_Dtool_Coerce != nullptr, nullptr);
-  return ((DatagramIterator *(*)(PyObject *, DatagramIterator &))Dtool_Ptr_DatagramIterator->_Dtool_Coerce)(args, coerced);
+inline static Datagram *Dtool_Coerce_Datagram(PyObject *args, Datagram &coerced) {
+  nassertr(Dtool_Ptr_Datagram != nullptr, nullptr);
+  nassertr(Dtool_Ptr_Datagram->_Dtool_Coerce != nullptr, nullptr);
+  return ((Datagram *(*)(PyObject *, Datagram &))Dtool_Ptr_Datagram->_Dtool_Coerce)(args, coerced);
 }
 #else
-extern struct Dtool_PyTypedObject Dtool_DatagramIterator;
-static struct Dtool_PyTypedObject *const Dtool_Ptr_DatagramIterator = &Dtool_DatagramIterator;
-extern DatagramIterator *Dtool_Coerce_DatagramIterator(PyObject *args, DatagramIterator &coerced);
+extern struct Dtool_PyTypedObject Dtool_Datagram;
+static struct Dtool_PyTypedObject *const Dtool_Ptr_Datagram = &Dtool_Datagram;
+extern Datagram *Dtool_Coerce_Datagram(PyObject *args, Datagram &coerced);
 #endif
 
 /**
@@ -213,6 +213,75 @@ static const char *Dtool_NetworkMessage_get_connection_4_comment =
 #else
 static const char *Dtool_NetworkMessage_get_connection_4_comment = nullptr;
 #endif
+
+static PyObject *Dtool_NetworkMessage_dg_Getter(PyObject *self, void *) {
+  const NetworkMessage *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer(self, Dtool_NetworkMessage, (void **)&local_this)) {
+    return nullptr;
+  }
+
+  // 1-Datagram const &NetworkMessage::get_dg(void) const
+  Datagram const *return_value = &(((const NetworkMessage*)local_this)->dg);
+  if (return_value == nullptr) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  } else {
+    return DTool_CreatePyInstanceTyped((void *)return_value, *Dtool_Ptr_Datagram, false, true, return_value->as_typed_object()->get_type_index());
+  }
+}
+
+static PyObject *Dtool_NetworkMessage_dgi_Getter(PyObject *self, void *) {
+  const NetworkMessage *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer(self, Dtool_NetworkMessage, (void **)&local_this)) {
+    return nullptr;
+  }
+
+  // 1-DatagramIterator const &NetworkMessage::get_dgi(void) const
+  DatagramIterator const *return_value = &(((const NetworkMessage*)local_this)->dgi);
+  return DTool_CreatePyInstance((void *)return_value, *Dtool_Ptr_DatagramIterator, false, true);
+}
+
+static PyObject *Dtool_NetworkMessage_hConn_Getter(PyObject *self, void *) {
+  const NetworkMessage *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer(self, Dtool_NetworkMessage, (void **)&local_this)) {
+    return nullptr;
+  }
+
+  // 1-NetworkConnectionHandle NetworkMessage::get_hConn(void) const
+  NetworkConnectionHandle return_value = ((const NetworkMessage*)local_this)->hConn;
+  return Dtool_WrapValue(return_value);
+}
+
+static int Dtool_NetworkMessage_hConn_Setter(PyObject *self, PyObject *arg, void *) {
+  NetworkMessage *local_this = nullptr;
+  if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkMessage, (void **)&local_this, "NetworkMessage.hConn")) {
+    return -1;
+  }
+
+  if (arg == nullptr) {
+    Dtool_Raise_TypeError("can't delete hConn attribute");
+    return -1;
+  }
+  // 1-void NetworkMessage::set_hConn(NetworkConnectionHandle value)
+  if (PyLongOrInt_Check(arg)) {
+    unsigned long param1 = PyLong_AsUnsignedLong(arg);
+#if (SIZEOF_LONG > SIZEOF_INT) && !defined(NDEBUG)
+    if (param1 > UINT_MAX) {
+      PyErr_Format(PyExc_OverflowError,
+                   "value %lu out of range for unsigned integer",
+                   param1);
+      return -1;
+    }
+#endif
+    (local_this)->hConn = (NetworkConnectionHandle)param1;
+    return 0;
+  }
+  if (!_PyErr_OCCURRED()) {
+    Dtool_Raise_BadArgumentsError(
+      "set_hConn(const NetworkMessage self, int value)\n");
+  }
+  return -1;
+}
 
 /**
  * Python function wrapper for:
@@ -312,7 +381,7 @@ static void *Dtool_DowncastInterface_NetworkMessage(void *from_this, Dtool_PyTyp
  * Python function wrapper for:
  * NetworkConnectionHandle NetworkSystem::connect_by_IP_address(NetAddress const &addr)
  */
-static PyObject *Dtool_NetworkSystem_connect_by_IP_address_10(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_NetworkSystem_connect_by_IP_address_24(PyObject *self, PyObject *arg) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.connect_by_IP_address")) {
     return nullptr;
@@ -336,18 +405,18 @@ static PyObject *Dtool_NetworkSystem_connect_by_IP_address_10(PyObject *self, Py
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_connect_by_IP_address_10_comment =
+static const char *Dtool_NetworkSystem_connect_by_IP_address_24_comment =
   "C++ Interface:\n"
   "connect_by_IP_address(const NetworkSystem self, const NetAddress addr)\n";
 #else
-static const char *Dtool_NetworkSystem_connect_by_IP_address_10_comment = nullptr;
+static const char *Dtool_NetworkSystem_connect_by_IP_address_24_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool NetworkSystem::get_connection_info(NetworkConnectionHandle hConn, NetworkConnectionInfo *pInfo)
  */
-static PyObject *Dtool_NetworkSystem_get_connection_info_11(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_NetworkSystem_get_connection_info_25(PyObject *self, PyObject *args, PyObject *kwds) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.get_connection_info")) {
     return nullptr;
@@ -378,18 +447,18 @@ static PyObject *Dtool_NetworkSystem_get_connection_info_11(PyObject *self, PyOb
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_get_connection_info_11_comment =
+static const char *Dtool_NetworkSystem_get_connection_info_25_comment =
   "C++ Interface:\n"
   "get_connection_info(const NetworkSystem self, int hConn, NetworkConnectionInfo pInfo)\n";
 #else
-static const char *Dtool_NetworkSystem_get_connection_info_11_comment = nullptr;
+static const char *Dtool_NetworkSystem_get_connection_info_25_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void NetworkSystem::send_datagram(NetworkConnectionHandle hConn, Datagram const &dg, NetworkSystem::NetworkSendFlags flags = ::NetworkSystem::NSF_reliable)
  */
-static PyObject *Dtool_NetworkSystem_send_datagram_12(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_NetworkSystem_send_datagram_26(PyObject *self, PyObject *args, PyObject *kwds) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.send_datagram")) {
     return nullptr;
@@ -423,18 +492,18 @@ static PyObject *Dtool_NetworkSystem_send_datagram_12(PyObject *self, PyObject *
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_send_datagram_12_comment =
+static const char *Dtool_NetworkSystem_send_datagram_26_comment =
   "C++ Interface:\n"
   "send_datagram(const NetworkSystem self, int hConn, const Datagram dg, int flags)\n";
 #else
-static const char *Dtool_NetworkSystem_send_datagram_12_comment = nullptr;
+static const char *Dtool_NetworkSystem_send_datagram_26_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void NetworkSystem::close_connection(NetworkConnectionHandle hConn)
  */
-static PyObject *Dtool_NetworkSystem_close_connection_13(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_NetworkSystem_close_connection_27(PyObject *self, PyObject *arg) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.close_connection")) {
     return nullptr;
@@ -460,18 +529,18 @@ static PyObject *Dtool_NetworkSystem_close_connection_13(PyObject *self, PyObjec
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_close_connection_13_comment =
+static const char *Dtool_NetworkSystem_close_connection_27_comment =
   "C++ Interface:\n"
   "close_connection(const NetworkSystem self, int hConn)\n";
 #else
-static const char *Dtool_NetworkSystem_close_connection_13_comment = nullptr;
+static const char *Dtool_NetworkSystem_close_connection_27_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * void NetworkSystem::run_callbacks(NetworkCallbacks *pCallbacks)
  */
-static PyObject *Dtool_NetworkSystem_run_callbacks_14(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_NetworkSystem_run_callbacks_28(PyObject *self, PyObject *arg) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.run_callbacks")) {
     return nullptr;
@@ -490,18 +559,18 @@ static PyObject *Dtool_NetworkSystem_run_callbacks_14(PyObject *self, PyObject *
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_run_callbacks_14_comment =
+static const char *Dtool_NetworkSystem_run_callbacks_28_comment =
   "C++ Interface:\n"
   "run_callbacks(const NetworkSystem self, NetworkCallbacks pCallbacks)\n";
 #else
-static const char *Dtool_NetworkSystem_run_callbacks_14_comment = nullptr;
+static const char *Dtool_NetworkSystem_run_callbacks_28_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool NetworkSystem::accept_connection(NetworkConnectionHandle hConn)
  */
-static PyObject *Dtool_NetworkSystem_accept_connection_15(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_NetworkSystem_accept_connection_29(PyObject *self, PyObject *arg) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.accept_connection")) {
     return nullptr;
@@ -527,18 +596,18 @@ static PyObject *Dtool_NetworkSystem_accept_connection_15(PyObject *self, PyObje
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_accept_connection_15_comment =
+static const char *Dtool_NetworkSystem_accept_connection_29_comment =
   "C++ Interface:\n"
   "accept_connection(const NetworkSystem self, int hConn)\n";
 #else
-static const char *Dtool_NetworkSystem_accept_connection_15_comment = nullptr;
+static const char *Dtool_NetworkSystem_accept_connection_29_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool NetworkSystem::set_connection_poll_group(NetworkConnectionHandle hConn, NetworkPollGroupHandle hPollGroup)
  */
-static PyObject *Dtool_NetworkSystem_set_connection_poll_group_16(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_NetworkSystem_set_connection_poll_group_30(PyObject *self, PyObject *args, PyObject *kwds) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.set_connection_poll_group")) {
     return nullptr;
@@ -573,18 +642,18 @@ static PyObject *Dtool_NetworkSystem_set_connection_poll_group_16(PyObject *self
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_set_connection_poll_group_16_comment =
+static const char *Dtool_NetworkSystem_set_connection_poll_group_30_comment =
   "C++ Interface:\n"
   "set_connection_poll_group(const NetworkSystem self, int hConn, int hPollGroup)\n";
 #else
-static const char *Dtool_NetworkSystem_set_connection_poll_group_16_comment = nullptr;
+static const char *Dtool_NetworkSystem_set_connection_poll_group_30_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool NetworkSystem::receive_message_on_connection(NetworkConnectionHandle hConn, NetworkMessage &msg)
  */
-static PyObject *Dtool_NetworkSystem_receive_message_on_connection_17(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_NetworkSystem_receive_message_on_connection_31(PyObject *self, PyObject *args, PyObject *kwds) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.receive_message_on_connection")) {
     return nullptr;
@@ -615,18 +684,18 @@ static PyObject *Dtool_NetworkSystem_receive_message_on_connection_17(PyObject *
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_receive_message_on_connection_17_comment =
+static const char *Dtool_NetworkSystem_receive_message_on_connection_31_comment =
   "C++ Interface:\n"
   "receive_message_on_connection(const NetworkSystem self, int hConn, NetworkMessage msg)\n";
 #else
-static const char *Dtool_NetworkSystem_receive_message_on_connection_17_comment = nullptr;
+static const char *Dtool_NetworkSystem_receive_message_on_connection_31_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * bool NetworkSystem::receive_message_on_poll_group(NetworkPollGroupHandle hPollGroup, NetworkMessage &msg)
  */
-static PyObject *Dtool_NetworkSystem_receive_message_on_poll_group_18(PyObject *self, PyObject *args, PyObject *kwds) {
+static PyObject *Dtool_NetworkSystem_receive_message_on_poll_group_32(PyObject *self, PyObject *args, PyObject *kwds) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.receive_message_on_poll_group")) {
     return nullptr;
@@ -657,18 +726,18 @@ static PyObject *Dtool_NetworkSystem_receive_message_on_poll_group_18(PyObject *
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_receive_message_on_poll_group_18_comment =
+static const char *Dtool_NetworkSystem_receive_message_on_poll_group_32_comment =
   "C++ Interface:\n"
   "receive_message_on_poll_group(const NetworkSystem self, int hPollGroup, NetworkMessage msg)\n";
 #else
-static const char *Dtool_NetworkSystem_receive_message_on_poll_group_18_comment = nullptr;
+static const char *Dtool_NetworkSystem_receive_message_on_poll_group_32_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * NetworkPollGroupHandle NetworkSystem::create_poll_group(void)
  */
-static PyObject *Dtool_NetworkSystem_create_poll_group_19(PyObject *self, PyObject *) {
+static PyObject *Dtool_NetworkSystem_create_poll_group_33(PyObject *self, PyObject *) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.create_poll_group")) {
     return nullptr;
@@ -682,18 +751,18 @@ static PyObject *Dtool_NetworkSystem_create_poll_group_19(PyObject *self, PyObje
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_create_poll_group_19_comment =
+static const char *Dtool_NetworkSystem_create_poll_group_33_comment =
   "C++ Interface:\n"
   "create_poll_group(const NetworkSystem self)\n";
 #else
-static const char *Dtool_NetworkSystem_create_poll_group_19_comment = nullptr;
+static const char *Dtool_NetworkSystem_create_poll_group_33_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * NetworkListenSocketHandle NetworkSystem::create_listen_socket(int port)
  */
-static PyObject *Dtool_NetworkSystem_create_listen_socket_20(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_NetworkSystem_create_listen_socket_34(PyObject *self, PyObject *arg) {
   NetworkSystem *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkSystem, (void **)&local_this, "NetworkSystem.create_listen_socket")) {
     return nullptr;
@@ -722,18 +791,18 @@ static PyObject *Dtool_NetworkSystem_create_listen_socket_20(PyObject *self, PyO
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_create_listen_socket_20_comment =
+static const char *Dtool_NetworkSystem_create_listen_socket_34_comment =
   "C++ Interface:\n"
   "create_listen_socket(const NetworkSystem self, int port)\n";
 #else
-static const char *Dtool_NetworkSystem_create_listen_socket_20_comment = nullptr;
+static const char *Dtool_NetworkSystem_create_listen_socket_34_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
  * static NetworkSystem *NetworkSystem::get_global_ptr(void)
  */
-static PyObject *Dtool_NetworkSystem_get_global_ptr_21(PyObject *, PyObject *) {
+static PyObject *Dtool_NetworkSystem_get_global_ptr_35(PyObject *, PyObject *) {
   // 1-static NetworkSystem *NetworkSystem::get_global_ptr(void)
   NetworkSystem *return_value = (NetworkSystem::get_global_ptr)();
   if (Dtool_CheckErrorOccurred()) {
@@ -743,16 +812,16 @@ static PyObject *Dtool_NetworkSystem_get_global_ptr_21(PyObject *, PyObject *) {
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkSystem_get_global_ptr_21_comment =
+static const char *Dtool_NetworkSystem_get_global_ptr_35_comment =
   "C++ Interface:\n"
   "get_global_ptr()\n";
 #else
-static const char *Dtool_NetworkSystem_get_global_ptr_21_comment = nullptr;
+static const char *Dtool_NetworkSystem_get_global_ptr_35_comment = nullptr;
 #endif
 
 /**
  * Python function wrapper for:
- * inline NetworkSystem::NetworkSystem(void) = default
+ * NetworkSystem::NetworkSystem(void)
  * inline NetworkSystem::NetworkSystem(NetworkSystem const &) = default
  */
 static int Dtool_Init_NetworkSystem(PyObject *self, PyObject *args, PyObject *kwds) {
@@ -769,7 +838,7 @@ static int Dtool_Init_NetworkSystem(PyObject *self, PyObject *args, PyObject *kw
   switch (parameter_count) {
   case 0:
     {
-      // 1-inline NetworkSystem::NetworkSystem(void) = default
+      // 1-NetworkSystem::NetworkSystem(void)
       NetworkSystem *return_value = new NetworkSystem();
       if (return_value == nullptr) {
         PyErr_NoMemory();
@@ -848,7 +917,7 @@ static void *Dtool_DowncastInterface_NetworkSystem(void *from_this, Dtool_PyType
  * Python function wrapper for:
  * void NetworkCallbacks::set_callback(PyObject *pPyCallback)
  */
-static PyObject *Dtool_NetworkCallbacks_set_callback_30(PyObject *self, PyObject *arg) {
+static PyObject *Dtool_NetworkCallbacks_set_callback_42(PyObject *self, PyObject *arg) {
   NetworkCallbacks *local_this = nullptr;
   if (!Dtool_Call_ExtractThisPointer_NonConst(self, Dtool_NetworkCallbacks, (void **)&local_this, "NetworkCallbacks.set_callback")) {
     return nullptr;
@@ -864,11 +933,11 @@ static PyObject *Dtool_NetworkCallbacks_set_callback_30(PyObject *self, PyObject
 }
 
 #ifndef NDEBUG
-static const char *Dtool_NetworkCallbacks_set_callback_30_comment =
+static const char *Dtool_NetworkCallbacks_set_callback_42_comment =
   "C++ Interface:\n"
   "set_callback(const NetworkCallbacks self, object pPyCallback)\n";
 #else
-static const char *Dtool_NetworkCallbacks_set_callback_30_comment = nullptr;
+static const char *Dtool_NetworkCallbacks_set_callback_42_comment = nullptr;
 #endif
 
 /**
@@ -1208,6 +1277,13 @@ static PyMethodDef Dtool_Methods_NetworkMessage[] = {
   {nullptr, nullptr, 0, nullptr}
 };
 
+static PyGetSetDef Dtool_Properties_NetworkMessage[] = {
+  {(char *)"dg", &Dtool_NetworkMessage_dg_Getter, nullptr, nullptr, nullptr},
+  {(char *)"dgi", &Dtool_NetworkMessage_dgi_Getter, nullptr, nullptr, nullptr},
+  {(char *)"hConn", &Dtool_NetworkMessage_hConn_Getter, &Dtool_NetworkMessage_hConn_Setter, nullptr, nullptr},
+  {nullptr},
+};
+
 static PyNumberMethods Dtool_NumberMethods_NetworkMessage = {
   nullptr,
   nullptr,
@@ -1305,7 +1381,7 @@ struct Dtool_PyTypedObject Dtool_NetworkMessage = {
     nullptr,
     Dtool_Methods_NetworkMessage,
     nullptr, // tp_members
-    nullptr, // tp_getset
+    Dtool_Properties_NetworkMessage,
     nullptr, // tp_base
     nullptr, // tp_dict
     nullptr,
@@ -1362,30 +1438,30 @@ static void Dtool_PyModuleClassInit_NetworkMessage(PyObject *module) {
  * Python method tables for NetworkSystem (NetworkSystem)
  */
 static PyMethodDef Dtool_Methods_NetworkSystem[] = {
-  {"connect_by_IP_address", &Dtool_NetworkSystem_connect_by_IP_address_10, METH_O, (const char *)Dtool_NetworkSystem_connect_by_IP_address_10_comment},
-  {"connectByIPAddress", &Dtool_NetworkSystem_connect_by_IP_address_10, METH_O, (const char *)Dtool_NetworkSystem_connect_by_IP_address_10_comment},
-  {"get_connection_info", (PyCFunction) &Dtool_NetworkSystem_get_connection_info_11, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_get_connection_info_11_comment},
-  {"getConnectionInfo", (PyCFunction) &Dtool_NetworkSystem_get_connection_info_11, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_get_connection_info_11_comment},
-  {"send_datagram", (PyCFunction) &Dtool_NetworkSystem_send_datagram_12, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_send_datagram_12_comment},
-  {"sendDatagram", (PyCFunction) &Dtool_NetworkSystem_send_datagram_12, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_send_datagram_12_comment},
-  {"close_connection", &Dtool_NetworkSystem_close_connection_13, METH_O, (const char *)Dtool_NetworkSystem_close_connection_13_comment},
-  {"closeConnection", &Dtool_NetworkSystem_close_connection_13, METH_O, (const char *)Dtool_NetworkSystem_close_connection_13_comment},
-  {"run_callbacks", &Dtool_NetworkSystem_run_callbacks_14, METH_O, (const char *)Dtool_NetworkSystem_run_callbacks_14_comment},
-  {"runCallbacks", &Dtool_NetworkSystem_run_callbacks_14, METH_O, (const char *)Dtool_NetworkSystem_run_callbacks_14_comment},
-  {"accept_connection", &Dtool_NetworkSystem_accept_connection_15, METH_O, (const char *)Dtool_NetworkSystem_accept_connection_15_comment},
-  {"acceptConnection", &Dtool_NetworkSystem_accept_connection_15, METH_O, (const char *)Dtool_NetworkSystem_accept_connection_15_comment},
-  {"set_connection_poll_group", (PyCFunction) &Dtool_NetworkSystem_set_connection_poll_group_16, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_set_connection_poll_group_16_comment},
-  {"setConnectionPollGroup", (PyCFunction) &Dtool_NetworkSystem_set_connection_poll_group_16, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_set_connection_poll_group_16_comment},
-  {"receive_message_on_connection", (PyCFunction) &Dtool_NetworkSystem_receive_message_on_connection_17, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_receive_message_on_connection_17_comment},
-  {"receiveMessageOnConnection", (PyCFunction) &Dtool_NetworkSystem_receive_message_on_connection_17, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_receive_message_on_connection_17_comment},
-  {"receive_message_on_poll_group", (PyCFunction) &Dtool_NetworkSystem_receive_message_on_poll_group_18, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_receive_message_on_poll_group_18_comment},
-  {"receiveMessageOnPollGroup", (PyCFunction) &Dtool_NetworkSystem_receive_message_on_poll_group_18, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_receive_message_on_poll_group_18_comment},
-  {"create_poll_group", &Dtool_NetworkSystem_create_poll_group_19, METH_NOARGS, (const char *)Dtool_NetworkSystem_create_poll_group_19_comment},
-  {"createPollGroup", &Dtool_NetworkSystem_create_poll_group_19, METH_NOARGS, (const char *)Dtool_NetworkSystem_create_poll_group_19_comment},
-  {"create_listen_socket", &Dtool_NetworkSystem_create_listen_socket_20, METH_O, (const char *)Dtool_NetworkSystem_create_listen_socket_20_comment},
-  {"createListenSocket", &Dtool_NetworkSystem_create_listen_socket_20, METH_O, (const char *)Dtool_NetworkSystem_create_listen_socket_20_comment},
-  {"get_global_ptr", &Dtool_NetworkSystem_get_global_ptr_21, METH_NOARGS | METH_STATIC, (const char *)Dtool_NetworkSystem_get_global_ptr_21_comment},
-  {"getGlobalPtr", &Dtool_NetworkSystem_get_global_ptr_21, METH_NOARGS | METH_STATIC, (const char *)Dtool_NetworkSystem_get_global_ptr_21_comment},
+  {"connect_by_IP_address", &Dtool_NetworkSystem_connect_by_IP_address_24, METH_O, (const char *)Dtool_NetworkSystem_connect_by_IP_address_24_comment},
+  {"connectByIPAddress", &Dtool_NetworkSystem_connect_by_IP_address_24, METH_O, (const char *)Dtool_NetworkSystem_connect_by_IP_address_24_comment},
+  {"get_connection_info", (PyCFunction) &Dtool_NetworkSystem_get_connection_info_25, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_get_connection_info_25_comment},
+  {"getConnectionInfo", (PyCFunction) &Dtool_NetworkSystem_get_connection_info_25, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_get_connection_info_25_comment},
+  {"send_datagram", (PyCFunction) &Dtool_NetworkSystem_send_datagram_26, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_send_datagram_26_comment},
+  {"sendDatagram", (PyCFunction) &Dtool_NetworkSystem_send_datagram_26, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_send_datagram_26_comment},
+  {"close_connection", &Dtool_NetworkSystem_close_connection_27, METH_O, (const char *)Dtool_NetworkSystem_close_connection_27_comment},
+  {"closeConnection", &Dtool_NetworkSystem_close_connection_27, METH_O, (const char *)Dtool_NetworkSystem_close_connection_27_comment},
+  {"run_callbacks", &Dtool_NetworkSystem_run_callbacks_28, METH_O, (const char *)Dtool_NetworkSystem_run_callbacks_28_comment},
+  {"runCallbacks", &Dtool_NetworkSystem_run_callbacks_28, METH_O, (const char *)Dtool_NetworkSystem_run_callbacks_28_comment},
+  {"accept_connection", &Dtool_NetworkSystem_accept_connection_29, METH_O, (const char *)Dtool_NetworkSystem_accept_connection_29_comment},
+  {"acceptConnection", &Dtool_NetworkSystem_accept_connection_29, METH_O, (const char *)Dtool_NetworkSystem_accept_connection_29_comment},
+  {"set_connection_poll_group", (PyCFunction) &Dtool_NetworkSystem_set_connection_poll_group_30, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_set_connection_poll_group_30_comment},
+  {"setConnectionPollGroup", (PyCFunction) &Dtool_NetworkSystem_set_connection_poll_group_30, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_set_connection_poll_group_30_comment},
+  {"receive_message_on_connection", (PyCFunction) &Dtool_NetworkSystem_receive_message_on_connection_31, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_receive_message_on_connection_31_comment},
+  {"receiveMessageOnConnection", (PyCFunction) &Dtool_NetworkSystem_receive_message_on_connection_31, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_receive_message_on_connection_31_comment},
+  {"receive_message_on_poll_group", (PyCFunction) &Dtool_NetworkSystem_receive_message_on_poll_group_32, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_receive_message_on_poll_group_32_comment},
+  {"receiveMessageOnPollGroup", (PyCFunction) &Dtool_NetworkSystem_receive_message_on_poll_group_32, METH_VARARGS | METH_KEYWORDS, (const char *)Dtool_NetworkSystem_receive_message_on_poll_group_32_comment},
+  {"create_poll_group", &Dtool_NetworkSystem_create_poll_group_33, METH_NOARGS, (const char *)Dtool_NetworkSystem_create_poll_group_33_comment},
+  {"createPollGroup", &Dtool_NetworkSystem_create_poll_group_33, METH_NOARGS, (const char *)Dtool_NetworkSystem_create_poll_group_33_comment},
+  {"create_listen_socket", &Dtool_NetworkSystem_create_listen_socket_34, METH_O, (const char *)Dtool_NetworkSystem_create_listen_socket_34_comment},
+  {"createListenSocket", &Dtool_NetworkSystem_create_listen_socket_34, METH_O, (const char *)Dtool_NetworkSystem_create_listen_socket_34_comment},
+  {"get_global_ptr", &Dtool_NetworkSystem_get_global_ptr_35, METH_NOARGS | METH_STATIC, (const char *)Dtool_NetworkSystem_get_global_ptr_35_comment},
+  {"getGlobalPtr", &Dtool_NetworkSystem_get_global_ptr_35, METH_NOARGS | METH_STATIC, (const char *)Dtool_NetworkSystem_get_global_ptr_35_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -1575,8 +1651,8 @@ static void Dtool_PyModuleClassInit_NetworkSystem(PyObject *module) {
  * Python method tables for NetworkCallbacks (NetworkCallbacks)
  */
 static PyMethodDef Dtool_Methods_NetworkCallbacks[] = {
-  {"set_callback", &Dtool_NetworkCallbacks_set_callback_30, METH_O, (const char *)Dtool_NetworkCallbacks_set_callback_30_comment},
-  {"setCallback", &Dtool_NetworkCallbacks_set_callback_30, METH_O, (const char *)Dtool_NetworkCallbacks_set_callback_30_comment},
+  {"set_callback", &Dtool_NetworkCallbacks_set_callback_42, METH_O, (const char *)Dtool_NetworkCallbacks_set_callback_42_comment},
+  {"setCallback", &Dtool_NetworkCallbacks_set_callback_42, METH_O, (const char *)Dtool_NetworkCallbacks_set_callback_42_comment},
   {"__copy__", &copy_from_copy_constructor, METH_NOARGS, nullptr},
   {"__deepcopy__", &map_deepcopy_to_copy, METH_VARARGS, nullptr},
   {nullptr, nullptr, 0, nullptr}
@@ -1976,7 +2052,7 @@ extern const struct LibraryDef networksystem_moddef = {python_simple_funcs, expo
 extern const struct LibraryDef networksystem_moddef = {python_simple_funcs, exports, imports};
 #endif
 static InterrogateModuleDef _in_module_def = {
-  1587106949,  /* file_identifier */
+  1587625268,  /* file_identifier */
   "networksystem",  /* library_name */
   "XHsk",  /* library_hash_name */
   "networksystem",  /* module_name */
@@ -1986,7 +2062,7 @@ static InterrogateModuleDef _in_module_def = {
   nullptr,  /* fptrs */
   0,  /* num_fptrs */
   1,  /* first_index */
-  102  /* next_index */
+  109  /* next_index */
 };
 
 Configure(_in_configure_networksystem);

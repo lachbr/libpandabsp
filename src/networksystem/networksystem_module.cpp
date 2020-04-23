@@ -17,7 +17,7 @@ extern "C" EXPORT_CLASS void initnetworksystem();
 #if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef py_networksystem_module = {
   PyModuleDef_HEAD_INIT,
-  "panda3d.networksystem",
+  "networksystem",
   nullptr,
   -1,
   nullptr,
@@ -45,7 +45,7 @@ void initnetworksystem() {
 
   const LibraryDef *defs[] = {&networksystem_moddef, nullptr};
 
-  PyObject *module = Dtool_PyModuleInitHelper(defs, "panda3d.networksystem");
+  PyObject *module = Dtool_PyModuleInitHelper(defs, "networksystem");
   if (module != nullptr) {
     Dtool_networksystem_BuildInstants(module);
   }
