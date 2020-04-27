@@ -92,6 +92,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275")
 
 add_subdirectory(tools/keyvalue-parser)
 add_subdirectory(tools/common)
+add_subdirectory(bphysics)
 add_subdirectory(libpandabsp)
 
 if (PYTHON_VERSION)
