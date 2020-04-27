@@ -4,3 +4,6 @@
 [submodule "src/dependencies/protobuf"]
 	path = src/dependencies/protobuf
 	url = https://github.com/protocolbuffers/protobuf.git
+[submodule "src/dependencies/PhysX"]
+	path = src/dependencies/PhysX
+	url = https://github.com/lachbr/PhysX.git
