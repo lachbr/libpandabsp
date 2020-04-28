@@ -1,3 +1,14 @@
+/**
+ * PANDA3D BSP LIBRARY
+ *
+ * Copyright (c) Brian Lach <brianlach72@gmail.com>
+ * All rights reserved.
+ *
+ * @file physx_globals.h
+ * @author Brian Lach
+ * @date April 27, 2020
+ */
+
 #pragma once
 
 #if !defined(NDEBUG) && !defined(_DEBUG)
