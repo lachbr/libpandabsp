@@ -1,13 +1,31 @@
 #include "physx_globals.h"
 
-physx::PxFoundation *GetPxFoundation()
+PxFoundation *GetPxFoundation()
 {
-	static physx::PxFoundation *pFoundation = physx::PxCreateFoundation( PX_PHYSICS_VERSION, GetPxDefaultAllocator(), GetPxDefaultErrorCallback() );
+	static PxFoundation *pFoundation = PxCreateFoundation( PX_PHYSICS_VERSION, *GetPxDefaultAllocator(), *GetPxDefaultErrorCallback() );
 	return pFoundation;
 }
 
-physx::PxPhysics *GetPxPhysics()
+PxPhysics *GetPxPhysics()
 {
-	static physx::PxPhysics *pPhysics = physx::PxCreatePhysics( PX_PHYSICS_VERSION, *GetPxFoundation(), physx::PxTolerancesScale(), true, nullptr );
+	static PxPhysics *pPhysics = PxCreatePhysics( PX_PHYSICS_VERSION, *GetPxFoundation(), physx::PxTolerancesScale(), true );
 	return pPhysics;
+}
+
+PxDefaultCpuDispatcher *GetPxDefaultCpuDispatcher()
+{
+	static PxDefaultCpuDispatcher *pDispatch = PxDefaultCpuDispatcherCreate( 1 );
+	return pDispatch;
+}
+
+PxDefaultErrorCallback *GetPxDefaultErrorCallback()
+{
+	static PxDefaultErrorCallback callback;
+	return &callback;
+}
+
+PxDefaultAllocator *GetPxDefaultAllocator()
+{
+	static PxDefaultAllocator alloc;
+	return &alloc;
 }

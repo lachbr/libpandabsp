@@ -1,5 +1,6 @@
 set(INCPHYSX C:/Users/brian/OneDrive/Documents/Projects/libpandabsp/src/dependencies/PhysX/physx/include CACHE PATH "Path to PhysX include directory.")
-set(LIBPHYSX C:/Users/brian/OneDrive/Documents/Projects/libpandabsp/src/dependencies/PhysX/physx/bin/win.x86_64.vc142.mt/release CACHE PATH "Path to PhysX lib directory.")
+set(INCPHYSX_SHARED C:/Users/brian/OneDrive/Documents/Projects/libpandabsp/src/dependencies/PhysX/pxshared/include CACHE PATH "Path to PhysX shared include directory.")
+set(LIBPHYSX C:/Users/brian/OneDrive/Documents/Projects/libpandabsp/src/dependencies/PhysX/physx/bin/win.x86_64.vc142.md/release CACHE PATH "Path to PhysX lib directory.")
 
 file (GLOB SRCS "*.cpp")
 file (GLOB HEADERS "*.h")
@@ -13,6 +14,7 @@ target_include_directories(bphysics PRIVATE
 	./
 	${INCPANDA}
 	${INCPHYSX}
+	${INCPHYSX_SHARED}
 )
 
 target_link_directories(bphysics PRIVATE
@@ -31,4 +33,5 @@ target_link_libraries(bphysics
 					libp3dtoolconfig.lib
 					PhysX_64.lib
 					PhysXCommon_64.lib
-					PhysXFoundation_64.lib)
+					PhysXFoundation_64.lib
+					PhysXExtensions_static_64.lib)

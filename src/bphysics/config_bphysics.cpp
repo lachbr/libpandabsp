@@ -1,4 +1,5 @@
 #include "config_bphysics.h"
+#include "physx_globals.h"
 
 ConfigureDef( config_bphysics )
 
@@ -16,4 +17,10 @@ void init_bphysics()
 	}
 
 	s_bInitialized = true;
+
+	GetPxDefaultAllocator();
+	GetPxDefaultErrorCallback();
+	GetPxDefaultCpuDispatcher();
+	GetPxFoundation();
+	GetPxPhysics();
 }

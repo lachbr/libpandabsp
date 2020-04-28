@@ -1,17 +1,17 @@
 #pragma once
 
-#include <PxFoundation.h>
-#include <PxPhysics.h>
+#if !defined(NDEBUG) && !defined(_DEBUG)
+#define NDEBUG 1
 #include <PxPhysicsAPI.h>
-#include <PxMaterial.h>
-#include <extensions/PxDefaultCpuDispatcher.h>
-#include <extensions/PxDefaultAllocator.h>
-#include <extensions/PxDefaultErrorCallback.h>
+#undef NDEBUG
+#else
+#include <PxPhysicsAPI.h>
+#endif
 
 using namespace physx;
 
-extern physx::PxFoundation *GetPxFoundation();
-extern physx::PxPhysics *GetPxPhysics();
-extern physx::PxDefaultCpuDispatcher *GetPxDefaultCpuDispatcher();
-extern physx::PxDefaultAllocator *GetPxDefaultAllocator();
-extern physx::PxDefaultErrorCallback *GetPxDefaultErrorCallback();
+extern PxFoundation *GetPxFoundation();
+extern PxPhysics *GetPxPhysics();
+extern PxDefaultCpuDispatcher *GetPxDefaultCpuDispatcher();
+extern PxDefaultAllocator *GetPxDefaultAllocator();
+extern PxDefaultErrorCallback *GetPxDefaultErrorCallback();

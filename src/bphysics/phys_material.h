@@ -1,9 +1,11 @@
 #pragma once
 
 #include <referenceCount.h>
+
+#include "config_bphysics.h"
 #include "physx_types.h"
 
-class CPhysMaterial : public ReferenceCount
+class EXPORT_BPHYSICS CPhysMaterial : public ReferenceCount
 {
 PUBLISHED:
 	CPhysMaterial( float flStaticFriction, float flDynamicFriction, float flRestitution );
