@@ -174,6 +174,9 @@ PUBLISHED:
 
 	virtual const char *GetDebugName() = 0;
 	virtual void SetDebugName( const char *pName ) = 0;
+
+public:
+	virtual void _Setup( void *data, int type ) = 0;
 };
 
 template <typename Type, bool IS_ARRAY>
@@ -549,6 +552,9 @@ PUBLISHED:
 	bool GetInterpolationInfo( float currentTime, int *pNewer, int *pOlder,
 				   int *pOldest );
 
+public:
+	virtual void _Setup( void *data, int type );
+
 protected:
 	typedef CInterpolatedVarEntryBase<Type, IS_ARRAY> CInterpolatedVarEntry;
 	typedef CSimpleRingBuffer<CInterpolatedVarEntry> CVarHistory;
@@ -647,7 +653,14 @@ template <typename Type, bool IS_ARRAY>
 inline void CInterpolatedVarArrayBase<Type, IS_ARRAY>::Setup( Type *pValue,
 							      int type )
 {
-	m_pValue = (Type *)pValue;
+	_Setup( (void *)pValue, type );	
+}
+
+template <typename Type, bool IS_ARRAY>
+inline void CInterpolatedVarArrayBase<Type, IS_ARRAY>::_Setup( void *pData,
+							       int type )
+{
+	m_pValue = (Type *)pData;
 	m_fType = type;
 }
 

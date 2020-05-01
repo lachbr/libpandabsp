@@ -413,11 +413,11 @@ void PhysicsCharacterController::update_event_sphere()
 			if ( _event_enter_callback )
 			{
 				// Tell python code about it.
-				//PyObject *py_np =
-				//	DTool_CreatePyInstance( &np, *(Dtool_PyTypedObject *)np.get_class_type().get_python_type(), true, true );
-				//Py_INCREF( py_np );
-				//PyObject *args = PyTuple_Pack( 1, py_np );
-				//PyObject_CallObject( _event_enter_callback, args );
+				PyObject *py_np =
+					DTool_CreatePyInstance( &np, *(Dtool_PyTypedObject *)np.get_class_type().get_python_type(), true, true );
+				Py_INCREF( py_np );
+				PyObject *args = PyTuple_Pack( 1, py_np );
+				PyObject_CallObject( _event_enter_callback, args );
 			}
 #endif
 		}
@@ -435,11 +435,11 @@ void PhysicsCharacterController::update_event_sphere()
 			if ( _event_exit_callback )
 			{
 				// Tell python code about it.
-				//PyObject *py_np =
-				//	DTool_CreatePyInstance( &np, *(Dtool_PyTypedObject *)np.get_class_type().get_python_type(), true, true );
-				//Py_INCREF( py_np );
-				//PyObject *args = PyTuple_Pack( 1, py_np );
-				//PyObject_CallObject( _event_exit_callback, args );
+				PyObject *py_np =
+					DTool_CreatePyInstance( &np, *(Dtool_PyTypedObject *)np.get_class_type().get_python_type(), true, true );
+				Py_INCREF( py_np );
+				PyObject *args = PyTuple_Pack( 1, py_np );
+				PyObject_CallObject( _event_exit_callback, args );
 			}
 #endif
 		}
