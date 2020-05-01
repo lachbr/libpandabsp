@@ -1772,10 +1772,17 @@ void BSPLoader::do_optimizations()
                                 // Apply my transform to the GeomNode
                                 NodePath np = mdlroots.get_path( j );
                                 NodePath gnp = np.find( "**/+GeomNode" );
-                                gnp.set_transform( np.get_transform() );
-                                gnp.reparent_to( mdlroot );
-                                np.remove_node();
-                                flatten_node( gnp );
+                                if ( !gnp.is_empty() )
+                                {
+                                        gnp.set_transform( np.get_transform() );
+                                        gnp.reparent_to( mdlroot );
+                                        np.remove_node();
+                                        flatten_node( gnp );
+                                }
+                                else
+                                {
+                                        np.remove_node();
+                                }
                 	}
                         flatten_node( mdlroot );
 
@@ -2273,9 +2280,7 @@ void BSPLoader::set_want_lightmaps( bool flag )
 
 NodePath BSPLoader::get_model( int modelnum ) const
 {
-        std::ostringstream search;
-        search << "**/model-" << modelnum;
-        return _result.find( search.str() );
+        return _model_data[modelnum].model_root;
 }
 
 void BSPLoader::set_physics_type( int type )
